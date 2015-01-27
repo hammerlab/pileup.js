@@ -1,0 +1,23 @@
+{
+  "name": "pileup.js",
+  "version": "0.0.0",
+  "description": "JavaScript track viewer",
+  "main": "2bit.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danvk/pileup.js.git"
+  },
+  "author": "Dan Vanderkam",
+  "license": "Apache2",
+  "bugs": {
+    "url": "https://github.com/danvk/pileup.js/issues"
+  },
+  "homepage": "https://github.com/danvk/pileup.js",
+  "dependencies": {
+    "curl-amd": "^0.8.12",
+    "qajax": "^1.0.2"
+  }
+}
