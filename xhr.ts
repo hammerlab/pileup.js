@@ -8,6 +8,7 @@
 
 interface ResponseType {
   buffer: ArrayBuffer;
+  xhr: XMLHttpRequest;
 }
 
 function fetchByteRange(url: string, start: number, stop: number): Q.Promise<ResponseType> {
@@ -18,7 +19,7 @@ function fetchByteRange(url: string, start: number, stop: number): Q.Promise<Res
   xhr.responseType = 'arraybuffer';
   xhr.setRequestHeader('Range', `bytes=${start}-${stop}`);
   xhr.onload = function(e) {
-    deferred.resolve({buffer: this.response});
+    deferred.resolve({buffer: this.response, xhr: this});
     // var uInt8Array = new Uint8Array(this.response); // this.response == uInt8Array.buffer
     // var byte3 = uInt8Array[4]; // byte at offset 4
   };
