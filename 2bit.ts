@@ -7,11 +7,12 @@ interface DataSource {
   getFeaturesInRange(contig: string, start: number, stop: number): Q.Promise<any>;
 }
 
-enum BaseMask { Intron, Exon, Unknown };
-
-interface BasePair {
-  base: string;  // A, T, C, G or N (unknown)
-}
+var BASE_PAIRS = [
+  'T',  // 0=00
+  'C',  // 1=01
+  'A',  // 2=10
+  'G'   // 3=11
+];
 
 interface FileIndexEntry {
   name: string;
@@ -25,7 +26,8 @@ interface SequenceRecord {
   numMaskBlocks: number
   maskBlockStarts: number[];
   maskBlockLengths: number[];
-  dnaOffsetInFile: number;
+  dnaOffsetFromHeader: number;  // # of bytes from sequence header to packed DNA
+  offset: number;  // bytes from the start of the file at which this data lives.
 }
 
 interface TwoBitHeader {
@@ -68,7 +70,8 @@ function parseSequenceRecord(dataView: DataView): SequenceRecord {
     numMaskBlocks: maskBlockCount,
     maskBlockStarts: [],
     maskBlockLengths: [],
-    dnaOffsetInFile: offset
+    dnaOffsetFromHeader: offset,
+    offset: null  // unknown
   };
 }
 
@@ -103,6 +106,26 @@ function parseHeader(dataView: DataView): TwoBitHeader {
 }
 
 
+function unpackDNA(dataView: DataView, startBasePair: number, numBasePairs: number): string {
+  var basePairs: string[] = [];
+  basePairs.length = dataView.byteLength * 4;  // pre-allocate
+  var basePairIdx = -startBasePair;
+  for (var i = 0; i < dataView.byteLength; i++) {
+    var packed = dataView.getUint8(i);
+    for (var shift = 6; shift >= 0; shift -= 2) {
+      var bp = BASE_PAIRS[(packed >> shift) & 3];
+      if (startBasePair >= 0) {
+        basePairs[basePairIdx] = bp;
+      }
+      basePairIdx++;
+    }
+  }
+  // Remove base pairs from the end if the sequence terminated mid-byte.
+  basePairs.length = numBasePairs;
+  return basePairs.join('');
+}
+
+
 class TwoBit implements DataSource {
   remoteFile: RemoteFile;
   header: Q.Promise<TwoBitHeader>;
@@ -119,17 +142,31 @@ class TwoBit implements DataSource {
       });
   }
 
+  // Returns the base pairs for contig:start-stop. The range is inclusive.
   getFeaturesInRange(contig: string, start: number, stop: number): Q.Promise<string> {
+    start--;  // switch to zero-based indices
+    stop--;
+    return this.getSequenceHeader(contig).then(header => {
+      var dnaOffset = header.offset + header.dnaOffsetFromHeader;
+      var offset = Math.floor(dnaOffset + start/4);
+      var byteLength = Math.ceil((stop - start + 1) / 4) + 1;
+      return this.remoteFile.getBytes(offset, byteLength).then(dataView => {
+        return unpackDNA(dataView, start % 4, stop - start + 1);
+      });
+    });
+  }
+
+  private getSequenceHeader(contig: string): Q.Promise<SequenceRecord> {
     return this.header.then(header => {
-      var seq = _.findWhere(header.sequences, {contig});
+      var seq = _.findWhere(header.sequences, {name: contig});
       if (!seq) {
         throw 'Invalid contig: ' + contig;
       }
 
-      return this.remoteFile.getBytes(seq.offset, seq.offset + 4095).then(seqHeaderView => {
-        var seqHeader = parseSequenceRecord(seqHeaderView);
-        console.log(seqHeader);
-        return 'ABCD';
+      return this.remoteFile.getBytes(seq.offset, 4095).then(dataView => {
+        var rec = parseSequenceRecord(dataView);
+        rec.offset = seq.offset;
+        return rec;
       });
     });
   }

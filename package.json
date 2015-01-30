@@ -18,6 +18,7 @@
   "homepage": "https://github.com/danvk/pileup.js",
   "dependencies": {
     "curl-amd": "^0.8.12",
-    "qajax": "^1.0.2"
+    "qajax": "^1.0.2",
+    "underscore": "^1.7.0"
   }
 }
