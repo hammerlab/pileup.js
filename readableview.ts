@@ -17,9 +17,9 @@ class ReadableView {
 
   // Read an unsigned 32-bit integer and advance the current position.
   readUint32(): number {
-    var num = this.readUint8() +
-              this.readUint8() * (1 << 8) +
-              this.readUint8() * (1 << 16) +
+    var num = this.readUint8()             |
+              this.readUint8() * (1 << 8 ) |
+              this.readUint8() * (1 << 16) |
               this.readUint8() * (1 << 24);
     return num;
   }

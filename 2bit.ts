@@ -2,6 +2,7 @@
 /// <reference path="typings/underscore/underscore.d.ts" />
 /// <reference path="readableview.ts" />
 /// <reference path="remotefile.ts" />
+'use strict';
 
 interface DataSource {
   getFeaturesInRange(contig: string, start: number, stop: number): Q.Promise<any>;
@@ -21,8 +22,8 @@ interface FileIndexEntry {
 
 interface SequenceRecord {
   numBases: number;
-  unknownBlockStarts: number[];
-  unknownBlockLengths: number[];
+  unknownBlockStarts: number[];  // nb these numbers are 0-based
+  unknownBlockLengths: number[];  // TODO(danvk): add an interval type?
   numMaskBlocks: number
   maskBlockStarts: number[];
   maskBlockLengths: number[];
@@ -106,7 +107,7 @@ function parseHeader(dataView: DataView): TwoBitHeader {
 }
 
 
-function unpackDNA(dataView: DataView, startBasePair: number, numBasePairs: number): string {
+function unpackDNA(dataView: DataView, startBasePair: number, numBasePairs: number): string[] {
   var basePairs: string[] = [];
   basePairs.length = dataView.byteLength * 4;  // pre-allocate
   var basePairIdx = -startBasePair;
@@ -122,6 +123,25 @@ function unpackDNA(dataView: DataView, startBasePair: number, numBasePairs: numb
   }
   // Remove base pairs from the end if the sequence terminated mid-byte.
   basePairs.length = numBasePairs;
+  return basePairs;
+}
+
+function markUnknownDNA(basePairs: string[], dnaStartIndex: number, sequence: SequenceRecord): string {
+  var dnaStop = dnaStartIndex + basePairs.length - 1;
+  for (var i = 0; i < sequence.unknownBlockStarts.length; i++) {
+    var nStart = sequence.unknownBlockStarts[i],
+        nLength = sequence.unknownBlockLengths[i],
+        nStop = nStart + nLength - 1,
+        intStart = Math.max(nStart, dnaStartIndex),
+        intStop = Math.min(nStop, dnaStop);
+    // console.log('dna: ', dnaStart, dnaStop, 'unknown: ', nStart, nStop, nStop - nStart + 1, 'int:', intStart, intStop, Math.max(0, intStop - intStart + 1));
+    if (intStop < intStart) continue;  // no overlap
+
+    for (var j = intStart; j <= intStop; j++) {
+      basePairs[j - dnaStartIndex] = 'N';
+    }
+  }
+
   return basePairs.join('');
 }
 
@@ -151,14 +171,16 @@ class TwoBit implements DataSource {
       var offset = Math.floor(dnaOffset + start/4);
       var byteLength = Math.ceil((stop - start + 1) / 4) + 1;
       return this.remoteFile.getBytes(offset, byteLength).then(dataView => {
-        return unpackDNA(dataView, start % 4, stop - start + 1);
+        return markUnknownDNA(
+            unpackDNA(dataView, start % 4, stop - start + 1), start, header);
       });
     });
   }
 
   private getSequenceHeader(contig: string): Q.Promise<SequenceRecord> {
     return this.header.then(header => {
-      var seq = _.findWhere(header.sequences, {name: contig});
+      var seq = _.findWhere(header.sequences, {name: contig}) ||
+                _.findWhere(header.sequences, {name: 'chr' + contig});
       if (!seq) {
         throw 'Invalid contig: ' + contig;
       }
