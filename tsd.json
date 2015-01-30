@@ -7,6 +7,9 @@
   "installed": {
     "q/Q.d.ts": {
       "commit": "b3324f69165309a3ea2bd02fd10e97841bf07c83"
+    },
+    "underscore/underscore.d.ts": {
+      "commit": "01ce3ccf7f071514ff5057ef32a4550bf0b81dfe"
     }
   }
 }
