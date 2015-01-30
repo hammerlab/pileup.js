@@ -1,5 +1,5 @@
-/// <reference path="typings/q/q.d.ts" />
-/// <reference path="typings/underscore/underscore.d.ts" />
+/// <reference path="../typings/q/q.d.ts" />
+/// <reference path="../typings/underscore/underscore.d.ts" />
 /// <reference path="readableview.ts" />
 /// <reference path="remotefile.ts" />
 'use strict';

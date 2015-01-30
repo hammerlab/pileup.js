@@ -3,6 +3,7 @@
  * fetched in chunks, e.g. using a Range request.
  */
 
+/// <reference path="../typings/q/q.d.ts" />
 interface Chunk {
   start: number;
   stop: number;
@@ -56,5 +57,3 @@ class RemoteFile {
     return deferred.promise;
   }
 }
-
-/// <reference path="typings/q/q.d.ts" />
