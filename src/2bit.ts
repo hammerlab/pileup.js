@@ -154,12 +154,12 @@ class TwoBit implements DataSource {
     var deferredHeader = Q.defer<TwoBitHeader>();
     this.header = deferredHeader.promise;
 
-    this.remoteFile.getBytes(0, 4096).then(function(dataView) {
+    // TODO: if 16k is insufficient, fetch the right amount.
+    this.remoteFile.getBytes(0, 16*1024).then(function(dataView) {
         var header = parseHeader(dataView);
         deferredHeader.resolve(header);
-      }).catch(function(e) {
-        console.error(e);
-      });
+        console.log(header);
+      }).done();
   }
 
   // Returns the base pairs for contig:start-stop. The range is inclusive.
@@ -185,6 +185,7 @@ class TwoBit implements DataSource {
         throw 'Invalid contig: ' + contig;
       }
 
+      // TODO: if 4k is insufficient, fetch the right amount.
       return this.remoteFile.getBytes(seq.offset, 4095).then(dataView => {
         var rec = parseSequenceRecord(dataView);
         rec.offset = seq.offset;

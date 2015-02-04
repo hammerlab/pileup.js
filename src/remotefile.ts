@@ -46,6 +46,13 @@ class RemoteFile {
     var remoteFile = this;
     xhr.onload = function(e) {
       var buffer = this.response;
+      var expectLength = stop - start + 1,
+          actualLength = buffer.byteLength;
+      if (actualLength != expectLength) {
+        deferred.reject(`Server returned incorrect number of bytes for ${this.url}. Requested ${start}-${stop} (${expectLength} bytes) but received ${actualLength}.`);
+        return;
+      }
+
       var newChunk = { start, stop, buffer };
       remoteFile.chunks.push(newChunk);
       deferred.resolve(new DataView(buffer));
