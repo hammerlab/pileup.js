@@ -1,4 +1,4 @@
-/// <reference path="2bit.ts" />
+import TwoBit = require('./2bit');
 
 var startMs = Date.now();
 // var genome = new TwoBit('http://www.biodalliance.org/datasets/hg19.2bit');

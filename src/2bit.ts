@@ -1,8 +1,9 @@
 /// <reference path="../typings/q/q.d.ts" />
 /// <reference path="../typings/underscore/underscore.d.ts" />
-/// <reference path="readableview.ts" />
-/// <reference path="remotefile.ts" />
 'use strict';
+
+import ReadableView = require('./readableview');
+import RemoteFile = require('./remotefile');
 
 interface DataSource {
   getFeaturesInRange(contig: string, start: number, stop: number): Q.Promise<any>;
@@ -194,3 +195,5 @@ class TwoBit implements DataSource {
     });
   }
 }
+
+export = TwoBit;

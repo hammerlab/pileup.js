@@ -64,3 +64,5 @@ class RemoteFile {
     return deferred.promise;
   }
 }
+
+export = RemoteFile;

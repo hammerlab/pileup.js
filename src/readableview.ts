@@ -59,3 +59,5 @@ class ReadableView {
     return this.offset;
   }
 }
+
+export = ReadableView;
