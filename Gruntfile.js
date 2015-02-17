@@ -47,13 +47,23 @@ module.exports = function (grunt) {
       //   src: ['test/**/*.js']
       // }
     },
+
+    browserify: {
+      client: {
+        src: 'build/src/main.js',
+        dest: 'build/all.js'
+      }
+    }
   });
     
   grunt.loadNpmTasks('grunt-typescript');
   grunt.loadNpmTasks('grunt-mocha-test');
+  grunt.loadNpmTasks('grunt-browserify');
 
   grunt.registerTask('_runTests', ['mochaTest']);
   grunt.registerTask('test', ['typescript', '_runTests']);
+
+  grunt.registerTask('prod', ['typescript', 'browserify']);
   
   grunt.registerTask('default', ['test']);
 };
