@@ -53,12 +53,18 @@ module.exports = function (grunt) {
         src: 'build/src/main.js',
         dest: 'build/all.js'
       }
+    },
+
+    watch: {
+      files: ['<%= typescript.app.src %>'],
+      tasks: ['typescript', 'browserify']
     }
   });
     
   grunt.loadNpmTasks('grunt-typescript');
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-browserify');
+  grunt.loadNpmTasks('grunt-contrib-watch');
 
   grunt.registerTask('_runTests', ['mochaTest']);
   grunt.registerTask('test', ['typescript', '_runTests']);

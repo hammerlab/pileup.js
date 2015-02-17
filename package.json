@@ -25,6 +25,7 @@
     "chai": "^2.0.0",
     "grunt": "^0.4.5",
     "grunt-browserify": "^3.3.0",
+    "grunt-contrib-watch": "^0.6.1",
     "grunt-env": "^0.4.2",
     "grunt-mocha-test": "^0.12.7",
     "grunt-typescript": "^0.6.1",

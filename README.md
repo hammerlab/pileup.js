@@ -7,7 +7,16 @@ Interactive in-browser track viewer
   cd pileup.js
   npm install
   tsd reinstall
-  tsc --watch --out build/all.js main.ts
+  grunt prod
 
 Then open `playground.html` in your browser of choice.
 
+## Development
+
+Run the tests:
+
+  grunt test
+
+Iterate on the JS:
+
+  grunt watch
