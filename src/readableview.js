@@ -1,11 +1,15 @@
+/** @flow */
+
 /**
  * Wrapper around an ArrayBuffer which facilitates reading different types of
  * values from it, from start to finish.
  */
 class ReadableView {
   offset: number;
-  constructor(private dataView: DataView) {
+  dataView: DataView;
+  constructor(dataView: DataView) {
     this.offset = 0;
+    this.dataView = dataView;
   }
 
   // Read an unsigned 8-bit integer and advance the current position.
@@ -60,4 +64,4 @@ class ReadableView {
   }
 }
 
-export = ReadableView;
+module.exports = ReadableView;

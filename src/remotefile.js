@@ -1,13 +1,12 @@
+/** @flow */
 /**
  * RemoteFile is a representation of a file on a remote server which can be
  * fetched in chunks, e.g. using a Range request.
  */
 
-/// <reference path="../typings/node/node.d.ts" />
-/// <reference path="../typings/q/q.d.ts" />
-import Q = require('q');
+var Q = require('q');
 
-interface Chunk {
+type Chunk = {
   start: number;
   stop: number;
   buffer: ArrayBuffer;
@@ -15,10 +14,12 @@ interface Chunk {
 }
 
 class RemoteFile {
+  url: string;
   fileLength: number;
-  private chunks: Chunk[];  // regions of file that have already been loaded.
+  chunks: Array<Chunk>;  // regions of file that have already been loaded.
 
-  constructor(public url: string) {
+  constructor(url: string) {
+    this.url = url;
     this.fileLength = -1;  // unknown
     this.chunks = [];
   }
@@ -29,7 +30,7 @@ class RemoteFile {
     for (var i = 0; i < this.chunks.length; i++) {
       var chunk = this.chunks[i];
       if (chunk.start <= start && chunk.stop >= stop) {
-        return Q(new DataView(chunk.buffer, start - chunk.start, length));
+        return Q.when(new DataView(chunk.buffer, start - chunk.start, length));
       }
     }
 
@@ -39,8 +40,8 @@ class RemoteFile {
     return this.getFromNetwork(start, start + length - 1);
   }
 
-  private getFromNetwork(start: number, stop: number): Q.Promise<DataView> {
-    var deferred = Q.defer<DataView>();
+  getFromNetwork(start: number, stop: number): Q.Promise<DataView> {
+    var deferred = Q.defer();
 
     var xhr = new XMLHttpRequest();
     xhr.open('GET', this.url);
@@ -48,6 +49,7 @@ class RemoteFile {
     xhr.setRequestHeader('Range', `bytes=${start}-${stop}`);
     var remoteFile = this;
     xhr.onload = function(e) {
+      console.log('response came back');
       var buffer = this.response;
       var expectLength = stop - start + 1,
           actualLength = buffer.byteLength;
@@ -69,4 +71,4 @@ class RemoteFile {
   }
 }
 
-export = RemoteFile;
+module.exports = RemoteFile;

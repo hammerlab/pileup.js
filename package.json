@@ -32,9 +32,12 @@
     "grunt-mocha-test": "^0.12.7",
     "grunt-typescript": "^0.6.1",
     "mocha": "^2.1.0",
+    "nock": "^0.59.1",
+    "react-tools": "^0.12.2",
     "requirejs": "^2.1.16",
     "sinon": "^1.12.2",
     "typescript": "^1.4.1",
+    "xhr2": "^0.1.2",
     "xmlhttprequest": "^1.7.0"
   }
 }

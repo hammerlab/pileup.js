@@ -1,10 +1,7 @@
-/// <reference path="../typings/chai/chai.d.ts" />
-/// <reference path="../typings/mocha/mocha.d.ts" />
-
-import chai = require('chai');
+var chai = require('chai');
 var expect = chai.expect;
 
-import ReadableView = require('../src/readableview');
+var ReadableView = require('../src/readableview');
 
 describe('ReadableView', function() {
   it('should read 8-bit unsigned ints', function() {
