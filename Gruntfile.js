@@ -2,53 +2,6 @@
 
 module.exports = function (grunt) {
   grunt.initConfig({
-  
-    typescript: {
-      app: {
-        src: ['src/**/*.ts'],
-        dest: 'build',
-        options: {
-          module: 'commonjs',
-          sourcemap: true,
-          declaration: true
-        }
-      },
-
-      test: {
-        src: ['test/**/*.ts'],
-        dest: 'build',
-        options: {
-          module: 'commonjs',
-          sourcemap: true
-        }
-      }
-    },
-
-    mochaTest: {
-      test: {
-        options: {
-          reporter: 'spec',
-          require: 'node_modules/qajax/build/qajax.min.js',
-          quiet: false
-        },
-        src: ['build/test/**/*.js']
-      },
-      coverage: {
-        options: {
-          reporter: 'html-cov',
-          quiet: true,
-          captureFile: 'build/coverage.html'
-        },
-        src: ['build/test/**/*.js']
-      },
-      // 'travis-cov': {
-      //   options: {
-      //     reporter: 'travis-cov'
-      //   },
-      //   src: ['test/**/*.js']
-      // }
-    },
-
     browserify: {
       client: {
         src: 'build/src/main.js',

@@ -4,7 +4,9 @@
   "description": "JavaScript track viewer",
   "main": "2bit.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "watchify -o js/bundle.js -v -d .",
+    "build": "NODE_ENV=production browserify . | uglifyjs -cm > js/bundle.min.js",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -34,10 +36,22 @@
     "mocha": "^2.1.0",
     "nock": "^0.59.1",
     "react-tools": "^0.12.2",
+    "reactify": "^1.0.0",
     "requirejs": "^2.1.16",
     "sinon": "^1.12.2",
     "typescript": "^1.4.1",
     "xhr2": "^0.1.2",
     "xmlhttprequest": "^1.7.0"
+  },
+  "browserify": {
+    "transform": [
+      [
+        "reactify",
+        {
+          "harmony": true,
+          "stripTypes": true
+        }
+      ]
+    ]
   }
 }

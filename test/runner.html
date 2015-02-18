@@ -12,12 +12,10 @@
 
   <!-- external test dependencies -->
   <script src="../node_modules/mocha/mocha.js"></script>
-  <script src="../node_modules/chai/chai.js"></script>
 
   <!-- the tests -->
   <script>mocha.setup('bdd')</script>
-  <script src="../build/test/readableview-test.js"></script>
-  <script src="../build/test/remotefile-test.js"></script>
+  <script src="../build/tests.js"></script>
 
   <script>
     mocha.checkLeaks();
