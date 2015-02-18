@@ -6,7 +6,6 @@ Interactive in-browser track viewer
   git clone https://github.com/danvk/pileup.js.git
   cd pileup.js
   npm install
-  tsd reinstall
   grunt prod
 
 Then open `playground.html` in your browser of choice.
@@ -15,8 +14,9 @@ Then open `playground.html` in your browser of choice.
 
 Run the tests:
 
-  grunt test
+  browserify test/*-test.js -o build/tests.js
+  open tests/runner.html
 
-Iterate on the JS:
+Iterate on the tests:
 
-  grunt watch
+  watchify test/*-test.js -o build/tests.js
