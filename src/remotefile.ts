@@ -3,7 +3,10 @@
  * fetched in chunks, e.g. using a Range request.
  */
 
+/// <reference path="../typings/node/node.d.ts" />
 /// <reference path="../typings/q/q.d.ts" />
+import Q = require('q');
+
 interface Chunk {
   start: number;
   stop: number;
@@ -13,7 +16,7 @@ interface Chunk {
 
 class RemoteFile {
   fileLength: number;
-  chunks: Chunk[];  // regions of file that have already been loaded.
+  private chunks: Chunk[];  // regions of file that have already been loaded.
 
   constructor(public url: string) {
     this.fileLength = -1;  // unknown
@@ -59,6 +62,7 @@ class RemoteFile {
     };
 
     // TODO: `reject`, `notify` on progress
+    console.log('issuing request!');
     xhr.send();
 
     return deferred.promise;

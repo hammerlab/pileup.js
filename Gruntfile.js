@@ -9,7 +9,8 @@ module.exports = function (grunt) {
         dest: 'build',
         options: {
           module: 'commonjs',
-          sourcemap: true
+          sourcemap: true,
+          declaration: true
         }
       },
 
@@ -27,7 +28,7 @@ module.exports = function (grunt) {
       test: {
         options: {
           reporter: 'spec',
-          // require: 'config/coverage_blanket',
+          require: 'node_modules/qajax/build/qajax.min.js',
           quiet: false
         },
         src: ['build/test/**/*.js']
@@ -56,7 +57,8 @@ module.exports = function (grunt) {
     },
 
     watch: {
-      files: ['<%= typescript.app.src %>'],
+      files: ['<%= typescript.app.src %>',
+              '<%= typescript.test.src %>'],
       tasks: ['typescript', 'browserify']
     }
   });

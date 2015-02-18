@@ -5,10 +5,6 @@
 import ReadableView = require('./readableview');
 import RemoteFile = require('./remotefile');
 
-interface DataSource {
-  getFeaturesInRange(contig: string, start: number, stop: number): Q.Promise<any>;
-}
-
 var BASE_PAIRS = [
   'T',  // 0=00
   'C',  // 1=01
@@ -147,9 +143,9 @@ function markUnknownDNA(basePairs: string[], dnaStartIndex: number, sequence: Se
 }
 
 
-class TwoBit implements DataSource {
+class TwoBit {
   remoteFile: RemoteFile;
-  header: Q.Promise<TwoBitHeader>;
+  private header: Q.Promise<TwoBitHeader>;
   constructor(private url: string) {
     this.remoteFile = new RemoteFile(url);
     var deferredHeader = Q.defer<TwoBitHeader>();
