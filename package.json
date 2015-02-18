@@ -1,0 +1,40 @@
+{
+  "name": "pileup.js",
+  "version": "0.0.0",
+  "description": "JavaScript track viewer",
+  "main": "2bit.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danvk/pileup.js.git"
+  },
+  "author": "Dan Vanderkam",
+  "license": "Apache2",
+  "bugs": {
+    "url": "https://github.com/danvk/pileup.js/issues"
+  },
+  "homepage": "https://github.com/danvk/pileup.js",
+  "dependencies": {
+    "curl-amd": "^0.8.12",
+    "q": "^1.1.2",
+    "qajax": "^1.0.2",
+    "underscore": "^1.7.0"
+  },
+  "devDependencies": {
+    "chai": "^2.0.0",
+    "faux-jax": "^1.3.0",
+    "grunt": "^0.4.5",
+    "grunt-browserify": "^3.3.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-env": "^0.4.2",
+    "grunt-mocha-test": "^0.12.7",
+    "grunt-typescript": "^0.6.1",
+    "mocha": "^2.1.0",
+    "requirejs": "^2.1.16",
+    "sinon": "^1.12.2",
+    "typescript": "^1.4.1",
+    "xmlhttprequest": "^1.7.0"
+  }
+}
