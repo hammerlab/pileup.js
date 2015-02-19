@@ -8,8 +8,8 @@
 var Q = require('q'),
     _ = require('underscore');
 
-var ReadableView = require('./readableview'),
-    RemoteFile = require('./remotefile');
+var ReadableView = require('./ReadableView'),
+    RemoteFile = require('./RemoteFile');
 
 var BASE_PAIRS = [
   'T',  // 0=00

@@ -2,7 +2,7 @@ var sinon = require('sinon'),
     chai = require('chai'),
     expect = chai.expect;
 
-var FakeXHR = require('./fake-xhr');
+var FakeXHR = require('./FakeXMLHttpRequest');
 
 describe('FakeXMLHttpRequest', () => {
   beforeEach(() => {

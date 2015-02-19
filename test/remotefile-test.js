@@ -1,9 +1,9 @@
 var chai = require('chai'),
     expect = chai.expect;
 
-var FakeXHR = require('./fake-xhr');
+var FakeXHR = require('./FakeXMLHttpRequest');
 
-var RemoteFile = require('../src/remotefile');
+var RemoteFile = require('../src/RemoteFile');
 
 describe('RemoteFile', () => {
   beforeEach(() => {

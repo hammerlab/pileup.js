@@ -1,7 +1,7 @@
 var chai = require('chai');
 var expect = chai.expect;
 
-var ReadableView = require('../src/readableview');
+var ReadableView = require('../src/ReadableView');
 
 describe('ReadableView', function() {
   it('should read 8-bit unsigned ints', function() {

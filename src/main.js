@@ -1,5 +1,5 @@
 /* @flow */
-var TwoBit = require('./2bit');
+var TwoBit = require('./TwoBit');
 
 var startMs = Date.now();
 // var genome = new TwoBit('http://www.biodalliance.org/datasets/hg19.2bit');
