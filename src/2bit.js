@@ -33,7 +33,7 @@ type SequenceRecord = {
 type TwoBitHeader = {
   sequenceCount: number;
   reserved: number;
-  sequences: FileIndexEntry[];
+  sequences: Array<FileIndexEntry>;
 }
 
 var TWO_BIT_MAGIC = 0x1A412743;
@@ -112,7 +112,7 @@ function parseHeader(dataView: DataView): TwoBitHeader {
  * modification.
  */
 function unpackDNA(dataView: DataView, startBasePair: number, numBasePairs: number): Array<string> {
-  var basePairs: string[] = [];
+  var basePairs: Array<string> = [];
   basePairs.length = dataView.byteLength * 4;  // pre-allocate
   var basePairIdx = -startBasePair;
   for (var i = 0; i < dataView.byteLength; i++) {
@@ -134,7 +134,7 @@ function unpackDNA(dataView: DataView, startBasePair: number, numBasePairs: numb
  * Change base pairs to 'N' where the SequenceRecord dictates.
  * This modifies the basePairs array in-place.
  */
-function markUnknownDNA(basePairs: string[], dnaStartIndex: number, sequence: SequenceRecord): Array<string> {
+function markUnknownDNA(basePairs: Array<string>, dnaStartIndex: number, sequence: SequenceRecord): Array<string> {
   var dnaStop = dnaStartIndex + basePairs.length - 1;
   for (var i = 0; i < sequence.unknownBlockStarts.length; i++) {
     var nStart = sequence.unknownBlockStarts[i],
@@ -189,7 +189,7 @@ class TwoBit {
     return this.header.then(header => {
       var seq = _.findWhere(header.sequences, {name: contig}) ||
                 _.findWhere(header.sequences, {name: 'chr' + contig});
-      if (!seq) {
+      if (seq == null) {
         throw 'Invalid contig: ' + contig;
       }
 
