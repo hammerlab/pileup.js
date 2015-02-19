@@ -45,14 +45,19 @@ module.exports = function(grunt) {
         },
         options: browserifyOpts
       }
+    },
+    mocha_phantomjs: {
+      all: ['test/**/*.html']
     }
   });
 
-  grunt.loadNpmTasks('grunt-flow-type-check');
-  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-browserify');
+  grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-flow-type-check');
+  grunt.loadNpmTasks('grunt-mocha-phantomjs');
 
   grunt.registerTask('watchFlow', ['flow:app:start', 'watch']);
   grunt.registerTask('prod', ['flow:app', 'browserify:dist']);
   grunt.registerTask('browsertests', ['flow:app', 'browserify:test']);
+  grunt.registerTask('test', ['browsertests', 'mocha_phantomjs']);
 };

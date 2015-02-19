@@ -7,19 +7,23 @@
 <body>
   <div id="mocha"></div>
 
-  <!-- external source dependencies -->
-  <script src="../node_modules/underscore/underscore-min.js"></script>
+  <!-- Polyfills for PhantomJS -->
+  <script src="../node_modules/es5-shim/es5-shim.min.js"></script>
+  <script src="../node_modules/es5-shim/es5-sham.min.js"></script>
+  <script src="../node_modules/text-encoding/lib/encoding.js"></script>
 
-  <!-- external test dependencies -->
+  <!-- Mocha -->
   <script src="../node_modules/mocha/mocha.js"></script>
-
-  <!-- the tests -->
   <script>mocha.setup('bdd')</script>
   <script src="../build/tests.js"></script>
 
   <script>
     mocha.checkLeaks();
-    mocha.run();
+    if (window.mochaPhantomJS) {
+      mochaPhantomJS.run();
+    } else {
+      mocha.run();
+    }
   </script>
 </body>
 </html>

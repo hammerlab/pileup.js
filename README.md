@@ -12,9 +12,13 @@ Then open `playground.html` in your browser of choice.
 
 ## Development
 
+Run the tests from the command line:
+
+  grunt test
+
 Run the tests in a browser:
 
-  browserify test/*-test.js -o build/tests.js
+  grunt browsertests
   open tests/runner.html
 
 Iterate on the tests:
