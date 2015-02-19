@@ -49,7 +49,6 @@ class RemoteFile {
     xhr.setRequestHeader('Range', `bytes=${start}-${stop}`);
     var remoteFile = this;
     xhr.onload = function(e) {
-      console.log('response came back');
       var buffer = this.response;
       var expectLength = stop - start + 1,
           actualLength = buffer.byteLength;

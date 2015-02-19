@@ -166,7 +166,6 @@ class TwoBit {
     this.remoteFile.getBytes(0, 16*1024).then(function(dataView) {
         var header = parseHeader(dataView);
         deferredHeader.resolve(header);
-        console.log(header);
       }).done();
   }
 
