@@ -32,16 +32,5 @@
     "reactify": "^1.0.0",
     "sinon": "^1.12.2",
     "text-encoding": "^0.5.2"
-  },
-  "browserify": {
-    "transform": [
-      [
-        "reactify",
-        {
-          "harmony": true,
-          "stripTypes": true
-        }
-      ]
-    ]
   }
 }
