@@ -54,6 +54,6 @@ module.exports = function(grunt) {
 
   grunt.registerTask('watchFlow', ['flow:app:start', 'watch']);
   grunt.registerTask('prod', ['flow:app', 'browserify:dist']);
-  grunt.registerTask('browsertests', ['flow:app', 'browserify:test']);
+  grunt.registerTask('browsertests', ['browserify:test']);
   grunt.registerTask('test', ['browsertests', 'mocha_phantomjs']);
 };

@@ -1,4 +1,8 @@
-/* @flow */
+/**
+ * This module defines a parser for the 2bit file format.
+ * See http://genome.ucsc.edu/FAQ/FAQformat.html#format7
+ * @flow
+ */
 'use strict';
 
 var Q = require('q'),
@@ -56,9 +60,8 @@ function parseSequenceRecord(dataView: DataView, fileOffset: number): SequenceRe
       // maskBlockSizes = bytes.readUint32Array(maskBlockCount),
       // reserved = bytes.readUint32();
 
-  var offset = bytes.tell() + 8 * maskBlockCount + 4;
+  var dnaOffset = bytes.tell() + 8 * maskBlockCount + 4;
 
-  // DNA information comes after this.
   return {
     numBases: dnaSize,
     unknownBlockStarts: nBlockStarts,
@@ -66,7 +69,7 @@ function parseSequenceRecord(dataView: DataView, fileOffset: number): SequenceRe
     numMaskBlocks: maskBlockCount,
     maskBlockStarts: [],
     maskBlockLengths: [],
-    dnaOffsetFromHeader: offset,
+    dnaOffsetFromHeader: dnaOffset,
     offset: fileOffset
   };
 }
@@ -187,11 +190,12 @@ class TwoBit {
 
   getSequenceHeader(contig: string): Q.Promise<SequenceRecord> {
     return this.header.then(header => {
-      var seq = _.findWhere(header.sequences, {name: contig}) ||
-                _.findWhere(header.sequences, {name: 'chr' + contig});
-      if (seq == null) {
+      var maybeSeq = _.findWhere(header.sequences, {name: contig}) ||
+                     _.findWhere(header.sequences, {name: 'chr' + contig});
+      if (maybeSeq == null) {
         throw 'Invalid contig: ' + contig;
       }
+      var seq = maybeSeq;  // for flow, see facebook/flow#266
 
       // TODO: if 4k is insufficient, fetch the right amount.
       return this.remoteFile.getBytes(seq.offset, 4095).then(
