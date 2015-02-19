@@ -1,9 +1,11 @@
-/// <reference path="../typings/q/q.d.ts" />
-/// <reference path="../typings/underscore/underscore.d.ts" />
+/* @flow */
 'use strict';
 
-import ReadableView = require('./readableview');
-import RemoteFile = require('./remotefile');
+var Q = require('q'),
+    _ = require('underscore');
+
+var ReadableView = require('./readableview'),
+    RemoteFile = require('./remotefile');
 
 var BASE_PAIRS = [
   'T',  // 0=00
@@ -12,51 +14,47 @@ var BASE_PAIRS = [
   'G'   // 3=11
 ];
 
-interface FileIndexEntry {
+type FileIndexEntry = {
   name: string;
   offset: number;
-}
+};
 
-interface SequenceRecord {
+type SequenceRecord = {
   numBases: number;
-  unknownBlockStarts: number[];  // nb these numbers are 0-based
-  unknownBlockLengths: number[];  // TODO(danvk): add an interval type?
-  numMaskBlocks: number
-  maskBlockStarts: number[];
-  maskBlockLengths: number[];
+  unknownBlockStarts: Array<number>;  // nb these numbers are 0-based
+  unknownBlockLengths: Array<number>;  // TODO(danvk): add an interval type?
+  numMaskBlocks: number;
+  maskBlockStarts: Array<number>;
+  maskBlockLengths: Array<number>;
   dnaOffsetFromHeader: number;  // # of bytes from sequence header to packed DNA
   offset: number;  // bytes from the start of the file at which this data lives.
 }
 
-interface TwoBitHeader {
+type TwoBitHeader = {
   sequenceCount: number;
   reserved: number;
   sequences: FileIndexEntry[];
 }
 
-
 var TWO_BIT_MAGIC = 0x1A412743;
-
 
 
 /**
  * Parses a single SequenceRecord from the start of the ArrayBuffer.
+ * fileOffset is the position of this sequence within the 2bit file.
  */
-function parseSequenceRecord(dataView: DataView): SequenceRecord {
+function parseSequenceRecord(dataView: DataView, fileOffset: number): SequenceRecord {
   var bytes = new ReadableView(dataView);
   var dnaSize = bytes.readUint32(),
       nBlockCount = bytes.readUint32(),
       nBlockStarts = bytes.readUint32Array(nBlockCount),
       nBlockSizes = bytes.readUint32Array(nBlockCount),
-      // Can probably just ignore the mask fields?
+      // The masks can be quite large (~2MB for chr1) and we mostly don't care
+      // about them.  So we ignore them, but we do need to know their length.
       maskBlockCount = bytes.readUint32();
-      // maskBlockStarts = bytes.readUint32Array(maskBlockCount),
+      // maskBlockCount maskBlockStarts = bytes.readUint32Array(maskBlockCount),
       // maskBlockSizes = bytes.readUint32Array(maskBlockCount),
       // reserved = bytes.readUint32();
-  // For chr1, dnaSize = 249250621
-  // nBlockCount = 39
-  // maskBlockCount = 325027
-  // i.e. reading the whole header requires at least 2MB of data.
 
   var offset = bytes.tell() + 8 * maskBlockCount + 4;
 
@@ -69,11 +67,14 @@ function parseSequenceRecord(dataView: DataView): SequenceRecord {
     maskBlockStarts: [],
     maskBlockLengths: [],
     dnaOffsetFromHeader: offset,
-    offset: null  // unknown
+    offset: fileOffset
   };
 }
 
 
+/**
+ * Parses the 2bit file header.
+ */
 function parseHeader(dataView: DataView): TwoBitHeader {
   var bytes = new ReadableView(dataView);
   var magic = bytes.readUint32();
@@ -87,7 +88,7 @@ function parseHeader(dataView: DataView): TwoBitHeader {
   var sequenceCount = bytes.readUint32(),
       reserved = bytes.readUint32();
 
-  var sequences: FileIndexEntry[] = [];
+  var sequences: Array<FileIndexEntry> = [];
   for (var i = 0; i < sequenceCount; i++) {
     var nameSize = bytes.readUint8();
     var name = bytes.readAscii(nameSize);
@@ -104,7 +105,13 @@ function parseHeader(dataView: DataView): TwoBitHeader {
 }
 
 
-function unpackDNA(dataView: DataView, startBasePair: number, numBasePairs: number): string[] {
+/**
+ * Read 2-bit encoded base pairs from a DataView into an array of 'A', 'T',
+ * 'C', 'G' strings.
+ * These are returned as an array (rather than a string) to facilitate further
+ * modification.
+ */
+function unpackDNA(dataView: DataView, startBasePair: number, numBasePairs: number): Array<string> {
   var basePairs: string[] = [];
   basePairs.length = dataView.byteLength * 4;  // pre-allocate
   var basePairIdx = -startBasePair;
@@ -123,7 +130,11 @@ function unpackDNA(dataView: DataView, startBasePair: number, numBasePairs: numb
   return basePairs;
 }
 
-function markUnknownDNA(basePairs: string[], dnaStartIndex: number, sequence: SequenceRecord): string {
+/**
+ * Change base pairs to 'N' where the SequenceRecord dictates.
+ * This modifies the basePairs array in-place.
+ */
+function markUnknownDNA(basePairs: string[], dnaStartIndex: number, sequence: SequenceRecord): Array<string> {
   var dnaStop = dnaStartIndex + basePairs.length - 1;
   for (var i = 0; i < sequence.unknownBlockStarts.length; i++) {
     var nStart = sequence.unknownBlockStarts[i],
@@ -131,7 +142,6 @@ function markUnknownDNA(basePairs: string[], dnaStartIndex: number, sequence: Se
         nStop = nStart + nLength - 1,
         intStart = Math.max(nStart, dnaStartIndex),
         intStop = Math.min(nStop, dnaStop);
-    // console.log('dna: ', dnaStart, dnaStop, 'unknown: ', nStart, nStop, nStop - nStart + 1, 'int:', intStart, intStop, Math.max(0, intStop - intStart + 1));
     if (intStop < intStart) continue;  // no overlap
 
     for (var j = intStart; j <= intStop; j++) {
@@ -139,16 +149,17 @@ function markUnknownDNA(basePairs: string[], dnaStartIndex: number, sequence: Se
     }
   }
 
-  return basePairs.join('');
+  return basePairs;
 }
 
 
 class TwoBit {
   remoteFile: RemoteFile;
-  private header: Q.Promise<TwoBitHeader>;
-  constructor(private url: string) {
+  header: Q.Promise<TwoBitHeader>;
+
+  constructor(url: string) {
     this.remoteFile = new RemoteFile(url);
-    var deferredHeader = Q.defer<TwoBitHeader>();
+    var deferredHeader = Q.defer();
     this.header = deferredHeader.promise;
 
     // TODO: if 16k is insufficient, fetch the right amount.
@@ -169,12 +180,13 @@ class TwoBit {
       var byteLength = Math.ceil((stop - start + 1) / 4) + 1;
       return this.remoteFile.getBytes(offset, byteLength).then(dataView => {
         return markUnknownDNA(
-            unpackDNA(dataView, start % 4, stop - start + 1), start, header);
+            unpackDNA(dataView, start % 4, stop - start + 1), start, header)
+            .join('');
       });
     });
   }
 
-  private getSequenceHeader(contig: string): Q.Promise<SequenceRecord> {
+  getSequenceHeader(contig: string): Q.Promise<SequenceRecord> {
     return this.header.then(header => {
       var seq = _.findWhere(header.sequences, {name: contig}) ||
                 _.findWhere(header.sequences, {name: 'chr' + contig});
@@ -183,13 +195,10 @@ class TwoBit {
       }
 
       // TODO: if 4k is insufficient, fetch the right amount.
-      return this.remoteFile.getBytes(seq.offset, 4095).then(dataView => {
-        var rec = parseSequenceRecord(dataView);
-        rec.offset = seq.offset;
-        return rec;
-      });
+      return this.remoteFile.getBytes(seq.offset, 4095).then(
+          dataView => parseSequenceRecord(dataView, seq.offset));
     });
   }
 }
 
-export = TwoBit;
+module.exports = TwoBit;

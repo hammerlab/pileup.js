@@ -1,30 +1,58 @@
 'use strict';
 
-module.exports = function (grunt) {
+module.exports = function(grunt) {
+
+  var browserifyOpts = {
+      transform: [
+        [
+          "reactify",
+          {
+            harmony: true,
+            stripTypes: true
+          }
+        ]
+      ],
+      browserifyOptions: {
+        debug: true  // generate a source map
+      }
+    };
+
   grunt.initConfig({
-    browserify: {
-      client: {
-        src: 'build/src/main.js',
-        dest: 'build/all.js'
+    flow: {
+      app: {
+        src: '.',
+        options: {
+          background: true,
+        }
       }
     },
-
     watch: {
-      files: ['<%= typescript.app.src %>',
-              '<%= typescript.test.src %>'],
-      tasks: ['typescript', 'browserify']
+      flow: {
+        files: ['src/**/*.js', 'test/**/*.js'],
+        tasks: ['flow:app:status']
+      }
+    },
+    browserify: {
+      dist: {
+        files: {
+          'build/all.js': ['src/**/*.js']
+        },
+        options: browserifyOpts
+      },
+      test: {
+        files: {
+          'build/tests.js': ['test/**/*-test.js']
+        },
+        options: browserifyOpts
+      }
     }
   });
-    
-  grunt.loadNpmTasks('grunt-typescript');
-  grunt.loadNpmTasks('grunt-mocha-test');
-  grunt.loadNpmTasks('grunt-browserify');
+
+  grunt.loadNpmTasks('grunt-flow-type-check');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-browserify');
 
-  grunt.registerTask('_runTests', ['mochaTest']);
-  grunt.registerTask('test', ['typescript', '_runTests']);
-
-  grunt.registerTask('prod', ['typescript', 'browserify']);
-  
-  grunt.registerTask('default', ['test']);
+  grunt.registerTask('watchFlow', ['flow:app:start', 'watch']);
+  grunt.registerTask('prod', ['flow:app', 'browserify:dist']);
+  grunt.registerTask('browsertests', ['flow:app', 'browserify:test']);
 };

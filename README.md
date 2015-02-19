@@ -12,7 +12,7 @@ Then open `playground.html` in your browser of choice.
 
 ## Development
 
-Run the tests:
+Run the tests in a browser:
 
   browserify test/*-test.js -o build/tests.js
   open tests/runner.html
@@ -20,3 +20,9 @@ Run the tests:
 Iterate on the tests:
 
   watchify test/*-test.js -o build/tests.js
+
+(and reload the `runner.html` page in your browser after making changes.)
+
+To iterate on code while running the type checker:
+
+  grunt watchFlow

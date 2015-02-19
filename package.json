@@ -3,11 +3,6 @@
   "version": "0.0.0",
   "description": "JavaScript track viewer",
   "main": "2bit.js",
-  "scripts": {
-    "start": "watchify -o js/bundle.js -v -d .",
-    "build": "NODE_ENV=production browserify . | uglifyjs -cm > js/bundle.min.js",
-    "test": "jest"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/danvk/pileup.js.git"
@@ -19,9 +14,7 @@
   },
   "homepage": "https://github.com/danvk/pileup.js",
   "dependencies": {
-    "curl-amd": "^0.8.12",
     "q": "^1.1.2",
-    "qajax": "^1.0.2",
     "underscore": "^1.7.0"
   },
   "devDependencies": {
@@ -31,6 +24,7 @@
     "grunt-browserify": "^3.3.0",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-env": "^0.4.2",
+    "grunt-flow-type-check": "^0.4.2",
     "grunt-mocha-test": "^0.12.7",
     "grunt-typescript": "^0.6.1",
     "mocha": "^2.1.0",

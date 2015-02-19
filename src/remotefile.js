@@ -64,7 +64,6 @@ class RemoteFile {
     };
 
     // TODO: `reject`, `notify` on progress
-    console.log('issuing request!');
     xhr.send();
 
     return deferred.promise;
