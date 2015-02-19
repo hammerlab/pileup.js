@@ -16,16 +16,10 @@ Run the tests from the command line:
 
   grunt test
 
-Run the tests in a browser:
+Run the tests in a real browser:
 
   grunt browsertests
   open tests/runner.html
-
-Iterate on the tests:
-
-  watchify test/*-test.js -o build/tests.js
-
-(and reload the `runner.html` page in your browser after making changes.)
 
 To iterate on code while running the type checker:
 
