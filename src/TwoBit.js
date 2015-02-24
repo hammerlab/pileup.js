@@ -176,7 +176,7 @@ class TwoBit {
   getFeaturesInRange(contig: string, start: number, stop: number): Q.Promise<string> {
     start--;  // switch to zero-based indices
     stop--;
-    return this.getSequenceHeader(contig).then(header => {
+    return this._getSequenceHeader(contig).then(header => {
       var dnaOffset = header.offset + header.dnaOffsetFromHeader;
       var offset = Math.floor(dnaOffset + start/4);
       var byteLength = Math.ceil((stop - start + 1) / 4) + 1;
@@ -188,7 +188,12 @@ class TwoBit {
     });
   }
 
-  getSequenceHeader(contig: string): Q.Promise<SequenceRecord> {
+  // Returns a list of contig names.
+  getContigList(): Q.Promise<string[]> {
+    return this.header.then(header => header.sequences.map(seq => seq.name));
+  }
+
+  _getSequenceHeader(contig: string): Q.Promise<SequenceRecord> {
     return this.header.then(header => {
       var maybeSeq = _.findWhere(header.sequences, {name: contig}) ||
                      _.findWhere(header.sequences, {name: 'chr' + contig});
