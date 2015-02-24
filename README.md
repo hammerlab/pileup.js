@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/hammerlab/pileup.js.svg?branch=travis-flow)](https://travis-ci.org/hammerlab/pileup.js)
+
 # pileup.js
 Interactive in-browser track viewer
 
