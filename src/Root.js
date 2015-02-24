@@ -16,7 +16,7 @@ var Root = React.createClass({
   },
   getInitialState: function(): any {
     return {
-      contigList: ['1', '2', '3'],
+      contigList: [],
       range: null,
       basePairs: null
     }

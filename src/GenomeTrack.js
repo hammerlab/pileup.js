@@ -12,10 +12,10 @@ var GenomeTrack = React.createClass({
     basePairs: React.PropTypes.string
   },
   render: function(): any {
-    if (!this.props.range) {
+    var range = this.props.range;
+    if (!range) {
       return <EmptyTrack />;
     }
-    var range = this.props.range;
     var rangeLength = range.limit - range.start;
     if (rangeLength > 200) {
       return <EmptyTrack />;
