@@ -1,0 +1,8 @@
+sudo: false  # Use container-based infrastructure
+language: node_js
+node_js: 
+  - "0.12"
+
+before_install: npm install -g grunt-cli
+    
+script: grunt test
