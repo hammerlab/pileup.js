@@ -66,4 +66,5 @@ module.exports = function(grunt) {
   grunt.registerTask('prod', ['browserify:dist']);
   grunt.registerTask('browsertests', ['browserify:test']);
   grunt.registerTask('test', ['browsertests', 'mocha_phantomjs']);
+  grunt.registerTask('travis', ['flow', 'test']);
 };
