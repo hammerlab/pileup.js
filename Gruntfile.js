@@ -33,8 +33,8 @@ module.exports = function(grunt) {
       },
       test: {
         files: {
-          'build/tests.js': ['test/**/*-test.js']
-        },
+          'build/tests.js': ['src/**/*.js', 'test/**/*-test.js', '!src/main.js']
+        }
       },
       options: {
         transform: [
@@ -51,8 +51,34 @@ module.exports = function(grunt) {
         }
       }
     },
+    jscoverage: {
+      src: {
+        expand: true,
+        cwd: 'build/',
+        src: ['tests.js'],
+        dest: 'build/cov/',
+        ext: '.js'
+      }
+    },
+    exorcise: {
+      bundle: {
+        options: {},
+        files: {
+          'build/tests.map': ['build/tests.js'],  // externalize source map
+        }
+      }
+    },
     mocha_phantomjs: {
-      all: ['test/**/*.html']
+      run: {
+        src: ['test/runner.html']
+      },
+      cov: {
+        src: ['test/coverage.html'],
+        options: {
+          reporter: 'test/lcov-reporter.js',
+          output: 'build/bundled.lcov'
+        }
+      }
     }
   });
 
@@ -60,11 +86,15 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-flow-type-check');
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
+  grunt.loadNpmTasks("grunt-jscoverage");
+  grunt.loadNpmTasks("grunt-exorcise");
 
   grunt.registerTask('watchFlow', ['flow:app:start', 'watch:flow']);
   grunt.registerTask('watchFlowProd', ['flow:app:start', 'watch:flowProd']);
   grunt.registerTask('prod', ['browserify:dist']);
   grunt.registerTask('browsertests', ['browserify:test']);
-  grunt.registerTask('test', ['browsertests', 'mocha_phantomjs']);
+  grunt.registerTask('test', ['browsertests', 'mocha_phantomjs:run']);
   grunt.registerTask('travis', ['flow', 'test']);
+  grunt.registerTask('coverage',
+                     ['browsertests', 'exorcise', 'jscoverage', 'mocha_phantomjs:cov']);
 };
