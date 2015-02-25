@@ -9,21 +9,22 @@
  *   transform-coverage.js path/to/soure.map path/to/coverage.lcov > out.lcov
  */
 
-var sourcemap = require('source-map');
-var fs = require('fs');
-var parseDataUri = require('parse-data-uri')
-var lcovParse = require('lcov-parse');
-var assert = require('assert');
+// TODO: make this a command line argument
+var SOURCE = 'src/';  // only report files under this directory
 
-var sourcemapfile = process.argv[2];
-var lcovfile = process.argv[3];
+var assert = require('assert'),
+    fs = require('fs'),
+    lcovParse = require('lcov-parse'),
+    parseDataUri = require('parse-data-uri'),
+    sourcemap = require('source-map');
 
-var sourcemap_data = fs.readFileSync(sourcemapfile).toString();
-var sourcemap_consumer = new sourcemap.SourceMapConsumer(sourcemap_data);
+var sourcemapFile = process.argv[2];
+var lcovFile = process.argv[3];
 
-var SOURCE = 'src/';
+var sourcemapData = fs.readFileSync(sourcemapFile).toString();
+var sourcemap = new sourcemap.SourceMapConsumer(sourcemapData);
 
-lcovParse(lcovfile, function(err, data) {
+lcovParse(lcovFile, function(err, data) {
   assert(!err);
   // TODO: 0 --> the correct file
   var lines = data[0].lines.details;
@@ -31,25 +32,25 @@ lcovParse(lcovfile, function(err, data) {
   var fileToCov = {};  // filename -> { line num -> hits }
 
   lines.forEach(function(line) {
-    var num = line.line, hits = line.hit;
-    var original_position = sourcemap_consumer.originalPositionFor({ line: num, column: 0 });
-    if (original_position == null) {
+    var pos = sourcemap.originalPositionFor({line: line.line, column: 0});
+    if (pos == null) {
       return;
     }
 
-    original_filename = original_position.source;
-    original_num = original_position.line;
+    var filename = pos.source;
 
-    if (!original_filename || original_filename.indexOf('node_modules') >= 0) {
+    // Test coverage of node_modules is never interesting.
+    if (!filename || filename.indexOf('node_modules') >= 0) {
       return;
     }
 
-    var base = original_filename.indexOf(SOURCE);
+    // Strip paths down to the source root.
+    var base = filename.indexOf(SOURCE);
     if (base == -1) return;
-    original_filename = original_filename.slice(base);
+    filename = filename.slice(base);
 
-    if (!fileToCov[original_filename]) fileToCov[original_filename] = [];
-    fileToCov[original_filename][original_num] = hits;
+    if (!fileToCov[filename]) fileToCov[filename] = [];
+    fileToCov[filename][pos.line] = line.hit;
   });
 
   // Convert to LCOV format
