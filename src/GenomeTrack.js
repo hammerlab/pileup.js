@@ -26,7 +26,7 @@ var GenomeTrack = React.createClass({
       return <div className="reference empty">no data</div>;
     }
 
-    return <NonEmptyGenomeTrack key="ne" {...this.props} />;
+    return <NonEmptyGenomeTrack {...this.props} />;
   }
 });
 
