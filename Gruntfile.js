@@ -80,7 +80,8 @@ module.exports = function(grunt) {
         src: ['test/coverage.html'],
         options: {
           reporter: 'node_modules/mocha-lcov-reporter/lib/lcov.js',
-          output: 'build/bundled.lcov'
+          output: 'build/bundled.lcov',
+          silent: true
         }
       }
     }
