@@ -75,7 +75,7 @@ module.exports = function(grunt) {
       cov: {
         src: ['test/coverage.html'],
         options: {
-          reporter: 'test/lcov-reporter.js',
+          reporter: 'node_modules/mocha-lcov-reporter/lib/lcov.js',
           output: 'build/bundled.lcov'
         }
       }

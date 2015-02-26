@@ -34,7 +34,7 @@
     "grunt-mocha-test": "^0.12.7",
     "lcov-parse": "0.0.9",
     "mocha": "^2.1.0",
-    "mocha-lcov-reporter": "0.0.1",
+    "mocha-lcov-reporter": ">=0.0.2",
     "parse-data-uri": "^0.2.0",
     "react-tools": "^0.12.2",
     "reactify": "^1.0.0",
