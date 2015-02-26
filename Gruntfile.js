@@ -23,6 +23,10 @@ module.exports = function(grunt) {
       flowProd: {
         files: ['<%= watch.flow.files %>'],
         tasks: ['flow:app:status', 'prod']
+      },
+      prod: {
+        files: ['<%= watch.flow.files %>'],
+        tasks: ['prod']
       }
     },
     browserify: {

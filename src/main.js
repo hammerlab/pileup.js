@@ -5,7 +5,7 @@ var React = require('react'),
 
 var startMs = Date.now();
 // var genome = new TwoBit('http://www.biodalliance.org/datasets/hg19.2bit');
-var genome = new TwoBit('http://localhost:8000/hg19.2bit');
+var genome = new TwoBit('/hg19.2bit');
 
 genome.getFeaturesInRange('chr22', 19178140, 19178170).then(basePairs => {
   var endMs = Date.now();
