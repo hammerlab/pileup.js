@@ -46,7 +46,7 @@ var NonEmptyGenomeTrack = React.createClass({
         svg = d3.select(div)
                 .append('svg');
 
-    var originalRange, originalScale, dx;
+    var originalRange, originalScale, dx=0;
     var dragstarted = () => {
       d3.event.sourceEvent.stopPropagation();
       dx = 0;
@@ -54,6 +54,8 @@ var NonEmptyGenomeTrack = React.createClass({
       originalScale = this.getScale();
     };
     var updateRange = () => {
+      if (!originalScale) return;  // can never happen, but Flow don't know.
+      if (!originalRange) return;  // can never happen, but Flow don't know.
       var newStart = originalScale.invert(-dx),
           intStart = Math.round(newStart),
           offsetPx = originalScale(newStart) - originalScale(intStart);
