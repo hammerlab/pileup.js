@@ -9,6 +9,7 @@ module.exports = {
   GenomeRange: React.PropTypes.shape({
     contig: React.PropTypes.string,
     start: React.PropTypes.number,
-    stop: React.PropTypes.number
+    stop: React.PropTypes.number,
+    offsetPx: React.PropTypes.number
   })
 };

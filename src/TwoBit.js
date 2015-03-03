@@ -174,6 +174,10 @@ class TwoBit {
 
   // Returns the base pairs for contig:start-stop. The range is inclusive.
   getFeaturesInRange(contig: string, start: number, stop: number): Q.Promise<string> {
+    if (start > stop) {
+      throw `Requested a 2bit range with start > stop (${start}, ${stop})`;
+    }
+
     start--;  // switch to zero-based indices
     stop--;
     return this._getSequenceHeader(contig).then(header => {
