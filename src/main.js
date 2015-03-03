@@ -16,5 +16,8 @@ genome.getFeaturesInRange('chr22', 19178140, 19178170).then(basePairs => {
   }
 }).done();
 
+// pre-load some data to allow network-free panning
+genome.getFeaturesInRange('chr1', 123000, 124000).done();
+
 var root = React.render(<Root referenceSource={genome} />,
                         document.getElementById('root'));

@@ -54,7 +54,7 @@ var NonEmptyGenomeTrack = React.createClass({
       originalScale = this.getScale();
     };
     var updateRange = () => {
-      var newStart = originalScale.invert(dx),
+      var newStart = originalScale.invert(-dx),
           intStart = Math.round(newStart),
           offsetPx = originalScale(newStart) - originalScale(intStart);
 
@@ -87,10 +87,11 @@ var NonEmptyGenomeTrack = React.createClass({
   getScale: function() {
     var div = this.getDOMNode(),
         range = this.props.range,
-        width = div.offsetWidth;
+        width = div.offsetWidth,
+        offsetPx = range.offsetPx || 0;
     var scale = d3.scale.linear()
             .domain([range.start, range.stop + 1])  // 1 bp wide
-            .range([0, width]);
+            .range([-offsetPx, width - offsetPx]);
     return scale;
   },
   componentDidUpdate: function(prevProps: any, prevState: any) {
