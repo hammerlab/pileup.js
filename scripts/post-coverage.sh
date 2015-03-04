@@ -1,6 +1,5 @@
 #!/bin/bash
 # Generate code coverage and post it to Coveralls.
-set -o errexit
 set -x
 
 # Generate LCOV data for the bundled tests
@@ -11,3 +10,5 @@ grunt coverage
   build/tests.map \
   build/bundled.lcov \
   | ./node_modules/.bin/coveralls
+
+echo ''  # reset last exit code
