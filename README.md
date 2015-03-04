@@ -10,13 +10,12 @@ Interactive in-browser track viewer
     npm install
     grunt prod
 
-To play with the demo, you'll need [RangeHTTPServer][rs], which adds support
-for byte range requests to SimpleHTTPServer:
+To play with the demo, you'll need to install the node.js [http-server][hs]:
 
-    pip install rangehttpserver
-    python -m RangeHTTPServer
+    npm install http-server
+    http-server
 
-Then open `http://localhost:8000/playground.html` in your browser of choice.
+Then open `http://localhost:8080/playground.html` in your browser of choice.
 
 ## Development
 
@@ -37,4 +36,4 @@ To continuously regenerate the combined JS, run:
 
     grunt watchFlowProd
 
-[rs]: https://github.com/danvk/RangeHTTPServer
+[hs]: https://github.com/nodeapps/http-server

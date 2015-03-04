@@ -27,14 +27,17 @@ var Controls = React.createClass({
         ? this.props.contigList.map((contig, i) => <option key={i}>{contig}</option>)
         : null;
 
+    // TODO: this is broken. The UI should show the current range _and_ allow editing.
+    var r = this.props.range || {contig: null, start: null, stop: null};
+
     return (
       <div className='controls'>
         Contig:
         <select ref='contig' onChange={this.handleChange}>
           {contigOptions}
         </select>
-        <input ref='start' type='text' />
-        <input ref='stop' type='text'  />
+        <input ref='start' type='text' value={r.start} readOnly />
+        <input ref='stop' type='text' value={r.stop} readOnly />
         <button onClick={this.handleChange}>Update</button>
       </div>
     );

@@ -26,7 +26,13 @@ var Root = React.createClass({
     var ref: TwoBit = this.props.referenceSource;
     ref.getContigList().then(contigList => {
       this.setState({contigList});
-    });
+      // this is here to facilitate faster iteration
+      this.handleRangeChange({
+        contig: 'chr1',
+        start: 123456,
+        stop: 123500
+      });
+    }).done();
   },
   handleRangeChange: function(newRange: GenomeRange) {
     this.setState({range: newRange, basePairs: null});
@@ -34,15 +40,17 @@ var Root = React.createClass({
     ref.getFeaturesInRange(newRange.contig, newRange.start, newRange.stop)
        .then(basePairs => {
          this.setState({basePairs});
-       });
+       }).done();
   },
   render: function(): any {
     return (
       <div>
         <Controls contigList={this.state.contigList}
+                  range={this.state.range}
                   onChange={this.handleRangeChange} />
         <GenomeTrack range={this.state.range}
-                     basePairs={this.state.basePairs} />
+                     basePairs={this.state.basePairs}
+                     onRangeChange={this.handleRangeChange} />
       </div>
     );
   }
