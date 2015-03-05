@@ -6,9 +6,8 @@
 var React = require('react'),
     Controls = require('./Controls'),
     GenomeTrack = require('./GenomeTrack'),
-    types = require('./types'),
+    types = require('./types');
     // TODO: make this an "import type" when react-tools 0.13.0 is out.
-    TwoBit = require('./TwoBit');
 
 var Root = React.createClass({
   propTypes: {
@@ -23,24 +22,35 @@ var Root = React.createClass({
   },
   componentDidMount: function() {
     // Note: flow is unable to infer this type through `this.propTypes`.
-    var ref: TwoBit = this.props.referenceSource;
-    ref.getContigList().then(contigList => {
-      this.setState({contigList});
+    var source: TwoBitDataSource = this.props.referenceSource;
+    source.needContigs();
+
+    source.on('contigs', () => { this.update() })
+          .on('newdata', () => { this.update() })
+
+    source.on('contigs', () => {
       // this is here to facilitate faster iteration
       this.handleRangeChange({
         contig: 'chr1',
         start: 123456,
         stop: 123500
       });
-    }).done();
+    });
+
+    this.update();
+  },
+  update: function() {
+    this.setState({
+      contigList: this.props.referenceSource.contigList(),
+      basePairs: this.props.referenceSource.getRange(this.state.range)
+    });
   },
   handleRangeChange: function(newRange: GenomeRange) {
-    this.setState({range: newRange, basePairs: null});
+    this.setState({range: newRange});
+    this.update();
+
     var ref = this.props.referenceSource;
-    ref.getFeaturesInRange(newRange.contig, newRange.start, newRange.stop)
-       .then(basePairs => {
-         this.setState({basePairs});
-       }).done();
+    ref.rangeChanged(newRange);
   },
   render: function(): any {
     return (
