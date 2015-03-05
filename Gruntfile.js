@@ -26,7 +26,7 @@ module.exports = function(grunt) {
       },
       prod: {
         files: ['<%= watch.flow.files %>'],
-        tasks: ['prod']
+        tasks: ['browserify:dist']
       }
     },
     browserify: {
@@ -52,6 +52,13 @@ module.exports = function(grunt) {
         ],
         browserifyOptions: {
           debug: true  // generate a source map
+        }
+      }
+    },
+    uglify: {
+      dist: {
+        files: {
+          'build/all.min.js': ['build/all.js']
         }
       }
     },
@@ -93,13 +100,14 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
   grunt.loadNpmTasks("grunt-jscoverage");
   grunt.loadNpmTasks("grunt-exorcise");
+  grunt.loadNpmTasks('grunt-contrib-uglify');
 
   grunt.registerTask('watchFlow', ['flow:app:start', 'watch:flow']);
   grunt.registerTask('watchFlowProd', ['flow:app:start', 'watch:flowProd']);
-  grunt.registerTask('prod', ['browserify:dist']);
+  grunt.registerTask('prod', ['browserify:dist', 'uglify:dist']);
   grunt.registerTask('browsertests', ['browserify:test']);
   grunt.registerTask('test', ['browsertests', 'mocha_phantomjs:run']);
   grunt.registerTask('travis', ['flow', 'test']);
   grunt.registerTask('coverage',
-                     ['browsertests', 'exorcise', 'jscoverage', 'mocha_phantomjs:cov']);
+                     ['browsertests', 'exorcise:bundle', 'jscoverage', 'mocha_phantomjs:cov']);
 };
