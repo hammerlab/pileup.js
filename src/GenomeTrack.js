@@ -3,7 +3,7 @@
  * @flow
  */
 
-var React = require('react'),
+var React = require('react/addons'),
     _ = require('underscore'),
     d3 = require('d3'),
     types = require('./types');
@@ -11,7 +11,7 @@ var React = require('react'),
 var GenomeTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange,
-    basePairs: React.PropTypes.string,
+    basePairs: React.PropTypes.object,
     onRangeChange: React.PropTypes.func.isRequired
   },
   render: function(): any {
@@ -33,9 +33,12 @@ var GenomeTrack = React.createClass({
 });
 
 var NonEmptyGenomeTrack = React.createClass({
+  // This prevents updates if state & props have not changed.
+  mixins: [React.addons.PureRenderMixin],
+
   propTypes: {
     range: types.GenomeRange.isRequired,
-    basePairs: React.PropTypes.string.isRequired,
+    basePairs: React.PropTypes.object.isRequired,
     onRangeChange: React.PropTypes.func.isRequired
   },
   render: function(): any {
@@ -97,7 +100,13 @@ var NonEmptyGenomeTrack = React.createClass({
     return scale;
   },
   componentDidUpdate: function(prevProps: any, prevState: any) {
-    this.updateVisualization();
+    // Check a whitelist of properties which could change the visualization.
+    // For now, just basePairs and range.
+    var newProps = this.props;
+    if (!_.isEqual(newProps.basePairs, prevProps.basePairs) ||
+        !_.isEqual(newProps.range, prevProps.range)) {
+      this.updateVisualization();
+    }
   },
   updateVisualization: function() {
     var div = this.getDOMNode(),
@@ -108,10 +117,12 @@ var NonEmptyGenomeTrack = React.createClass({
 
     var scale = this.getScale();
 
-    var absBasePairs = [].map.call(this.props.basePairs, (bp, i) => ({
-      position: i + range.start,
-      letter: bp
-    }));
+    var contigColon = this.props.range.contig + ':';
+    var absBasePairs = _.range(range.start - 1, range.stop + 1)
+        .map(locus => ({
+          position: locus,
+          letter: this.props.basePairs[contigColon + locus]
+        }));
 
     svg.attr('width', width)
        .attr('height', height);
