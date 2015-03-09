@@ -34,6 +34,6 @@ To iterate on code while running the type checker:
 
 To continuously regenerate the combined JS, run:
 
-    grunt watchFlowProd
+    grunt watch:prod
 
 [hs]: https://github.com/nodeapps/http-server
