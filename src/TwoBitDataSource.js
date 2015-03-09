@@ -47,11 +47,13 @@ var createTwoBitDataSource = function(remoteSource: TwoBit) {
         });
   }
 
+  // Returns a {"chr12:123" -> "[ATCG]"} mapping for the range.
   function getRange(range: GenomeRange) {
     if (!range) return null;
-    return _.range(range.start, range.stop)
-        .map(x => getBasePair(range.contig, x))
-        .join('');
+    return _.chain(_.range(range.start, range.stop))
+        .map(x => [range.contig + ':' + x, getBasePair(range.contig, x)])
+        .object()
+        .value();
   }
 
   var o = {
