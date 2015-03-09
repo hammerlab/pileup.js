@@ -6,8 +6,10 @@
 var React = require('react'),
     Controls = require('./Controls'),
     GenomeTrack = require('./GenomeTrack'),
-    types = require('./types');
     // TODO: make this an "import type" when react-tools 0.13.0 is out.
+    TwoBitDataSource = require('./TwoBitDataSource'),
+    types = require('./types');
+
 
 var Root = React.createClass({
   propTypes: {
@@ -22,7 +24,7 @@ var Root = React.createClass({
   },
   componentDidMount: function() {
     // Note: flow is unable to infer this type through `this.propTypes`.
-    var source: TwoBitDataSource = this.props.referenceSource;
+    var source = this.props.referenceSource;
     source.needContigs();
 
     source.on('contigs', () => { this.update() })

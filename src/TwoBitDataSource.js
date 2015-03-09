@@ -20,13 +20,17 @@
 var Events = require('backbone').Events,
     _ = require('underscore');
 
+// TODO: make this an "import type" when react-tools 0.13.0 is out.
+var TwoBit = require('./TwoBit');
+
 // Factor by which to over-request data from the network.
 // If a range of 100bp is shown and this is 2.0, then 300 base pairs will be
 // requested over the network (100 * 2.0 too much)
 var EXPANSION_FACTOR = 2.0;
 
 
-var createTwoBitDataSource = function(remoteSource: TwoBit) {
+// TODO: make the return type more precise
+var createTwoBitDataSource = function(remoteSource: TwoBit): any {
   // Local cache of genomic data.
   var contigList = [];
   var basePairs = {};  // contig -> locus -> letter
