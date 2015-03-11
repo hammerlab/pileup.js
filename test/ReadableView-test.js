@@ -61,4 +61,12 @@ describe('ReadableView', function() {
     expect(bytes.tell()).to.equal(20);
     expect(bytes.bytesRemaining()).to.equal(0);
   });
+
+  it('should read a large uint32', function() {
+    var u32 = new Uint32Array(1);
+    u32[0] = 0xebf28987;
+
+    var bytes = new ReadableView(new DataView(u32.buffer));
+    expect(bytes.readUint32()).to.equal(0xebf28987);
+  });
 });

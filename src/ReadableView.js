@@ -19,13 +19,18 @@ class ReadableView {
     return num;
   }
 
+  // Read an unsigned 16-bit integer and advance the current position.
+  readUint16(): number {
+    return this.readUint8() +
+           this.readUint8() * (1 << 8);
+  }
+
   // Read an unsigned 32-bit integer and advance the current position.
   readUint32(): number {
-    var num = this.readUint8()             |
-              this.readUint8() * (1 << 8 ) |
-              this.readUint8() * (1 << 16) |
-              this.readUint8() * (1 << 24);
-    return num;
+    return this.readUint8()             +
+           this.readUint8() * (1 << 8 ) +
+           this.readUint8() * (1 << 16) +
+           this.readUint8() * (1 << 24);
   }
 
   // Read a sequence of 32-bit integers and advance the current position.

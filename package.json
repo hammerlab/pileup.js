@@ -16,6 +16,8 @@
   "dependencies": {
     "backbone": "^1.1.2",
     "d3": "^3.5.5",
+    "jbinary": "^2.1.2",
+    "pako": "^0.2.5",
     "q": "^1.1.2",
     "react": "^0.12.2",
     "underscore": "^1.7.0"

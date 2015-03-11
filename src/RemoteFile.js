@@ -24,6 +24,7 @@ class RemoteFile {
     this.chunks = [];
   }
 
+  // TODO: return a buffer, not a DataView
   getBytes(start: number, length: number): Q.Promise<DataView> {
     var stop = start + length;
     // First check the cache.
