@@ -27,7 +27,6 @@ describe('jBinary', function() {
 
     var jb = new jBinary(u8array.buffer, twoBitTypeSet);
     var header = jb.readAll();
-    console.log(header);
 
     expect(header.magic).to.equal(0x1A412743);  // two bit magic
     expect(header.version).to.equal(0);
@@ -51,9 +50,11 @@ describe('jBinary', function() {
     var buffer = u8array.buffer;
 
     var jb = new jBinary(buffer, uint8TypeSet);
+    var num = 0;
     while (jb.tell() < buffer.byteLength) {
-      var x = jb.read({value: 'uint8'});
-      console.log(jb.tell(), x);
+      var x = jb.read('File');
+      expect(x).to.deep.equal({value: num * num});
+      num++;
     }
   });
 });

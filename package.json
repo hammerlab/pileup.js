@@ -23,6 +23,7 @@
     "underscore": "^1.7.0"
   },
   "devDependencies": {
+    "arraybuffer-slice": "^0.1.2",
     "chai": "^2.0.0",
     "coveralls": "^2.11.2",
     "es5-shim": "^4.1.0",
@@ -45,7 +46,6 @@
     "react-tools": "^0.12.2",
     "reactify": "^1.0.0",
     "sinon": "^1.12.2",
-    "source-map": "^0.3.0",
-    "text-encoding": "^0.5.2"
+    "source-map": "^0.3.0"
   }
 }

@@ -166,8 +166,8 @@ class TwoBit {
     this.header = deferredHeader.promise;
 
     // TODO: if 16k is insufficient, fetch the right amount.
-    this.remoteFile.getBytes(0, 16*1024).then(function(dataView) {
-        var header = parseHeader(dataView);
+    this.remoteFile.getBytes(0, 16*1024).then(function(buffer) {
+        var header = parseHeader(new DataView(buffer));
         deferredHeader.resolve(header);
       }).done();
   }
@@ -184,7 +184,8 @@ class TwoBit {
       var dnaOffset = header.offset + header.dnaOffsetFromHeader;
       var offset = Math.floor(dnaOffset + start/4);
       var byteLength = Math.ceil((stop - start + 1) / 4) + 1;
-      return this.remoteFile.getBytes(offset, byteLength).then(dataView => {
+      return this.remoteFile.getBytes(offset, byteLength).then(buffer => {
+        var dataView = new DataView(buffer);
         return markUnknownDNA(
             unpackDNA(dataView, start % 4, stop - start + 1), start, header)
             .join('');
@@ -208,7 +209,7 @@ class TwoBit {
 
       // TODO: if 4k is insufficient, fetch the right amount.
       return this.remoteFile.getBytes(seq.offset, 4095).then(
-          dataView => parseSequenceRecord(dataView, seq.offset));
+          buf => parseSequenceRecord(new DataView(buf), seq.offset));
     });
   }
 }
