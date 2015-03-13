@@ -20,14 +20,6 @@ module.exports = function(grunt) {
         ],
         tasks: ['flow:app:status']
       },
-      flowProd: {
-        files: ['<%= watch.flow.files %>'],
-        tasks: ['flow:app:status', 'prod']
-      },
-      prod: {
-        files: ['<%= watch.flow.files %>'],
-        tasks: ['browserify:dist']
-      }
     },
     browserify: {
       dist: {
@@ -38,6 +30,20 @@ module.exports = function(grunt) {
       test: {
         files: {
           'build/tests.js': ['src/**/*.js', 'test/**/*-test.js', '!src/main.js']
+        }
+      },
+      watchDist: {
+        files: '<%= browserify.dist.files %>',
+        options: {
+          watch: true,
+          keepAlive: true,
+        }
+      },
+      watchTest: {
+        files: '<%= browserify.test.files %>',
+        options: {
+          watch: true,
+          keepAlive: true,
         }
       },
       options: {
@@ -103,7 +109,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
   grunt.registerTask('watchFlow', ['flow:app:start', 'watch:flow']);
-  grunt.registerTask('watchFlowProd', ['flow:app:start', 'watch:flowProd']);
   grunt.registerTask('prod', ['browserify:dist', 'uglify:dist']);
   grunt.registerTask('browsertests', ['browserify:test']);
   grunt.registerTask('test', ['browsertests', 'mocha_phantomjs:run']);
