@@ -48,6 +48,7 @@ class Interval {
     return result;
   }
 
+  // Returns an interval which contains all the given intervals.
   static boundingInterval(intervals: Array<Interval>): Interval {
     if (!intervals.length) {
       throw new Error('Tried to bound zero intervals');
