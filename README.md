@@ -34,6 +34,10 @@ To iterate on code while running the type checker:
 
 To continuously regenerate the combined JS, run:
 
-    grunt watch:prod
+    grunt browserify:watchDist
+
+To continuously regenerate the testing JS, run:
+
+    grunt browserify:watchTest
 
 [hs]: https://github.com/nodeapps/http-server
