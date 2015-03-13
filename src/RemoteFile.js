@@ -49,15 +49,11 @@ class RemoteFile {
     xhr.setRequestHeader('Range', `bytes=${start}-${stop}`);
     var remoteFile = this;
     xhr.onload = function(e) {
+      // The actual length of the response may be less than requested if it's
+      // too short, e.g. if we request bytes 0-1000 of a 500-byte file.
       var buffer = this.response;
-      var expectLength = stop - start + 1,
-          actualLength = buffer.byteLength;
-      if (actualLength != expectLength) {
-        deferred.reject(`Server returned incorrect number of bytes for ${this.url}. Requested ${start}-${stop} (${expectLength} bytes) but received ${actualLength}.`);
-        return;
-      }
 
-      var newChunk = { start, stop, buffer };
+      var newChunk = { start, stop: start + buffer.byteLength - 1, buffer };
       remoteFile.chunks.push(newChunk);
       deferred.resolve(new DataView(buffer));
     };

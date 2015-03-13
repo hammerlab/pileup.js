@@ -87,20 +87,30 @@ module.exports = function(grunt) {
     },
     mocha_phantomjs: {
       run: {
-        src: ['test/runner.html']
+        options: {
+          urls: ['http://localhost:9501/test/runner.html']
+        }
       },
       cov: {
-        src: ['test/coverage.html'],
         options: {
+          urls: ['http://localhost:9501/test/coverage.html'],
           reporter: 'node_modules/mocha-lcov-reporter/lib/lcov.js',
           output: 'build/bundled.lcov',
           silent: true
+        }
+      }
+    },
+    connect: {
+      server: {
+        options: {
+          port: 9501
         }
       }
     }
   });
 
   grunt.loadNpmTasks('grunt-browserify');
+  grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-flow-type-check');
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
@@ -111,8 +121,8 @@ module.exports = function(grunt) {
   grunt.registerTask('watchFlow', ['flow:app:start', 'watch:flow']);
   grunt.registerTask('prod', ['browserify:dist', 'uglify:dist']);
   grunt.registerTask('browsertests', ['browserify:test']);
-  grunt.registerTask('test', ['browsertests', 'mocha_phantomjs:run']);
+  grunt.registerTask('test', ['browsertests', 'connect', 'mocha_phantomjs:run']);
   grunt.registerTask('travis', ['flow', 'test']);
   grunt.registerTask('coverage',
-                     ['browsertests', 'exorcise:bundle', 'jscoverage', 'mocha_phantomjs:cov']);
+                     ['browsertests', 'exorcise:bundle', 'jscoverage', 'connect', 'mocha_phantomjs:cov']);
 };
