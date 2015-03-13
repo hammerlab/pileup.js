@@ -18,22 +18,22 @@ class ContigInterval {
   }
 
   // TODO: make these getter methods & switch to Babel.
-  start() {
+  start(): number {
     return this.interval.start;
   }
-  stop() {
+  stop(): number {
     return this.interval.stop;
   }
-  length() {
+  length(): number {
     return this.interval.length();
   }
 
-  intersects(other) {
-    return (this.contig == other.contig &&
+  intersects(other: ContigInterval): boolean {
+    return (this.contig === other.contig &&
             this.interval.intersects(other.interval));
   }
 
-  toString() {
+  toString(): string {
     return `${this.contig}:${this.start()}-${this.stop()}`;
   }
 }

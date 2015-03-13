@@ -15,24 +15,24 @@ class Interval {
   }
 
   // TODO: make this a getter method & switch to Babel.
-  length() {
+  length(): number {
     return Math.max(0, this.stop - this.start + 1);
   }
 
-  intersect(otherInterval) {
-    return new Interval(Math.max(this.start, otherInterval.start),
-                        Math.min(this.stop, otherInterval.stop));
+  intersect(other: Interval): Interval {
+    return new Interval(Math.max(this.start, other.start),
+                        Math.min(this.stop, other.stop));
   }
 
-  intersects(otherInterval) {
-    return this.start <= otherInterval.stop && otherInterval.start <= this.stop;
+  intersects(other: Interval): boolean {
+    return this.start <= other.stop && other.start <= this.stop;
   }
 
-  contains(value) {
+  contains(value: number): boolean {
     return value >= this.start && value <= this.stop;
   }
 
-  clone() {
+  clone(): Interval {
     return new Interval(this.start, this.stop);
   }
 
@@ -60,7 +60,7 @@ class Interval {
     return result;
   }
 
-  toString() {
+  toString(): string {
     return `[${this.start}, ${this.stop}]`;
   }
 }
