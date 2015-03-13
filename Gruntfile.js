@@ -124,5 +124,5 @@ module.exports = function(grunt) {
   grunt.registerTask('test', ['browsertests', 'connect', 'mocha_phantomjs:run']);
   grunt.registerTask('travis', ['flow', 'test']);
   grunt.registerTask('coverage',
-                     ['browsertests', 'exorcise:bundle', 'jscoverage', 'mocha_phantomjs:cov']);
+                     ['browsertests', 'exorcise:bundle', 'jscoverage', 'connect', 'mocha_phantomjs:cov']);
 };
