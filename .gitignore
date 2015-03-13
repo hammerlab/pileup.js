@@ -33,3 +33,5 @@ build
 
 # Genomics
 *.2bit
+*.bb
+*.bed
