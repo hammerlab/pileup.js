@@ -10,8 +10,7 @@ var Q = require('q'),
     pako = require('pako');  // for gzip inflation
     
 
-var ReadableView = require('./ReadableView'),
-    RemoteFile = require('./RemoteFile'),
+var RemoteFile = require('./RemoteFile'),
     Interval = require('./Interval'),
     ContigInterval = require('./ContigInterval'),
     utils = require('./utils.js'),
