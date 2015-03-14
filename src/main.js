@@ -1,7 +1,6 @@
 /* @flow */
 var React = require('react'),
     TwoBit = require('./TwoBit'),
-    BigBed = require('./BigBed'),
     Root = require('./Root'),
     createTwoBitDataSource = require('./TwoBitDataSource');
 
@@ -24,8 +23,3 @@ genome.getFeaturesInRange('chr1', 123000, 124000).done();
 
 var root = React.render(<Root referenceSource={dataSource} />,
                         document.getElementById('root'));
-
-var ensembl = new BigBed('/ensGene.bb');
-
-window.ensembl = ensembl;
-window.genome = genome;

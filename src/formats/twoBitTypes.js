@@ -13,7 +13,6 @@ var TYPE_SET = {
   'Header': {
     magic: ['const', 'uint32', 0x1A412743, true],
     version: ['const', 'uint32', 0, true],
-
     sequenceCount: 'uint32',
     reserved: 'uint32',
 

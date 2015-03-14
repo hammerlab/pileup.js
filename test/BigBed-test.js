@@ -1,19 +1,15 @@
-// Things to test:
-// - getFeatures which return no features
-// - getFeatures which crosses a block boundary
-// - getFeatures which crosses a contig boundary (not currently possible)
-
 var chai = require('chai');
 var expect = chai.expect;
 var assert = chai.assert;
 
+var Q = require('q');
 var BigBed = require('../src/BigBed');
 
 describe('BigBed', function() {
   function getTestBigBed() {
     // This file was generated using UCSC tools:
     // cd kent/src/utils/bedToBigBed/tests; make
-    // This file is compressed, little endian and contains autoSQL.
+    // It is compressed, little endian, has autoSQL and two blocks.
     return new BigBed('/test/data/itemRgb.bb');
   }
 
@@ -22,8 +18,9 @@ describe('BigBed', function() {
 
     bb.getFeaturesInRange('chrX', 151077036, 151078532)
         .then(features => {
-          // chrX	151077031	151078198	MID_BLUE	0	-	151077031	151078198	0,0,128
-          // chrX	151078198	151079365	VIOLET_RED1	0	-	151078198	151079365	255,62,150
+          // Here's what these two lines in the file look like:
+          // chrX 151077031 151078198 MID_BLUE 0 - 151077031 151078198 0,0,128
+          // chrX 151078198 151079365 VIOLET_RED1 0 - 151078198 151079365 255,62,150
           expect(features).to.have.length(2);
           expect(features[0].contig).to.equal('chrX');
           expect(features[0].start).to.equal(151077031);
@@ -47,4 +44,53 @@ describe('BigBed', function() {
         })
         .done();
   });
+
+  it('should have inclusive ranges', function(done) {
+    // The matches looks like this:
+    // chrX 151071196 151072363 RED
+    // chrX 151094536 151095703 PeachPuff
+    var red = [151071196, 151072362],  // note: stop is inclusive
+        peachpuff = [151094536, 151095702];
+
+    var bb = getTestBigBed();
+    var expectN = n => features => {
+        expect(features).to.have.length(n);
+      };
+
+    Q.all([
+        // request for precisely one row from the file.
+        bb.getFeaturesInRange('chrX', red[0], red[1])
+            .then(expectN(1)),
+        // the additional base in the range hits another row.
+        bb.getFeaturesInRange('chrX', red[0], 1 + red[1])
+            .then(expectN(2)),
+        // this overlaps exactly one base pair of the first feature.
+        bb.getFeaturesInRange('chrX', red[0] - 1000, red[0])
+            .then(expectN(1)),
+        // but this range ends one base pair before it.
+        bb.getFeaturesInRange('chrX', red[0] - 1000, red[0] - 1)
+            .then(expectN(0))
+    ]).then(() => {
+      done();
+    }).done();
+  });
+
+  it('should add "chr" to contig names', function(done) {
+    var bb = getTestBigBed();
+
+    bb.getFeaturesInRange('X', 151077036, 151078532)
+        .then(features => {
+          // (same as 'should extract features in a range' test)
+          expect(features).to.have.length(2);
+          expect(features[0].contig).to.equal('chrX');
+          expect(features[1].contig).to.equal('chrX');
+          done();
+        })
+        .done();
+  });
+
+  // Things left to test:
+  // - getFeatures which crosses a block boundary
+  // - uncompressed bigBed file.
 });
+

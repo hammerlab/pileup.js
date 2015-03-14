@@ -3,6 +3,7 @@
  */
 var jBinary = require('jbinary');
 
+// Read a jBinary type at an offset in the buffer specified by another field.
 function typeAtOffset(typeName, offsetFieldName) {
   return jBinary.Template({
       baseType: typeName,

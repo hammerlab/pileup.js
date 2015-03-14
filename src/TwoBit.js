@@ -37,7 +37,6 @@ type SequenceRecord = {
 
 type TwoBitHeader = {
   sequenceCount: number;
-  reserved: number;
   sequences: Array<FileIndexEntry>;
 }
 

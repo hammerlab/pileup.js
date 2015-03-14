@@ -21,19 +21,16 @@ function parseHeader(buffer) {
   // TODO: check Endianness using magic. Possibly use jDataView.littleEndian
   // to flip the endianness for jBinary consumption.
   // NB: dalliance doesn't support big endian formats.
-  var jb = new jBinary(buffer, bbi.TYPE_SET);
-  var header = jb.read('Header');
-
-  return header;
+  return new jBinary(buffer, bbi.TYPE_SET).read('Header');
 }
 
+// The "CIR" tree contains a mapping from sequence -> block offsets.
+// It stands for "Chromosome Index R tree"
 function parseCirTree(buffer) {
-  var jb = new jBinary(buffer, bbi.TYPE_SET);
-  var cirTree = jb.read('CirTree');
-
-  return cirTree;
+  return new jBinary(buffer, bbi.TYPE_SET).read('CirTree');
 }
 
+// Extract a map from contig name --> contig ID from the bigBed header.
 function generateContigMap(twoBitHeader): {[key:string]: number} {
   // Just assume it's a flat "tree" for now.
   var nodes = twoBitHeader.chromosomeTree.nodes.contents;
@@ -46,6 +43,16 @@ function generateContigMap(twoBitHeader): {[key:string]: number} {
   }));
 }
 
+// Generate the reverse map from contig ID --> contig name.
+function reverseContigMap(contigMap: {[key:string]: number}): Array<string> {
+  var ary = [];
+  _.forEach(contigMap, (index, name) => {
+    ary[index] = name;
+  });
+  return ary;
+}
+
+// Map contig name to contig ID. Leading "chr" is optional.
 function getContigId(contigMap, contig) {
   if (contig in contigMap) {
     return contigMap[contig];
@@ -57,15 +64,7 @@ function getContigId(contigMap, contig) {
   return null;
 }
 
-function reverseContigMap(contigMap: {[key:string]: number}): Array<string> {
-  var ary = [];
-  _.forEach(contigMap, (index, name) => {
-    ary[index] = name;
-  });
-  return ary;
-}
-
-// Get all blocks in the file containing features which intersect with contigRange.
+// Find all blocks containing features which intersect with contigRange.
 function findOverlappingBlocks(twoBitHeader, cirTree, contigRange) {
   // Do a recursive search through the index tree
   var matchingBlocks = [];
@@ -101,13 +100,49 @@ function extractFeaturesInRange(buffer, dataRange, blocks, contigRange) {
     var beds = jb.read('BedBlock');
 
     beds = beds.filter(function(bed) {
-      var bedInterval = new ContigInterval(bed.chrId, bed.start, bed.stop);
-      var r = contigRange.intersects(bedInterval);
-      return r;
+      // Note: BED intervals are explicitly half-open.
+      // The "- 1" converts them to closed intervals for ContigInterval.
+      var bedInterval = new ContigInterval(bed.chrId, bed.start, bed.stop - 1);
+      return contigRange.intersects(bedInterval);
     });
 
     return beds;
   }));
+}
+
+// Fetch the relevant blocks from the bigBed file and extract the features
+// which overlap the given range.
+function fetchFeatures(contigRange, header, cirTree, contigMap, remoteFile) {
+  var blocks = findOverlappingBlocks(header, cirTree, contigRange);
+  if (blocks.length == 0) {
+    return [];
+  }
+
+  // Find the range in the file which contains all relevant blocks.
+  // In theory there could be gaps between blocks, but it's hard to see how.
+  var range = Interval.boundingInterval(
+      blocks.map(n => new Interval(+n.offset, n.offset+n.size)));
+
+  return remoteFile.getBytes(range.start, range.length())
+      .then(buffer => {
+        var reverseMap = reverseContigMap(contigMap);
+        var features = extractFeaturesInRange(buffer, range, blocks, contigRange)
+        features.forEach(f => {
+          f.contig = reverseMap[f.chrId];
+          delete f.chrId;
+        });
+        return features;
+      });
+}
+
+
+type BedRow = {
+  // Half-open interval for the BED row.
+  contig: string;
+  start: number;
+  stop: number;
+  // Remaining fields in the BED row (typically tab-delimited)
+  rest: string;
 }
 
 
@@ -115,18 +150,24 @@ class BigBed {
   remoteFile: RemoteFile;
   header: Q.Promise<any>;
   cirTree: Q.Promise<any>;
+  contigMap: Q.Promise<{[key:string]: number}>;
 
+  /**
+   * Prepare to request features from a remote bigBed file.
+   * The remote source must support HTTP Range headers.
+   * This will kick off several async requests for portions of the file.
+   */
   constructor(url: string) {
     this.remoteFile = new RemoteFile(url);
     this.header = this.remoteFile.getBytes(0, 64*1024).then(parseHeader);
     this.contigMap = this.header.then(generateContigMap);
 
-    // Next: fetch [header.unzoomedIndexOffset, zoomHeaders[0].dataOffset] and parse
-    // the "CIR" tree.
+    // Next: fetch the block index and parse out the "CIR" tree.
     this.cirTree = this.header.then(header => {
       // zoomHeaders[0].dataOffset is the next entry in the file.
       // We assume the "cirTree" section goes all the way to that point.
       // Lacking zoom headers, assume it's 4k.
+      // TODO: fetch more than 4k if necessary
       var start = header.unzoomedIndexOffset,
           zoomHeader = header.zoomHeaders[0],
           length = zoomHeader ? zoomHeader.dataOffset - start : 4096;
@@ -139,9 +180,13 @@ class BigBed {
     this.cirTree.done();
   }
 
-  // Returns all BED entries which overlap the range.
-  // TODO: factor logic out into a helper
-  getFeaturesInRange(contig: string, start: number, stop: number): Q.Promise<any> {
+  /**
+   * Returns all BED entries which overlap the range.
+   * Note: while the requested range is inclusive on both ends, ranges in
+   * bigBed format files are half-open (inclusive at the start, exclusive at
+   * the end).
+   */
+  getFeaturesInRange(contig: string, start: number, stop: number): Q.Promise<Array<BedRow>> {
     return Q.spread([this.header, this.cirTree, this.contigMap],
                     (header, cirTree, contigMap) => {
       var contigIx = getContigId(contigMap, contig);
@@ -149,24 +194,7 @@ class BigBed {
         throw `Invalid contig ${contig}`;
       }
       var contigRange = new ContigInterval(contigIx, start, stop);
-
-      var blocks = findOverlappingBlocks(header, cirTree, contigRange);
-      if (blocks.length == 0) {
-        return [];
-      }
-
-      var range = Interval.boundingInterval(
-          blocks.map(n => new Interval(+n.offset, n.offset+n.size)));
-      return this.remoteFile.getBytes(range.start, range.length())
-          .then(buffer => {
-            var reverseMap = reverseContigMap(contigMap);
-            var features = extractFeaturesInRange(buffer, range, blocks, contigRange)
-            features.forEach(f => {
-              f.contig = reverseMap[f.chrId];
-              delete f.chrId;
-            });
-            return features;
-          });
+      return fetchFeatures(contigRange, header, cirTree, contigMap, this.remoteFile);
     });
   }
 }
