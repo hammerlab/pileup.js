@@ -18,6 +18,7 @@
 // import type * as TwoBit from './TwoBit';
 
 var Events = require('backbone').Events,
+    Q = require('q'),
     _ = require('underscore');
 
 // TODO: make this an "import type" when react-tools 0.13.0 is out.
@@ -28,6 +29,7 @@ var TwoBit = require('./TwoBit');
 // requested over the network (100 * 2.0 too much)
 var EXPANSION_FACTOR = 2.0;
 
+var MAX_BASE_PAIRS_TO_FETCH = 100000;
 
 // TODO: make the return type more precise
 var createTwoBitDataSource = function(remoteSource: TwoBit): any {
@@ -43,6 +45,11 @@ var createTwoBitDataSource = function(remoteSource: TwoBit): any {
   }
 
   function fetch(range: GenomeRange) {
+    var span = range.stop - range.start;
+    if (span > MAX_BASE_PAIRS_TO_FETCH) {
+      return Q();  // empty promise
+    }
+
     return remoteSource.getFeaturesInRange(range.contig, range.start, range.stop)
         .then(letters => {
           for (var i = 0; i < letters.length; i++) {
