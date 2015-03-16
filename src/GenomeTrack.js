@@ -22,10 +22,6 @@ var GenomeTrack = React.createClass({
     if (!range) {
       return <EmptyTrack />;
     }
-    var rangeLength = range.limit - range.start;
-    if (rangeLength > 200) {
-      return <EmptyTrack />;
-    }
 
     if (!this.props.basePairs) {
       return <div className="reference empty">no data</div>;

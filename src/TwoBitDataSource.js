@@ -29,7 +29,7 @@ var TwoBit = require('./TwoBit');
 // requested over the network (100 * 2.0 too much)
 var EXPANSION_FACTOR = 2.0;
 
-var MAX_BASE_PAIRS_TO_FETCH = 100000;
+var MAX_BASE_PAIRS_TO_FETCH = 10000;
 
 // TODO: make the return type more precise
 var createTwoBitDataSource = function(remoteSource: TwoBit): any {
@@ -50,6 +50,7 @@ var createTwoBitDataSource = function(remoteSource: TwoBit): any {
       return Q();  // empty promise
     }
 
+    console.log(`Fetching ${span} base pairs`);
     return remoteSource.getFeaturesInRange(range.contig, range.start, range.stop)
         .then(letters => {
           for (var i = 0; i < letters.length; i++) {
@@ -61,6 +62,10 @@ var createTwoBitDataSource = function(remoteSource: TwoBit): any {
   // Returns a {"chr12:123" -> "[ATCG]"} mapping for the range.
   function getRange(range: GenomeRange) {
     if (!range) return null;
+    var span = range.stop - range.start;
+    if (span > MAX_BASE_PAIRS_TO_FETCH) {
+      return {};
+    }
     return _.chain(_.range(range.start, range.stop))
         .map(x => [range.contig + ':' + x, getBasePair(range.contig, x)])
         .object()

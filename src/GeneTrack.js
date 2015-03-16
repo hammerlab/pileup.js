@@ -6,14 +6,92 @@ var React = require('react/addons'),
 var GeneTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange,
-    genes: React.PropTypes.array.isRequired
+    genes: React.PropTypes.array.isRequired,
+    onRangeChange: React.PropTypes.func.isRequired
   },
   render: function(): any {
-    return (
-      <div className="genes">
-        {JSON.stringify(this.props.genes)}
-      </div>
-    );
+    var range = this.props.range;
+    if (!range) {
+      return <EmptyTrack />;
+    }
+
+    return <NonEmptyGeneTrack {...this.props} />;
+  }
+});
+
+var NonEmptyGeneTrack = React.createClass({
+  propTypes: {
+    range: types.GenomeRange,
+    genes: React.PropTypes.array.isRequired,
+    onRangeChange: React.PropTypes.func.isRequired
+  },
+  render: function() {
+    return <div className="genes"></div>;
+  },
+  componentDidMount: function() {
+    var div = this.getDOMNode(),
+        svg = d3.select(div)
+                .append('svg');
+
+    var g = svg.append('g');
+
+    this.updateVisualization();
+  },
+  getScale: function() {
+    var div = this.getDOMNode(),
+        range = this.props.range,
+        width = div.offsetWidth,
+        offsetPx = range.offsetPx || 0;
+    var scale = d3.scale.linear()
+            .domain([range.start, range.stop + 1])  // 1 bp wide
+            .range([-offsetPx, width - offsetPx]);
+    return scale;
+  },
+  componentDidUpdate: function(prevProps: any, prevState: any) {
+    // Check a whitelist of properties which could change the visualization.
+    // For now, just basePairs and range.
+    var newProps = this.props;
+    if (!_.isEqual(newProps.genes, prevProps.genes) ||
+        !_.isEqual(newProps.range, prevProps.range)) {
+      this.updateVisualization();
+    }
+  },
+  updateVisualization: function() {
+    var div = this.getDOMNode(),
+        range = this.props.range,
+        width = div.offsetWidth,
+        height = div.offsetHeight,
+        svg = d3.select(div).select('svg');
+
+    var scale = this.getScale();
+
+    svg.attr('width', width)
+       .attr('height', height);
+
+    var g = svg.select('g');
+
+    var genes = g.selectAll('line')
+       .data(this.props.genes, gene => gene.id);
+
+    // Enter
+    genes.enter().append('line');
+
+    // Enter & update
+    genes
+        .attr('x1', g => scale(g.position.start()))
+        .attr('x2', g => scale(g.position.stop()))
+        .attr('y1', height / 2)
+        .attr('y2', height / 2)
+        .attr('class', 'gene');
+
+    // Exit
+    genes.exit().remove();
+  }
+});
+
+var EmptyTrack = React.createClass({
+  render: function() {
+    return <div className="genes empty">Zoom in to see genes</div>
   }
 });
 
