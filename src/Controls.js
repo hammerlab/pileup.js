@@ -14,8 +14,7 @@ var Controls = React.createClass({
     // XXX: can we be more specific than this with Flow?
     onChange: React.PropTypes.func.isRequired
   },
-  makeRange: function() {
-    // XXX Removing the Number() should lead to type errors, but doesn't.
+  makeRange: function(): GenomeRange {
     return {
       contig: this.refs.contig.getDOMNode().value,
       start: Number(this.refs.start.getDOMNode().value),
@@ -35,8 +34,10 @@ var Controls = React.createClass({
     this.refs.start.getDOMNode().value = r.start;
     this.refs.stop.getDOMNode().value = r.stop;
 
-    var contigIdx = this.props.contigList.indexOf(r.contig);
-    this.refs.contig.getDOMNode().selectedIndex = contigIdx;
+    if (this.props.contigList) {
+      var contigIdx = this.props.contigList.indexOf(r.contig);
+      this.refs.contig.getDOMNode().selectedIndex = contigIdx;
+    }
   },
   render: function(): any {
     var contigOptions = this.props.contigList
@@ -56,7 +57,7 @@ var Controls = React.createClass({
       </form>
     );
   },
-  componentDidUpdate: function(prevProps, prevState) {
+  componentDidUpdate: function(prevProps: Object) {
     if (!_.isEqual(prevProps.range, this.props.range)) {
       this.updateRangeUI();
     }

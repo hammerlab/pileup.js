@@ -17,20 +17,22 @@ class RemoteFile {
   url: string;
   fileLength: number;
   chunks: Array<Chunk>;  // regions of file that have already been loaded.
+  numNetworkRequests: number;  // track this for debugging/testing
 
   constructor(url: string) {
     this.url = url;
     this.fileLength = -1;  // unknown
     this.chunks = [];
+    this.numNetworkRequests = 0;
   }
 
-  getBytes(start: number, length: number): Q.Promise<DataView> {
+  getBytes(start: number, length: number): Q.Promise<ArrayBuffer> {
     var stop = start + length;
     // First check the cache.
     for (var i = 0; i < this.chunks.length; i++) {
       var chunk = this.chunks[i];
       if (chunk.start <= start && chunk.stop >= stop) {
-        return Q.when(new DataView(chunk.buffer, start - chunk.start, length));
+        return Q.when(chunk.buffer.slice(start - chunk.start, stop - chunk.start));
       }
     }
 
@@ -40,7 +42,7 @@ class RemoteFile {
     return this.getFromNetwork(start, start + length - 1);
   }
 
-  getFromNetwork(start: number, stop: number): Q.Promise<DataView> {
+  getFromNetwork(start: number, stop: number): Q.Promise<ArrayBuffer> {
     var deferred = Q.defer();
 
     var xhr = new XMLHttpRequest();
@@ -55,10 +57,11 @@ class RemoteFile {
 
       var newChunk = { start, stop: start + buffer.byteLength - 1, buffer };
       remoteFile.chunks.push(newChunk);
-      deferred.resolve(new DataView(buffer));
+      deferred.resolve(buffer);
     };
 
     // TODO: `reject`, `notify` on progress
+    this.numNetworkRequests++;
     xhr.send();
 
     return deferred.promise;

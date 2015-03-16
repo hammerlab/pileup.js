@@ -6,10 +6,11 @@
 'use strict';
 
 var Q = require('q'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    jBinary = require('jbinary');
 
-var ReadableView = require('./ReadableView'),
-    RemoteFile = require('./RemoteFile');
+var RemoteFile = require('./RemoteFile'),
+    twoBitTypes = require('./formats/twoBitTypes');
 
 var BASE_PAIRS = [
   'T',  // 0=00
@@ -36,37 +37,25 @@ type SequenceRecord = {
 
 type TwoBitHeader = {
   sequenceCount: number;
-  reserved: number;
   sequences: Array<FileIndexEntry>;
 }
-
-var TWO_BIT_MAGIC = 0x1A412743;
 
 
 /**
  * Parses a single SequenceRecord from the start of the ArrayBuffer.
  * fileOffset is the position of this sequence within the 2bit file.
  */
-function parseSequenceRecord(dataView: DataView, fileOffset: number): SequenceRecord {
-  var bytes = new ReadableView(dataView);
-  var dnaSize = bytes.readUint32(),
-      nBlockCount = bytes.readUint32(),
-      nBlockStarts = bytes.readUint32Array(nBlockCount),
-      nBlockSizes = bytes.readUint32Array(nBlockCount),
-      // The masks can be quite large (~2MB for chr1) and we mostly don't care
-      // about them.  So we ignore them, but we do need to know their length.
-      maskBlockCount = bytes.readUint32();
-      // maskBlockCount maskBlockStarts = bytes.readUint32Array(maskBlockCount),
-      // maskBlockSizes = bytes.readUint32Array(maskBlockCount),
-      // reserved = bytes.readUint32();
+function parseSequenceRecord(buffer: ArrayBuffer, fileOffset: number): SequenceRecord {
+  var jb = new jBinary(buffer, twoBitTypes.TYPE_SET);
+  var header = jb.read('SequenceRecord');
 
-  var dnaOffset = bytes.tell() + 8 * maskBlockCount + 4;
+  var dnaOffset = jb.tell() + 8 * header.maskBlockCount + 4;
 
   return {
-    numBases: dnaSize,
-    unknownBlockStarts: nBlockStarts,
-    unknownBlockLengths: nBlockSizes,
-    numMaskBlocks: maskBlockCount,
+    numBases: header.dnaSize,
+    unknownBlockStarts: header.nBlockStarts,
+    unknownBlockLengths: header.nBlockSizes,
+    numMaskBlocks: header.maskBlockCount,
     maskBlockStarts: [],
     maskBlockLengths: [],
     dnaOffsetFromHeader: dnaOffset,
@@ -75,35 +64,13 @@ function parseSequenceRecord(dataView: DataView, fileOffset: number): SequenceRe
 }
 
 
-/**
- * Parses the 2bit file header.
- */
-function parseHeader(dataView: DataView): TwoBitHeader {
-  var bytes = new ReadableView(dataView);
-  var magic = bytes.readUint32();
-  if (magic != TWO_BIT_MAGIC) {
-    throw 'Invalid magic';
-  }
-  var version = bytes.readUint32();
-  if (version != 0) {
-    throw 'Unknown version of 2bit';
-  }
-  var sequenceCount = bytes.readUint32(),
-      reserved = bytes.readUint32();
-
-  var sequences: Array<FileIndexEntry> = [];
-  for (var i = 0; i < sequenceCount; i++) {
-    var nameSize = bytes.readUint8();
-    var name = bytes.readAscii(nameSize);
-    var offset = bytes.readUint32();
-    sequences.push({name, offset});
-  }
-  // hg19 header is 1671 bytes to this point
+function parseHeader(buffer: ArrayBuffer): TwoBitHeader {
+  var jb = new jBinary(buffer, twoBitTypes.TYPE_SET);
+  var header = jb.read('Header');
 
   return {
-    sequenceCount,
-    reserved,
-    sequences
+    sequenceCount: header.sequenceCount,
+    sequences: header.sequences
   };
 }
 
@@ -115,6 +82,7 @@ function parseHeader(dataView: DataView): TwoBitHeader {
  * modification.
  */
 function unpackDNA(dataView: DataView, startBasePair: number, numBasePairs: number): Array<string> {
+  // TODO: use jBinary bitfield for this
   var basePairs: Array<string> = [];
   basePairs.length = dataView.byteLength * 4;  // pre-allocate
   var basePairIdx = -startBasePair;
@@ -166,8 +134,8 @@ class TwoBit {
     this.header = deferredHeader.promise;
 
     // TODO: if 16k is insufficient, fetch the right amount.
-    this.remoteFile.getBytes(0, 16*1024).then(function(dataView) {
-        var header = parseHeader(dataView);
+    this.remoteFile.getBytes(0, 16*1024).then(function(buffer) {
+        var header = parseHeader(buffer);
         deferredHeader.resolve(header);
       }).done();
   }
@@ -184,7 +152,8 @@ class TwoBit {
       var dnaOffset = header.offset + header.dnaOffsetFromHeader;
       var offset = Math.floor(dnaOffset + start/4);
       var byteLength = Math.ceil((stop - start + 1) / 4) + 1;
-      return this.remoteFile.getBytes(offset, byteLength).then(dataView => {
+      return this.remoteFile.getBytes(offset, byteLength).then(buffer => {
+        var dataView = new DataView(buffer);
         return markUnknownDNA(
             unpackDNA(dataView, start % 4, stop - start + 1), start, header)
             .join('');
@@ -208,7 +177,7 @@ class TwoBit {
 
       // TODO: if 4k is insufficient, fetch the right amount.
       return this.remoteFile.getBytes(seq.offset, 4095).then(
-          dataView => parseSequenceRecord(dataView, seq.offset));
+          buf => parseSequenceRecord(buf, seq.offset));
     });
   }
 }
