@@ -4,8 +4,10 @@
  */
 
 var React = require('react'),
+    ContigInterval = require('./ContigInterval'),
     Controls = require('./Controls'),
     GenomeTrack = require('./GenomeTrack'),
+    GeneTrack = require('./GeneTrack'),
     // TODO: make this an "import type" when react-tools 0.13.0 is out.
     TwoBitDataSource = require('./TwoBitDataSource'),
     types = require('./types');
@@ -13,13 +15,15 @@ var React = require('react'),
 
 var Root = React.createClass({
   propTypes: {
-    referenceSource: React.PropTypes.object.isRequired
+    referenceSource: React.PropTypes.object.isRequired,
+    geneSource: React.PropTypes.object.isRequired
   },
   getInitialState: function(): any {
     return {
       contigList: [],
       range: null,
-      basePairs: null
+      basePairs: null,
+      genes: []
     }
   },
   componentDidMount: function() {
@@ -33,18 +37,24 @@ var Root = React.createClass({
     source.on('contigs', () => {
       // this is here to facilitate faster iteration
       this.handleRangeChange({
-        contig: 'chr1',
-        start: 123456,
-        stop: 123500
+        contig: 'chr17',
+        start: 7512444,
+        stop: 7512484
       });
     });
+
+    var geneSource = this.props.geneSource;
+    source.on('newdata', () => { this.update() });
 
     this.update();
   },
   update: function() {
+    var range = this.state.range,
+        ci = range && new ContigInterval(range.contig, range.start, range.stop);
     this.setState({
       contigList: this.props.referenceSource.contigList(),
-      basePairs: this.props.referenceSource.getRange(this.state.range)
+      basePairs: this.props.referenceSource.getRange(range),
+      genes: this.props.geneSource.getGenesInRange(ci)
     });
   },
   handleRangeChange: function(newRange: GenomeRange) {
@@ -53,6 +63,8 @@ var Root = React.createClass({
 
     var ref = this.props.referenceSource;
     ref.rangeChanged(newRange);
+
+    this.props.geneSource.rangeChanged(newRange);
   },
   render: function(): any {
     return (
@@ -63,6 +75,10 @@ var Root = React.createClass({
         <GenomeTrack range={this.state.range}
                      basePairs={this.state.basePairs}
                      onRangeChange={this.handleRangeChange} />
+        <GeneTrack range={this.state.range}
+                   genes={this.state.genes}
+                   onRangeChange={this.handleRangeChange} />
+
       </div>
     );
   }
