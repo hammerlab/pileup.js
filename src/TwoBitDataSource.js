@@ -38,6 +38,24 @@ type TwoBitSource = {
   needContigs: () => void;
   getRange: (range: GenomeRange) => ?{[key:string]: string};
   contigList: () => string[];
+  on: (event: string, handler: Function) => void;
+  off: (event: string) => void;
+}
+
+// Expand range by EXPANSION_FACTOR, allowing for boundary effects and
+// respecting MAX_BASE_PAIRS_TO_FETCH.
+function expandRange(range) {
+  var span = range.stop - range.start,
+      center = range.start + span / 2,
+      newSpan = Math.min(MAX_BASE_PAIRS_TO_FETCH, (1 + EXPANSION_FACTOR) * span),
+      newStart = Math.max(1, Math.floor(center - newSpan / 2)),
+      newStop = Math.ceil(center + newSpan / 2);
+
+  return {
+    contig: range.contig,
+    start: newStart,
+    stop: newStop
+  }
 }
 
 
@@ -47,7 +65,7 @@ var createTwoBitDataSource = function(remoteSource: TwoBit): TwoBitSource {
   var contigList = [];
   var basePairs = {};  // contig -> locus -> letter
   function getBasePair(contig: string, position: number) {
-    return basePairs[contig] && basePairs[contig][position];
+    return (basePairs[contig] && basePairs[contig][position]) || null;
   }
   function setBasePair(contig: string, position: number, letter: string) {
     if (!basePairs[contig]) basePairs[contig] = {};
@@ -59,6 +77,10 @@ var createTwoBitDataSource = function(remoteSource: TwoBit): TwoBitSource {
     if (span > MAX_BASE_PAIRS_TO_FETCH) {
       return Q.when();  // empty promise
     }
+
+    var oldRange = range;
+    range = expandRange(range);
+    console.log('expanded ', oldRange, ' to ', range);
 
     console.log(`Fetching ${span} base pairs`);
     return remoteSource.getFeaturesInRange(range.contig, range.start, range.stop)
@@ -76,7 +98,7 @@ var createTwoBitDataSource = function(remoteSource: TwoBit): TwoBitSource {
     if (span > MAX_BASE_PAIRS_TO_FETCH) {
       return {};
     }
-    return _.chain(_.range(range.start, range.stop))
+    return _.chain(_.range(range.start, range.stop + 1))
         .map(x => [range.contig + ':' + x, getBasePair(range.contig, x)])
         .object()
         .value();
@@ -97,7 +119,11 @@ var createTwoBitDataSource = function(remoteSource: TwoBit): TwoBitSource {
       }).done();
     },
     getRange: getRange,
-    contigList: () => contigList
+    contigList: () => contigList,
+
+    // These are here to make Flow happy.
+    on: () => {},
+    off: () => {}
   };
   _.extend(o, Events);  // Make this an event emitter
 
