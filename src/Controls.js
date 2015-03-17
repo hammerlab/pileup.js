@@ -45,9 +45,11 @@ var Controls = React.createClass({
   zoomOut: function() {
     this.zoomByFactor(2.0);
   },
-  zoomByFactor: function(factor) {
-    var r = this.props.range,
-        span = r.stop - r.start,
+  zoomByFactor: function(factor: number) {
+    var r = this.props.range;
+    if (!r) return;
+
+    var span = r.stop - r.start,
         center = r.start + span / 2,
         newSpan = factor * span;
     this.props.onChange({

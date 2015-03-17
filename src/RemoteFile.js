@@ -33,7 +33,8 @@ class RemoteFile {
     for (var i = 0; i < this.chunks.length; i++) {
       var chunk = this.chunks[i];
       if (chunk.start <= start && chunk.stop >= stop) {
-        return Q(chunk.buffer.slice(start - chunk.start, stop - chunk.start));
+        return Q.when(
+            chunk.buffer.slice(start - chunk.start, stop - chunk.start + 1));
       }
     }
 

@@ -31,8 +31,18 @@ var EXPANSION_FACTOR = 2.0;
 
 var MAX_BASE_PAIRS_TO_FETCH = 10000;
 
+
+// Flow type for export.
+type TwoBitSource = {
+  rangeChanged: (newRange: GenomeRange) => void;
+  needContigs: () => void;
+  getRange: (range: GenomeRange) => ?{[key:string]: string};
+  contigList: () => string[];
+}
+
+
 // TODO: make the return type more precise
-var createTwoBitDataSource = function(remoteSource: TwoBit): any {
+var createTwoBitDataSource = function(remoteSource: TwoBit): TwoBitSource {
   // Local cache of genomic data.
   var contigList = [];
   var basePairs = {};  // contig -> locus -> letter
@@ -47,7 +57,7 @@ var createTwoBitDataSource = function(remoteSource: TwoBit): any {
   function fetch(range: GenomeRange) {
     var span = range.stop - range.start;
     if (span > MAX_BASE_PAIRS_TO_FETCH) {
-      return Q();  // empty promise
+      return Q.when();  // empty promise
     }
 
     console.log(`Fetching ${span} base pairs`);

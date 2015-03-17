@@ -18,12 +18,12 @@ var Root = React.createClass({
     referenceSource: React.PropTypes.object.isRequired,
     geneSource: React.PropTypes.object.isRequired
   },
-  getInitialState: function(): any {
+  getInitialState: function() {
     return {
-      contigList: [],
-      range: null,
-      basePairs: null,
-      genes: []
+      contigList: ([]: string[]),
+      range: (null: ?GenomeRange),
+      basePairs: (null: any),
+      genes: ([]: Array<any>)  // TODO import Gene type
     }
   },
   componentDidMount: function() {

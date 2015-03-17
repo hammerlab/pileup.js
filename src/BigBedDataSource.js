@@ -55,7 +55,7 @@ function createBigBedDataSource(remoteSource: BigBed) {
     }
   }
 
-  function getGenesInRange(range: ContigInterval) {
+  function getGenesInRange(range: ContigInterval): Gene[] {
     if (!range) return [];
     return genes.filter(gene => range.intersects(gene.position));
   }
