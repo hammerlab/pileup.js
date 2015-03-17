@@ -86,6 +86,11 @@ var NonEmptyGenomeTrack = React.createClass({
     var g = svg.append('g')
                .call(drag);
 
+    g.append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('class', 'background');
+
     this.updateVisualization();
   },
   getScale: function() {
@@ -131,6 +136,7 @@ var NonEmptyGenomeTrack = React.createClass({
 
     svg.attr('width', width)
        .attr('height', height);
+    svg.select('rect').attr({width, height});
 
     var g = svg.select('g');
 
