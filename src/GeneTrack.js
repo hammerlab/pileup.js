@@ -33,7 +33,32 @@ var NonEmptyGeneTrack = React.createClass({
         svg = d3.select(div)
                 .append('svg');
 
-    var g = svg.append('g');
+    var defs = svg.append('defs')
+
+    defs
+        .append('pattern')
+          .attr('id', 'antisense')
+          .attr('patternUnits', 'userSpaceOnUse')
+          .attr('width', 30)
+          .attr('height', 9)
+          .attr('x', 0)
+          .attr('y', -4)
+          .append('path')
+            .attr('d', 'M4,0 L0,4 L4,8')
+            .attr('fill', 'none')
+            .attr('stroke-width', 1);
+    defs
+        .append('pattern')
+          .attr('id', 'sense')
+          .attr('patternUnits', 'userSpaceOnUse')
+          .attr('width', 30)
+          .attr('height', 9)
+          .attr('x', 0)
+          .attr('y', -4)
+          .append('path')
+            .attr('d', 'M0,0 L4,4 L0,8')
+            .attr('fill', 'none')
+            .attr('stroke-width', 1);
 
     this.updateVisualization();
   },
@@ -73,36 +98,55 @@ var NonEmptyGeneTrack = React.createClass({
     svg.attr('width', width)
        .attr('height', height);
 
-    var g = svg.select('g');
-
-    var genes = g.selectAll('g.gene')
+    var genes = svg.selectAll('g.gene')
        .data(this.props.genes, gene => gene.id);
 
     // Enter
     var geneGs = genes.enter()
         .append('g')
         .attr('class', 'gene');
-    geneGs.append('line');
     geneGs.append('text');
+    var geneLineG = geneGs.append('g').attr('class', 'track');
+    geneLineG.append('line');
+    geneLineG.append('rect');
 
     // The gene name goes in the center of the gene, modulo boundary effects.
     var textCenterX = g => {
       var p = g.position;
       return 0.5 * (clampedScale(p.start()) + clampedScale(p.stop()));
     };
+    var scaledWidth = g => scale(g.position.stop()) - scale(g.position.start());
+
+    var geneLineY = height / 4;
 
     // Enter & update
-    genes
-        .selectAll('line')
-        .attr('x1', g => scale(g.position.start()))
-        .attr('x2', g => scale(g.position.stop()))
-        .attr('y1', height / 4)
-        .attr('y2', height / 4);
+    var track = genes.selectAll('g.track')
+        .attr('transform',
+              g => `translate(${scale(g.position.start())} ${geneLineY})`);
 
     genes.selectAll('text')
-        .attr('x', textCenterX)
-        .attr('y', height / 4 + 15)
+        .attr({
+          'x': textCenterX,
+          'y': geneLineY + 15
+        })
         .text(g => g.name || g.id);
+
+    track.selectAll('line').attr({
+      'x1': 0,
+      'x2': scaledWidth,
+      'y1': 0,
+      'y2': 0
+    });
+
+    track.selectAll('rect')
+        .attr({
+          'y': -4,
+          'height': 9,
+          'x': 0,
+          'width': scaledWidth,
+          'fill': g => `url(#${g.strand == '+' ? '' : 'anti'}sense)`,
+          'stroke': 'none'
+        });
 
     // Exit
     genes.exit().remove();
