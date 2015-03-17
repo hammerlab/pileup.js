@@ -108,7 +108,15 @@ var NonEmptyGeneTrack = React.createClass({
     geneGs.append('text');
     var geneLineG = geneGs.append('g').attr('class', 'track');
     geneLineG.append('line');
-    geneLineG.append('rect');
+    geneLineG.append('rect').attr('class', 'strand');
+
+    geneLineG.selectAll('rect.exon')
+      .data(g => g.exons.map(function(x) {
+        return [x.start, x.stop, g.position.start()]
+      }))
+      .enter()
+      .append('rect')
+        .attr('class', 'exon')
 
     // The gene name goes in the center of the gene, modulo boundary effects.
     var textCenterX = g => {
@@ -138,7 +146,7 @@ var NonEmptyGeneTrack = React.createClass({
       'y2': 0
     });
 
-    track.selectAll('rect')
+    track.selectAll('rect.strand')
         .attr({
           'y': -4,
           'height': 9,
@@ -147,6 +155,18 @@ var NonEmptyGeneTrack = React.createClass({
           'fill': g => `url(#${g.strand == '+' ? '' : 'anti'}sense)`,
           'stroke': 'none'
         });
+
+    track.selectAll('rect.exon')
+        .attr({
+          'x': function([start, stop, gStart]) {
+            return scale(start) - scale(0);
+          },
+          'y': -3,
+          'height': 6,
+          'width': function([start, stop]) {
+            return scale(stop) - scale(start);
+          }
+        })
 
     // Exit
     genes.exit().remove();
