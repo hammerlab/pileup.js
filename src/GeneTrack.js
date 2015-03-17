@@ -63,26 +63,46 @@ var NonEmptyGeneTrack = React.createClass({
         height = div.offsetHeight,
         svg = d3.select(div).select('svg');
 
-    var scale = this.getScale();
+    var scale = this.getScale(),
+        // We can't clamp scale directly because of offsetPx.
+        clampedScale = d3.scale.linear()
+            .domain([scale.invert(0), scale.invert(width)])
+            .range([0, width])
+            .clamp(true);
 
     svg.attr('width', width)
        .attr('height', height);
 
     var g = svg.select('g');
 
-    var genes = g.selectAll('line')
+    var genes = g.selectAll('g.gene')
        .data(this.props.genes, gene => gene.id);
 
     // Enter
-    genes.enter().append('line');
+    var geneGs = genes.enter()
+        .append('g')
+        .attr('class', 'gene');
+    geneGs.append('line');
+    geneGs.append('text');
+
+    // The gene name goes in the center of the gene, modulo boundary effects.
+    var textCenterX = g => {
+      var p = g.position;
+      return 0.5 * (clampedScale(p.start()) + clampedScale(p.stop()));
+    };
 
     // Enter & update
     genes
+        .selectAll('line')
         .attr('x1', g => scale(g.position.start()))
         .attr('x2', g => scale(g.position.stop()))
-        .attr('y1', height / 2)
-        .attr('y2', height / 2)
-        .attr('class', 'gene');
+        .attr('y1', height / 4)
+        .attr('y2', height / 4);
+
+    genes.selectAll('text')
+        .attr('x', textCenterX)
+        .attr('y', height / 4 + 15)
+        .text(g => g.name || g.id);
 
     // Exit
     genes.exit().remove();
