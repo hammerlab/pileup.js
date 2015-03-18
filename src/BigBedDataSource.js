@@ -12,7 +12,7 @@ var ContigInterval = require('./ContigInterval'),
 
 
 type Gene = {
-  position: ContigInterval;
+  position: ContigInterval<string>;
   id: string;  // transcript ID, e.g. "ENST00000269305"
   strand: string;  // '+' or '-'
   codingRegion: Interval;  // locus of coding start
@@ -39,7 +39,7 @@ declare class BigBed {
 // Flow type for export.
 type BigBedSource = {
   rangeChanged: (newRange: GenomeRange) => void;
-  getGenesInRange: (range: ContigInterval) => Gene[];
+  getGenesInRange: (range: ContigInterval<string>) => Gene[];
   on: (event: string, handler: Function) => void;
   off: (event: string) => void;
   trigger: (event: string, ...args:any) => void;
@@ -79,7 +79,7 @@ function createBigBedDataSource(remoteSource: BigBed): BigBedSource {
     }
   }
 
-  function getGenesInRange(range: ContigInterval): Gene[] {
+  function getGenesInRange(range: ContigInterval<string>): Gene[] {
     if (!range) return [];
     return genes.filter(gene => range.intersects(gene.position));
   }
