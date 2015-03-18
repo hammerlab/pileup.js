@@ -1,6 +1,7 @@
 [ignore]
 .*node_modules/flow-bin.*
 .*node_modules/jsxhint.*
+.*node_modules/.*mocha.*
 .*build.*
 
 [include]

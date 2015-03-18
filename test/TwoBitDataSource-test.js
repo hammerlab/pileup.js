@@ -52,7 +52,7 @@ describe('TwoBitDataSource', function() {
         source = createTwoBitDataSource(tb);
 
     source.on('newdata', () => {
-      expect(source.getRange({contig: 'chr22', start: 1, stop: 18}))
+      expect(source.getRange({contig: 'chr22', start: 1, stop: 15}))
           .to.deep.equal({
             'chr22:1':  'N',
             'chr22:2':  'T',
@@ -68,10 +68,7 @@ describe('TwoBitDataSource', function() {
             'chr22:12': 'C',
             'chr22:13': 'C',
             'chr22:14': 'A',
-            'chr22:15': 'T',  // 5 past end of request
-            'chr22:16': null,
-            'chr22:17': null,
-            'chr22:18': null
+            'chr22:15': 'T',
           });
       done();
     });
