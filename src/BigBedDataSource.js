@@ -1,23 +1,47 @@
+/* @flow */
 'use strict';
 
 var Events = require('backbone').Events,
-    _ = require('underscore');
+    _ = require('underscore'),
+    Q = require('q');
 
 
 var ContigInterval = require('./ContigInterval'),
     Interval = require('./Interval');
 
 
-// TODO: move this into BigBed.js
+
 type Gene = {
   position: ContigInterval;
   id: string;  // transcript ID, e.g. "ENST00000269305"
   strand: string;  // '+' or '-'
-  codingStart: number;  // locus of coding start
-  codingStop: number;
+  codingRegion: Interval;  // locus of coding start
   exons: Array<Interval>;
   geneId: string;  // ensembl gene ID
   name: string;  // human-readable name, e.g. "TP53"
+}
+
+// TODO: move this into BigBed.js and get it to type check.
+type BedRow = {
+  // Half-open interval for the BED row.
+  contig: string;
+  start: number;
+  stop: number;
+  // Remaining fields in the BED row (typically tab-delimited)
+  rest: string;
+}
+
+declare class BigBed {
+  getFeaturesInRange: (contig: string, start: number, stop: number) => Q.Promise<Array<BedRow>>;
+}
+
+
+// Flow type for export.
+type BigBedSource = {
+  rangeChanged: (newRange: GenomeRange) => void;
+  getGenesInRange: (range: ContigInterval) => Gene[];
+  on: (event: string, handler: Function) => void;
+  off: (event: string) => void;
 }
 
 // The fields are described at http://genome.ucsc.edu/FAQ/FAQformat#format1
@@ -28,15 +52,14 @@ function parseBedFeature(f): Gene {
       exonStarts = x[8].split(',').map(Number),
       exons = _.zip(exonStarts, exonLengths)
                .map(function([start, length]) {
-                 return new Interval(start, start + length);
+                 return new Interval(f.start + start, f.start + start + length);
                });
 
   return {
     position,
     id: x[0],  // e.g. ENST00000359597
     strand: x[2],  // either + or -
-    codingStart: Number(x[3]),
-    codingStop: Number(x[4]),
+    codingRegion: new Interval(Number(x[3]), Number(x[4])),
     geneId: x[9],
     name: x[10],
     exons
@@ -44,7 +67,7 @@ function parseBedFeature(f): Gene {
 }
 
 
-function createBigBedDataSource(remoteSource: BigBed) {
+function createBigBedDataSource(remoteSource: BigBed): BigBedSource {
   // Collection of genes that have already been loaded.
   var genes: Array<Gene> = [];
   window.genes = genes;
@@ -75,7 +98,11 @@ function createBigBedDataSource(remoteSource: BigBed) {
           .then(() => o.trigger('newdata', newRange))
           .done();
     },
-    getGenesInRange
+    getGenesInRange,
+
+    // These are here to make Flow happy.
+    on: () => {},
+    off: () => {}
   };
   _.extend(o, Events);  // Make this an event emitter
 
