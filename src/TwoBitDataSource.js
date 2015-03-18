@@ -40,6 +40,7 @@ type TwoBitSource = {
   contigList: () => string[];
   on: (event: string, handler: Function) => void;
   off: (event: string) => void;
+  trigger: (event: string, ...args:any) => void;
 }
 
 // Expand range by EXPANSION_FACTOR, allowing for boundary effects and
@@ -75,7 +76,7 @@ var createTwoBitDataSource = function(remoteSource: TwoBit): TwoBitSource {
   function fetch(range: GenomeRange) {
     var span = range.stop - range.start;
     if (span > MAX_BASE_PAIRS_TO_FETCH) {
-      return Q.when();  // empty promise
+      return Q.when(null);  // empty promise
     }
 
     var oldRange = range;
@@ -123,7 +124,8 @@ var createTwoBitDataSource = function(remoteSource: TwoBit): TwoBitSource {
 
     // These are here to make Flow happy.
     on: () => {},
-    off: () => {}
+    off: () => {},
+    trigger: () => {}
   };
   _.extend(o, Events);  // Make this an event emitter
 

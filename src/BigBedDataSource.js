@@ -42,6 +42,7 @@ type BigBedSource = {
   getGenesInRange: (range: ContigInterval) => Gene[];
   on: (event: string, handler: Function) => void;
   off: (event: string) => void;
+  trigger: (event: string, ...args:any) => void;
 }
 
 // The fields are described at http://genome.ucsc.edu/FAQ/FAQformat#format1
@@ -102,7 +103,8 @@ function createBigBedDataSource(remoteSource: BigBed): BigBedSource {
 
     // These are here to make Flow happy.
     on: () => {},
-    off: () => {}
+    off: () => {},
+    trigger: () => {}
   };
   _.extend(o, Events);  // Make this an event emitter
 

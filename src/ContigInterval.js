@@ -8,11 +8,11 @@ var Interval = require('./Interval');
  * The contig may be either a string ("chr22") or a number (in case the contigs
  * are indexed, for example).
  */
-class ContigInterval {
-  contig: string|number;
+class ContigInterval<T: (number|string)> {
+  contig: T;
   interval: Interval;
 
-  constructor(contig: string|number, start: number, stop: number) {
+  constructor(contig: T, start: number, stop: number) {
     this.contig = contig;
     this.interval = new Interval(start, stop);
   }
@@ -28,7 +28,7 @@ class ContigInterval {
     return this.interval.length();
   }
 
-  intersects(other: ContigInterval): boolean {
+  intersects(other: ContigInterval<T>): boolean {
     return (this.contig === other.contig &&
             this.interval.intersects(other.interval));
   }
