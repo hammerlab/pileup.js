@@ -54,8 +54,9 @@ type BigBedSource = {
 function parseBedFeature(f): Gene {
   var position = new ContigInterval(f.contig, f.start, f.stop),
       x = f.rest.split('\t'),
-      exonLengths = x[7].split(',').map(Number),
-      exonStarts = x[8].split(',').map(Number),
+      // exons arrays sometimes have trailing commas
+      exonLengths = x[7].replace(/,*$/, '').split(',').map(Number),
+      exonStarts = x[8].replace(/,*$/, '').split(',').map(Number),
       exons = _.zip(exonStarts, exonLengths)
                .map(function([start, length]) {
                  return new Interval(f.start + start, f.start + start + length);
@@ -76,7 +77,6 @@ function parseBedFeature(f): Gene {
 function createBigBedDataSource(remoteSource: BigBed): BigBedSource {
   // Collection of genes that have already been loaded.
   var genes: Array<Gene> = [];
-  window.genes = genes;
 
   // Ranges for which we have complete information -- no need to hit network.
   var coveredRanges: Array<ContigInterval<string>> = []
