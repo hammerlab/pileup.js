@@ -17,14 +17,8 @@ describe('BigBedDataSource', function() {
     return createBigBedDataSource(new BigBed('/test/data/ensembl.chr17.bb'));
   }
 
-  // Shorthand
-  function ci(contig, start, stop) {
-    return new ContigInterval(contig, start, stop);
-  }
-
   it('should extract features in a range', function(done) {
     this.timeout(5000);
-    console.time('extract');
     var source = getTestSource();
 
     // No genes fetched initially
@@ -34,7 +28,6 @@ describe('BigBedDataSource', function() {
 
     // Fetching that one gene should cache its entire block.
     source.on('newdata', () => {
-      console.timeEnd('extract');
       var tp53s = source.getGenesInRange(tp53range);
       expect(tp53s).to.have.length(1);
 
@@ -43,6 +36,10 @@ describe('BigBedDataSource', function() {
       expect(tp53.exons).to.have.length(11);
       done();
     });
-    source.rangeChanged(tp53range);
+    source.rangeChanged({
+      contig: tp53range.contig,
+      start: tp53range.start(),
+      stop: tp53range.stop()
+    });
   });
 });

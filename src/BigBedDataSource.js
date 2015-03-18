@@ -76,20 +76,26 @@ function parseBedFeature(f): Gene {
 
 function createBigBedDataSource(remoteSource: BigBed): BigBedSource {
   // Collection of genes that have already been loaded.
-  var genes: Array<Gene> = [];
+  var genes: {[key:string]: Gene} = {};
 
   // Ranges for which we have complete information -- no need to hit network.
   var coveredRanges: Array<ContigInterval<string>> = []
 
   function addGene(newGene) {
-    if (!_.findWhere(genes, {id: newGene.id})) {
-      genes.push(newGene);
+    if (!genes[newGene.id]) {
+      genes[newGene.id] = newGene;
     }
   }
 
   function getGenesInRange(range: ContigInterval<string>): Gene[] {
     if (!range) return [];
-    return genes.filter(gene => range.intersects(gene.position));
+    var results = [];
+    _.each(genes, gene => {
+      if (range.intersects(gene.position)) {
+        results.push(gene);
+      }
+    });
+    return results;
   }
 
   function fetch(range: GenomeRange) {
