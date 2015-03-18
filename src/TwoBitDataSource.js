@@ -22,12 +22,14 @@ var Events = require('backbone').Events,
     _ = require('underscore');
 
 // TODO: make this an "import type" when react-tools 0.13.0 is out.
-var TwoBit = require('./TwoBit');
+var TwoBit = require('./TwoBit'),
+    ContigInterval = require('./ContigInterval');
 
-// Factor by which to over-request data from the network.
-// If a range of 100bp is shown and this is 2.0, then 300 base pairs will be
-// requested over the network (100 * 2.0 too much)
-var EXPANSION_FACTOR = 2.0;
+
+// Requests for 2bit ranges are expanded to begin & end at multiples of this
+// constant. Doing this means that panning typically won't require
+// additional network requests.
+var BASE_PAIRS_PER_FETCH = 1000;
 
 var MAX_BASE_PAIRS_TO_FETCH = 10000;
 
@@ -44,19 +46,13 @@ type TwoBitSource = {
 }
 
 // Expand range by EXPANSION_FACTOR, allowing for boundary effects and
-// respecting MAX_BASE_PAIRS_TO_FETCH.
+// respecting MAX_BASE_PAIRS_TO_FETCH. 
 function expandRange(range) {
-  var span = range.stop - range.start,
-      center = range.start + span / 2,
-      newSpan = Math.min(MAX_BASE_PAIRS_TO_FETCH, (1 + EXPANSION_FACTOR) * span),
-      newStart = Math.max(1, Math.floor(center - newSpan / 2)),
-      newStop = Math.ceil(center + newSpan / 2);
+  var roundDown = x => x - x % BASE_PAIRS_PER_FETCH;
+  var newStart = Math.max(1, roundDown(range.start())),
+      newStop = roundDown(range.stop() + BASE_PAIRS_PER_FETCH - 1)
 
-  return {
-    contig: range.contig,
-    start: newStart,
-    stop: newStop
-  }
+  return new ContigInterval(range.contig, newStart, newStop);
 }
 
 
@@ -72,22 +68,31 @@ var createTwoBitDataSource = function(remoteSource: TwoBit): TwoBitSource {
     if (!basePairs[contig]) basePairs[contig] = {};
     basePairs[contig][position] = letter;
   }
+  // Are all base pairs in the interval known? If so, no need to fetch.
+  function isEntirelyKnown(interval: ContigInterval<string>) {
+    for (var i = interval.start(); i <= interval.stop(); i++) {
+      if (getBasePair(interval.contig, i) === null) return false;
+    }
+    return true;
+  }
 
-  function fetch(range: GenomeRange) {
-    var span = range.stop - range.start;
+  function fetch(range: ContigInterval) {
+    var span = range.stop() - range.start();
     if (span > MAX_BASE_PAIRS_TO_FETCH) {
-      return Q.when(null);  // empty promise
+      return Q.when();  // empty promise
+    }
+    if (isEntirelyKnown(range)) {
+      console.log('skipping TwoBit.js');
+      return Q.when();
     }
 
-    var oldRange = range;
     range = expandRange(range);
-    console.log('expanded ', oldRange, ' to ', range);
 
     console.log(`Fetching ${span} base pairs`);
-    return remoteSource.getFeaturesInRange(range.contig, range.start, range.stop)
+    return remoteSource.getFeaturesInRange(range.contig, range.start(), range.stop())
         .then(letters => {
           for (var i = 0; i < letters.length; i++) {
-            setBasePair(range.contig, range.start + i, letters[i]);
+            setBasePair(range.contig, range.start() + i, letters[i]);
           }
         });
   }
@@ -108,9 +113,10 @@ var createTwoBitDataSource = function(remoteSource: TwoBit): TwoBitSource {
   var o = {
     rangeChanged: function(newRange: GenomeRange) {
       // Range has changed! Fetch new data.
-      // TODO: only fetch it if it isn't cached already.
-      fetch(newRange)
-          .then(() => o.trigger('newdata', newRange))
+      var range = new ContigInterval(newRange.contig, newRange.start, newRange.stop);
+
+      fetch(range)
+          .then(() => o.trigger('newdata', range))
           .done();
     },
     needContigs: () => {

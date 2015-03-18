@@ -41,6 +41,7 @@ class RemoteFile {
     // TODO: handle partial overlap of request w/ cache.
 
     // Need to fetch from the network.
+    console.log('fetching from network: ', start, '+', length); 
     return this.getFromNetwork(start, stop);
   }
 
