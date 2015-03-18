@@ -43,7 +43,7 @@
     "mocha": "^2.1.0",
     "mocha-lcov-reporter": ">=0.0.2",
     "parse-data-uri": "^0.2.0",
-    "react-tools": "^0.12.2",
+    "react-tools": "^0.13.1",
     "reactify": "^1.0.0",
     "sinon": "^1.12.2",
     "source-map": "^0.3.0"

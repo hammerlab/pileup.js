@@ -39,6 +39,25 @@ var Controls = React.createClass({
       this.refs.contig.getDOMNode().selectedIndex = contigIdx;
     }
   },
+  zoomIn: function() {
+    this.zoomByFactor(0.5);
+  },
+  zoomOut: function() {
+    this.zoomByFactor(2.0);
+  },
+  zoomByFactor: function(factor: number) {
+    var r = this.props.range;
+    if (!r) return;
+
+    var span = r.stop - r.start,
+        center = r.start + span / 2,
+        newSpan = factor * span;
+    this.props.onChange({
+      contig: r.contig,
+      start: Math.max(0, center - newSpan / 2),
+      stop: center + newSpan / 2  // TODO: clamp
+    });
+  },
   render: function(): any {
     var contigOptions = this.props.contigList
         ? this.props.contigList.map((contig, i) => <option key={i}>{contig}</option>)
@@ -54,6 +73,9 @@ var Controls = React.createClass({
         <input ref='start' type='text' />
         <input ref='stop' type='text' />
         <button>Go</button>
+
+        <button onClick={this.zoomOut}>-</button>
+        <button onClick={this.zoomIn}>+</button>
       </form>
     );
   },

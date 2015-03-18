@@ -32,6 +32,10 @@ class Interval {
     return value >= this.start && value <= this.stop;
   }
 
+  containsInterval(other: Interval): boolean {
+    return this.contains(other.start) && this.contains(other.stop);
+  }
+
   clone(): Interval {
     return new Interval(this.start, this.stop);
   }

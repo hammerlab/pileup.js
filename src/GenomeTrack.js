@@ -8,6 +8,9 @@ var React = require('react/addons'),
     d3 = require('d3'),
     types = require('./types');
 
+var MIN_PX_PER_LETTER = 6;  // hide individual base pairs at this resolution.
+
+
 var GenomeTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange,
@@ -17,10 +20,6 @@ var GenomeTrack = React.createClass({
   render: function(): any {
     var range = this.props.range;
     if (!range) {
-      return <EmptyTrack />;
-    }
-    var rangeLength = range.limit - range.start;
-    if (rangeLength > 200) {
       return <EmptyTrack />;
     }
 
@@ -87,6 +86,11 @@ var NonEmptyGenomeTrack = React.createClass({
     var g = svg.append('g')
                .call(drag);
 
+    g.append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('class', 'background');
+
     this.updateVisualization();
   },
   getScale: function() {
@@ -116,16 +120,23 @@ var NonEmptyGenomeTrack = React.createClass({
         svg = d3.select(div).select('svg');
 
     var scale = this.getScale();
+    var pxPerLetter = scale(1) - scale(0);
 
     var contigColon = this.props.range.contig + ':';
-    var absBasePairs = _.range(range.start - 1, range.stop + 1)
-        .map(locus => ({
-          position: locus,
-          letter: this.props.basePairs[contigColon + locus]
-        }));
+    var absBasePairs;
+    if (pxPerLetter > MIN_PX_PER_LETTER) {
+      absBasePairs = _.range(range.start - 1, range.stop + 1)
+          .map(locus => ({
+            position: locus,
+            letter: this.props.basePairs[contigColon + locus]
+          }));
+    } else {
+      absBasePairs = [];  // TODO: show a "zoom out" message.
+    }
 
     svg.attr('width', width)
        .attr('height', height);
+    svg.select('rect').attr({width, height});
 
     var g = svg.select('g');
 
