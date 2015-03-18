@@ -4,6 +4,7 @@ var assert = chai.assert;
 
 var Q = require('q');
 var BigBed = require('../src/BigBed');
+var ContigInterval = require('../src/ContigInterval');
 
 describe('BigBed', function() {
   function getTestBigBed() {
@@ -115,6 +116,21 @@ describe('BigBed', function() {
       done();
     })
     .done();
+  });
+
+  it('should fetch full blocks', function(done) {
+    var bb = getTestBigBed();
+
+    bb.getFeatureBlocksOverlapping(new ContigInterval('X', 151077036, 151078532))
+        .then(blockFeatures => {
+          expect(blockFeatures).to.have.length(1);  // just one block fetched.
+          var range = blockFeatures[0].range,
+              rows = blockFeatures[0].rows;
+          expect(rows).to.have.length(21);  // all the chrX features.
+          expect(range.toString()).to.equal('chrX:151071196-151095703');
+          done();
+        })
+        .done();
   });
 
   // Things left to test:
