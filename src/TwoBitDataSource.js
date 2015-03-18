@@ -82,7 +82,6 @@ var createTwoBitDataSource = function(remoteSource: TwoBit): TwoBitSource {
       return Q.when();  // empty promise
     }
     if (isEntirelyKnown(range)) {
-      console.log('skipping TwoBit.js');
       return Q.when();
     }
 

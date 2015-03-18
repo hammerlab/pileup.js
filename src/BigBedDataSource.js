@@ -30,9 +30,14 @@ type BedRow = {
   // Remaining fields in the BED row (typically tab-delimited)
   rest: string;
 }
+type BedBlock = {
+  range: ContigInterval<string>;
+  rows: BedRow[];
+}
 
 declare class BigBed {
   getFeaturesInRange: (contig: string, start: number, stop: number) => Q.Promise<Array<BedRow>>;
+  getFeatureBlocksOverlapping(range: ContigInterval): Q.Promise<Array<BedBlock>>;
 }
 
 
@@ -73,6 +78,9 @@ function createBigBedDataSource(remoteSource: BigBed): BigBedSource {
   var genes: Array<Gene> = [];
   window.genes = genes;
 
+  // Ranges for which we have complete information -- no need to hit network.
+  var coveredRanges: Array<ContigInterval<string>> = []
+
   function addGene(newGene) {
     if (!_.findWhere(genes, {id: newGene.id})) {
       genes.push(newGene);
@@ -85,12 +93,20 @@ function createBigBedDataSource(remoteSource: BigBed): BigBedSource {
   }
 
   function fetch(range: GenomeRange) {
-    // TODO: add an API for requesting the entire block of genes.
-    return remoteSource.getFeaturesInRange(range.contig, range.start, range.stop)
-        .then(features => {
-          var genes = features.map(parseBedFeature);
-          genes.forEach(gene => addGene(gene));
-        });
+    var interval = new ContigInterval(range.contig, range.start, range.stop);
+
+    // Check if this interval is already in the cache.
+    if (_.any(coveredRanges, r => r.intersects(interval))) {
+      return Q.when();
+    }
+
+    return remoteSource.getFeatureBlocksOverlapping(interval).then(featureBlocks => {
+      featureBlocks.forEach(fb => {
+        coveredRanges.push(fb.range);
+        var genes = fb.rows.map(parseBedFeature);
+        genes.forEach(gene => addGene(gene));
+      });
+    });
   }
 
   var o = {

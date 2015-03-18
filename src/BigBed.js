@@ -173,7 +173,7 @@ type BedRow = {
 
 // All features found in range.
 type BedBlock = {
-  range: ContigRange<string>;
+  range: ContigInterval<string>;
   rows: BedRow[];
 }
 
@@ -235,7 +235,7 @@ class BigBed {
    * Because these features must all be fetched, decompressed and parsed
    * anyway, this can be helpful for upstream caching.
    */
-  getFeatureBlocksOverlapping(range: ContigRange): Q.Promise<Array<BedBlock>> {
+  getFeatureBlocksOverlapping(range: ContigInterval<string>): Q.Promise<Array<BedBlock>> {
     return Q.spread([this.header, this.cirTree, this.contigMap],
                     (header, cirTree, contigMap) => {
       var contigIx = getContigId(contigMap, range.contig);

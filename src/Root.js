@@ -38,8 +38,8 @@ var Root = React.createClass({
       // this is here to facilitate faster iteration
       this.handleRangeChange({
         contig: 'chr17',
-        start: 100,
-        stop: 150
+        start: 7512444,
+        stop: 7512484
       });
     });
 
