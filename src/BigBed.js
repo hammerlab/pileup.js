@@ -1,7 +1,7 @@
 /**
  * Parser for bigBed format.
  * Based on UCSC's src/inc/bbiFile.h
- * @flow weak
+ * @flow
  */
 'use strict';
 
@@ -47,7 +47,7 @@ function generateContigMap(twoBitHeader): {[key:string]: number} {
 // Generate the reverse map from contig ID --> contig name.
 function reverseContigMap(contigMap: {[key:string]: number}): Array<string> {
   var ary = [];
-  _.forEach(contigMap, (index, name) => {
+  _.each(contigMap, (index, name) => {
     ary[index] = name;
   });
   return ary;
@@ -104,7 +104,7 @@ class ImmediateBigBed {
   contigMap: {[key:string]: number};
   chrIdToContig: string[];
 
-  constructor(remoteFile, header, cirTree, contigMap) {
+  constructor(remoteFile, header, cirTree, contigMap: {[key:string]: number}) {
     this.remoteFile = remoteFile;
     this.header = header;
     this.cirTree = cirTree;
@@ -257,10 +257,10 @@ class BigBed {
       return this.remoteFile.getBytes(start, length).then(parseCirTree);
     });
 
-    this.immediate = Q.spread(
-        [this.header, this.cirTree, this.contigMap],
-        (header, cirTree, contigMap) => {
-          return new ImmediateBigBed(this.remoteFile, header, cirTree, contigMap);
+    this.immediate = Q.all([this.header, this.cirTree, this.contigMap])
+        .then(([header, cirTree, contigMap]) => {
+          var cm: {[key:string]: number} = contigMap;
+          return new ImmediateBigBed(this.remoteFile, header, cirTree, cm);
         });
 
     // Bubble up errors
