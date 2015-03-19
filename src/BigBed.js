@@ -54,7 +54,7 @@ function reverseContigMap(contigMap: {[key:string]: number}): Array<string> {
 }
 
 
-function extractFeaturesFromBlock(buffer, dataRange, block) {
+function extractFeaturesFromBlock(buffer, dataRange, block): ChrIdBedRow[] {
   var blockOffset = block.offset - dataRange.start,
       blockLimit = blockOffset + block.size,
       // TODO: where does the +2 come from? (I copied it from dalliance)
@@ -77,12 +77,23 @@ type BedRow = {
   rest: string;
 }
 
+type ChrIdBedRow = {
+  chrId: number;
+  start: number;
+  stop: number;  // note: not inclusive
+  rest: string;
+}
+
 // All features found in range.
 type BedBlock = {
   range: ContigInterval<string>;
   rows: BedRow[];
 }
 
+type ChrIdBedBlock = {
+  range: ContigInterval<number>;
+  rows: ChrIdBedRow[];
+}
 
 // This (internal) version of the BigBed class has no promises for headers,
 // only immediate data. This greatly simplifies writing methods on it.
@@ -102,7 +113,7 @@ class ImmediateBigBed {
   }
 
   // Map contig name to contig ID. Leading "chr" is optional. Throws on failure.
-  getContigId(contig) {
+  getContigId(contig: string): number {
     if (contig in this.contigMap) return this.contigMap[contig];
     var chr = 'chr' + contig;
     if (chr in this.contigMap) return this.contigMap[chr];
@@ -114,14 +125,19 @@ class ImmediateBigBed {
         this.getContigId(range.contig), range.start(), range.stop());
   }
 
-  // bed entries have a chromosome ID. This converts that to a contig string.
-  // Note: modifies beds in-place.
-  attachContigToBedRows(beds) {
-    beds.forEach(bed => {
-      bed.contig = this.chrIdToContig[bed.chrId];
-      delete bed.chrId;
-    });
-    return beds;
+  getContigInterval(range: ContigInterval<number>): ContigInterval<string> {
+    return new ContigInterval(
+        this.chrIdToContig[range.contig], range.start(), range.stop());
+  }
+
+  // Bed entries have a chromosome ID. This converts that to a contig string.
+  attachContigToBedRows(beds: ChrIdBedRow[]): BedRow[] {
+    return beds.map(bed => ({
+      contig: this.chrIdToContig[bed.chrId],
+      start: bed.start,
+      stop: bed.stop,
+      rest: bed.rest
+    }));
   }
 
   // Find all blocks containing features which intersect with contigRange.
@@ -147,7 +163,7 @@ class ImmediateBigBed {
   }
 
   // Internal function for fetching features by block.
-  fetchFeaturesByBlock(range: ContigInterval<number>): Q.Promise<Array<BedBlock>> {
+  fetchFeaturesByBlock(range: ContigInterval<number>): Q.Promise<ChrIdBedBlock[]> {
     var blocks = this.findOverlappingBlocks(range);
     if (blocks.length == 0) {
       return Q.when([]);
@@ -177,10 +193,10 @@ class ImmediateBigBed {
   // TODO: merge this into getFeaturesInRange
   // Fetch the relevant blocks from the bigBed file and extract the features
   // which overlap the given range.
-  fetchFeatures(contigRange: ContigInterval<number>) {
+  fetchFeatures(contigRange: ContigInterval<number>): Q.Promise<BedRow[]> {
     return this.fetchFeaturesByBlock(contigRange)
         .then(bedsByBlock => {
-          var beds = _.flatten(_.pluck(bedsByBlock, 'rows'));
+          var beds = _.flatten(bedsByBlock.map(b => b.rows));
 
           beds = beds.filter(function(bed) {
             // Note: BED intervals are explicitly half-open.
@@ -193,20 +209,19 @@ class ImmediateBigBed {
         });
   }
 
-  getFeaturesInRange(range: ContigInterval<string>): Q.Promise<Array<BedRow>> {
+  getFeaturesInRange(range: ContigInterval<string>): Q.Promise<BedRow[]> {
     return this.fetchFeatures(this.getChrIdInterval(range));
   }
 
-  getFeatureBlocksOverlapping(range: ContigInterval<string>): Q.Promise<Array<BedBlock>> {
+  getFeatureBlocksOverlapping(range: ContigInterval<string>): Q.Promise<BedBlock[]> {
     var indexRange = this.getChrIdInterval(range);
     return this.fetchFeaturesByBlock(indexRange)
         .then(featureBlocks => {
           // Convert chrIds to contig strings.
-          featureBlocks.forEach(fb => {
-            fb.range.contig = this.chrIdToContig[fb.range.contig];
-            this.attachContigToBedRows(fb.rows);
-          });
-          return featureBlocks;
+          return featureBlocks.map(fb => ({
+            range: this.getContigInterval(fb.range),
+            rows: this.attachContigToBedRows(fb.rows)
+          }));
         });
   }
 
