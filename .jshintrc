@@ -1,0 +1,11 @@
+{
+  "node": true,  // allow "require", "module.exports", etc.
+  "browser": true,  // allow document, window, console, etc.
+  "lastsemic": true,  // allow missing semicolons in one-liners
+  "unused": "vars",  // unused vars are bad, but function params are OK
+  "undef": true,  // catch use before define errors
+  "globalstrict": true,  // allow module-level "use strict", which is OK with browserify.
+  "laxbreak": true,  // allow ambiguous continuation lines, e.g. "+" on next line
+  "esnext": true,  // allow ES6 features
+  "mocha": true  // allow "describe", "it" and friends
+}

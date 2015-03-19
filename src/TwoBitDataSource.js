@@ -21,9 +21,9 @@ var Events = require('backbone').Events,
     Q = require('q'),
     _ = require('underscore');
 
-// TODO: make this an "import type" when react-tools 0.13.0 is out.
-var TwoBit = require('./TwoBit'),
-    ContigInterval = require('./ContigInterval');
+var ContigInterval = require('./ContigInterval');
+
+import type * as TwoBit from './TwoBit';
 
 
 // Requests for 2bit ranges are expanded to begin & end at multiples of this
@@ -50,7 +50,7 @@ type TwoBitSource = {
 function expandRange(range) {
   var roundDown = x => x - x % BASE_PAIRS_PER_FETCH;
   var newStart = Math.max(1, roundDown(range.start())),
-      newStop = roundDown(range.stop() + BASE_PAIRS_PER_FETCH - 1)
+      newStop = roundDown(range.stop() + BASE_PAIRS_PER_FETCH - 1);
 
   return new ContigInterval(range.contig, newStart, newStop);
 }

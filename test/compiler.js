@@ -1,4 +1,6 @@
 // From http://www.hammerlab.org/2015/02/14/testing-react-web-apps-with-mocha/#jsx-transpilation
+'use strict';
+
 var fs = require('fs'),
     ReactTools = require('react-tools'),
     origJs = require.extensions['.js'];

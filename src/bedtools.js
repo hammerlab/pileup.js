@@ -1,4 +1,5 @@
 /* @flow */
+'use strict';
 
 var _ = require('underscore');
 var Interval = require('./Interval');

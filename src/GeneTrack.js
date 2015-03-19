@@ -2,6 +2,8 @@
  * Visualization of genes, including exons and coding regions.
  * @flow
  */
+'use strict';
+
 var React = require('react/addons'),
     _ = require('underscore'),
     d3 = require('d3'),
@@ -39,7 +41,7 @@ var NonEmptyGeneTrack = React.createClass({
                 .append('svg');
 
     // These define the left/right arrow patterns for sense/antisense genes.
-    var defs = svg.append('defs')
+    var defs = svg.append('defs');
     defs.append('pattern')
         .attr({
           'id': 'antisense',
@@ -95,7 +97,6 @@ var NonEmptyGeneTrack = React.createClass({
   },
   updateVisualization: function() {
     var div = this.getDOMNode(),
-        range = this.props.range,
         width = div.offsetWidth,
         height = div.offsetHeight,
         svg = d3.select(div).select('svg');
@@ -127,7 +128,7 @@ var NonEmptyGeneTrack = React.createClass({
                     .map(x => [x, g.position.start()]))
       .enter()
       .append('rect')
-        .attr('class', 'exon')
+        .attr('class', 'exon');
 
     // The gene name goes in the center of the gene, modulo boundary effects.
     var textCenterX = g => {
@@ -182,7 +183,7 @@ var NonEmptyGeneTrack = React.createClass({
 
 var EmptyTrack = React.createClass({
   render: function() {
-    return <div className="genes empty">Zoom in to see genes</div>
+    return <div className="genes empty">Zoom in to see genes</div>;
   }
 });
 

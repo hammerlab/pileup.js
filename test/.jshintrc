@@ -1,0 +1,5 @@
+{
+  "extends": "../.jshintrc",
+
+  "expr": true  // chai assertions look like expressions to jshint
+}

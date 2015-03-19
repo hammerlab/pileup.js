@@ -52,7 +52,10 @@ module.exports = function(grunt) {
             "reactify",
             {
               harmony: true,
-              stripTypes: true
+              stripTypes: true,
+              reactOptions: {
+                nonStrictEs6module: true
+              }
             }
           ]
         ],

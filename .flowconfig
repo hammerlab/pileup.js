@@ -2,6 +2,7 @@
 .*node_modules/flow-bin.*
 .*node_modules/jsxhint.*
 .*node_modules/.*mocha.*
+.*node_modules/reactify.*
 .*build.*
 
 [include]

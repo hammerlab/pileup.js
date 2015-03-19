@@ -2,6 +2,7 @@
  * Controls for zooming to particular ranges of the genome.
  * @flow
  */
+'use strict';
 
 var React = require('react'),
     types = require('./types'),

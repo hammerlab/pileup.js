@@ -1,8 +1,10 @@
-/** @flow */
+
 /**
  * RemoteFile is a representation of a file on a remote server which can be
  * fetched in chunks, e.g. using a Range request.
+ * @flow
  */
+'use strict';
 
 var Q = require('q');
 

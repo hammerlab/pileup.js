@@ -2,15 +2,13 @@
  * Root of the React component tree.
  * @flow
  */
+'use strict';
 
 var React = require('react'),
     ContigInterval = require('./ContigInterval'),
     Controls = require('./Controls'),
     GenomeTrack = require('./GenomeTrack'),
-    GeneTrack = require('./GeneTrack'),
-    // TODO: make this an "import type" when react-tools 0.13.0 is out.
-    TwoBitDataSource = require('./TwoBitDataSource'),
-    types = require('./types');
+    GeneTrack = require('./GeneTrack');
 
 
 var Root = React.createClass({
@@ -24,7 +22,7 @@ var Root = React.createClass({
       range: (null: ?GenomeRange),
       basePairs: (null: any),
       genes: ([]: Array<any>)  // TODO import Gene type
-    }
+    };
   },
   componentDidMount: function() {
     // Note: flow is unable to infer this type through `this.propTypes`.
@@ -32,7 +30,7 @@ var Root = React.createClass({
     source.needContigs();
 
     source.on('contigs', () => { this.update() })
-          .on('newdata', () => { this.update() })
+          .on('newdata', () => { this.update() });
 
     source.on('contigs', () => {
       // this is here to facilitate faster iteration
@@ -44,7 +42,7 @@ var Root = React.createClass({
     });
 
     var geneSource = this.props.geneSource;
-    source.on('newdata', () => { this.update() });
+    geneSource.on('newdata', () => { this.update() });
 
     this.update();
   },

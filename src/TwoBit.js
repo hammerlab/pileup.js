@@ -170,7 +170,7 @@ class TwoBit {
     return this.header.then(header => {
       var maybeSeq = _.findWhere(header.sequences, {name: contig}) ||
                      _.findWhere(header.sequences, {name: 'chr' + contig});
-      if (maybeSeq == null) {
+      if (maybeSeq === null || maybeSeq === undefined) {
         throw 'Invalid contig: ' + contig;
       }
       var seq = maybeSeq;  // for flow, see facebook/flow#266

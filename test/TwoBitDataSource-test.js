@@ -1,7 +1,8 @@
 /* @flow */
+'use strict';
+
 var chai = require('chai');
 var expect = chai.expect;
-var assert = chai.assert;
 
 var TwoBit = require('../src/TwoBit');
 var createTwoBitDataSource = require('../src/TwoBitDataSource');
@@ -48,7 +49,6 @@ describe('TwoBitDataSource', function() {
 
   it('should fetch nearby base pairs', function(done) {
     var tb = new TwoBit('/test/data/test.2bit'),
-        remote = tb.remoteFile,
         source = createTwoBitDataSource(tb);
 
     source.on('newdata', () => {
@@ -72,6 +72,6 @@ describe('TwoBitDataSource', function() {
           });
       done();
     });
-    source.rangeChanged({contig: 'chr22', start: 5, stop: 10})
+    source.rangeChanged({contig: 'chr22', start: 5, stop: 10});
   });
 });
