@@ -1,6 +1,6 @@
+'use strict';
 var chai = require('chai');
 var expect = chai.expect;
-var assert = chai.assert;
 
 var Q = require('q');
 var BigBed = require('../src/BigBed');
@@ -31,13 +31,13 @@ describe('BigBed', function() {
           expect(features[1].stop).to.equal(151079365);
 
           var rest0 = features[0].rest.split('\t');
-          expect(rest0).to.have.length(6)
+          expect(rest0).to.have.length(6);
           expect(rest0[0]).to.equal('MID_BLUE');
           expect(rest0[2]).to.equal('-');
           expect(rest0[5]).to.equal('0,0,128');
 
           var rest1 = features[1].rest.split('\t');
-          expect(rest1).to.have.length(6)
+          expect(rest1).to.have.length(6);
           expect(rest1[0]).to.equal('VIOLET_RED1');
           expect(rest1[2]).to.equal('-');
           expect(rest1[5]).to.equal('255,62,150');
@@ -50,8 +50,7 @@ describe('BigBed', function() {
     // The matches looks like this:
     // chrX 151071196 151072363 RED
     // chrX 151094536 151095703 PeachPuff
-    var red = [151071196, 151072362],  // note: stop is inclusive
-        peachpuff = [151094536, 151095702];
+    var red = [151071196, 151072362];  // note: stop is inclusive
 
     var bb = getTestBigBed();
     var expectN = n => features => {

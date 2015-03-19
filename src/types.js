@@ -2,6 +2,8 @@
  * Common types used in many React components.
  * @flow
  */
+'use strict';
+
 var React = require('react');
 
 module.exports = {

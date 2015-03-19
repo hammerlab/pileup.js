@@ -1,7 +1,8 @@
 /* @flow */
+'use strict';
+
 var chai = require('chai');
 var expect = chai.expect;
-var assert = chai.assert;
 
 var BigBed = require('../src/BigBed'),
     createBigBedDataSource = require('../src/BigBedDataSource'),
@@ -22,7 +23,7 @@ describe('BigBedDataSource', function() {
     var source = getTestSource();
 
     // No genes fetched initially
-    var tp53range = new ContigInterval('chr17', 7512444, 7517300)
+    var tp53range = new ContigInterval('chr17', 7512444, 7517300);
     var tp53 = source.getGenesInRange(tp53range);
     expect(tp53).to.deep.equal([]);
 

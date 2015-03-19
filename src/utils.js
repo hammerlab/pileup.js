@@ -2,7 +2,7 @@
  * Grab-bag of utility functions.
  * @flow
  */
-
+'use strict';
 
 // Compare two tuples of equal length. Is t1 <= t2?
 // TODO: make this tupleLessOrEqual<T> -- it works with strings or booleans, too.

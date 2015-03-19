@@ -117,7 +117,7 @@ function attachContigToBedRows(beds, contigMap) {
 // Internal function for fetching features by block.
 function fetchFeaturesByBlock(contigRange, header, cirTree, remoteFile): Array<BedBlock> {
   var blocks = findOverlappingBlocks(header, cirTree, contigRange);
-  if (blocks.length == 0) {
+  if (blocks.length === 0) {
     return Q.when([]);
   }
 
@@ -240,7 +240,7 @@ class BigBed {
                     (header, cirTree, contigMap) => {
       var contigIx = getContigId(contigMap, range.contig);
       if (contigIx === null) {
-        throw `Invalid contig ${contig}`;
+        throw `Invalid contig ${range.contig}`;
       }
       var indexRange = new ContigInterval(contigIx, range.start(), range.stop());
       return fetchFeaturesByBlock(indexRange, header, cirTree, this.remoteFile)

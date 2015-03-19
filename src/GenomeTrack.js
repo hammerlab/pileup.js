@@ -2,6 +2,7 @@
  * A track which displays a reference genome.
  * @flow
  */
+'use strict';
 
 var React = require('react/addons'),
     _ = require('underscore'),
@@ -160,7 +161,7 @@ var NonEmptyGenomeTrack = React.createClass({
 
 var EmptyTrack = React.createClass({
   render: function() {
-    return <div className="reference empty">Zoom in to see bases</div>
+    return <div className="reference empty">Zoom in to see bases</div>;
   }
 });
 

@@ -79,7 +79,7 @@ function createBigBedDataSource(remoteSource: BigBed): BigBedSource {
   var genes: {[key:string]: Gene} = {};
 
   // Ranges for which we have complete information -- no need to hit network.
-  var coveredRanges: Array<ContigInterval<string>> = []
+  var coveredRanges: Array<ContigInterval<string>> = [];
 
   function addGene(newGene) {
     if (!genes[newGene.id]) {

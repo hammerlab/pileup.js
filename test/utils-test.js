@@ -1,3 +1,4 @@
+'use strict';
 var chai = require('chai');
 var expect = chai.expect;
 
@@ -31,13 +32,13 @@ describe('utils', function() {
       ];
       var empty = [[4], [3]];
       expect(overlap(ivs[0], ivs[1])).to.be.true;
-      expect(overlap(ivs[0], ivs[2])).to.be.true
-      expect(overlap(ivs[1], ivs[3])).to.be.false
+      expect(overlap(ivs[0], ivs[2])).to.be.true;
+      expect(overlap(ivs[1], ivs[3])).to.be.false;
 
-      expect(overlap(ivs[0], empty)).to.be.false
-      expect(overlap(ivs[1], empty)).to.be.false
-      expect(overlap(ivs[2], empty)).to.be.false
-      expect(overlap(ivs[3], empty)).to.be.false
+      expect(overlap(ivs[0], empty)).to.be.false;
+      expect(overlap(ivs[1], empty)).to.be.false;
+      expect(overlap(ivs[2], empty)).to.be.false;
+      expect(overlap(ivs[3], empty)).to.be.false;
     });
 
     it('should work on 2-tuples', function() {

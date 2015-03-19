@@ -5,8 +5,6 @@
 
 'use strict';
 
-var jBinary = require('jbinary');
-
 var TYPE_SET = {
   'jBinary.littleEndian': true,
 

@@ -5,8 +5,7 @@
 
 'use strict';
 
-var jBinary = require('jbinary'),
-    {typeAtOffset} = require('./helpers');
+var {typeAtOffset} = require('./helpers');
 
 var TYPE_SET = {
   'jBinary.littleEndian': true,
