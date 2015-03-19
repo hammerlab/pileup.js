@@ -1,6 +1,7 @@
 /**
  * TwoBit is a packed genome format.
  * See http://genome.ucsc.edu/FAQ/FAQformat.html#format7
+ * @flow
  */
 
 'use strict';

@@ -1,6 +1,7 @@
 /**
  * BBI is the shared structure between bigBed and bigWig.
  * These structures are based on UCSC's src/inc/bbiFile.h
+ * @flow
  */
 
 'use strict';
