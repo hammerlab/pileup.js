@@ -7,9 +7,9 @@ var Events = require('backbone').Events,
 
 
 var ContigInterval = require('./ContigInterval'),
-    Interval = require('./Interval'),
-    BigBed = require('./BigBed');
+    Interval = require('./Interval');
 
+import type * as BigBed from './BigBed';
 
 
 type Gene = {

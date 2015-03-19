@@ -1,7 +1,7 @@
 /**
  * Parser for bigBed format.
  * Based on UCSC's src/inc/bbiFile.h
- * @flow
+ * @flow weak
  */
 'use strict';
 
@@ -165,19 +165,19 @@ class ImmediateBigBed {
   // Internal function for fetching features by block.
   fetchFeaturesByBlock(range: ContigInterval<number>): Q.Promise<ChrIdBedBlock[]> {
     var blocks = this.findOverlappingBlocks(range);
-    if (blocks.length == 0) {
+    if (blocks.length === 0) {
       return Q.when([]);
     }
 
     // Find the range in the file which contains all relevant blocks.
     // In theory there could be gaps between blocks, but it's hard to see how.
-    var range = Interval.boundingInterval(
+    var byteRange = Interval.boundingInterval(
         blocks.map(n => new Interval(+n.offset, n.offset+n.size)));
 
-    return this.remoteFile.getBytes(range.start, range.length())
+    return this.remoteFile.getBytes(byteRange.start, byteRange.length())
         .then(buffer => {
           return blocks.map(block => {
-            var beds = extractFeaturesFromBlock(buffer, range, block);
+            var beds = extractFeaturesFromBlock(buffer, byteRange, block);
             if (block.startChromIx != block.endChromIx) {
               throw `Can't handle blocks which span chromosomes!`;
             }
