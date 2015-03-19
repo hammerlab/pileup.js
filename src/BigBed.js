@@ -1,6 +1,7 @@
 /**
  * Parser for bigBed format.
  * Based on UCSC's src/inc/bbiFile.h
+ * @flow weak
  */
 'use strict';
 
@@ -30,9 +31,6 @@ function parseCirTree(buffer) {
   return new jBinary(buffer, bbi.TYPE_SET).read('CirTree');
 }
 
-// TODO: create an "ImmediateTwoBit" class and make most of the following
-// functions methods on it.
-
 // Extract a map from contig name --> contig ID from the bigBed header.
 function generateContigMap(twoBitHeader): {[key:string]: number} {
   // Just assume it's a flat "tree" for now.
@@ -49,47 +47,14 @@ function generateContigMap(twoBitHeader): {[key:string]: number} {
 // Generate the reverse map from contig ID --> contig name.
 function reverseContigMap(contigMap: {[key:string]: number}): Array<string> {
   var ary = [];
-  _.forEach(contigMap, (index, name) => {
+  _.each(contigMap, (index, name) => {
     ary[index] = name;
   });
   return ary;
 }
 
-// Map contig name to contig ID. Leading "chr" is optional.
-function getContigId(contigMap, contig) {
-  if (contig in contigMap) {
-    return contigMap[contig];
-  }
-  var chr = 'chr' + contig;
-  if (chr in contigMap) {
-    return contigMap[chr];
-  }
-  return null;
-}
 
-// Find all blocks containing features which intersect with contigRange.
-function findOverlappingBlocks(twoBitHeader, cirTree, contigRange) {
-  // Do a recursive search through the index tree
-  var matchingBlocks = [];
-  var tupleRange = [[contigRange.contig, contigRange.start()],
-                    [contigRange.contig, contigRange.stop()]];
-  var find = function(node) {
-    if (node.contents) {
-      node.contents.forEach(find);
-    } else {
-      var nodeRange = [[node.startChromIx, node.startBase],
-                       [node.endChromIx, node.endBase]];
-      if (utils.tupleRangeOverlaps(nodeRange, tupleRange)) {
-        matchingBlocks.push(node);
-      }
-    }
-  };
-  find(cirTree.blocks);
-
-  return matchingBlocks;
-}
-
-function extractFeaturesFromBlock(buffer, dataRange, block) {
+function extractFeaturesFromBlock(buffer, dataRange, block): ChrIdBedRow[] {
   var blockOffset = block.offset - dataRange.start,
       blockLimit = blockOffset + block.size,
       // TODO: where does the +2 come from? (I copied it from dalliance)
@@ -102,65 +67,6 @@ function extractFeaturesFromBlock(buffer, dataRange, block) {
   return jb.read('BedBlock');
 }
 
-// bed entries have a chromosome ID. This converts that to a contig string.
-// Note: modifies beds in-place.
-function attachContigToBedRows(beds, contigMap) {
-  var reverseMap = reverseContigMap(contigMap);
-  beds.forEach(bed => {
-    bed.contig = reverseMap[bed.chrId];
-    delete bed.chrId;
-  });
-  return beds;
-}
-
-
-// Internal function for fetching features by block.
-function fetchFeaturesByBlock(contigRange, header, cirTree, remoteFile): Array<BedBlock> {
-  var blocks = findOverlappingBlocks(header, cirTree, contigRange);
-  if (blocks.length === 0) {
-    return Q.when([]);
-  }
-
-  // Find the range in the file which contains all relevant blocks.
-  // In theory there could be gaps between blocks, but it's hard to see how.
-  var range = Interval.boundingInterval(
-      blocks.map(n => new Interval(+n.offset, n.offset+n.size)));
-
-  return remoteFile.getBytes(range.start, range.length())
-      .then(buffer => {
-        return blocks.map(block => {
-          var beds = extractFeaturesFromBlock(buffer, range, block);
-          if (block.startChromIx != block.endChromIx) {
-            throw `Can't handle blocks which span chromosomes!`;
-          }
-
-          return {
-            range: new ContigInterval(block.startChromIx, block.startBase, block.endBase),
-            rows: beds
-          };
-        });
-      });
-}
-
-
-// Fetch the relevant blocks from the bigBed file and extract the features
-// which overlap the given range.
-function fetchFeatures(contigRange, header, cirTree, contigMap, remoteFile) {
-  return fetchFeaturesByBlock(contigRange, header, cirTree, remoteFile)
-      .then(bedsByBlock => {
-        var beds = _.flatten(_.pluck(bedsByBlock, 'rows'));
-
-        beds = beds.filter(function(bed) {
-          // Note: BED intervals are explicitly half-open.
-          // The "- 1" converts them to closed intervals for ContigInterval.
-          var bedInterval = new ContigInterval(bed.chrId, bed.start, bed.stop - 1);
-          return contigRange.intersects(bedInterval);
-        });
-
-        return attachContigToBedRows(beds, contigMap);
-      });
-}
-
 
 type BedRow = {
   // Half-open interval for the BED row.
@@ -171,10 +77,154 @@ type BedRow = {
   rest: string;
 }
 
+type ChrIdBedRow = {
+  chrId: number;
+  start: number;
+  stop: number;  // note: not inclusive
+  rest: string;
+}
+
 // All features found in range.
 type BedBlock = {
   range: ContigInterval<string>;
   rows: BedRow[];
+}
+
+type ChrIdBedBlock = {
+  range: ContigInterval<number>;
+  rows: ChrIdBedRow[];
+}
+
+// This (internal) version of the BigBed class has no promises for headers,
+// only immediate data. This greatly simplifies writing methods on it.
+class ImmediateBigBed {
+  remoteFile: RemoteFile;
+  header: Object;
+  cirTree: Object;
+  contigMap: {[key:string]: number};
+  chrIdToContig: string[];
+
+  constructor(remoteFile, header, cirTree, contigMap: {[key:string]: number}) {
+    this.remoteFile = remoteFile;
+    this.header = header;
+    this.cirTree = cirTree;
+    this.contigMap = contigMap;
+    this.chrIdToContig = reverseContigMap(contigMap);
+  }
+
+  // Map contig name to contig ID. Leading "chr" is optional. Throws on failure.
+  getContigId(contig: string): number {
+    if (contig in this.contigMap) return this.contigMap[contig];
+    var chr = 'chr' + contig;
+    if (chr in this.contigMap) return this.contigMap[chr];
+    throw `Invalid contig ${contig}`;
+  }
+
+  getChrIdInterval(range: ContigInterval<string>): ContigInterval<number> {
+    return new ContigInterval(
+        this.getContigId(range.contig), range.start(), range.stop());
+  }
+
+  getContigInterval(range: ContigInterval<number>): ContigInterval<string> {
+    return new ContigInterval(
+        this.chrIdToContig[range.contig], range.start(), range.stop());
+  }
+
+  // Bed entries have a chromosome ID. This converts that to a contig string.
+  attachContigToBedRows(beds: ChrIdBedRow[]): BedRow[] {
+    return beds.map(bed => ({
+      contig: this.chrIdToContig[bed.chrId],
+      start: bed.start,
+      stop: bed.stop,
+      rest: bed.rest
+    }));
+  }
+
+  // Find all blocks containing features which intersect with contigRange.
+  findOverlappingBlocks(range: ContigInterval<number>) {
+    // Do a recursive search through the index tree
+    var matchingBlocks = [];
+    var tupleRange = [[range.contig, range.start()],
+                      [range.contig, range.stop()]];
+    var find = function(node) {
+      if (node.contents) {
+        node.contents.forEach(find);
+      } else {
+        var nodeRange = [[node.startChromIx, node.startBase],
+                         [node.endChromIx, node.endBase]];
+        if (utils.tupleRangeOverlaps(nodeRange, tupleRange)) {
+          matchingBlocks.push(node);
+        }
+      }
+    };
+    find(this.cirTree.blocks);
+
+    return matchingBlocks;
+  }
+
+  // Internal function for fetching features by block.
+  fetchFeaturesByBlock(range: ContigInterval<number>): Q.Promise<ChrIdBedBlock[]> {
+    var blocks = this.findOverlappingBlocks(range);
+    if (blocks.length === 0) {
+      return Q.when([]);
+    }
+
+    // Find the range in the file which contains all relevant blocks.
+    // In theory there could be gaps between blocks, but it's hard to see how.
+    var byteRange = Interval.boundingInterval(
+        blocks.map(n => new Interval(+n.offset, n.offset+n.size)));
+
+    return this.remoteFile.getBytes(byteRange.start, byteRange.length())
+        .then(buffer => {
+          return blocks.map(block => {
+            var beds = extractFeaturesFromBlock(buffer, byteRange, block);
+            if (block.startChromIx != block.endChromIx) {
+              throw `Can't handle blocks which span chromosomes!`;
+            }
+
+            return {
+              range: new ContigInterval(block.startChromIx, block.startBase, block.endBase),
+              rows: beds
+            };
+          });
+        });
+  }
+
+  // TODO: merge this into getFeaturesInRange
+  // Fetch the relevant blocks from the bigBed file and extract the features
+  // which overlap the given range.
+  fetchFeatures(contigRange: ContigInterval<number>): Q.Promise<BedRow[]> {
+    return this.fetchFeaturesByBlock(contigRange)
+        .then(bedsByBlock => {
+          var beds = _.flatten(bedsByBlock.map(b => b.rows));
+
+          beds = beds.filter(function(bed) {
+            // Note: BED intervals are explicitly half-open.
+            // The "- 1" converts them to closed intervals for ContigInterval.
+            var bedInterval = new ContigInterval(bed.chrId, bed.start, bed.stop - 1);
+            return contigRange.intersects(bedInterval);
+          });
+
+          return this.attachContigToBedRows(beds);
+        });
+  }
+
+  getFeaturesInRange(range: ContigInterval<string>): Q.Promise<BedRow[]> {
+    return this.fetchFeatures(this.getChrIdInterval(range));
+  }
+
+  getFeatureBlocksOverlapping(range: ContigInterval<string>): Q.Promise<BedBlock[]> {
+    var indexRange = this.getChrIdInterval(range);
+    return this.fetchFeaturesByBlock(indexRange)
+        .then(featureBlocks => {
+          // Convert chrIds to contig strings.
+          return featureBlocks.map(fb => ({
+            range: this.getContigInterval(fb.range),
+            rows: this.attachContigToBedRows(fb.rows)
+          }));
+        });
+  }
+
 }
 
 
@@ -183,6 +233,7 @@ class BigBed {
   header: Q.Promise<any>;
   cirTree: Q.Promise<any>;
   contigMap: Q.Promise<{[key:string]: number}>;
+  immediate: Q.Promise<ImmediateBigBed>;
 
   /**
    * Prepare to request features from a remote bigBed file.
@@ -205,11 +256,15 @@ class BigBed {
           length = zoomHeader ? zoomHeader.dataOffset - start : 4096;
       return this.remoteFile.getBytes(start, length).then(parseCirTree);
     });
-    
-    // XXX: are these necessary? what's the right way to propagate errors?
-    this.header.done();
-    this.contigMap.done();
-    this.cirTree.done();
+
+    this.immediate = Q.all([this.header, this.cirTree, this.contigMap])
+        .then(([header, cirTree, contigMap]) => {
+          var cm: {[key:string]: number} = contigMap;
+          return new ImmediateBigBed(this.remoteFile, header, cirTree, cm);
+        });
+
+    // Bubble up errors
+    this.immediate.done();
   }
 
   /**
@@ -219,15 +274,8 @@ class BigBed {
    * the end).
    */
   getFeaturesInRange(contig: string, start: number, stop: number): Q.Promise<Array<BedRow>> {
-    return Q.spread([this.header, this.cirTree, this.contigMap],
-                    (header, cirTree, contigMap) => {
-      var contigIx = getContigId(contigMap, contig);
-      if (contigIx === null) {
-        throw `Invalid contig ${contig}`;
-      }
-      var contigRange = new ContigInterval(contigIx, start, stop);
-      return fetchFeatures(contigRange, header, cirTree, contigMap, this.remoteFile);
-    });
+    var range = new ContigInterval(contig, start, stop);
+    return this.immediate.then(im => im.getFeaturesInRange(range));
   }
 
   /**
@@ -236,23 +284,7 @@ class BigBed {
    * anyway, this can be helpful for upstream caching.
    */
   getFeatureBlocksOverlapping(range: ContigInterval<string>): Q.Promise<Array<BedBlock>> {
-    return Q.spread([this.header, this.cirTree, this.contigMap],
-                    (header, cirTree, contigMap) => {
-      var contigIx = getContigId(contigMap, range.contig);
-      if (contigIx === null) {
-        throw `Invalid contig ${range.contig}`;
-      }
-      var indexRange = new ContigInterval(contigIx, range.start(), range.stop());
-      return fetchFeaturesByBlock(indexRange, header, cirTree, this.remoteFile)
-          .then(featureBlocks => {
-            // Convert chrIds to contig strings.
-            featureBlocks.forEach(fb => {
-              fb.range.contig = reverseContigMap(contigMap)[fb.range.contig];
-              attachContigToBedRows(fb.rows, contigMap);
-            });
-            return featureBlocks;
-          });
-    });
+    return this.immediate.then(im => im.getFeatureBlocksOverlapping(range));
   }
 }
 

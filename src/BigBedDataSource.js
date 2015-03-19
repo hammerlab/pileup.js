@@ -9,6 +9,7 @@ var Events = require('backbone').Events,
 var ContigInterval = require('./ContigInterval'),
     Interval = require('./Interval');
 
+import type * as BigBed from './BigBed';
 
 
 type Gene = {
@@ -34,12 +35,6 @@ type BedBlock = {
   range: ContigInterval<string>;
   rows: BedRow[];
 }
-
-declare class BigBed {
-  getFeaturesInRange: (contig: string, start: number, stop: number) => Q.Promise<Array<BedRow>>;
-  getFeatureBlocksOverlapping(range: ContigInterval): Q.Promise<Array<BedBlock>>;
-}
-
 
 // Flow type for export.
 type BigBedSource = {

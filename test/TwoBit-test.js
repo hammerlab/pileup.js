@@ -1,4 +1,6 @@
+/* @flow */
 'use strict';
+
 var chai = require('chai');
 var expect = chai.expect;
 var assert = chai.assert;
@@ -37,7 +39,7 @@ describe('TwoBit', function() {
 
   it('should reject invalid contigs', function(done) {
     var twoBit = getTestTwoBit();
-    twoBit.getFeaturesInRange('chrZ')
+    twoBit.getFeaturesInRange('chrZ', 12, 34)
           .then(() => { assert.fail('Should have thrown'); })
           .catch(err => {
             expect(err).to.match(/Invalid contig/);
