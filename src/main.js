@@ -15,7 +15,8 @@ var ensembl = new BigBed('/ensGene.bb');
 var ensemblDataSource = createBigBedDataSource(ensembl);
 
 React.render(<Root referenceSource={dataSource}
-                   geneSource={ensemblDataSource} />,
+                   geneSource={ensemblDataSource}
+                   initialRange={{contig: "chr17", start: 7512444, stop: 7512484}} />,
              document.getElementById('root'));
 
 window.ensembl = ensembl;

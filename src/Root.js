@@ -14,7 +14,8 @@ var React = require('react'),
 var Root = React.createClass({
   propTypes: {
     referenceSource: React.PropTypes.object.isRequired,
-    geneSource: React.PropTypes.object.isRequired
+    geneSource: React.PropTypes.object.isRequired,
+    initialRange: React.PropTypes.object.isRequired
   },
   getInitialState: function() {
     return {
@@ -34,11 +35,7 @@ var Root = React.createClass({
 
     source.on('contigs', () => {
       // this is here to facilitate faster iteration
-      this.handleRangeChange({
-        contig: 'chr17',
-        start: 7512444,
-        stop: 7512484
-      });
+      this.handleRangeChange(this.props.initialRange);
     });
 
     var geneSource = this.props.geneSource;

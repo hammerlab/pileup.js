@@ -1,10 +1,10 @@
 /* @flow */
+'use strict';
 
 var chai = require('chai');
 var expect = chai.expect;
 
 var Q = require('q');
-var _ = require('underscore');
 
 var React = require('react/addons'),
     TwoBit = require('../src/TwoBit'),
@@ -28,7 +28,7 @@ function waitFor(predFn, timeoutMs) {
   var check = function() {
     if (def.promise.isRejected()) return;
     if (predFn()) {
-      def.resolve();
+      def.resolve(null);  // no arguments needed
       window.clearTimeout(timeoutId);
     } else {
       checkTimeoutId = window.setTimeout(check, WAIT_FOR_POLL_INTERVAL_MS);
@@ -40,19 +40,13 @@ function waitFor(predFn, timeoutMs) {
 }
 
 
-/**
- * Apply a CSS selector to a React tree. Returns an array of DOM nodes.
- */
-function findInComponent(selector, component) {
-  return _.toArray(component.getDOMNode().querySelectorAll(selector));
-}
-
-
 describe('Root component', function() {
-  var genome = new TwoBit('/hg19.2bit');
+  var genome = new TwoBit('/test/data/test.2bit');
   var dataSource = createTwoBitDataSource(genome);
 
-  var ensembl = new BigBed('/ensGene.bb');
+  // This file contains just the TP53 gene, shifted so that it starts at the
+  // beginning of chr17 (to match test.2bit).
+  var ensembl = new BigBed('/test/data/tp53.shifted.bb');
   var ensemblDataSource = createBigBedDataSource(ensembl);
 
   var testDiv = document.getElementById('testdiv');
@@ -68,8 +62,10 @@ describe('Root component', function() {
     div.setAttribute('style', 'width: 800px; height: 200px;');
     testDiv.appendChild(div);
 
-    var root = React.render(<Root referenceSource={dataSource}
-                                  geneSource={ensemblDataSource} />, div);
+    // TODO: changing to {start:1, stop:50} makes the test fail.
+    React.render(<Root referenceSource={dataSource}
+                       geneSource={ensemblDataSource}
+                       initialRange={{contig:"chr17", start: 100, stop: 150}} />, div);
 
     var ready = (() => 
       div.querySelectorAll('.basepair').length > 0 &&
