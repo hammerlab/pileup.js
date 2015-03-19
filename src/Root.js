@@ -44,7 +44,7 @@ var Root = React.createClass({
     });
 
     var geneSource = this.props.geneSource;
-    source.on('newdata', () => { this.update() });
+    geneSource.on('newdata', () => { this.update() });
 
     this.update();
   },
