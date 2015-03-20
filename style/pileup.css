@@ -41,6 +41,9 @@ text.basepair {
 #sense, #antisense {
   stroke: blue;
 }
+#antisense .offset, #sense .offset {
+  stroke: white;
+}
 .exon {
   fill: blue;
   stroke: none;

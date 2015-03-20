@@ -42,7 +42,7 @@ var NonEmptyGeneTrack = React.createClass({
 
     // These define the left/right arrow patterns for sense/antisense genes.
     var defs = svg.append('defs');
-    defs.append('pattern')
+    var antiSense = defs.append('pattern')
         .attr({
           'id': 'antisense',
           'patternUnits': 'userSpaceOnUse',
@@ -50,15 +50,24 @@ var NonEmptyGeneTrack = React.createClass({
           'height': 9,
           'x': 0,
           'y': -4
-        })
-        .append('path')
+        });
+    antiSense.append('path')
           .attr({
-            'd': 'M4,0 L0,4 L4,8',  // Arrow pointing left
+            'd': 'M5,0 L1,4 L5,8',  // Arrow pointing left
             'fill': 'none',
-            'stroke-width': 1
+            'stroke-width': 1,
+            'class': 'main'
+          });
+    antiSense.append('path')
+          .attr({
+            // 'd': 'M4,0 L0,4 L4,8',  // Arrow pointing left
+            'd': 'M4,0 L1,3 M1,5 L4,8',  // offset 1, less center pixel
+            'fill': 'none',
+            'stroke-width': 1,
+            'class': 'offset'
           });
 
-    defs.append('pattern')
+    var sense = defs.append('pattern')
         .attr({
           'id': 'sense',
           'patternUnits': 'userSpaceOnUse',
@@ -66,10 +75,16 @@ var NonEmptyGeneTrack = React.createClass({
           'height': 9,
           'x': 0,
           'y': -4
-        })
-        .append('path')
+        });
+    sense.append('path')
           .attr({
             'd': 'M0,0 L4,4 L0,8',  // Arrow pointing right
+            'fill': 'none',
+            'stroke-width': 1
+          });
+    sense.append('path')
+          .attr({
+            'd': 'M1,0 L4,3 M4,5 L1,8',  // offset 1, less center pixel
             'fill': 'none',
             'stroke-width': 1
           });
@@ -126,8 +141,6 @@ var NonEmptyGeneTrack = React.createClass({
         .attr('class', 'gene');
     geneGs.append('text');
     var geneLineG = geneGs.append('g').attr('class', 'track');
-    geneLineG.append('line');
-    geneLineG.append('rect').attr('class', 'strand');
 
     geneLineG.selectAll('rect.exon')
       .data(g => bedtools.splitCodingExons(g.exons, g.codingRegion)
@@ -135,6 +148,9 @@ var NonEmptyGeneTrack = React.createClass({
       .enter()
       .append('rect')
         .attr('class', 'exon');
+
+    geneLineG.append('line');
+    geneLineG.append('rect').attr('class', 'strand');
 
     // The gene name goes in the center of the gene, modulo boundary effects.
     var textCenterX = g => {
