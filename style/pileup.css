@@ -38,9 +38,17 @@ text.basepair {
   stroke: black;
   alignment-baseline: hanging;
 }
-#sense, #antisense {
+#sense, #antisense .main {
   stroke: blue;
+  fill: none;
+  stroke-width: 1;
+}
+#antisense .offset, #sense .offset {
+  stroke: white;
+  fill: none;
+  stroke-width: 1;
 }
 .exon {
   fill: blue;
+  stroke: none;
 }

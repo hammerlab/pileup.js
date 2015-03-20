@@ -8,7 +8,8 @@ var React = require('react/addons'),
     _ = require('underscore'),
     d3 = require('d3'),
     types = require('./types'),
-    bedtools = require('./bedtools');
+    bedtools = require('./bedtools'),
+    Interval = require('./Interval');
 
 var GeneTrack = React.createClass({
   propTypes: {
@@ -26,6 +27,26 @@ var GeneTrack = React.createClass({
   }
 });
 
+
+// D3 function to hide overlapping elements in a selection.
+// nb: this is O(n^2) in the number of transcripts on-screen.
+// TODO: move into a d3utils module
+var PADDING = 10;  // empty pixels to require around each element.
+function removeOverlapping(selection) {
+  var rects = [];
+
+  selection.each(function() {
+    var bbox = this.getBoundingClientRect();
+    var myInterval = new Interval(bbox.left - PADDING, bbox.right + PADDING);
+    if (_.any(rects, r => myInterval.intersects(r))) {
+      d3.select(this).attr('visibility', 'hidden');
+    } else {
+      rects.push(myInterval);
+      d3.select(this).attr('visibility', 'visible');
+    }
+  });
+}
+
 var NonEmptyGeneTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange.isRequired,
@@ -41,38 +62,20 @@ var NonEmptyGeneTrack = React.createClass({
                 .append('svg');
 
     // These define the left/right arrow patterns for sense/antisense genes.
+    // The second <path> allows the arrow to be seen on top of an exon.
     var defs = svg.append('defs');
-    defs.append('pattern')
-        .attr({
-          'id': 'antisense',
-          'patternUnits': 'userSpaceOnUse',
-          'width': 30,
-          'height': 9,
-          'x': 0,
-          'y': -4
-        })
-        .append('path')
-          .attr({
-            'd': 'M4,0 L0,4 L4,8',  // Arrow pointing left
-            'fill': 'none',
-            'stroke-width': 1
-          });
-
-    defs.append('pattern')
-        .attr({
-          'id': 'sense',
-          'patternUnits': 'userSpaceOnUse',
-          'width': 30,
-          'height': 9,
-          'x': 0,
-          'y': -4
-        })
-        .append('path')
-          .attr({
-            'd': 'M0,0 L4,4 L0,8',  // Arrow pointing right
-            'fill': 'none',
-            'stroke-width': 1
-          });
+    defs[0][0].innerHTML = `
+      <pattern id="antisense" patternUnits="userSpaceOnUse"
+            width="30" height="9" x="0" y="-4">
+        <path d="M5,0 L1,4 L5,8" class="main"></path>
+        <path d="M4,0 L1,3 M1,5 L4,8" class="offset"></path>
+      </pattern>
+      <pattern id="sense" patternUnits="userSpaceOnUse"
+            width="30" height="9" x="0" y="-4">
+        <path d="M0,0 L4,4 L0,8" class="main"></path>
+        <path d="M1,0 L4,3 M4,5 L1,8" class="offset"></path>
+      </pattern>
+    `;
 
     this.updateVisualization();
   },
@@ -114,21 +117,27 @@ var NonEmptyGeneTrack = React.createClass({
     var genes = svg.selectAll('g.gene')
        .data(this.props.genes, gene => gene.id);
 
+    // By default, the left of the arrow pattern goes to x=0 in SVG space.
+    // We'd prefer it start at genome coordinate 0.
+    // The "% 30" matches the pattern widths. It's there to fight roundoff.
+    svg.selectAll('pattern').attr('patternTransform',
+                                  `translate(${scale(0) % 30} 0)`);
+
     // Enter
     var geneGs = genes.enter()
         .append('g')
         .attr('class', 'gene');
     geneGs.append('text');
     var geneLineG = geneGs.append('g').attr('class', 'track');
-    geneLineG.append('line');
-    geneLineG.append('rect').attr('class', 'strand');
 
     geneLineG.selectAll('rect.exon')
-      .data(g => bedtools.splitCodingExons(g.exons, g.codingRegion)
-                    .map(x => [x, g.position.start()]))
+      .data(g => bedtools.splitCodingExons(g.exons, g.codingRegion))
       .enter()
       .append('rect')
         .attr('class', 'exon');
+
+    geneLineG.append('line');
+    geneLineG.append('rect').attr('class', 'strand');
 
     // The gene name goes in the center of the gene, modulo boundary effects.
     var textCenterX = g => {
@@ -142,18 +151,19 @@ var NonEmptyGeneTrack = React.createClass({
     // Enter & update
     var track = genes.selectAll('g.track')
         .attr('transform',
-              g => `translate(${scale(g.position.start())} ${geneLineY})`);
+              g => `translate(0 ${geneLineY})`);
 
     genes.selectAll('text')
         .attr({
           'x': textCenterX,
           'y': geneLineY + 15
         })
-        .text(g => g.name || g.id);
+        .text(g => g.name || g.id)
+        .call(removeOverlapping);
 
     track.selectAll('line').attr({
-      'x1': 0,
-      'x2': scaledWidth,
+      'x1': g => scale(g.position.start()),
+      'x2': g => scale(g.position.stop()),
       'y1': 0,
       'y2': 0
     });
@@ -162,7 +172,7 @@ var NonEmptyGeneTrack = React.createClass({
         .attr({
           'y': -4,
           'height': 9,
-          'x': 0,
+          'x': g => scale(g.position.start()),
           'width': scaledWidth,
           'fill': g => `url(#${g.strand == '+' ? '' : 'anti'}sense)`,
           'stroke': 'none'
@@ -170,10 +180,10 @@ var NonEmptyGeneTrack = React.createClass({
 
     track.selectAll('rect.exon')
         .attr({
-          'x': ([exon, gStart]) => scale(exon.start - gStart) - scale(0),
-          'y':      ([exon]) => -3 * (exon.isCoding ? 2 : 1),
-          'height': ([exon]) =>  6 * (exon.isCoding ? 2 : 1),
-          'width':  ([exon]) => scale(exon.stop) - scale(exon.start)
+          'x':      exon => scale(exon.start),
+          'width':  exon => scale(exon.stop) - scale(exon.start),
+          'y':      exon => -3 * (exon.isCoding ? 2 : 1),
+          'height': exon =>  6 * (exon.isCoding ? 2 : 1)
         });
 
     // Exit
