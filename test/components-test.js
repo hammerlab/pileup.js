@@ -45,7 +45,7 @@ describe('Root component', function() {
   var dataSource = createTwoBitDataSource(genome);
 
   // This file contains just the TP53 gene, shifted so that it starts at the
-  // beginning of chr17 (to match test.2bit).
+  // beginning of chr17 (to match test.2bit). See test/data/README.md.
   var ensembl = new BigBed('/test/data/tp53.shifted.bb');
   var ensemblDataSource = createBigBedDataSource(ensembl);
 

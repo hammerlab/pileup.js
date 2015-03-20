@@ -10,10 +10,7 @@ var ContigInterval = require('../src/ContigInterval');
 
 describe('BigBed', function() {
   function getTestBigBed() {
-    // This file was generated using UCSC tools:
-    // cd kent/src/utils/bedToBigBed/tests; make
-    // It is compressed, little endian, has autoSQL and two blocks.
-    return new BigBed('/test/data/itemRgb.bb');
+    return new BigBed('/test/data/itemRgb.bb');   // See test/data/README.md
   }
 
   it('should extract features in a range', function(done) {

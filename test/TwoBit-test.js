@@ -9,11 +9,7 @@ var TwoBit = require('../src/TwoBit');
 
 describe('TwoBit', function() {
   function getTestTwoBit() {
-    // This file was generated using UCSC tools:
-    // twoBitToFa -seqList=./test/seqList.txt hg19.2bit /tmp/extract.fa
-    // perl -i -pe 's/:.*//' /tmp/extract.fa
-    // faToTwoBit /tmp/extract.fa test/data/test.2bit
-    return new TwoBit('/test/data/test.2bit');
+    return new TwoBit('/test/data/test.2bit');   // See test/data/README.md
   }
 
   it('should have the right contigs', function(done) {
