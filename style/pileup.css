@@ -43,4 +43,5 @@ text.basepair {
 }
 .exon {
   fill: blue;
+  stroke: none;
 }

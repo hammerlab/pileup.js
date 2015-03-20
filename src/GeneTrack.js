@@ -99,6 +99,7 @@ var NonEmptyGeneTrack = React.createClass({
     var div = this.getDOMNode(),
         width = div.offsetWidth,
         height = div.offsetHeight,
+        range = this.props.range,
         svg = d3.select(div).select('svg');
 
     var scale = this.getScale(),
@@ -113,6 +114,11 @@ var NonEmptyGeneTrack = React.createClass({
 
     var genes = svg.selectAll('g.gene')
        .data(this.props.genes, gene => gene.id);
+
+    // By default, the left of the arrow pattern goes to x=0 in SVG space.
+    // We'd prefer it start at genome coordinate 0.
+    svg.selectAll('pattern').attr('patternTransform',
+                                  `translate(${scale(0) % 30} 0)`);
 
     // Enter
     var geneGs = genes.enter()
@@ -142,7 +148,7 @@ var NonEmptyGeneTrack = React.createClass({
     // Enter & update
     var track = genes.selectAll('g.track')
         .attr('transform',
-              g => `translate(${scale(g.position.start())} ${geneLineY})`);
+              g => `translate(0 ${geneLineY})`);
 
     genes.selectAll('text')
         .attr({
@@ -152,8 +158,8 @@ var NonEmptyGeneTrack = React.createClass({
         .text(g => g.name || g.id);
 
     track.selectAll('line').attr({
-      'x1': 0,
-      'x2': scaledWidth,
+      'x1': g => scale(g.position.start()),
+      'x2': g => scale(g.position.stop()),
       'y1': 0,
       'y2': 0
     });
@@ -162,7 +168,7 @@ var NonEmptyGeneTrack = React.createClass({
         .attr({
           'y': -4,
           'height': 9,
-          'x': 0,
+          'x': g => scale(g.position.start()),
           'width': scaledWidth,
           'fill': g => `url(#${g.strand == '+' ? '' : 'anti'}sense)`,
           'stroke': 'none'
@@ -170,7 +176,7 @@ var NonEmptyGeneTrack = React.createClass({
 
     track.selectAll('rect.exon')
         .attr({
-          'x': ([exon, gStart]) => scale(exon.start - gStart) - scale(0),
+          'x': ([exon, gStart]) => scale(exon.start),
           'y':      ([exon]) => -3 * (exon.isCoding ? 2 : 1),
           'height': ([exon]) =>  6 * (exon.isCoding ? 2 : 1),
           'width':  ([exon]) => scale(exon.stop) - scale(exon.start)
