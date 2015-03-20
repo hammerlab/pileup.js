@@ -41,53 +41,20 @@ var NonEmptyGeneTrack = React.createClass({
                 .append('svg');
 
     // These define the left/right arrow patterns for sense/antisense genes.
+    // The second <path> allows the arrow to be seen on top of an exon.
     var defs = svg.append('defs');
-    var antiSense = defs.append('pattern')
-        .attr({
-          'id': 'antisense',
-          'patternUnits': 'userSpaceOnUse',
-          'width': 30,
-          'height': 9,
-          'x': 0,
-          'y': -4
-        });
-    antiSense.append('path')
-          .attr({
-            'd': 'M5,0 L1,4 L5,8',  // Arrow pointing left
-            'fill': 'none',
-            'stroke-width': 1,
-            'class': 'main'
-          });
-    antiSense.append('path')
-          .attr({
-            // 'd': 'M4,0 L0,4 L4,8',  // Arrow pointing left
-            'd': 'M4,0 L1,3 M1,5 L4,8',  // offset 1, less center pixel
-            'fill': 'none',
-            'stroke-width': 1,
-            'class': 'offset'
-          });
-
-    var sense = defs.append('pattern')
-        .attr({
-          'id': 'sense',
-          'patternUnits': 'userSpaceOnUse',
-          'width': 30,
-          'height': 9,
-          'x': 0,
-          'y': -4
-        });
-    sense.append('path')
-          .attr({
-            'd': 'M0,0 L4,4 L0,8',  // Arrow pointing right
-            'fill': 'none',
-            'stroke-width': 1
-          });
-    sense.append('path')
-          .attr({
-            'd': 'M1,0 L4,3 M4,5 L1,8',  // offset 1, less center pixel
-            'fill': 'none',
-            'stroke-width': 1
-          });
+    defs[0][0].innerHTML = `
+      <pattern id="antisense" patternUnits="userSpaceOnUse"
+            width="30" height="9" x="0" y="-4">
+        <path d="M5,0 L1,4 L5,8" class="main"></path>
+        <path d="M4,0 L1,3 M1,5 L4,8" class="offset"></path>
+      </pattern>
+      <pattern id="sense" patternUnits="userSpaceOnUse"
+            width="30" height="9" x="0" y="-4">
+        <path d="M0,0 L4,4 L0,8" class="main"></path>
+        <path d="M1,0 L4,3 M4,5 L1,8" class="offset"></path>
+      </pattern>
+    `;
 
     this.updateVisualization();
   },
