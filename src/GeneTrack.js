@@ -8,7 +8,8 @@ var React = require('react/addons'),
     _ = require('underscore'),
     d3 = require('d3'),
     types = require('./types'),
-    bedtools = require('./bedtools');
+    bedtools = require('./bedtools'),
+    Interval = require('./Interval');
 
 var GeneTrack = React.createClass({
   propTypes: {
@@ -25,6 +26,26 @@ var GeneTrack = React.createClass({
     return <NonEmptyGeneTrack {...this.props} />;
   }
 });
+
+
+// D3 function to hide overlapping elements in a selection.
+// nb: this is O(n^2) in the number of transcripts on-screen.
+// TODO: move into a d3utils module
+var PADDING = 10;  // empty pixels to require around each element.
+function removeOverlapping(selection) {
+  var rects = [];
+
+  selection.each(function() {
+    var bbox = this.getBoundingClientRect();
+    var myInterval = new Interval(bbox.left - PADDING, bbox.right + PADDING);
+    if (_.any(rects, r => myInterval.intersects(r))) {
+      d3.select(this).attr('visibility', 'hidden');
+    } else {
+      rects.push(myInterval);
+      d3.select(this).attr('visibility', 'visible');
+    }
+  });
+}
 
 var NonEmptyGeneTrack = React.createClass({
   propTypes: {
@@ -81,7 +102,6 @@ var NonEmptyGeneTrack = React.createClass({
     var div = this.getDOMNode(),
         width = div.offsetWidth,
         height = div.offsetHeight,
-        range = this.props.range,
         svg = d3.select(div).select('svg');
 
     var scale = this.getScale(),
@@ -99,6 +119,7 @@ var NonEmptyGeneTrack = React.createClass({
 
     // By default, the left of the arrow pattern goes to x=0 in SVG space.
     // We'd prefer it start at genome coordinate 0.
+    // The "% 30" matches the pattern widths. It's there to fight roundoff.
     svg.selectAll('pattern').attr('patternTransform',
                                   `translate(${scale(0) % 30} 0)`);
 
@@ -110,8 +131,7 @@ var NonEmptyGeneTrack = React.createClass({
     var geneLineG = geneGs.append('g').attr('class', 'track');
 
     geneLineG.selectAll('rect.exon')
-      .data(g => bedtools.splitCodingExons(g.exons, g.codingRegion)
-                    .map(x => [x, g.position.start()]))
+      .data(g => bedtools.splitCodingExons(g.exons, g.codingRegion))
       .enter()
       .append('rect')
         .attr('class', 'exon');
@@ -138,7 +158,8 @@ var NonEmptyGeneTrack = React.createClass({
           'x': textCenterX,
           'y': geneLineY + 15
         })
-        .text(g => g.name || g.id);
+        .text(g => g.name || g.id)
+        .call(removeOverlapping);
 
     track.selectAll('line').attr({
       'x1': g => scale(g.position.start()),
@@ -159,10 +180,10 @@ var NonEmptyGeneTrack = React.createClass({
 
     track.selectAll('rect.exon')
         .attr({
-          'x': ([exon, gStart]) => scale(exon.start),
-          'y':      ([exon]) => -3 * (exon.isCoding ? 2 : 1),
-          'height': ([exon]) =>  6 * (exon.isCoding ? 2 : 1),
-          'width':  ([exon]) => scale(exon.stop) - scale(exon.start)
+          'x':      exon => scale(exon.start),
+          'width':  exon => scale(exon.stop) - scale(exon.start),
+          'y':      exon => -3 * (exon.isCoding ? 2 : 1),
+          'height': exon =>  6 * (exon.isCoding ? 2 : 1)
         });
 
     // Exit
