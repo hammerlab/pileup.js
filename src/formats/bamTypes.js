@@ -7,10 +7,29 @@
 'use strict';
 
 var jBinary = require('jbinary');
+var _ = require('underscore');
+
 var {sizedBlock, nullString} = require('./helpers');
 
 var SEQUENCE_VALUES = ['=', 'A', 'C', 'M', 'G', 'R', 'S', 'V', 'T', 'W', 'Y', 'H', 'K', 'D', 'B', 'N'];
 var CIGAR_OPS = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X'];
+
+
+// Core alignment fields shared between BamAlignments and ThinBamAlignments.
+// TODO: figure out why jBinary's 'extend' type doesn't work with this in TYPE_SET.
+var ThinAlignment = {
+  refID: 'int32',
+  pos: 'int32',
+  l_read_name: 'uint8',
+  MAPQ: 'uint8',
+  bin: 'uint16',
+  n_cigar_op: 'uint16',
+  FLAG: 'uint16',
+  l_seq: 'int32',
+  next_refID: 'int32',
+  next_pos: 'int32',
+  tlen: 'int32'
+};
 
 var TYPE_SET: any = {
   'jBinary.littleEndian': true,
@@ -29,18 +48,7 @@ var TYPE_SET: any = {
 
   'BamAlignments': {
     block_size: 'int32',
-    contents: [sizedBlock, {
-      refID: 'int32',
-      pos: 'int32',
-      l_read_name: 'uint8',
-      MAPQ: 'uint8',
-      bin: 'uint16',
-      n_cigar_op: 'uint16',
-      FLAG: 'uint16',
-      l_seq: 'int32',
-      next_refID: 'int32',
-      next_pos: 'int32',
-      tlen: 'int32',
+    contents: [sizedBlock, _.extend({}, ThinAlignment, {
       read_name: [nullString, 'l_read_name'],
       cigar: ['array', 'CigarOp', 'n_cigar_op'],
       seq: ['FourBitSequence', 'l_seq'],
@@ -54,7 +62,12 @@ var TYPE_SET: any = {
                  values: ['array', 'AuxiliaryValue', 'num_values']
                 }, 'AuxiliaryValue']
       }]  // goes until the end of the block
-    }, 'block_size']
+    }), 'block_size']
+  },
+
+  'ThinBamAlignments': {
+    block_size: 'int32',
+    contents: [sizedBlock, ThinAlignment, 'block_size']
   },
 
   // TODO: make a "case" construct for jBinary & implement the rest of these.
@@ -107,6 +120,11 @@ var TYPE_SET: any = {
     header: 'BamHeader',
     alignments: ['array', 'BamAlignments']
   },
+
+  'ThinBamFile': {
+    header: 'BamHeader',
+    alignments: ['array', 'ThinBamAlignments']
+  }
 };
 
 

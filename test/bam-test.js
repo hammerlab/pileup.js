@@ -49,4 +49,15 @@ describe('BAM', function() {
       done();
     }).done();
   });
+
+  /*
+  it('should handle ginormous files', function(done) {
+    this.timeout(5000);
+    var bamFile = new Bam(new RemoteFile('/chrM.sorted.bam'));
+    bamFile.readAll(true).then(bamData => {
+      expect(bamData.alignments).to.have.length(38461);
+      done();
+    }).done();
+  });
+  */
 });

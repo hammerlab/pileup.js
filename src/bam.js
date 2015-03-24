@@ -28,7 +28,9 @@ function inflateConcatenatedGzip(buffer: ArrayBuffer): ArrayBuffer {
     inflator = new pako.Inflate();
     inflator.push(buffer.slice(position));
     if (inflator.err) { throw inflator.msg; }
-    blocks.push(inflator.result);
+    if (inflator.result) {
+      blocks.push(inflator.result);
+    }
     position += inflator.strm.total_in;
   } while (inflator.strm.avail_in > 0);
   return utils.concatArrayBuffers(blocks);
@@ -39,14 +41,20 @@ class Bam {
     this.remoteFile = remoteFile;
   }
 
-  // Reads the entire BAM file from the remote source and parses it.
-  // Since BAM files can be enormous (hundreds of GB), this is only recommended
-  // for small test inputs.
-  readAll(): Q.Promise<Object> {
-    return this.remoteFile.getBytes(0, 100000).then(buf => {
+  /**
+   * Reads the entire BAM file from the remote source and parses it.
+   * Since BAM files can be enormous (hundreds of GB), this is only recommended
+   * for small test inputs.
+   *
+   * If thinReads is set, only the fields needed to place the read in the
+   * genome will be parsed. This typically results in a dramatic (~40x)
+   * speedup.
+   */
+  readAll(thinReads?: boolean): Q.Promise<Object> {
+    return this.remoteFile.getBytes(0, 10000000).then(buf => {
       var decomp = inflateConcatenatedGzip(buf);
       var jb = new jBinary(decomp, bamTypes.TYPE_SET);
-      var o = jb.read('BamFile');
+      var o = jb.read(thinReads ? 'ThinBamFile' : 'BamFile');
       // Do some mild re-shaping.
       o.alignments = o.alignments.map(x => x.contents);
       return o;
