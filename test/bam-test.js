@@ -38,14 +38,24 @@ describe('BAM', function() {
 
       var aux = r000.auxiliary;
       expect(aux).to.have.length(2);
-      expect(aux[0]).to.contain({tag: 'RG', value:'cow'});
-      expect(aux[1]).to.contain({tag: 'PG', value:'bull'});
+      expect(aux[0]).to.contain({tag: 'RG', value: 'cow'});
+      expect(aux[1]).to.contain({tag: 'PG', value: 'bull'});
 
 
-      // TODO: tests for a few more records, particularly:
-      // - one with 'B'-format auxiliary data
+      // This one has more interesting auxiliary data:
+      // XX:B:S,12561,2,20,112
+      aux = aligns[2].auxiliary;
+      expect(aux).to.have.length(4);
+      expect(aux[0]).to.contain({tag: 'XX'});
+      expect(aux[0].value.values).to.deep.equal([12561, 2, 20, 112]);
+      expect(aux[1]).to.contain({tag: 'YY', value: 100});
+      expect(aux[2]).to.contain({tag: 'RG', value: 'fish'});
+      expect(aux[3]).to.contain({tag: 'PG', value: 'colt'});
+
+      // This one has a more interesting Cigar string
+      expect(Bam.makeCigarString(aligns[3].cigar)).to.equal('1S2I6M1P1I1P1I4M2I');
+
       // - one with a more interesting Phred string
-      // - one with a more interesting Cigar string
       done();
     }).done();
   });
