@@ -62,4 +62,15 @@ describe('utils', function() {
                      [[-1, 10], [2, 1]])).to.be.false;
     });
   });
+
+  it('should concatenate ArrayBuffers', function() {
+    var u8a = new Uint8Array([0, 1, 2, 3]),
+        u8b = new Uint8Array([4, 5, 6]),
+        concat = new Uint8Array(utils.concatArrayBuffers([u8a.buffer, u8b.buffer]));
+    var result = [];
+    for (var i = 0; i < concat.byteLength; i++) {
+      result.push(concat[i]);
+    }
+    expect(result).to.deep.equal([0, 1, 2, 3, 4, 5, 6]);
+  });
 });

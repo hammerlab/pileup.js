@@ -31,4 +31,16 @@ function tupleRangeOverlaps(tupleRange1: Array<Array<number>>,
      tupleLessOrEqual(tupleRange2[0], tupleRange2[1]));
 }
 
-module.exports = {tupleLessOrEqual, tupleRangeOverlaps};
+// Return a new ArrayBuffer by concatenating an array of ArrayBuffers.
+function concatArrayBuffers(buffers: ArrayBuffer[]): ArrayBuffer {
+  var totalBytes = buffers.map(b => b.byteLength).reduce((a, b) => a + b, 0);
+  var output = new Uint8Array(totalBytes);
+  var position = 0;
+  buffers.forEach(buf => {
+    output.set(new Uint8Array(buf), position);
+    position += buf.byteLength;
+  });
+  return output.buffer;
+}
+
+module.exports = {tupleLessOrEqual, tupleRangeOverlaps, concatArrayBuffers};

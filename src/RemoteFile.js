@@ -15,6 +15,8 @@ type Chunk = {
   // TODO(danvk): priority: number;
 }
 
+// TODO: support fetching the entire file
+// TODO: remember the length of the file when it's learned.
 
 class RemoteFile {
   url: string;
