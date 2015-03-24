@@ -47,3 +47,9 @@ This is a subset of `ensembl.chr17.bb`, shifted to match the coordinates in
     grep '^chr17\t' ensGene.bed | grep TP53 | perl -pe 's/(75\d{4,})/$1-7512444/ge' > /tmp/tp53.shifted.bed
     bedToBigBed -type=bed12+2 /tmp/tp53.shifted.bed <(echo "chr17 78774742") test/data/tp53.shifted.bb
 
+#### test_input_1*
+
+These BAM and BAI files come from the [samtools][1] tests. You can find
+corresponding SAM files for them in the same repo.
+
+[1]: https://github.com/samtools/samtools/tree/develop/test/dat
