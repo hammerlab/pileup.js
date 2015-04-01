@@ -124,6 +124,32 @@ var TYPE_SET: any = {
   'ThinBamFile': {
     header: 'BamHeader',
     alignments: ['array', 'ThinBamAlignments']
+  },
+
+  // BAI index formats
+  // See https://samtools.github.io/hts-specs/SAMv1.pdf
+  // TODO: make a "uint64small" type for when we know it's < 2^53
+  'BaiIndex': {
+    n_bin: 'int32',
+    bins: ['array', {
+      bin: 'uint32',
+      n_chunk: 'int32',
+      chunks: ['array', {
+        chunk_beg: 'uint64',
+        chunk_end: 'uint64'
+      }, 'n_chunk']
+    }, 'n_bin'],
+    n_intv: 'int32',
+    intervals: ['array', {
+      ioffset: 'uint64'
+    }, 'n_intv']
+  },
+
+  'BaiFile': {
+    magic: ['const', ['string', 4], 'BAI\u0001'],
+    n_ref: 'int32',
+    indices: ['array', 'BaiIndex', 'n_ref'],
+    n_no_coor: 'uint64'  // spec says optional, but it's always there.
   }
 };
 

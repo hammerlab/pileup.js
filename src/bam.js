@@ -12,7 +12,7 @@ var jBinary = require('jbinary'),
     pako = require('pako'),
     _ = require('underscore');
 
-var bamTypes = require('../src/formats/bamTypes'),
+var bamTypes = require('./formats/bamTypes'),
     utils = require('./utils');
 
 /**
@@ -51,7 +51,7 @@ class Bam {
    * speedup.
    */
   readAll(thinReads?: boolean): Q.Promise<Object> {
-    return this.remoteFile.getBytes(0, 10000000).then(buf => {
+    return this.remoteFile.getAll().then(buf => {
       var decomp = inflateConcatenatedGzip(buf);
       var jb = new jBinary(decomp, bamTypes.TYPE_SET);
       var o = jb.read(thinReads ? 'ThinBamFile' : 'BamFile');
