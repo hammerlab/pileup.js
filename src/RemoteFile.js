@@ -1,4 +1,3 @@
-
 /**
  * RemoteFile is a representation of a file on a remote server which can be
  * fetched in chunks, e.g. using a Range request.
@@ -15,8 +14,6 @@ type Chunk = {
   // TODO(danvk): priority: number;
 }
 
-// TODO: support fetching the entire file
-// TODO: remember the length of the file when it's learned.
 
 class RemoteFile {
   url: string;
@@ -32,14 +29,16 @@ class RemoteFile {
   }
 
   getBytes(start: number, length: number): Q.Promise<ArrayBuffer> {
+    // If the remote file length is known, clamp the request to fit within it.
     var stop = start + length - 1;
+    if (this.fileLength != -1) {
+      stop = Math.min(this.fileLength - 1, stop);
+    }
+
     // First check the cache.
-    for (var i = 0; i < this.chunks.length; i++) {
-      var chunk = this.chunks[i];
-      if (chunk.start <= start && chunk.stop >= stop) {
-        return Q.when(
-            chunk.buffer.slice(start - chunk.start, stop - chunk.start + 1));
-      }
+    var buf = this.getFromCache(start, stop);
+    if (buf) {
+      return Q.when(buf);
     }
 
     // TODO: handle partial overlap of request w/ cache.
@@ -48,30 +47,105 @@ class RemoteFile {
     return this.getFromNetwork(start, stop);
   }
 
-  getFromNetwork(start: number, stop: number): Q.Promise<ArrayBuffer> {
-    var deferred = Q.defer();
+  // Read the entire file -- not recommended for large files!
+  getAll(): Q.Promise<ArrayBuffer> {
+    // Check cache if file length is available.
+    if (this.fileLength != -1) {
+      var buf = this.getFromCache(0, this.fileLength - 1);
+      if (buf) {
+        return Q.when(buf);
+      }
+    }
 
     var xhr = new XMLHttpRequest();
     xhr.open('GET', this.url);
     xhr.responseType = 'arraybuffer';
+    return this.promiseXHR(xhr).then(([buffer]) => {
+      this.fileLength = buffer.byteLength;
+      this.chunks = [{start: 0, stop: this.fileLength - 1, buffer}];
+      return buffer;
+    });
+  }
+
+  // Returns a promise for the number of bytes in the remote file.
+  getSize(): Q.Promise<number> {
+    if (this.fileLength != -1) {
+      return Q.when(this.fileLength);
+    }
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('HEAD', this.url);
+
+    return this.promiseXHR(xhr).then(() => {
+      // event.total would be better, see facebook/flow#357
+      var len = xhr.getResponseHeader('Content-Length');
+      if (len !== null) {
+        return Number(len);
+      } else {
+        throw 'Remote resource has unknown length';
+      }
+    });
+  }
+
+  getFromCache(start: number, stop: number): ?ArrayBuffer {
+    for (var i = 0; i < this.chunks.length; i++) {
+      var chunk = this.chunks[i];
+      if (chunk.start <= start && chunk.stop >= stop) {
+        return chunk.buffer.slice(start - chunk.start, stop - chunk.start + 1);
+      }
+    }
+    return null;
+  }
+
+  getFromNetwork(start: number, stop: number): Q.Promise<ArrayBuffer> {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', this.url);
+    xhr.responseType = 'arraybuffer';
     xhr.setRequestHeader('Range', `bytes=${start}-${stop}`);
-    var remoteFile = this;
-    xhr.onload = function(e) {
+
+    return this.promiseXHR(xhr).then(([buffer]) => {
       // The actual length of the response may be less than requested if it's
       // too short, e.g. if we request bytes 0-1000 of a 500-byte file.
-      // TODO: record the length of the file whenever we learn it and clamp
-      // requests to fit within it. The cache is broken at EOF.
-      var buffer = this.response;
-
       var newChunk = { start, stop: start + buffer.byteLength - 1, buffer };
-      remoteFile.chunks.push(newChunk);
-      deferred.resolve(buffer);
-    };
+      this.chunks.push(newChunk);
 
-    // TODO: `reject`, `notify` on progress
+      // Record the full file length if it's available.
+      var contentRange = xhr.getResponseHeader('Content-Range');
+      if (contentRange) {
+        var m = /\/(\d+)$/.exec(contentRange);
+        if (m) {
+          var size = Number(m[1]);
+          if (this.fileLength != -1 && this.fileLength != size) {
+            console.warn(`Size of remote file ${this.url} changed from ` +
+                         `${this.fileLength} to ${size}`);
+          } else {
+            this.fileLength = size;
+          }
+        } else {
+          console.warn(`Received improper Content-Range value for ${this.url}: ${contentRange}`);
+        }
+      }
+
+      return buffer;
+    });
+  }
+
+  // Wrapper to convert XHRs to Promises.
+  // The promised values are the response (e.g. an ArrayBuffer) and the Event.
+  promiseXHR(xhr: XMLHttpRequest): Q.Promise<[any, Event]> {
+    var deferred = Q.defer();
+    xhr.addEventListener('load', function(e) {
+      if (this.status >= 400) {
+        deferred.reject(this.status + ' ' + this.statusText);
+      } else {
+        deferred.resolve([this.response, e]);
+      }
+    });
+    xhr.addEventListener('error', function(e) {
+      deferred.reject(e);
+    });
     this.numNetworkRequests++;
     xhr.send();
-
     return deferred.promise;
   }
 
