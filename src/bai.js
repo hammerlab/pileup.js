@@ -6,10 +6,14 @@
  */
 
 import type * as RemoteFile from './RemoteFile';
+import type * as ContigInterval from './ContigInterval';
 import type * as Q from 'q';
 
 var bamTypes = require('./formats/bamTypes');
 var jBinary = require('jbinary');
+var jDataView = require('jdataview');
+var Interval = require('./Interval');
+var _ = require('underscore');
 
 /*
 
@@ -31,6 +35,8 @@ It *also* stores a linear index, which can be used to avoid lookups in larger bi
 
 
 // TODO: add support for index chunks
+// time for 'blob': 6.886s with console open
+// time for 'lazyArray': 9s with console open (3.855 closed)
 
 class BaiFile {
   remoteFile: RemoteFile;
@@ -39,10 +45,48 @@ class BaiFile {
   constructor(remoteFile: RemoteFile) {
     this.remoteFile = remoteFile;
     this.index = remoteFile.getAll().then(buf => {
-      console.log(buf.byteLength);
-      return new jBinary(buf, bamTypes.TYPE_SET).read('BaiFile');
+    // this.index = remoteFile.getBytes(0, 712304).then(buf => {
+      var start = new Date().getTime();
+      var o = new jBinary(buf, bamTypes.TYPE_SET).read('BaiFile');
+      // var view = new jDataView(buf);
+      // view.readInt32();  // magic
+      // var n_ref = view.readInt32();
+      // var n_bin = view.readInt32();
+      // for (var i = 0; i < n_bin; i++) {
+
+      // }
+      // var n_intv = view.readInt32();
+      // for (var i = 0; i < n_intv; i++) {
+
+      // }
+
+      var stop = new Date().getTime();
+      console.log('parse time: ', (stop - start) / 1000);
+      return o;
     });
+    
     this.index.done();
+  }
+
+  getChunksForInterval(range: ContigInterval<number>): Q.Promise<Interval[]> {
+    return this.index.then(index => {
+      console.log(index);
+      if (range.contig < 0 || range.contig > index.n_ref) {
+        throw `Invalid contig ${range.contig}`;
+      }
+
+      var bins = reg2bins(range.start(), range.stop() + 1);
+
+      var contigIndex = index.indices[range.contig];
+      var chunks = _.chain(contigIndex.bins)
+                    .filter(b => bins.indexOf(b.bin) >= 0)
+                    .map(b => b.chunks)
+                    .flatten()
+                    .uniq(false /* not sorted */,
+                          c => c.chunk_beg + ',' + c.chunk_end)
+                    .value();
+      return chunks;
+    });
   }
 }
 

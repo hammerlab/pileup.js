@@ -36,4 +36,37 @@ describe('jBinary Helpers', function() {
     var o = jb.read(['array', [helpers.nullString, 5]]);
     expect(o).to.deep.equal(['ABCD', 'BC']);
   });
+
+  it('should read arrays of simple types lazily', function() {
+    var numReads = 0;
+    var countingUint8 = jBinary.Template({
+      baseType: 'uint8',
+      read() {
+        numReads++;
+        return this.baseRead();
+      }
+    });
+
+    var u8 = new Uint8Array([65, 66, 67, 68, 1, 2, 3, 4, 5, 6]);
+    var jb = new jBinary(u8);
+    var o = jb.read([helpers.lazyArray, countingUint8, 1, 10]);
+    expect(o.length).to.equal(10);
+    expect(numReads).to.equal(0);
+    expect(o.get(0)).to.equal(65);
+    expect(numReads).to.equal(1);
+    expect(o.get(1)).to.equal(66);
+    expect(numReads).to.equal(2);
+    expect(o.get(9)).to.equal(6);
+    expect(numReads).to.equal(3);
+  });
+
+  it('should read arrays of objects lazily', function() {
+    var u8 = new Uint8Array([65, 66, 67, 68, 1, 2, 3, 4, 5, 6]);
+    var jb = new jBinary(u8);
+    var o = jb.read([helpers.lazyArray, {x: 'uint8', y: 'uint8'}, 2, 5]);
+    expect(o.length).to.equal(5);
+    expect(o.get(0)).to.deep.equal({x: 65, y: 66});
+    expect(o.get(1)).to.deep.equal({x: 67, y: 68});
+    expect(o.get(4)).to.deep.equal({x: 5, y: 6});
+  });
 });

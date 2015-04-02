@@ -9,7 +9,7 @@
 var jBinary = require('jbinary');
 var _ = require('underscore');
 
-var {sizedBlock, nullString} = require('./helpers');
+var {sizedBlock, nullString, uint64native, lazyArray} = require('./helpers');
 
 var SEQUENCE_VALUES = ['=', 'A', 'C', 'M', 'G', 'R', 'S', 'V', 'T', 'W', 'Y', 'H', 'K', 'D', 'B', 'N'];
 var CIGAR_OPS = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X'];
@@ -128,28 +128,40 @@ var TYPE_SET: any = {
 
   // BAI index formats
   // See https://samtools.github.io/hts-specs/SAMv1.pdf
-  // TODO: make a "uint64small" type for when we know it's < 2^53
+  'VirtualOffset': jBinary.Template({
+    baseType: 'uint64',
+    read() {
+      var u64 = this.baseRead();
+      return {
+        // offset of beginning of gzip block in the compressed file.
+        coffset: (u64.hi >> 16) + (u64.lo >> 16),
+        // offset of data within the decompressed block
+        uoffset: u64.lo & 0xffff
+      };
+    }
+  }),
+
   'BaiIndex': {
     n_bin: 'int32',
     bins: ['array', {
       bin: 'uint32',
       n_chunk: 'int32',
-      chunks: ['array', {
-        chunk_beg: 'uint64',
-        chunk_end: 'uint64'
-      }, 'n_chunk']
+      chunks: [lazyArray, {
+        chunk_beg: 'VirtualOffset',
+        chunk_end: 'VirtualOffset'
+      }, 16 /* bytes per item */, 'n_chunk']
     }, 'n_bin'],
     n_intv: 'int32',
-    intervals: ['array', {
-      ioffset: 'uint64'
-    }, 'n_intv']
+    intervals: [lazyArray, {
+      ioffset: 'uint64',  // 'VirtualOffset'
+    }, 8 /* bytes per item */, 'n_intv']
   },
 
   'BaiFile': {
     magic: ['const', ['string', 4], 'BAI\u0001'],
     n_ref: 'int32',
     indices: ['array', 'BaiIndex', 'n_ref'],
-    n_no_coor: 'uint64'  // spec says optional, but it's always there.
+    n_no_coor: uint64native  // spec says optional, but it's always there.
   }
 };
 

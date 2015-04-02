@@ -33,6 +33,7 @@ function inflateConcatenatedGzip(buffer: ArrayBuffer): ArrayBuffer {
     }
     position += inflator.strm.total_in;
   } while (inflator.strm.avail_in > 0);
+  console.log('blocks in gzip: ', blocks.length);
   return utils.concatArrayBuffers(blocks);
 }
  
