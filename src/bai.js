@@ -37,6 +37,36 @@ It *also* stores a linear index, which can be used to avoid lookups in larger bi
 // TODO: add support for index chunks
 // time for 'blob': 6.886s with console open
 // time for 'lazyArray': 9s with console open (3.855 closed)
+// time to compute index chunks: 0.785s w/ console open (using jDataView)
+
+// In the event that index chunks aren't available from an external source, it
+// winds up saving time to do a fast pass over the data to compute them. This
+// allows us to parse a single contig at a time using jBinary.
+function computeIndexChunks(buffer) {
+  var view = new jDataView(buffer, 0, buffer.byteLength, true /* little endian */);
+
+  var contigStartOffsets = [];
+  view.getInt32();  // magic
+  var n_ref = view.getInt32();
+  for (var j = 0; j < n_ref; j++) {
+    contigStartOffsets.push(view.tell());
+    var n_bin = view.getInt32();
+    for (var i = 0; i < n_bin; i++) {
+      var bin = view.getUint32();
+      var n_chunk = view.getInt32();
+      view.skip(n_chunk * 16);
+    }
+    var n_intv = view.getInt32();
+    view.skip(n_intv * 8);
+  }
+  contigStartOffsets.push(view.tell());
+  var n_no_coor = view.getUint64();
+
+  return {
+    chunks: _.zip(_.initial(contigStartOffsets), _.rest(contigStartOffsets)),
+    minBlockIndex: 0
+  };
+}
 
 class BaiFile {
   remoteFile: RemoteFile;
@@ -44,24 +74,20 @@ class BaiFile {
 
   constructor(remoteFile: RemoteFile) {
     this.remoteFile = remoteFile;
+    var start = new Date().getTime();
     this.index = remoteFile.getAll().then(buf => {
-    // this.index = remoteFile.getBytes(0, 712304).then(buf => {
-      var start = new Date().getTime();
-      var o = new jBinary(buf, bamTypes.TYPE_SET).read('BaiFile');
-      // var view = new jDataView(buf);
-      // view.readInt32();  // magic
-      // var n_ref = view.readInt32();
-      // var n_bin = view.readInt32();
-      // for (var i = 0; i < n_bin; i++) {
-
-      // }
-      // var n_intv = view.readInt32();
-      // for (var i = 0; i < n_intv; i++) {
-
-      // }
-
       var stop = new Date().getTime();
-      console.log('parse time: ', (stop - start) / 1000);
+      console.log('fetch: ', (stop - start) / 1000);
+    // this.index = remoteFile.getBytes(0, 712304).then(buf => {
+      // var o = new jBinary(buf, bamTypes.TYPE_SET).read('BaiFile');
+      var o = {};
+      // console.log('parse time: ', (stop - start) / 1000);
+
+      start = new Date().getTime();
+      var chunks = computeIndexChunks(buf);
+      stop = new Date().getTime();
+      console.log('parse time2: ', (stop - start) / 1000);
+      console.log(chunks);
       return o;
     });
     
