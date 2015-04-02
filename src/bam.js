@@ -33,13 +33,28 @@ function inflateConcatenatedGzip(buffer: ArrayBuffer): ArrayBuffer {
     }
     position += inflator.strm.total_in;
   } while (inflator.strm.avail_in > 0);
-  console.log('blocks in gzip: ', blocks.length);
   return utils.concatArrayBuffers(blocks);
+}
+
+/**
+ * Inflate a single gzip block at the start of the buffer.
+ */
+function inflateGzip(buffer: ArrayBuffer): ArrayBuffer {
+  return pako.inflate(buffer);
 }
  
 class Bam {
+  header: Q.Promise<Object>;
+
   constructor(remoteFile: RemoteFile) {
     this.remoteFile = remoteFile;
+    // TODO: compute 65535 from index chunks
+    this.header = this.remoteFile.getBytes(0, 65535).then(buf => {
+      var decomp = inflateGzip(buf);
+      var jb = new jBinary(decomp, bamTypes.TYPE_SET);
+      return jb.read('BamHeader');
+    });
+    this.header.done();
   }
 
   /**
@@ -59,6 +74,28 @@ class Bam {
       // Do some mild re-shaping.
       o.alignments = o.alignments.map(x => x.contents);
       return o;
+    });
+  }
+
+  /**
+   * Read alignments for a single block.
+   */
+  readOneBlock(compressedOffset: number, uncompressedOffset: number): Q.Promise<Object> {
+    return Q.when(null);
+  }
+
+  /**
+   * Map a contig name to a contig index.
+   */
+  getContigIndex(contigName: string): Q.Promise<number> {
+    return this.header.then(header => {
+      for (var i = 0; i < header.references.length; i++) {
+        var name = header.references[i].name;
+        if (name == contigName || name == 'chr' + contigName) {
+          return i;
+        }
+      }
+      throw `Invalid contig name: ${contigName}`;
     });
   }
 

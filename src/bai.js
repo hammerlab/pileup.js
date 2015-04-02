@@ -13,6 +13,7 @@ var bamTypes = require('./formats/bamTypes');
 var jBinary = require('jbinary');
 var jDataView = require('jdataview');
 var Interval = require('./Interval');
+var VirtualOffset = require('./VirtualOffset');
 var _ = require('underscore');
 
 /*
@@ -33,11 +34,6 @@ The BAI file stores the file start/stop offsets for each bin.
 It *also* stores a linear index, which can be used to avoid lookups in larger bins.
 */
 
-
-// TODO: add support for index chunks
-// time for 'blob': 6.886s with console open
-// time for 'lazyArray': 9s with console open (3.855 closed)
-// time to compute index chunks: 0.785s w/ console open (using jDataView)
 
 // In the event that index chunks aren't available from an external source, it
 // winds up saving time to do a fast pass over the data to compute them. This
@@ -64,54 +60,144 @@ function computeIndexChunks(buffer) {
 
   return {
     chunks: _.zip(_.initial(contigStartOffsets), _.rest(contigStartOffsets)),
-    minBlockIndex: 0
+    minBlockIndex: 0  // TODO: compute this if it's helpful
   };
 }
 
+
+function readChunks(buf) {
+  return new jBinary(buf, bamTypes.TYPE_SET).read('ChunksArray');
+  // return new jBinary(buf, bamTypes.TYPE_SET).read(['array', 'uint64']);
+}
+
+function readIntervals(buf) {
+  return new jBinary(buf, bamTypes.TYPE_SET).read('IntervalsArray');
+}
+
+type Chunk = {
+  chunk_beg: VirtualOffset;
+  chunk_end: VirtualOffset;
+}
+
+function doChunksOverlap(a: Chunk, b: Chunk) {
+  return a.chunk_beg.isLessThanOrEqual(b.chunk_end) &&
+         b.chunk_beg.isLessThanOrEqual(a.chunk_end);
+}
+
+function areChunksAdjacent(a: Chunk, b: Chunk) {
+  return a.chunk_beg.isEqual(b.chunk_end) || a.chunk_end.isEqual(b.chunk_beg);
+}
+
+// This coalesces adjacent & overlapping chunks to minimize fetches.
+function optimizeChunkList(chunkList: Chunk[]): Chunk[] {
+  chunkList.sort((a, b) => {
+    var result = a.chunk_beg.compareTo(b.chunk_beg);
+    if (result == 0) {
+      result = a.chunk_end.compareTo(b.chunk_end);
+    }
+    return result;
+  });
+
+  var newChunks = [];
+  chunkList.forEach(chunk => {
+    if (newChunks.length == 0) {
+      newChunks.push(chunk);
+      return;
+    }
+
+    var lastChunk = newChunks[newChunks.length - 1];
+    if (!doChunksOverlap(lastChunk, chunk) &&
+        !areChunksAdjacent(lastChunk, chunk)) {
+      newChunks.push(chunk);
+    } else {
+      if (lastChunk.chunk_end.isLessThan(chunk.chunk_end)) {
+        lastChunk.chunk_end = chunk.chunk_end;
+      }
+    }
+  });
+
+  return newChunks;
+}
+
+class ImmediateBaiFile {
+  buffer: ArrayBuffer;
+  indexChunks: Object;
+
+  constructor(buffer: ArrayBuffer) {
+    this.buffer = buffer;
+    this.indexChunks = computeIndexChunks(buffer);
+    // window.bai = this;
+  }
+
+  getChunksForInterval(range: ContigInterval<number>): Chunk[] {
+    if (range.contig < 0 || range.contig > this.indexChunks.chunks.length) {
+      throw `Invalid contig ${range.contig}`;
+    }
+
+    var bins = reg2bins(range.start(), range.stop() + 1);
+
+    var contigIndex = this.indexForContig(range.contig);
+
+    var str64 = u64 => u64.hi + ' ' + u64.lo;
+
+    var chunks = _.chain(contigIndex.bins)
+                  .filter(b => bins.indexOf(b.bin) >= 0)
+                  // .tap(x => console.log(x))
+                  .map(b => readChunks(b.chunks))
+                  .flatten()
+                  .value();
+
+    console.log('Candidate chunks: ', chunks.length);
+
+    chunks = optimizeChunkList(chunks);
+
+    /*
+    // Now use the linear index to prune this.
+    // "Given a region [rbeg,rend), we only need to visit a chunk whose end
+    // file offset is larger than the file offset of the 16kbp
+    // window containing rbeg."
+    var lindex = readIntervals(contigIndex.intervals);
+    var startIdx = Math.floor(range.start() / 16384);
+    var stopIdx = Math.floor(range.stop() / 16384);
+    console.log(lindex[startIdx], lindex[stopIdx]);
+
+    chunks = chunks.filter(c => {
+      // return c.chunk_end > interval;
+      return lindex[startIdx].isLessThan(c.chunk_end);
+      // && virtualOffsetLessThan(c.chunk_beg, lindex[stopIdx]);
+    });
+
+   */
+    console.log('Filtered chunks: ', chunks.length);
+
+    return chunks;
+  }
+
+  // Retrieve and parse the index for a particular contig.
+  // TODO: make this async
+  indexForContig(contig: number): Object {
+    var [start, stop] = this.indexChunks.chunks[contig];
+    var jb = new jBinary(this.buffer.slice(start, stop), bamTypes.TYPE_SET);
+    return jb.read('BaiIndex');
+  }
+}
+
+
 class BaiFile {
   remoteFile: RemoteFile;
-  index: Q.Promise<Object>;
+  immediate: Q.Promise<ImmediateBaiFile>;
 
   constructor(remoteFile: RemoteFile) {
     this.remoteFile = remoteFile;
-    var start = new Date().getTime();
-    this.index = remoteFile.getAll().then(buf => {
-      var stop = new Date().getTime();
-      console.log('fetch: ', (stop - start) / 1000);
-    // this.index = remoteFile.getBytes(0, 712304).then(buf => {
-      // var o = new jBinary(buf, bamTypes.TYPE_SET).read('BaiFile');
-      var o = {};
-      // console.log('parse time: ', (stop - start) / 1000);
-
-      start = new Date().getTime();
-      var chunks = computeIndexChunks(buf);
-      stop = new Date().getTime();
-      console.log('parse time2: ', (stop - start) / 1000);
-      console.log(chunks);
-      return o;
+    this.immediate = remoteFile.getAll().then(buf => {
+      return new ImmediateBaiFile(buf);
     });
-    
-    this.index.done();
+    this.immediate.done();
   }
 
-  getChunksForInterval(range: ContigInterval<number>): Q.Promise<Interval[]> {
-    return this.index.then(index => {
-      console.log(index);
-      if (range.contig < 0 || range.contig > index.n_ref) {
-        throw `Invalid contig ${range.contig}`;
-      }
-
-      var bins = reg2bins(range.start(), range.stop() + 1);
-
-      var contigIndex = index.indices[range.contig];
-      var chunks = _.chain(contigIndex.bins)
-                    .filter(b => bins.indexOf(b.bin) >= 0)
-                    .map(b => b.chunks)
-                    .flatten()
-                    .uniq(false /* not sorted */,
-                          c => c.chunk_beg + ',' + c.chunk_end)
-                    .value();
-      return chunks;
+  getChunksForInterval(range: ContigInterval<number>): Q.Promise<Chunk[]> {
+    return this.immediate.then(immediate => {
+      return immediate.getChunksForInterval(range);
     });
   }
 }

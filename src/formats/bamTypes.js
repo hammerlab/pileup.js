@@ -8,6 +8,7 @@
 
 var jBinary = require('jbinary');
 var _ = require('underscore');
+var VirtualOffset = require('../VirtualOffset');
 
 var {sizedBlock, nullString, uint64native, lazyArray} = require('./helpers');
 
@@ -131,30 +132,40 @@ var TYPE_SET: any = {
   'VirtualOffset': jBinary.Template({
     baseType: 'uint64',
     read() {
+      // Quoth Heng Li: u64 = coffset<<16|uoffset
       var u64 = this.baseRead();
-      return {
+      return new VirtualOffset(
         // offset of beginning of gzip block in the compressed file.
-        coffset: (u64.hi >> 16) + (u64.lo >> 16),
+        u64.hi * 65536 + (u64.lo >> 16),
         // offset of data within the decompressed block
-        uoffset: u64.lo & 0xffff
-      };
+        u64.lo & 0xffff
+      );
     }
   }),
+
+  'ChunksArray': ['array', {
+    chunk_beg: 'VirtualOffset',
+    chunk_end: 'VirtualOffset'
+  }],
+
+  'IntervalsArray': ['array', 'VirtualOffset'],
 
   'BaiIndex': {
     n_bin: 'int32',
     bins: ['array', {
       bin: 'uint32',
       n_chunk: 'int32',
-      chunks: [lazyArray, {
-        chunk_beg: 'VirtualOffset',
-        chunk_end: 'VirtualOffset'
-      }, 16 /* bytes per item */, 'n_chunk']
+      chunks: ['blob', ctx => 16 * ctx.n_chunk],
+      // chunks: [lazyArray, {
+      //   chunk_beg: 'VirtualOffset',
+      //   chunk_end: 'VirtualOffset'
+      // }, 16 /* bytes per item */, 'n_chunk']
     }, 'n_bin'],
     n_intv: 'int32',
-    intervals: [lazyArray, {
-      ioffset: 'uint64',  // 'VirtualOffset'
-    }, 8 /* bytes per item */, 'n_intv']
+    intervals: ['blob', ctx => 8 * ctx.n_intv]
+    // intervals: [lazyArray, {
+    //   ioffset: 'uint64',  // 'VirtualOffset'
+    // }, 8 /* bytes per item */, 'n_intv']
   },
 
   'BaiFile': {
