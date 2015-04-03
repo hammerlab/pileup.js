@@ -101,7 +101,7 @@ var lazyArray = jBinary.Type({
     var buffer = this.binary.slice(pos, pos + len);
     this.binary.skip(len);
     return new LazyArray(buffer, bytesPerItem, this.itemType);
-  },
+  }
 });
 
 module.exports = {typeAtOffset, sizedBlock, nullString, uint64native, lazyArray};

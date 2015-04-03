@@ -6,7 +6,6 @@ var expect = chai.expect;
 var jBinary = require('jbinary');
 
 var BaiFile = require('../src/bai'),
-    Bam = require('../src/bam'),
     bamTypes = require('../src/formats/bamTypes'),
     ContigInterval = require('../src/ContigInterval'),
     RemoteFile = require('../src/RemoteFile');

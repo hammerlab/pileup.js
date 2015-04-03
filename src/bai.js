@@ -4,16 +4,16 @@
  * bam.js.
  * @flow
  */
+'use strict';
 
 import type * as RemoteFile from './RemoteFile';
 import type * as ContigInterval from './ContigInterval';
 import type * as Q from 'q';
+import type * as VirtualOffset from './VirtualOffset';
 
 var bamTypes = require('./formats/bamTypes');
 var jBinary = require('jbinary');
 var jDataView = require('jdataview');
-var Interval = require('./Interval');
-var VirtualOffset = require('./VirtualOffset');
 var _ = require('underscore');
 
 /*
@@ -48,7 +48,7 @@ function computeIndexChunks(buffer) {
     contigStartOffsets.push(view.tell());
     var n_bin = view.getInt32();
     for (var i = 0; i < n_bin; i++) {
-      var bin = view.getUint32();
+      view.getUint32();  // bin ID
       var n_chunk = view.getInt32();
       view.skip(n_chunk * 16);
     }
@@ -56,7 +56,6 @@ function computeIndexChunks(buffer) {
     view.skip(n_intv * 8);
   }
   contigStartOffsets.push(view.tell());
-  var n_no_coor = view.getUint64();
 
   return {
     chunks: _.zip(_.initial(contigStartOffsets), _.rest(contigStartOffsets)),
@@ -92,7 +91,7 @@ function areChunksAdjacent(a: Chunk, b: Chunk) {
 function optimizeChunkList(chunkList: Chunk[], minimumOffset: VirtualOffset): Chunk[] {
   chunkList.sort((a, b) => {
     var result = a.chunk_beg.compareTo(b.chunk_beg);
-    if (result == 0) {
+    if (result === 0) {
       result = a.chunk_end.compareTo(b.chunk_end);
     }
     return result;
@@ -104,7 +103,7 @@ function optimizeChunkList(chunkList: Chunk[], minimumOffset: VirtualOffset): Ch
       return;  // linear index optimization
     }
 
-    if (newChunks.length == 0) {
+    if (newChunks.length === 0) {
       newChunks.push(chunk);
       return;
     }
@@ -140,8 +139,6 @@ class ImmediateBaiFile {
     var bins = reg2bins(range.start(), range.stop() + 1);
 
     var contigIndex = this.indexForContig(range.contig);
-
-    var str64 = u64 => u64.hi + ' ' + u64.lo;
 
     var chunks = _.chain(contigIndex.bins)
                   .filter(b => bins.indexOf(b.bin) >= 0)
@@ -191,21 +188,9 @@ class BaiFile {
 // These functions come directly from the SAM paper
 // See https://samtools.github.io/hts-specs/SAMv1.pdf section 5.3
 
-// calculate bin given an alignment covering [beg,end)
-// (zero-based, half-closed-half-open)
-function reg2bin(beg, end) {
-  --end;
-  if (beg>>14 == end>>14) return ((1<<15)-1)/7 + (beg>>14);
-  if (beg>>17 == end>>17) return ((1<<12)-1)/7 + (beg>>17);
-  if (beg>>20 == end>>20) return ((1<<9)-1)/7  + (beg>>20);
-  if (beg>>23 == end>>23) return ((1<<6)-1)/7  + (beg>>23);
-  if (beg>>26 == end>>26) return ((1<<3)-1)/7  + (beg>>26);
-  return 0;
-}
-
 // calculate the list of bins that may overlap with region [beg,end) (zero-based)
 function reg2bins(beg, end) {
-  var i = 0, k, list = [];
+  var k, list = [];
   --end;
   list.push(0);
   for (k =    1 + (beg>>26); k <=    1 + (end>>26); ++k) list.push(k);

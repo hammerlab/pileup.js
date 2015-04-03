@@ -10,7 +10,7 @@ var jBinary = require('jbinary');
 var _ = require('underscore');
 var VirtualOffset = require('../VirtualOffset');
 
-var {sizedBlock, nullString, uint64native, lazyArray} = require('./helpers');
+var {sizedBlock, nullString, uint64native} = require('./helpers');
 
 var SEQUENCE_VALUES = ['=', 'A', 'C', 'M', 'G', 'R', 'S', 'V', 'T', 'W', 'Y', 'H', 'K', 'D', 'B', 'N'];
 var CIGAR_OPS = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X'];

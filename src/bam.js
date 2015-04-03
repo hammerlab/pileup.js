@@ -119,7 +119,7 @@ class Bam {
       if (stop) {
         decomp = decomp.slice(start.uoffset, stop.uoffset);
       } else {
-        decomp = decomp.slice(start.uoffset)
+        decomp = decomp.slice(start.uoffset);
       }
       var jb = new jBinary(decomp, bamTypes.TYPE_SET);
       var alignments = [];
