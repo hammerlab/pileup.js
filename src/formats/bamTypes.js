@@ -8,14 +8,15 @@
 
 var jBinary = require('jbinary');
 var _ = require('underscore');
+var VirtualOffset = require('../VirtualOffset');
 
-var {sizedBlock, nullString} = require('./helpers');
+var {sizedBlock, nullString, uint64native} = require('./helpers');
 
 var SEQUENCE_VALUES = ['=', 'A', 'C', 'M', 'G', 'R', 'S', 'V', 'T', 'W', 'Y', 'H', 'K', 'D', 'B', 'N'];
 var CIGAR_OPS = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X'];
 
 
-// Core alignment fields shared between BamAlignments and ThinBamAlignments.
+// Core alignment fields shared between BamAlignment and ThinBamAlignment.
 // TODO: figure out why jBinary's 'extend' type doesn't work with this in TYPE_SET.
 var ThinAlignment = {
   refID: 'int32',
@@ -46,7 +47,7 @@ var TYPE_SET: any = {
     }, 'n_ref']
   },
 
-  'BamAlignments': {
+  'BamAlignment': {
     block_size: 'int32',
     contents: [sizedBlock, _.extend({}, ThinAlignment, {
       read_name: [nullString, 'l_read_name'],
@@ -65,7 +66,7 @@ var TYPE_SET: any = {
     }), 'block_size']
   },
 
-  'ThinBamAlignments': {
+  'ThinBamAlignment': {
     block_size: 'int32',
     contents: [sizedBlock, ThinAlignment, 'block_size']
   },
@@ -118,12 +119,60 @@ var TYPE_SET: any = {
 
   'BamFile': {
     header: 'BamHeader',
-    alignments: ['array', 'BamAlignments']
+    alignments: ['array', 'BamAlignment']
   },
 
   'ThinBamFile': {
     header: 'BamHeader',
-    alignments: ['array', 'ThinBamAlignments']
+    alignments: ['array', 'ThinBamAlignment']
+  },
+
+  // BAI index formats
+  // See https://samtools.github.io/hts-specs/SAMv1.pdf
+  'VirtualOffset': jBinary.Template({
+    baseType: 'uint64',
+    read() {
+      // Quoth Heng Li: u64 = coffset<<16|uoffset
+      var u64 = this.baseRead();
+      return new VirtualOffset(
+        // offset of beginning of gzip block in the compressed file.
+        u64.hi * 65536 + (u64.lo >> 16),
+        // offset of data within the decompressed block
+        u64.lo & 0xffff
+      );
+    }
+  }),
+
+  'ChunksArray': ['array', {
+    chunk_beg: 'VirtualOffset',
+    chunk_end: 'VirtualOffset'
+  }],
+
+  'IntervalsArray': ['array', 'VirtualOffset'],
+
+  'BaiIndex': {
+    n_bin: 'int32',
+    bins: ['array', {
+      bin: 'uint32',
+      n_chunk: 'int32',
+      chunks: ['blob', ctx => 16 * ctx.n_chunk],
+      // Parsing is deferred as a performance optimization. The type is really:
+      // chunks: ['array', {
+      //   chunk_beg: 'VirtualOffset',
+      //   chunk_end: 'VirtualOffset'
+      // }, 'n_chunk']
+    }, 'n_bin'],
+    n_intv: 'int32',
+    intervals: ['blob', ctx => 8 * ctx.n_intv]
+    // Parsing is deferred as a performance optimization. The type is really:
+    // intervals: ['array', 'VirtualOffset', 'n_intv']
+  },
+
+  'BaiFile': {
+    magic: ['const', ['string', 4], 'BAI\u0001'],
+    n_ref: 'int32',
+    indices: ['array', 'BaiIndex', 'n_ref'],
+    n_no_coor: uint64native  // spec says optional, but it's always there.
   }
 };
 

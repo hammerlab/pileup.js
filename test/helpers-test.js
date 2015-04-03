@@ -36,4 +36,60 @@ describe('jBinary Helpers', function() {
     var o = jb.read(['array', [helpers.nullString, 5]]);
     expect(o).to.deep.equal(['ABCD', 'BC']);
   });
+
+  it('should read arrays of simple types lazily', function() {
+    var numReads = 0;
+    var countingUint8 = jBinary.Template({
+      baseType: 'uint8',
+      read() {
+        numReads++;
+        return this.baseRead();
+      }
+    });
+
+    var u8 = new Uint8Array([65, 66, 67, 68, 1, 2, 3, 4, 5, 6]);
+    var jb = new jBinary(u8);
+    var o = jb.read([helpers.lazyArray, countingUint8, 1, 10]);
+    expect(o.length).to.equal(10);
+    expect(numReads).to.equal(0);
+    expect(o.get(0)).to.equal(65);
+    expect(numReads).to.equal(1);
+    expect(o.get(1)).to.equal(66);
+    expect(numReads).to.equal(2);
+    expect(o.get(9)).to.equal(6);
+    expect(numReads).to.equal(3);
+  });
+
+  it('should read arrays of objects lazily', function() {
+    var u8 = new Uint8Array([65, 66, 67, 68, 1, 2, 3, 4, 5, 6]);
+    var jb = new jBinary(u8);
+    var o = jb.read([helpers.lazyArray, {x: 'uint8', y: 'uint8'}, 2, 5]);
+    expect(o.length).to.equal(5);
+    expect(o.get(0)).to.deep.equal({x: 65, y: 66});
+    expect(o.get(1)).to.deep.equal({x: 67, y: 68});
+    expect(o.get(4)).to.deep.equal({x: 5, y: 6});
+  });
+
+  it('should read the entire array lazily', function() {
+    //                        A   B   C   D      B,  C
+    var u8 = new Uint8Array([65, 66, 67, 68, 0, 66, 67, 0, 0, 0]);
+
+    var jb = new jBinary(u8);
+    var o = jb.read([helpers.lazyArray, [helpers.nullString, 5], 5, 2]);
+    expect(o.getAll()).to.deep.equal(['ABCD', 'BC']);
+  });
+
+  it('should read uint64s as native numbers', function() {
+    var TYPE_SET = {
+      'jBinary.littleEndian': true,
+      uint64native: helpers.uint64native
+    };
+    var u8big   = new jBinary([0x41, 0x42, 0x43, 0xF3, 0x04, 0x24, 0x30, 0x00], TYPE_SET),
+        u8small = new jBinary([0x00, 0x00, 0x43, 0xF3, 0x04, 0x00, 0x00, 0x00], TYPE_SET);
+    // TODO: test a few numbers right on the edge
+    // TODO: test number that wraps around to negative as a float
+    
+    expect(() => u8big.read('uint64native')).to.throw(RangeError);
+    expect(u8small.read('uint64native')).to.equal(21261123584);
+  });
 });

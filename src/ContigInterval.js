@@ -34,6 +34,11 @@ class ContigInterval<T: (number|string)> {
             this.interval.intersects(other.interval));
   }
 
+  containsInterval(other: ContigInterval<T>): boolean {
+    return (this.contig === other.contig &&
+            this.interval.containsInterval(other.interval));
+  }
+
   toString(): string {
     return `${this.contig}:${this.start()}-${this.stop()}`;
   }

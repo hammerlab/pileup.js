@@ -5,7 +5,9 @@ var chai = require('chai');
 var expect = chai.expect;
 
 var Bam = require('../src/bam'),
-    RemoteFile = require('../src/RemoteFile');
+    ContigInterval = require('../src/ContigInterval'),
+    RemoteFile = require('../src/RemoteFile'),
+    VirtualOffset = require('../src/VirtualOffset');
 
 describe('BAM', function() {
   it('should parse BAM files', function(done) {
@@ -56,6 +58,57 @@ describe('BAM', function() {
       expect(Bam.makeCigarString(aligns[3].cigar)).to.equal('1S2I6M1P1I1P1I4M2I');
 
       // - one with a more interesting Phred string
+      done();
+    }).done();
+  });
+
+  function alignmentRange(alignment) {
+    var stop = alignment.pos + alignment.l_seq;
+    return `${alignment.refID}:${1+alignment.pos}-${stop}`;
+  }
+  
+  // This matches htsjdk's BamFileIndexTest.testSpecificQueries
+  it('should find sequences using an index', function(done) {
+    var bam = new Bam(new RemoteFile('/test/data/index_test.bam'),
+                      new RemoteFile('/test/data/index_test.bam.bai'));
+
+    // TODO: run these in parallel
+    var range = new ContigInterval('chrM', 10400, 10600);
+    bam.getAlignmentsInRange(range, true).then(alignments => {
+      expect(alignments).to.have.length(1);
+      expect(alignmentRange(alignments[0])).to.equal('0:10427-10477');
+      return bam.getAlignmentsInRange(range, false).then(alignments => {
+        expect(alignments).to.have.length(2);
+        expect(alignmentRange(alignments[0])).to.equal('0:10388-10438');
+        expect(alignmentRange(alignments[1])).to.equal('0:10427-10477');
+        done();
+      });
+    }).done();
+  });
+
+  it('should fetch alignments from a Chunk', function(done) {
+    var bam = new Bam(new RemoteFile('/test/data/index_test.bam'));
+    bam.readChunk(new VirtualOffset(0, 8384),
+                  new VirtualOffset(0, 11194)).then(alignments => {
+      expect(alignments).to.have.length(21);
+      expect(alignments[0].refID).to.equal(0);
+      expect(alignments[0].pos).to.equal(1518);
+      expect(alignments[20].refID).to.equal(0);
+      expect(alignments[20].pos).to.equal(15568);
+      done();
+    }).done();
+  });
+
+  it('should fetch alignments to the end of a block', function(done) {
+    var bam = new Bam(new RemoteFile('/test/data/index_test.bam'));
+    bam.readChunk(new VirtualOffset(0, 8384)).then(alignments => {
+      expect(alignments).to.have.length(426);
+      expect(alignments[0].refID).to.equal(0);
+      expect(alignments[0].pos).to.equal(1518);
+      expect(alignments[20].refID).to.equal(0);
+      expect(alignments[20].pos).to.equal(15568);
+      expect(alignments[425].refID).to.equal(1);
+      expect(alignments[425].pos).to.equal(111620369);
       done();
     }).done();
   });
