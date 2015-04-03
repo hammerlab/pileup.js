@@ -145,20 +145,15 @@ class ImmediateBaiFile {
 
     var chunks = _.chain(contigIndex.bins)
                   .filter(b => bins.indexOf(b.bin) >= 0)
-                  // .tap(x => console.log(x))
                   .map(b => readChunks(b.chunks))
                   .flatten()
                   .value();
-
-    console.log('Candidate chunks: ', chunks.length);
 
     var linearIndex = readIntervals(contigIndex.intervals);
     var startIdx = Math.max(0, Math.floor(range.start() / 16384));
     var minimumOffset = linearIndex[startIdx];
 
     chunks = optimizeChunkList(chunks, minimumOffset);
-
-    console.log('Filtered chunks: ', chunks.length);
 
     return chunks;
   }

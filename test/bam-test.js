@@ -61,25 +61,30 @@ describe('BAM', function() {
       done();
     }).done();
   });
-  
-  // it('should find sequences using an index', function(done) {
-  //   var bam = new Bam(new RemoteFile('/test/data/index_test.bam'),
-  //                     new RemoteFile('/test/data/index_test.bam.bai'));
 
-  //   // TODO: run these in parallel
-  //   var range = new ContigInterval('chrM', 10400, 10600);
-  //   bam.getAlignmentsInRange(range, true).then(chunks => {
-  //     debugger;
-  //     // contained=true,
-  //     // 5186327 2/2 51b aligned read. (chrM:10427-10477)
-  //     // return bam.getAlignmentsInRange(range, false).then(alignments => {
-  //     //   // contained=false
-  //     //   // 5186327 1/2 51b aligned read. (chrM:10388-10438)
-  //     //   // 5186327 2/2 51b aligned read. (chrM:10427-10477)
-  //     //   done();
-  //     // });
-  //   }).done();
-  // });
+  function alignmentRange(alignment) {
+    var stop = alignment.pos + alignment.l_seq;
+    return `${alignment.refID}:${1+alignment.pos}-${stop}`;
+  }
+  
+  // This matches htsjdk's BamFileIndexTest.testSpecificQueries
+  it('should find sequences using an index', function(done) {
+    var bam = new Bam(new RemoteFile('/test/data/index_test.bam'),
+                      new RemoteFile('/test/data/index_test.bam.bai'));
+
+    // TODO: run these in parallel
+    var range = new ContigInterval('chrM', 10400, 10600);
+    bam.getAlignmentsInRange(range, true).then(alignments => {
+      expect(alignments).to.have.length(1);
+      expect(alignmentRange(alignments[0])).to.equal('0:10427-10477');
+      return bam.getAlignmentsInRange(range, false).then(alignments => {
+        expect(alignments).to.have.length(2);
+        expect(alignmentRange(alignments[0])).to.equal('0:10388-10438');
+        expect(alignmentRange(alignments[1])).to.equal('0:10427-10477');
+        done();
+      });
+    }).done();
+  });
 
   it('should fetch alignments from a Chunk', function(done) {
     var bam = new Bam(new RemoteFile('/test/data/index_test.bam'));

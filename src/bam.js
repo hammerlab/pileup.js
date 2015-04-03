@@ -46,6 +46,25 @@ function inflateConcatenatedGzip(buffer: ArrayBuffer): ArrayBuffer {
 function inflateGzip(buffer: ArrayBuffer): ArrayBuffer {
   return pako.inflate(buffer).buffer;
 }
+
+/**
+ * Filter a list of alignments down to just those which overlap the range.
+ * The 'contained' parameter controls whether the alignments must be fully
+ * contained within the range, or need only overlap it.
+ */
+function filterAlignments(alignments: Object[],
+                          idxRange: ContigInterval<number>,
+                          contained: boolean): Object[] {
+  return alignments.filter(read => {
+    // TODO: Use cigar.getReferenceLength() instead of l_seq, like htsjdk. 
+    var readRange = new ContigInterval(read.refID, read.pos, read.pos + read.l_seq - 1);
+    if (contained) {
+      return idxRange.containsInterval(readRange);
+    } else {
+      return readRange.intersects(idxRange);
+    }
+  });
+}
  
 class Bam {
   index: ?BaiFile;
@@ -155,7 +174,10 @@ class Bam {
         if (chunks.length > 1) {
           throw 'Multi-chunk queries are not implemented';
         }
-        return chunks;
+        var c = chunks[0];
+        return this.readChunk(c.chunk_beg, c.chunk_end).then(alignments => {
+          return filterAlignments(alignments, idxRange, contained);
+        });
       });
     });
   }
