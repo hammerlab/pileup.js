@@ -54,9 +54,11 @@ var nullString = jBinary.Template({
 var uint64native = jBinary.Template({
   baseType: 'uint64',
   read() {
-    var num = this.baseRead();
-    if (num != +num) {
-      throw `Number out of precise floating point range: ${num}`;
+    var num = this.baseRead(),
+        v = +num;
+    // Test for wraparound & roundoff
+    if (v < 0 || 1 + v == v) {
+      throw new RangeError(`Number out of precise floating point range: ${num}`);
     }
     return +num;
   }
