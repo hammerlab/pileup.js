@@ -26,8 +26,8 @@ describe('BAI', function() {
   // This matches htsjdk's BamFileIndexTest.testSpecificQueries
   it('should parse large BAI files', function(done) {
     var bai = new BaiFile(new RemoteFile('/test/data/index_test.bam.bai'));
-    // index 0 = chrM
 
+    // contig 0 = chrM
     bai.getChunksForInterval(new ContigInterval(0, 10400, 10600)).then(chunks => {
       expect(chunks).to.have.length(1);
       expect(chunkToString(chunks[0])).to.equal('0:8384-0:11328');

@@ -53,3 +53,10 @@ These BAM and BAI files come from the [samtools][1] tests. You can find
 corresponding SAM files for them in the same repo.
 
 [1]: https://github.com/samtools/samtools/tree/develop/test/dat
+
+
+#### index_test.bam
+
+This BAM/BAI file pair comes from [htsjdk][2] tests.
+
+[2]: https://github.com/samtools/htsjdk/blob/afecd5fa959087d5bdd5d5a701e415a72d629282/testdata/htsjdk/samtools/BAMFileIndexTest/index_test.bam

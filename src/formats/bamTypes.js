@@ -156,16 +156,16 @@ var TYPE_SET: any = {
       bin: 'uint32',
       n_chunk: 'int32',
       chunks: ['blob', ctx => 16 * ctx.n_chunk],
-      // chunks: [lazyArray, {
+      // Parsing is deferred as a performance optimization. The type is really:
+      // chunks: ['array', {
       //   chunk_beg: 'VirtualOffset',
       //   chunk_end: 'VirtualOffset'
-      // }, 16 /* bytes per item */, 'n_chunk']
+      // }, 'n_chunk']
     }, 'n_bin'],
     n_intv: 'int32',
     intervals: ['blob', ctx => 8 * ctx.n_intv]
-    // intervals: [lazyArray, {
-    //   ioffset: 'uint64',  // 'VirtualOffset'
-    // }, 8 /* bytes per item */, 'n_intv']
+    // Parsing is deferred as a performance optimization. The type is really:
+    // intervals: ['array', 'VirtualOffset', 'n_intv']
   },
 
   'BaiFile': {

@@ -16,24 +16,6 @@ var jBinary = require('jbinary');
 var jDataView = require('jdataview');
 var _ = require('underscore');
 
-/*
-
-General notes about BAI format:
-- It's a multi-level index: each particular locus is covered by several "bins" of different sizes.
-- It's an index of ranges (the reads). Each range gets places in the smallest bucket which contains it. So while most reads will be in small bins, it's still necessary to look in the large bins for reads which might cross smaller bin boundaries.
-
-In the BAI format, each bin spans either:
-- 512Mbp (bin 0)
-- 64Mbp  (bins 1-8)
-- 8Mbp   (bins 9-72)
-- 1Mbp   (bins 73-584)
-- 128kbp (bins 585-4680)
-- 16kbp  (bins 4681-37448)
-
-The BAI file stores the file start/stop offsets for each bin.
-It *also* stores a linear index, which can be used to avoid lookups in larger bins.
-*/
-
 
 // In the event that index chunks aren't available from an external source, it
 // winds up saving time to do a fast pass over the data to compute them. This
@@ -59,14 +41,13 @@ function computeIndexChunks(buffer) {
 
   return {
     chunks: _.zip(_.initial(contigStartOffsets), _.rest(contigStartOffsets)),
-    minBlockIndex: 0  // TODO: compute this if it's helpful
+    minBlockIndex: 0  // TODO: compute this, it tightens the initial header request
   };
 }
 
 
 function readChunks(buf) {
   return new jBinary(buf, bamTypes.TYPE_SET).read('ChunksArray');
-  // return new jBinary(buf, bamTypes.TYPE_SET).read(['array', 'uint64']);
 }
 
 function readIntervals(buf) {
@@ -88,6 +69,8 @@ function areChunksAdjacent(a: Chunk, b: Chunk) {
 }
 
 // This coalesces adjacent & overlapping chunks to minimize fetches.
+// It also applies the "linear optimization", which can greatly reduce the
+// number of network fetches needed to fulfill a request.
 function optimizeChunkList(chunkList: Chunk[], minimumOffset: VirtualOffset): Chunk[] {
   chunkList.sort((a, b) => {
     var result = a.chunk_beg.compareTo(b.chunk_beg);
