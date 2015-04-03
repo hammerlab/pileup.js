@@ -7,13 +7,17 @@
 
 import type * as RemoteFile from './RemoteFile';
 import type * as Q from 'q';
+import type * as VirtualOffset from './VirtualOffset';
 
 var jBinary = require('jbinary'),
     pako = require('pako'),
     _ = require('underscore');
 
 var bamTypes = require('./formats/bamTypes'),
-    utils = require('./utils');
+    utils = require('./utils'),
+    BaiFile = require('./bai'),
+    ContigInterval = require('./ContigInterval');
+
 
 /**
  * BAM files are written in "BGZF" format, which consists of many concatenated
@@ -40,13 +44,14 @@ function inflateConcatenatedGzip(buffer: ArrayBuffer): ArrayBuffer {
  * Inflate a single gzip block at the start of the buffer.
  */
 function inflateGzip(buffer: ArrayBuffer): ArrayBuffer {
-  return pako.inflate(buffer);
+  return pako.inflate(buffer).buffer;
 }
  
 class Bam {
+  index: ?BaiFile;
   header: Q.Promise<Object>;
 
-  constructor(remoteFile: RemoteFile) {
+  constructor(remoteFile: RemoteFile, remoteIndexFile?: RemoteFile) {
     this.remoteFile = remoteFile;
     // TODO: compute 65535 from index chunks
     this.header = this.remoteFile.getBytes(0, 65535).then(buf => {
@@ -55,6 +60,8 @@ class Bam {
       return jb.read('BamHeader');
     });
     this.header.done();
+
+    this.index = remoteIndexFile ? new BaiFile(remoteIndexFile) : null;
   }
 
   /**
@@ -78,10 +85,42 @@ class Bam {
   }
 
   /**
-   * Read alignments for a single block.
+   * Read alignments for a chunk of the BAM file.
+   * If stop is omitted, reads alignments to the end of the compression block.
    */
-  readOneBlock(compressedOffset: number, uncompressedOffset: number): Q.Promise<Object> {
-    return Q.when(null);
+  readChunk(start: VirtualOffset, stop?: VirtualOffset): Q.Promise<Object[]> {
+    if (stop && stop.coffset != start.coffset) {
+      throw 'Reading across compression blocks is not yet supported.';
+    }
+
+    // Blocks are no larger than 64k when compressed
+    return this.remoteFile.getBytes(start.coffset,
+                                    start.coffset + 65535).then(buf => {
+      var decomp = inflateGzip(buf);  // reads one compression block
+      if (stop) {
+        decomp = decomp.slice(start.uoffset, stop.uoffset);
+      } else {
+        decomp = decomp.slice(start.uoffset)
+      }
+      var jb = new jBinary(decomp, bamTypes.TYPE_SET);
+      var alignments = [];
+      try {
+        while (jb.tell() < decomp.byteLength) {
+          var alignment = jb.read('ThinBamAlignment');
+          if (!alignment) break;
+          alignments.push(alignment.contents);
+        }
+        // Code gets here if the compression block ended exactly at the end of
+        // an Alignment.
+      } catch (e) {
+        // If stop was specified, it must be precise.
+        // Otherwise, allow partial records.
+        if (stop || !(e instanceof RangeError)) {
+          throw e;
+        }
+      }
+      return alignments;
+    });
   }
 
   /**
@@ -96,6 +135,28 @@ class Bam {
         }
       }
       throw `Invalid contig name: ${contigName}`;
+    });
+  }
+
+  /**
+   * Fetch all the alignments which overlap a range.
+   * The 'contained' parameter controls whether the alignments must be fully
+   * contained within the range, or need only overlap it.
+   */
+  getAlignmentsInRange(range: ContigInterval<string>, contained: boolean): Q.Promise<Object[]> {
+    if (!this.index) {
+      throw 'Range searches are only supported on BAMs with BAI indices.';
+    }
+    var index = this.index;
+
+    return this.getContigIndex(range.contig).then(contigIdx => {
+      var idxRange = new ContigInterval(contigIdx, range.start(), range.stop());
+      return index.getChunksForInterval(idxRange).then(chunks => {
+        if (chunks.length > 1) {
+          throw 'Multi-chunk queries are not implemented';
+        }
+        return chunks;
+      });
     });
   }
 

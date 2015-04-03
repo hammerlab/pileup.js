@@ -16,7 +16,7 @@ var SEQUENCE_VALUES = ['=', 'A', 'C', 'M', 'G', 'R', 'S', 'V', 'T', 'W', 'Y', 'H
 var CIGAR_OPS = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X'];
 
 
-// Core alignment fields shared between BamAlignments and ThinBamAlignments.
+// Core alignment fields shared between BamAlignment and ThinBamAlignment.
 // TODO: figure out why jBinary's 'extend' type doesn't work with this in TYPE_SET.
 var ThinAlignment = {
   refID: 'int32',
@@ -47,7 +47,7 @@ var TYPE_SET: any = {
     }, 'n_ref']
   },
 
-  'BamAlignments': {
+  'BamAlignment': {
     block_size: 'int32',
     contents: [sizedBlock, _.extend({}, ThinAlignment, {
       read_name: [nullString, 'l_read_name'],
@@ -66,7 +66,7 @@ var TYPE_SET: any = {
     }), 'block_size']
   },
 
-  'ThinBamAlignments': {
+  'ThinBamAlignment': {
     block_size: 'int32',
     contents: [sizedBlock, ThinAlignment, 'block_size']
   },
@@ -119,12 +119,12 @@ var TYPE_SET: any = {
 
   'BamFile': {
     header: 'BamHeader',
-    alignments: ['array', 'BamAlignments']
+    alignments: ['array', 'BamAlignment']
   },
 
   'ThinBamFile': {
     header: 'BamHeader',
-    alignments: ['array', 'ThinBamAlignments']
+    alignments: ['array', 'ThinBamAlignment']
   },
 
   // BAI index formats

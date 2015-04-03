@@ -24,21 +24,9 @@ describe('BAI', function() {
     expect(vo.coffset).to.equal(5844788303);
   });
 
-  it('should parse BAI files', function(done) {
-    var bai = new BaiFile(new RemoteFile('/test/data/test_input_1_a.bam.bai'));
-    var bam = new Bam(new RemoteFile('/test/data/test_input_1_a.bam'));
-    bam.readAll().done();
-
-    bai.getChunksForInterval(new ContigInterval(0, 10, 20)).then(chunks => {
-      console.log(chunks);
-      done();
-    }).done();
-  });
-
   // This matches htsjdk's BamFileIndexTest.testSpecificQueries
   it('should parse large BAI files', function(done) {
     var bai = new BaiFile(new RemoteFile('/test/data/index_test.bam.bai'));
-    var bam = new Bam(new RemoteFile('/test/data/index_test.bam'));
     // index 0 = chrM
 
     bai.getChunksForInterval(new ContigInterval(0, 10400, 10600)).then(chunks => {

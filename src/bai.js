@@ -89,7 +89,7 @@ function areChunksAdjacent(a: Chunk, b: Chunk) {
 }
 
 // This coalesces adjacent & overlapping chunks to minimize fetches.
-function optimizeChunkList(chunkList: Chunk[]): Chunk[] {
+function optimizeChunkList(chunkList: Chunk[], minimumOffset: VirtualOffset): Chunk[] {
   chunkList.sort((a, b) => {
     var result = a.chunk_beg.compareTo(b.chunk_beg);
     if (result == 0) {
@@ -100,6 +100,10 @@ function optimizeChunkList(chunkList: Chunk[]): Chunk[] {
 
   var newChunks = [];
   chunkList.forEach(chunk => {
+    if (chunk.chunk_end.isLessThan(minimumOffset)) {
+      return;  // linear index optimization
+    }
+
     if (newChunks.length == 0) {
       newChunks.push(chunk);
       return;
@@ -126,7 +130,6 @@ class ImmediateBaiFile {
   constructor(buffer: ArrayBuffer) {
     this.buffer = buffer;
     this.indexChunks = computeIndexChunks(buffer);
-    // window.bai = this;
   }
 
   getChunksForInterval(range: ContigInterval<number>): Chunk[] {
@@ -149,25 +152,12 @@ class ImmediateBaiFile {
 
     console.log('Candidate chunks: ', chunks.length);
 
-    chunks = optimizeChunkList(chunks);
+    var linearIndex = readIntervals(contigIndex.intervals);
+    var startIdx = Math.max(0, Math.floor(range.start() / 16384));
+    var minimumOffset = linearIndex[startIdx];
 
-    /*
-    // Now use the linear index to prune this.
-    // "Given a region [rbeg,rend), we only need to visit a chunk whose end
-    // file offset is larger than the file offset of the 16kbp
-    // window containing rbeg."
-    var lindex = readIntervals(contigIndex.intervals);
-    var startIdx = Math.floor(range.start() / 16384);
-    var stopIdx = Math.floor(range.stop() / 16384);
-    console.log(lindex[startIdx], lindex[stopIdx]);
+    chunks = optimizeChunkList(chunks, minimumOffset);
 
-    chunks = chunks.filter(c => {
-      // return c.chunk_end > interval;
-      return lindex[startIdx].isLessThan(c.chunk_end);
-      // && virtualOffsetLessThan(c.chunk_beg, lindex[stopIdx]);
-    });
-
-   */
     console.log('Filtered chunks: ', chunks.length);
 
     return chunks;
