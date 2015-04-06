@@ -4,6 +4,8 @@
  */
 'use strict';
 
+var pako = require('pako');
+
 // Compare two tuples of equal length. Is t1 <= t2?
 // TODO: make this tupleLessOrEqual<T> -- it works with strings or booleans, too.
 function tupleLessOrEqual(t1: Array<number>, t2: Array<number>): boolean {
@@ -43,4 +45,37 @@ function concatArrayBuffers(buffers: ArrayBuffer[]): ArrayBuffer {
   return output.buffer;
 }
 
-module.exports = {tupleLessOrEqual, tupleRangeOverlaps, concatArrayBuffers};
+/**
+ * BAM files are written in "BGZF" format, which consists of many concatenated
+ * gzip blocks. gunzip concatenates all the inflated blocks, but pako only
+ * inflates one block at a time. This wrapper makes pako behave like gunzip.
+ * If specified, lastBlockStart will stop inflation before all the blocks
+ * have been processed.
+ */
+function inflateConcatenatedGzip(buffer: ArrayBuffer, lastBlockStart?: number): ArrayBuffer[] {
+  var position = 0,
+      blocks = [],
+      inflator;
+  if (lastBlockStart === undefined) {
+    lastBlockStart = buffer.byteLength;
+  }
+  do {
+    inflator = new pako.Inflate();
+    inflator.push(buffer.slice(position));
+    if (inflator.err) { throw inflator.msg; }
+    if (inflator.result) {
+      blocks.push(inflator.result.buffer);
+    }
+    position += inflator.strm.total_in;
+  } while (inflator.strm.avail_in > 0 && position <= lastBlockStart);
+  return blocks;
+}
+
+/**
+ * Inflate a single gzip block at the start of the buffer.
+ */
+function inflateGzip(buffer: ArrayBuffer): ArrayBuffer {
+  return pako.inflate(buffer).buffer;
+}
+
+module.exports = {tupleLessOrEqual, tupleRangeOverlaps, concatArrayBuffers, inflateConcatenatedGzip, inflateGzip};

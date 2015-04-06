@@ -10,7 +10,6 @@ import type * as Q from 'q';
 import type * as VirtualOffset from './VirtualOffset';
 
 var jBinary = require('jbinary'),
-    pako = require('pako'),
     _ = require('underscore');
 
 var bamTypes = require('./formats/bamTypes'),
@@ -18,34 +17,6 @@ var bamTypes = require('./formats/bamTypes'),
     BaiFile = require('./bai'),
     ContigInterval = require('./ContigInterval');
 
-
-/**
- * BAM files are written in "BGZF" format, which consists of many concatenated
- * gzip blocks. gunzip concatenates all the inflated blocks, but pako only
- * inflates one block at a time. This wrapper makes pako behave like gunzip.
- */
-function inflateConcatenatedGzip(buffer: ArrayBuffer): ArrayBuffer {
-  var position = 0,
-      blocks = [],
-      inflator;
-  do {
-    inflator = new pako.Inflate();
-    inflator.push(buffer.slice(position));
-    if (inflator.err) { throw inflator.msg; }
-    if (inflator.result) {
-      blocks.push(inflator.result);
-    }
-    position += inflator.strm.total_in;
-  } while (inflator.strm.avail_in > 0);
-  return utils.concatArrayBuffers(blocks);
-}
-
-/**
- * Inflate a single gzip block at the start of the buffer.
- */
-function inflateGzip(buffer: ArrayBuffer): ArrayBuffer {
-  return pako.inflate(buffer).buffer;
-}
 
 /**
  * Filter a list of alignments down to just those which overlap the range.
@@ -74,7 +45,7 @@ class Bam {
     this.remoteFile = remoteFile;
     // TODO: compute 65535 from index chunks
     this.header = this.remoteFile.getBytes(0, 65535).then(buf => {
-      var decomp = inflateGzip(buf);
+      var decomp = utils.inflateGzip(buf);
       var jb = new jBinary(decomp, bamTypes.TYPE_SET);
       return jb.read('BamHeader');
     });
@@ -94,7 +65,7 @@ class Bam {
    */
   readAll(thinReads?: boolean): Q.Promise<Object> {
     return this.remoteFile.getAll().then(buf => {
-      var decomp = inflateConcatenatedGzip(buf);
+      var decomp = utils.concatArrayBuffers(utils.inflateConcatenatedGzip(buf));
       var jb = new jBinary(decomp, bamTypes.TYPE_SET);
       var o = jb.read(thinReads ? 'ThinBamFile' : 'BamFile');
       // Do some mild re-shaping.
@@ -108,19 +79,18 @@ class Bam {
    * If stop is omitted, reads alignments to the end of the compression block.
    */
   readChunk(start: VirtualOffset, stop?: VirtualOffset): Q.Promise<Object[]> {
-    if (stop && stop.coffset != start.coffset) {
-      throw 'Reading across compression blocks is not yet supported.';
-    }
-
+    var lastCOffset = (stop ? stop.coffset : start.coffset);
     // Blocks are no larger than 64k when compressed
     return this.remoteFile.getBytes(start.coffset,
-                                    start.coffset + 65535).then(buf => {
-      var decomp = inflateGzip(buf);  // reads one compression block
+                                    lastCOffset + 65535).then(buf => {
+      var blocks = utils.inflateConcatenatedGzip(buf, lastCOffset - start.coffset);
       if (stop) {
-        decomp = decomp.slice(start.uoffset, stop.uoffset);
-      } else {
-        decomp = decomp.slice(start.uoffset);
+        var lastBlock = blocks[blocks.length - 1];
+        blocks[blocks.length - 1] = lastBlock.slice(0, stop.uoffset);
       }
+      blocks[0] = blocks[0].slice(start.uoffset);
+      var decomp = utils.concatArrayBuffers(blocks);
+
       var jb = new jBinary(decomp, bamTypes.TYPE_SET);
       var alignments = [];
       try {
@@ -162,7 +132,8 @@ class Bam {
    * The 'contained' parameter controls whether the alignments must be fully
    * contained within the range, or need only overlap it.
    */
-  getAlignmentsInRange(range: ContigInterval<string>, contained: boolean): Q.Promise<Object[]> {
+  getAlignmentsInRange(range: ContigInterval<string>, contained?: boolean): Q.Promise<Object[]> {
+    contained = contained || false;
     if (!this.index) {
       throw 'Range searches are only supported on BAMs with BAI indices.';
     }

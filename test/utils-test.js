@@ -4,6 +4,9 @@
 var chai = require('chai');
 var expect = chai.expect;
 
+var pako = require('pako'),
+    jBinary = require('jbinary');
+
 var utils = require('../src/utils');
 
 describe('utils', function() {
@@ -72,5 +75,37 @@ describe('utils', function() {
       result.push(concat[i]);
     }
     expect(result).to.deep.equal([0, 1, 2, 3, 4, 5, 6]);
+  });
+
+  function bufferToText(buf) {
+    return new jBinary(buf).read('string');
+  }
+
+  it('should inflate concatenated buffers', function() {
+    var str1 = 'Hello World',
+        str2 = 'Goodbye, World',
+        buf1 = pako.deflate(str1),
+        buf2 = pako.deflate(str2),
+        merged = utils.concatArrayBuffers([buf1, buf2]);
+    expect(buf1.byteLength).to.equal(19);
+    expect(buf2.byteLength).to.equal(22);
+
+    var inflated = utils.inflateConcatenatedGzip(merged);
+    expect(inflated).to.have.length(2);
+    expect(bufferToText(inflated[0])).to.equal('Hello World');
+    expect(bufferToText(inflated[1])).to.equal('Goodbye, World');
+
+    inflated = utils.inflateConcatenatedGzip(merged, 19);
+    expect(inflated).to.have.length(2);
+    expect(bufferToText(inflated[0])).to.equal('Hello World');
+    expect(bufferToText(inflated[1])).to.equal('Goodbye, World');
+
+    inflated = utils.inflateConcatenatedGzip(merged, 18);
+    expect(inflated).to.have.length(1);
+    expect(bufferToText(inflated[0])).to.equal('Hello World');
+
+    inflated = utils.inflateConcatenatedGzip(merged, 0);
+    expect(inflated).to.have.length(1);
+    expect(bufferToText(inflated[0])).to.equal('Hello World');
   });
 });
