@@ -113,6 +113,69 @@ describe('BAM', function() {
     }).done();
   });
 
+  it('should fetch alignments from chr18', function(done) {
+    var bam = new Bam(new RemoteFile('/test/data/index_test.bam'),
+                      new RemoteFile('/test/data/index_test.bam.bai'));
+    var range = new ContigInterval('chr18', 3627238, 6992285);
+
+    /* Grabbed from IntelliJ & htsjdk using this code fragment:
+     String x = "";
+     for (int i = 0; i < records.size(); i++) {
+         SAMRecord r = records.get(i);
+         x = x + r.mReferenceName + ":" + r.mAlignmentStart + "-" + r.mAlignmentEnd + "\n";
+     }
+     x = x;
+     */
+
+    bam.getAlignmentsInRange(range).then(reads => {
+      // Note: htsjdk returns contig names like 'chr18', not 18.
+      expect(reads).to.have.length(14);
+      expect(reads.map(alignmentRange)).to.deep.equal([
+          '18:3653516-3653566',
+          '18:3653591-3653641',
+          '18:4215486-4215536',
+          '18:4215629-4215679',
+          '18:4782331-4782381',
+          '18:4782490-4782540',
+          '18:5383914-5383964',
+          '18:5384093-5384143',
+          '18:5904078-5904128',
+          '18:5904241-5904291',
+          '18:6412181-6412231',
+          '18:6412353-6412403',
+          '18:6953238-6953288',
+          '18:6953412-6953462'
+      ]);
+      done();
+    }).done();
+  });
+
+  it('should fetch alignments across a chunk boundary', function(done) {
+    var bam = new Bam(new RemoteFile('/test/data/index_test.bam'),
+                      new RemoteFile('/test/data/index_test.bam.bai'));
+    var range = new ContigInterval('chr1', 90002285, 116992285);
+    bam.getAlignmentsInRange(range).then(reads => {
+      expect(reads).to.have.length(92);
+      expect(reads.slice(0, 5).map(alignmentRange)).to.deep.equal([
+        '1:90071452-90071502',
+        '1:90071609-90071659',
+        '1:90622416-90622466',
+        '1:90622572-90622622',
+        '1:91182945-91182995'
+      ]);
+
+      expect(reads.slice(-5).map(alignmentRange)).to.deep.equal([
+        '1:115379485-115379535',
+        '1:116045704-116045754',
+        '1:116045758-116045808',
+        '1:116563764-116563814',
+        '1:116563944-116563994'
+      ]);
+      
+      done();
+    }).done();
+  });
+
   /*
   it('should handle ginormous files', function(done) {
     this.timeout(5000);
