@@ -23,6 +23,7 @@ var _ = require('underscore');
 function computeIndexChunks(buffer) {
   var view = new jDataView(buffer, 0, buffer.byteLength, true /* little endian */);
 
+  var minBlockIndex = Infinity;
   var contigStartOffsets = [];
   view.getInt32();  // magic
   var n_ref = view.getInt32();
@@ -35,13 +36,22 @@ function computeIndexChunks(buffer) {
       view.skip(n_chunk * 16);
     }
     var n_intv = view.getInt32();
-    view.skip(n_intv * 8);
+    if (n_intv) {
+      var buf = view.getBytes(8),
+          jb = new jBinary(buf, bamTypes.TYPE_SET),
+          offset = jb.read('VirtualOffset'),
+          coffset = offset.coffset + (offset.uoffset ? 65536 : 0);
+      if (coffset) {
+        minBlockIndex = Math.min(coffset, minBlockIndex);
+      }
+      view.skip((n_intv - 1) * 8);
+    }
   }
   contigStartOffsets.push(view.tell());
 
   return {
     chunks: _.zip(_.initial(contigStartOffsets), _.rest(contigStartOffsets)),
-    minBlockIndex: 0  // TODO: compute this, it tightens the initial header request
+    minBlockIndex
   };
 }
 
