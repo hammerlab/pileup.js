@@ -28,10 +28,6 @@ Run the tests in a real browser:
     grunt browsertests
     open tests/runner.html
 
-To iterate on code while running the type checker:
-
-    grunt watchFlow
-
 To continuously regenerate the combined JS, run:
 
     grunt browserify:watchDist
@@ -39,5 +35,11 @@ To continuously regenerate the combined JS, run:
 To continuously regenerate the testing JS, run:
 
     grunt browserify:watchTest
+
+To typecheck the code, run
+
+    flow status .
+
+For best results, use one of the flowtype editor integrations.
 
 [hs]: https://github.com/nodeapps/http-server

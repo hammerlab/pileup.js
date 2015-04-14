@@ -175,6 +175,12 @@ class BaiFile {
       return immediate.getChunksForInterval(range);
     });
   }
+
+  getHeaderSize(): Q.Promise<number> {
+    return this.immediate.then(immediate => {
+      return immediate.indexChunks.minBlockIndex;
+    });
+  }
 }
 
 

@@ -92,20 +92,25 @@ describe('utils', function() {
 
     var inflated = utils.inflateConcatenatedGzip(merged);
     expect(inflated).to.have.length(2);
-    expect(bufferToText(inflated[0])).to.equal('Hello World');
-    expect(bufferToText(inflated[1])).to.equal('Goodbye, World');
+    expect(bufferToText(inflated[0].buffer)).to.equal('Hello World');
+    expect(bufferToText(inflated[1].buffer)).to.equal('Goodbye, World');
+
+    expect(inflated[0].offset).to.equal(0);
+    expect(inflated[0].compressedLength).to.equal(19);
+    expect(inflated[1].offset).to.equal(19);
+    expect(inflated[1].compressedLength).to.equal(22);
 
     inflated = utils.inflateConcatenatedGzip(merged, 19);
     expect(inflated).to.have.length(2);
-    expect(bufferToText(inflated[0])).to.equal('Hello World');
-    expect(bufferToText(inflated[1])).to.equal('Goodbye, World');
+    expect(bufferToText(inflated[0].buffer)).to.equal('Hello World');
+    expect(bufferToText(inflated[1].buffer)).to.equal('Goodbye, World');
 
     inflated = utils.inflateConcatenatedGzip(merged, 18);
     expect(inflated).to.have.length(1);
-    expect(bufferToText(inflated[0])).to.equal('Hello World');
+    expect(bufferToText(inflated[0].buffer)).to.equal('Hello World');
 
     inflated = utils.inflateConcatenatedGzip(merged, 0);
     expect(inflated).to.have.length(1);
-    expect(bufferToText(inflated[0])).to.equal('Hello World');
+    expect(bufferToText(inflated[0].buffer)).to.equal('Hello World');
   });
 });

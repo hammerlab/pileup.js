@@ -45,6 +45,12 @@ function concatArrayBuffers(buffers: ArrayBuffer[]): ArrayBuffer {
   return output.buffer;
 }
 
+type InflatedBlock = {
+  offset: number;
+  compressedLength: number;
+  buffer: ArrayBuffer;
+}
+
 /**
  * BAM files are written in "BGZF" format, which consists of many concatenated
  * gzip blocks. gunzip concatenates all the inflated blocks, but pako only
@@ -52,7 +58,7 @@ function concatArrayBuffers(buffers: ArrayBuffer[]): ArrayBuffer {
  * If specified, lastBlockStart will stop inflation before all the blocks
  * have been processed.
  */
-function inflateConcatenatedGzip(buffer: ArrayBuffer, lastBlockStart?: number): ArrayBuffer[] {
+function inflateConcatenatedGzip(buffer: ArrayBuffer, lastBlockStart?: number): InflatedBlock[] {
   var position = 0,
       blocks = [],
       inflator;
@@ -64,7 +70,11 @@ function inflateConcatenatedGzip(buffer: ArrayBuffer, lastBlockStart?: number): 
     inflator.push(buffer.slice(position));
     if (inflator.err) { throw inflator.msg; }
     if (inflator.result) {
-      blocks.push(inflator.result.buffer);
+      blocks.push({
+        offset: position,
+        compressedLength: inflator.strm.total_in,
+        buffer: inflator.result.buffer
+      });
     }
     position += inflator.strm.total_in;
   } while (inflator.strm.avail_in > 0 && position <= lastBlockStart);
@@ -72,10 +82,12 @@ function inflateConcatenatedGzip(buffer: ArrayBuffer, lastBlockStart?: number): 
 }
 
 /**
- * Inflate a single gzip block at the start of the buffer.
+ * Inflate one or more gzip blocks in the buffer.
+ * Returns the concatenation of all inflated blocks.
+ * This mirrors the behavior of gzip(1).
  */
 function inflateGzip(buffer: ArrayBuffer): ArrayBuffer {
-  return pako.inflate(buffer).buffer;
+  return concatArrayBuffers(inflateConcatenatedGzip(buffer).map(x => x.buffer));
 }
 
 module.exports = {tupleLessOrEqual, tupleRangeOverlaps, concatArrayBuffers, inflateConcatenatedGzip, inflateGzip};

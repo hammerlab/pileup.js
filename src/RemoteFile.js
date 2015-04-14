@@ -98,6 +98,11 @@ class RemoteFile {
   }
 
   getFromNetwork(start: number, stop: number): Q.Promise<ArrayBuffer> {
+    var length = stop - start + 1;
+    if (length > 50000000) {
+      throw `Monster request: Won't fetch ${length} bytes from ${this.url}`;
+    }
+
     var xhr = new XMLHttpRequest();
     xhr.open('GET', this.url);
     xhr.responseType = 'arraybuffer';
@@ -110,19 +115,13 @@ class RemoteFile {
       this.chunks.push(newChunk);
 
       // Record the full file length if it's available.
-      var contentRange = xhr.getResponseHeader('Content-Range');
-      if (contentRange) {
-        var m = /\/(\d+)$/.exec(contentRange);
-        if (m) {
-          var size = Number(m[1]);
-          if (this.fileLength != -1 && this.fileLength != size) {
-            console.warn(`Size of remote file ${this.url} changed from ` +
-                         `${this.fileLength} to ${size}`);
-          } else {
-            this.fileLength = size;
-          }
+      var size = this._getLengthFromContentRange(xhr);
+      if (size != null) {
+        if (this.fileLength != -1 && this.fileLength != size) {
+          console.warn(`Size of remote file ${this.url} changed from ` +
+                       `${this.fileLength} to ${size}`);
         } else {
-          console.warn(`Received improper Content-Range value for ${this.url}: ${contentRange}`);
+          this.fileLength = size;
         }
       }
 
@@ -147,6 +146,23 @@ class RemoteFile {
     this.numNetworkRequests++;
     xhr.send();
     return deferred.promise;
+  }
+
+  // Attempting to access Content-Range directly may raise security errors.
+  // This ensures the access is safe before making it.
+  _getLengthFromContentRange(xhr: XMLHttpRequest): ?number {
+    if (!/Content-Range/i.exec(xhr.getAllResponseHeaders())) {
+      return null;
+    }
+
+    var contentRange = xhr.getResponseHeader('Content-Range');
+    var m = /\/(\d+)$/.exec(contentRange);
+    if (m) {
+      return Number(m[1]);
+    }
+    console.warn(`Received improper Content-Range value for ` +
+                 `${this.url}: ${contentRange}`);
+    return null;
   }
 
   clearCache() {
