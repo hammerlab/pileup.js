@@ -6,8 +6,7 @@ var expect = chai.expect;
 
 var Bam = require('../src/bam'),
     ContigInterval = require('../src/ContigInterval'),
-    RemoteFile = require('../src/RemoteFile'),
-    VirtualOffset = require('../src/VirtualOffset');
+    RemoteFile = require('../src/RemoteFile');
 
 describe('BAM', function() {
   it('should parse BAM files', function(done) {
@@ -86,33 +85,6 @@ describe('BAM', function() {
     }).done();
   });
 
-  it('should fetch alignments from a Chunk', function(done) {
-    var bam = new Bam(new RemoteFile('/test/data/index_test.bam'));
-    bam.readChunk(new VirtualOffset(0, 8384),
-                  new VirtualOffset(0, 11194)).then(alignments => {
-      expect(alignments).to.have.length(21);
-      expect(alignments[0].refID).to.equal(0);
-      expect(alignments[0].pos).to.equal(1518);
-      expect(alignments[20].refID).to.equal(0);
-      expect(alignments[20].pos).to.equal(15568);
-      done();
-    }).done();
-  });
-
-  it('should fetch alignments to the end of a block', function(done) {
-    var bam = new Bam(new RemoteFile('/test/data/index_test.bam'));
-    bam.readChunk(new VirtualOffset(0, 8384)).then(alignments => {
-      expect(alignments).to.have.length(426);
-      expect(alignments[0].refID).to.equal(0);
-      expect(alignments[0].pos).to.equal(1518);
-      expect(alignments[20].refID).to.equal(0);
-      expect(alignments[20].pos).to.equal(15568);
-      expect(alignments[425].refID).to.equal(1);
-      expect(alignments[425].pos).to.equal(111620369);
-      done();
-    }).done();
-  });
-
   it('should fetch alignments from chr18', function(done) {
     var bam = new Bam(new RemoteFile('/test/data/index_test.bam'),
                       new RemoteFile('/test/data/index_test.bam.bai'));
@@ -172,6 +144,18 @@ describe('BAM', function() {
         '1:116563944-116563994'
       ]);
       
+      done();
+    }).done();
+  });
+
+  it('should fetch alignments in a wide interval', function(done) {
+    var bam = new Bam(new RemoteFile('/test/data/index_test.bam'),
+                      new RemoteFile('/test/data/index_test.bam.bai'));
+    var range = new ContigInterval('chr20', 1, 412345678);
+    bam.getAlignmentsInRange(range).then(reads => {
+      // This count matches what you get if you run:
+      // samtools view test/data/index_test.bam | cut -f3 | grep 'chr20' | wc -l
+      expect(reads).to.have.length(228);
       done();
     }).done();
   });

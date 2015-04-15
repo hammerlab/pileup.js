@@ -136,7 +136,7 @@ var TYPE_SET: any = {
       var u64 = this.baseRead();
       return new VirtualOffset(
         // offset of beginning of gzip block in the compressed file.
-        u64.hi * 65536 + (u64.lo >> 16),
+        u64.hi * 65536 + (u64.lo >>> 16),
         // offset of data within the decompressed block
         u64.lo & 0xffff
       );
