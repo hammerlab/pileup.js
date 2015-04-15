@@ -6,8 +6,7 @@ var expect = chai.expect;
 
 var Bam = require('../src/bam'),
     ContigInterval = require('../src/ContigInterval'),
-    RemoteFile = require('../src/RemoteFile'),
-    VirtualOffset = require('../src/VirtualOffset');
+    RemoteFile = require('../src/RemoteFile');
 
 describe('BAM', function() {
   it('should parse BAM files', function(done) {

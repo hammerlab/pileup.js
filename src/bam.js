@@ -71,7 +71,7 @@ function readAlignmentsToEnd(buffer: ArrayBuffer) {
   return {
     alignments,
     lastByteRead: lastStartOffset - 1
-  }
+  };
 }
 
 // Given an offset in a concatenated buffer, determine the offset it
@@ -94,13 +94,13 @@ function splitOffset(buffers: ArrayBuffer[], chunk: Chunk, lastByteRead: number)
 // Fetch alignments from the remote source at the locations specified by Chunks.
 // This can potentially result in many network requests.
 // The returned promise is fulfilled once it can be proved that no more
-// alignments need to be fetch.
+// alignments need to be fetched.
 function fetchAlignments(remoteFile: RemoteFile,
                          idxRange: ContigInterval<number>,
                          contained: boolean,
                          chunks: Chunk[],
                          alignments: Object[]): Q.Promise<Object[]> {
-  if (chunks.length == 0) {
+  if (chunks.length === 0) {
     return Q.when(alignments);
   }
 

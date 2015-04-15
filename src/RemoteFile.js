@@ -116,7 +116,7 @@ class RemoteFile {
 
       // Record the full file length if it's available.
       var size = this._getLengthFromContentRange(xhr);
-      if (size != null) {
+      if (size !== null && size !== undefined) {
         if (this.fileLength != -1 && this.fileLength != size) {
           console.warn(`Size of remote file ${this.url} changed from ` +
                        `${this.fileLength} to ${size}`);
