@@ -39,6 +39,14 @@ class ContigInterval<T: (number|string)> {
             this.interval.containsInterval(other.interval));
   }
 
+  /*
+  This method doesn't typecheck. See https://github.com/facebook/flow/issues/388
+  isAfterInterval(other: ContigInterval): boolean {
+    return (this.contig > other.contig ||
+            (this.contig === other.contig && this.start() > other.start()));
+  }
+  */
+
   toString(): string {
     return `${this.contig}:${this.start()}-${this.stop()}`;
   }

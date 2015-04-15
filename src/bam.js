@@ -62,8 +62,7 @@ function readAlignmentsToEnd(buffer: ArrayBuffer) {
     // Code gets here if the compression block ended exactly at the end of
     // an Alignment.
   } catch (e) {
-    // If stop was specified, it must be precise.
-    // Otherwise, allow partial records.
+    // Partial record
     if (!(e instanceof RangeError)) {
       throw e;
     }
@@ -101,7 +100,6 @@ function fetchAlignments(remoteFile: RemoteFile,
                          contained: boolean,
                          chunks: Chunk[],
                          alignments: Object[]): Q.Promise<Object[]> {
-  console.log(idxRange, chunks, alignments.length);
   if (chunks.length == 0) {
     return Q.when(alignments);
   }
@@ -116,8 +114,9 @@ function fetchAlignments(remoteFile: RemoteFile,
     var blocks = utils.inflateConcatenatedGzip(buffer, chunk_end - chunk_beg);
 
     // If the chunk hasn't been exhausted, resume it at an appropriate place.
+    // The last block needs to be re-read, since it may not have been exhausted.
     var lastBlock = blocks[blocks.length - 1],
-        lastByte = chunk_beg + lastBlock.offset + lastBlock.compressedLength - 1,
+        lastByte = chunk_beg + lastBlock.offset - 1,
         newChunk = null;
     if (lastByte < chunk_end) {
       newChunk = {
@@ -142,8 +141,9 @@ function fetchAlignments(remoteFile: RemoteFile,
     var lastAlignment = newAlignments[newAlignments.length - 1],
         lastStart = lastAlignment.pos,
         lastRange = new ContigInterval(lastAlignment.refID, lastStart, lastStart + 1);
+    // TODO: use contigInterval.isAfterInterval when that's possible.
     if (lastRange.contig > idxRange.contig ||
-        (lastRange.contig == idxRange.contig && lastRange.start() > idxRange.start())) {
+        (lastRange.contig == idxRange.contig && lastRange.start() > idxRange.stop())) {
       return Q.when(alignments);
     } else {
       return fetchAlignments(remoteFile,
@@ -192,44 +192,6 @@ class Bam {
       // Do some mild re-shaping.
       o.alignments = o.alignments.map(x => x.contents);
       return o;
-    });
-  }
-
-  /**
-   * Read alignments for a chunk of the BAM file.
-   * If stop is omitted, reads alignments to the end of the compression block.
-   */
-  readChunk(start: VirtualOffset, stop?: VirtualOffset): Q.Promise<Object[]> {
-    var lastCOffset = (stop ? stop.coffset : start.coffset);
-    // Blocks are no larger than 64k when compressed
-    return this.remoteFile.getBytes(start.coffset,
-                                    lastCOffset + 65535).then(buf => {
-      var blocks = utils.inflateConcatenatedGzip(buf, lastCOffset - start.coffset).map(x => x.buffer);
-      if (stop) {
-        var lastBlock = blocks[blocks.length - 1];
-        blocks[blocks.length - 1] = lastBlock.slice(0, stop.uoffset);
-      }
-      blocks[0] = blocks[0].slice(start.uoffset);
-      var decomp = utils.concatArrayBuffers(blocks);
-
-      var jb = new jBinary(decomp, bamTypes.TYPE_SET);
-      var alignments = [];
-      try {
-        while (jb.tell() < decomp.byteLength) {
-          var alignment = jb.read('ThinBamAlignment');
-          if (!alignment) break;
-          alignments.push(alignment.contents);
-        }
-        // Code gets here if the compression block ended exactly at the end of
-        // an Alignment.
-      } catch (e) {
-        // If stop was specified, it must be precise.
-        // Otherwise, allow partial records.
-        if (stop || !(e instanceof RangeError)) {
-          throw e;
-        }
-      }
-      return alignments;
     });
   }
 
