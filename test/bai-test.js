@@ -23,6 +23,18 @@ describe('BAI', function() {
     expect(vo.coffset).to.equal(5844788303);
   });
 
+  it('should parse virtual offsets near 2^32', function() {
+    // The low 32 bits of these virtual offsets are in [2^31, 2^32], which
+    // could cause sign propagation bugs with incorrect implementations.
+    var u8 = new Uint8Array([218, 128, 112, 239, 7, 0, 0, 0]);
+    var vo = new jBinary(u8, bamTypes.TYPE_SET).read('VirtualOffset');
+    expect(vo.toString()).to.equal('520048:32986');
+
+    u8 = new Uint8Array([230, 129, 112, 239, 7, 0, 0, 0]);
+    vo = new jBinary(u8, bamTypes.TYPE_SET).read('VirtualOffset');
+    expect(vo.toString()).to.equal('520048:33254');
+  });
+
   // This matches htsjdk's BamFileIndexTest.testSpecificQueries
   it('should parse large BAI files', function(done) {
     var bai = new BaiFile(new RemoteFile('/test/data/index_test.bam.bai'));

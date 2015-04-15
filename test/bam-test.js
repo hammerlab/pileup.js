@@ -149,18 +149,17 @@ describe('BAM', function() {
     }).done();
   });
 
-  /*
-  it('should fetch alignments across many chunks', function(done) {
+  it('should fetch alignments in a wide interval', function(done) {
     var bam = new Bam(new RemoteFile('/test/data/index_test.bam'),
                       new RemoteFile('/test/data/index_test.bam.bai'));
     var range = new ContigInterval('chr20', 1, 412345678);
     bam.getAlignmentsInRange(range).then(reads => {
-      console.log(reads.length);
-      expect(reads).to.have.length(92);
+      // This count matches what you get if you run:
+      // samtools view test/data/index_test.bam | cut -f3 | grep 'chr20' | wc -l
+      expect(reads).to.have.length(228);
       done();
     }).done();
   });
-  */
 
   /*
   it('should handle ginormous files', function(done) {
