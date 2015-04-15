@@ -8,13 +8,13 @@
 
 import type * as RemoteFile from './RemoteFile';
 import type * as ContigInterval from './ContigInterval';
-import type * as Q from 'q';
 import type * as VirtualOffset from './VirtualOffset';
 
-var bamTypes = require('./formats/bamTypes');
-var jBinary = require('jbinary');
-var jDataView = require('jdataview');
-var _ = require('underscore');
+var jBinary = require('jbinary'),
+    jDataView = require('jdataview'),
+    _ = require('underscore'),
+    Q = require('q'),
+    bamTypes = require('./formats/bamTypes');
 
 
 // In the event that index chunks aren't available from an external source, it
@@ -115,45 +115,66 @@ function optimizeChunkList(chunkList: Chunk[], minimumOffset: VirtualOffset): Ch
   return newChunks;
 }
 
+// This version of BaiFile is not completely immediate, but it does guarantee
+// that the index chunks are available.
 class ImmediateBaiFile {
-  buffer: ArrayBuffer;
+  buffer: ?ArrayBuffer;
+  remoteFile: RemoteFile;
   indexChunks: Object;
 
-  constructor(buffer: ArrayBuffer) {
+  constructor(buffer: ?ArrayBuffer, remoteFile: RemoteFile, indexChunks?: Object) {
     this.buffer = buffer;
-    this.indexChunks = computeIndexChunks(buffer);
+    this.remoteFile = remoteFile;
+    if (buffer) {
+      this.indexChunks = computeIndexChunks(buffer);
+    } else {
+      if (indexChunks) {
+        this.indexChunks = indexChunks;
+      } else {
+        throw 'Without index chunks, the entire BAI buffer must be loaded';
+      }
+    }
   }
 
-  getChunksForInterval(range: ContigInterval<number>): Chunk[] {
+  getChunksForInterval(range: ContigInterval<number>): Q.Promise<Chunk[]> {
     if (range.contig < 0 || range.contig > this.indexChunks.chunks.length) {
       throw `Invalid contig ${range.contig}`;
     }
 
     var bins = reg2bins(range.start(), range.stop() + 1);
 
-    var contigIndex = this.indexForContig(range.contig);
+    return this.indexForContig(range.contig).then(contigIndex => {
+      var chunks = _.chain(contigIndex.bins)
+                    .filter(b => bins.indexOf(b.bin) >= 0)
+                    .map(b => readChunks(b.chunks))
+                    .flatten()
+                    .value();
 
-    var chunks = _.chain(contigIndex.bins)
-                  .filter(b => bins.indexOf(b.bin) >= 0)
-                  .map(b => readChunks(b.chunks))
-                  .flatten()
-                  .value();
+      var linearIndex = readIntervals(contigIndex.intervals);
+      var startIdx = Math.max(0, Math.floor(range.start() / 16384));
+      var minimumOffset = linearIndex[startIdx];
 
-    var linearIndex = readIntervals(contigIndex.intervals);
-    var startIdx = Math.max(0, Math.floor(range.start() / 16384));
-    var minimumOffset = linearIndex[startIdx];
+      chunks = optimizeChunkList(chunks, minimumOffset);
 
-    chunks = optimizeChunkList(chunks, minimumOffset);
-
-    return chunks;
+      return chunks;
+    });
   }
 
   // Retrieve and parse the index for a particular contig.
-  // TODO: make this async
-  indexForContig(contig: number): Object {
+  indexForContig(contig: number): Q.Promise<Object> {
     var [start, stop] = this.indexChunks.chunks[contig];
-    var jb = new jBinary(this.buffer.slice(start, stop), bamTypes.TYPE_SET);
-    return jb.read('BaiIndex');
+    return this.getSlice(start, stop).then(buffer => {
+      var jb = new jBinary(buffer, bamTypes.TYPE_SET);
+      return jb.read('BaiIndex');
+    });
+  }
+
+  getSlice(start: number, stop: number): Q.Promise<ArrayBuffer> {
+    if (this.buffer) {
+      return Q.when(this.buffer.slice(start, stop));
+    } else {
+      return this.remoteFile.getBytes(start, stop - start + 1);
+    }
   }
 }
 
@@ -162,11 +183,15 @@ class BaiFile {
   remoteFile: RemoteFile;
   immediate: Q.Promise<ImmediateBaiFile>;
 
-  constructor(remoteFile: RemoteFile) {
+  constructor(remoteFile: RemoteFile, indexChunks?: Object) {
     this.remoteFile = remoteFile;
-    this.immediate = remoteFile.getAll().then(buf => {
-      return new ImmediateBaiFile(buf);
-    });
+    if (indexChunks) {
+      this.immediate = Q.when(new ImmediateBaiFile(null, remoteFile, indexChunks));
+    } else { 
+      this.immediate = remoteFile.getAll().then(buf => {
+        return new ImmediateBaiFile(buf, remoteFile, indexChunks);
+      });
+    }
     this.immediate.done();
   }
 

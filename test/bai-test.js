@@ -8,7 +8,8 @@ var jBinary = require('jbinary');
 var BaiFile = require('../src/bai'),
     bamTypes = require('../src/formats/bamTypes'),
     ContigInterval = require('../src/ContigInterval'),
-    RemoteFile = require('../src/RemoteFile');
+    RemoteFile = require('../src/RemoteFile'),
+    RecordedRemoteFile = require('./RecordedRemoteFile');
 
 function chunkToString(chunk) {
   return `${chunk.chunk_beg}-${chunk.chunk_end}`;
@@ -43,6 +44,27 @@ describe('BAI', function() {
     bai.getChunksForInterval(new ContigInterval(0, 10400, 10600)).then(chunks => {
       expect(chunks).to.have.length(1);
       expect(chunkToString(chunks[0])).to.equal('0:8384-0:11328');
+      done();
+    }).done();
+  });
+
+  it('should use index chunks', function(done) {
+    var remoteFile = new RecordedRemoteFile('/test/data/index_test.bam.bai');
+    var bai = new BaiFile(remoteFile,
+                          {
+                            'chunks': [[8, 144], [144, 13776]],
+                            'minBlockIndex': 65536
+                          });
+
+    // contig 0 = chrM
+    bai.getChunksForInterval(new ContigInterval(0, 10400, 10600)).then(chunks => {
+      expect(chunks).to.have.length(1);
+      expect(chunkToString(chunks[0])).to.equal('0:8384-0:11328');
+
+      var requests = remoteFile.requests;
+      expect(requests).to.have.length(1);
+      expect(requests[0].toString()).to.equal('[8, 144]');
+
       done();
     }).done();
   });

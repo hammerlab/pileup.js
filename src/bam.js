@@ -160,9 +160,11 @@ class Bam {
   index: ?BaiFile;
   header: Q.Promise<Object>;
 
-  constructor(remoteFile: RemoteFile, remoteIndexFile?: RemoteFile) {
+  constructor(remoteFile: RemoteFile,
+              remoteIndexFile?: RemoteFile,
+              indexChunks?: Object) {
     this.remoteFile = remoteFile;
-    this.index = remoteIndexFile ? new BaiFile(remoteIndexFile) : null;
+    this.index = remoteIndexFile ? new BaiFile(remoteIndexFile, indexChunks) : null;
 
     var sizePromise = this.index ? this.index.getHeaderSize() : Q.when(2 * 65535);
     this.header = sizePromise.then(size => {
