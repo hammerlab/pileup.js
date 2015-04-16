@@ -5,14 +5,19 @@
  * - Make the parsing lazy (for significant performance wins)
  * - Make the resulting object more precisely typed.
  *
+ * Parsing reads using SamRead is ~2-3x faster than using jBinary and
+ * ThinAlignment directly.
+ *
  * @flow
  */
+'use strict';
 
-var jDataView = require('jdataview');
-var jBinary = require('jbinary');
-var {nullString} = require('./formats/helpers');
-var bamTypes = require('./formats/bamTypes');
+var jDataView = require('jdataview'),
+    jBinary = require('jbinary'),
+    {nullString} = require('./formats/helpers'),
+    bamTypes = require('./formats/bamTypes');
 
+// TODO: Make more extensive use of the jBinary specs.
 
 class SamRead {
   buffer: ArrayBuffer;

@@ -31,7 +31,7 @@ var ThinAlignment = {
   next_pos: 'int32',     // 24
   tlen: 'int32'          // 28
   // length of fixed-size header = 32 bytes
-}
+};
 
 var ThickAlignment = _.extend({}, ThinAlignment, {
   read_name: [nullString, 'l_read_name'],
