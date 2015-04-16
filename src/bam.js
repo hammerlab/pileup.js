@@ -33,7 +33,6 @@ function isAlignmentInRange(read: Object,
     return readRange.intersects(idxRange);
   }
 }
-    
 
 
 /**
@@ -58,16 +57,31 @@ var kMaxFetch = 65536 * 2;
 
 
 // This tracks how many bytes were read.
-function readAlignmentsToEnd(buffer: ArrayBuffer) {
+function readAlignmentsToEnd(buffer: ArrayBuffer,
+                             idxRange: ContigInterval<number>,
+                             contained: boolean) {
   var jb = new jBinary(buffer, bamTypes.TYPE_SET);
   var alignments = [];
   var lastStartOffset = 0;
+  var shouldAbort = false;
   try {
     while (jb.tell() < buffer.byteLength) {
       var alignment = jb.read('ThinBamAlignment');
       if (!alignment) break;
       alignments.push(alignment.contents);
       lastStartOffset = jb.tell();
+
+      
+      // Optimization: if the last alignment started after the requested range,
+      // then no other chunks can possibly contain matching alignments.
+      // TODO: use contigInterval.isAfterInterval when that's possible.
+      var read = alignment.contents;
+      var range = new ContigInterval(read.refID, read.pos, read.pos + 1);
+      if (range.contig > idxRange.contig ||
+          (range.contig == idxRange.contig && range.start() > idxRange.stop())) {
+        shouldAbort = true;
+        break;
+      }
     }
     // Code gets here if the compression block ended exactly at the end of
     // an Alignment.
@@ -80,6 +94,7 @@ function readAlignmentsToEnd(buffer: ArrayBuffer) {
 
   return {
     alignments,
+    shouldAbort,
     lastByteRead: lastStartOffset - 1
   };
 }
@@ -138,7 +153,8 @@ function fetchAlignments(remoteFile: RemoteFile,
     var buffers = blocks.map(x => x.buffer);
     buffers[0] = buffers[0].slice(chunk.chunk_beg.uoffset);
     var decomp = utils.concatArrayBuffers(buffers);
-    var {alignments: newAlignments, lastByteRead} = readAlignmentsToEnd(decomp);
+    var {alignments: newAlignments, lastByteRead, shouldAbort} =
+        readAlignmentsToEnd(decomp, idxRange, contained);
     if (newChunk) {
       var lastUOffset = splitOffset(buffers, chunk, lastByteRead);
       newChunk.chunk_beg.uoffset = lastUOffset + 1;
@@ -146,14 +162,8 @@ function fetchAlignments(remoteFile: RemoteFile,
     alignments = alignments.concat(
         filterAlignments(newAlignments, idxRange, contained));
 
-    // Optimization: if the last alignment started after the requested range,
-    // then no other chunks can possibly contain matching alignments.
-    var lastAlignment = newAlignments[newAlignments.length - 1],
-        lastStart = lastAlignment.pos,
-        lastRange = new ContigInterval(lastAlignment.refID, lastStart, lastStart + 1);
-    // TODO: use contigInterval.isAfterInterval when that's possible.
-    if (lastRange.contig > idxRange.contig ||
-        (lastRange.contig == idxRange.contig && lastRange.start() > idxRange.stop())) {
+    if (shouldAbort) {
+      console.log(shouldAbort);
       return Q.when(alignments);
     } else {
       return fetchAlignments(remoteFile,
