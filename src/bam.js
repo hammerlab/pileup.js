@@ -19,6 +19,24 @@ var bamTypes = require('./formats/bamTypes'),
 
 
 /**
+ * The 'contained' parameter controls whether the alignments must be fully
+ * contained within the range, or need only overlap it.
+ */
+function isAlignmentInRange(read: Object,
+                            idxRange: ContigInterval<number>,
+                            contained: boolean): boolean {
+  // TODO: Use cigar.getReferenceLength() instead of l_seq, like htsjdk. 
+  var readRange = new ContigInterval(read.refID, read.pos, read.pos + read.l_seq - 1);
+  if (contained) {
+    return idxRange.containsInterval(readRange);
+  } else {
+    return readRange.intersects(idxRange);
+  }
+}
+    
+
+
+/**
  * Filter a list of alignments down to just those which overlap the range.
  * The 'contained' parameter controls whether the alignments must be fully
  * contained within the range, or need only overlap it.
@@ -26,15 +44,7 @@ var bamTypes = require('./formats/bamTypes'),
 function filterAlignments(alignments: Object[],
                           idxRange: ContigInterval<number>,
                           contained: boolean): Object[] {
-  return alignments.filter(read => {
-    // TODO: Use cigar.getReferenceLength() instead of l_seq, like htsjdk. 
-    var readRange = new ContigInterval(read.refID, read.pos, read.pos + read.l_seq - 1);
-    if (contained) {
-      return idxRange.containsInterval(readRange);
-    } else {
-      return readRange.intersects(idxRange);
-    }
-  });
+  return alignments.filter(read => isAlignmentInRange(read, idxRange, contained));
 }
 
 
