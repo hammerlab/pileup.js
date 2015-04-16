@@ -52,11 +52,18 @@ This is a subset of `ensembl.chr17.bb`, shifted to match the coordinates in
 These BAM and BAI files come from the [samtools][1] tests. You can find
 corresponding SAM files for them in the same repo.
 
-[1]: https://github.com/samtools/samtools/tree/develop/test/dat
-
-
 #### index_test.bam
 
 This BAM/BAI file pair comes from [htsjdk][2] tests.
 
+#### dream.synth3.bam.mapped
+
+This BAM/BAI pair comes from the [ICGC-TCGA DREAM Mutation Calling
+challenge][3]. It's the synth3.normal data set with MDTags added. The BAM and
+BAI files have been reduced to a small portion of the originals using
+`scripts/generate_mapped_file.py`.
+
+
+[1]: https://github.com/samtools/samtools/tree/develop/test/dat
 [2]: https://github.com/samtools/htsjdk/blob/afecd5fa959087d5bdd5d5a701e415a72d629282/testdata/htsjdk/samtools/BAMFileIndexTest/index_test.bam
+[3]: https://www.synapse.org/#%21Synapse:syn312572
