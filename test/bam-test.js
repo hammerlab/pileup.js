@@ -4,9 +4,11 @@
 var chai = require('chai');
 var expect = chai.expect;
 
+
 var Bam = require('../src/bam'),
     ContigInterval = require('../src/ContigInterval'),
-    RemoteFile = require('../src/RemoteFile');
+    RemoteFile = require('../src/RemoteFile'),
+    MappedRemoteFile = require('./MappedRemoteFile');
 
 describe('BAM', function() {
   it('should parse BAM files', function(done) {

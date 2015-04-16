@@ -29,6 +29,10 @@ class RemoteFile {
   }
 
   getBytes(start: number, length: number): Q.Promise<ArrayBuffer> {
+    if (length < 0) {
+      return Q.reject(`Requested <0 bytes (${length}) from ${this.url}`);
+    }
+
     // If the remote file length is known, clamp the request to fit within it.
     var stop = start + length - 1;
     if (this.fileLength != -1) {

@@ -7,13 +7,14 @@
  *
  * Recommended usage:
  * - In your test, use RecordedRemoteFile with the real remote file.
- *   At the end of the test, log remoteFile.requests to the console and copy it.
+ *   At the end of the test, console.log remoteFile.getRequests() and copy it.
  * - Generate a mapped file using scripts/generate_mapped_file.py:
  *   pbpaste | ./scripts/generate_mapped_file.py http://path/to/url
  * - Replace RecordedRemoteFile in the test with MappedRemoteFile.
  *
  * @flow
  */
+'use strict';
 
 var Q = require('q');
 
@@ -51,7 +52,12 @@ class MappedRemoteFile extends RemoteFile {
     }
 
     if (request) {
-      return super.getFromNetwork(request.start, request.stop);
+      return super.getFromNetwork(request.start, request.stop).then(buf => {
+        // RemoteFile may discover the mapped file length from this request.
+        // This results in incorrect behavior, so we force it to forget.
+        this.fileLength = -1;
+        return buf;
+      });
     } else {
       return Q.reject(`Request for ${originalRequest} is not mapped in ${this.url}`);
     }
