@@ -8,6 +8,7 @@
 import type * as RemoteFile from './RemoteFile';
 
 var jBinary = require('jbinary'),
+    jDataView = require('jdataview'),
     _ = require('underscore'),
     Q = require('q');
 
@@ -15,26 +16,24 @@ var bamTypes = require('./formats/bamTypes'),
     utils = require('./utils'),
     BaiFile = require('./bai'),
     ContigInterval = require('./ContigInterval'),
-    VirtualOffset = require('./VirtualOffset');
+    VirtualOffset = require('./VirtualOffset'),
+    SamRead = require('./SamRead');
 
 
 /**
- * Filter a list of alignments down to just those which overlap the range.
  * The 'contained' parameter controls whether the alignments must be fully
  * contained within the range, or need only overlap it.
  */
-function filterAlignments(alignments: Object[],
-                          idxRange: ContigInterval<number>,
-                          contained: boolean): Object[] {
-  return alignments.filter(read => {
-    // TODO: Use cigar.getReferenceLength() instead of l_seq, like htsjdk. 
-    var readRange = new ContigInterval(read.refID, read.pos, read.pos + read.l_seq - 1);
-    if (contained) {
-      return idxRange.containsInterval(readRange);
-    } else {
-      return readRange.intersects(idxRange);
-    }
-  });
+function isAlignmentInRange(read: SamRead,
+                            idxRange: ContigInterval<number>,
+                            contained: boolean): boolean {
+  // TODO: Use cigar.getReferenceLength() instead of l_seq, like htsjdk. 
+  var readRange = new ContigInterval(read.refID, read.pos, read.pos + read.l_seq - 1);
+  if (contained) {
+    return idxRange.containsInterval(readRange);
+  } else {
+    return readRange.intersects(idxRange);
+  }
 }
 
 
@@ -48,16 +47,37 @@ var kMaxFetch = 65536 * 2;
 
 
 // This tracks how many bytes were read.
-function readAlignmentsToEnd(buffer: ArrayBuffer) {
-  var jb = new jBinary(buffer, bamTypes.TYPE_SET);
-  var alignments = [];
+function readAlignmentsToEnd(buffer: ArrayBuffer,
+                             idxRange: ContigInterval<number>,
+                             contained: boolean,
+                             alignments: SamRead[]) {
+  // We use jDataView and ArrayBuffer directly for a speedup over jBinary.
+  // This parses reads ~2-3x faster than using ThinAlignment directly.
+  var jv = new jDataView(buffer, 0, buffer.byteLength, true /* little endian */);
   var lastStartOffset = 0;
+  var shouldAbort = false;
+  var pos = 0;
   try {
-    while (jb.tell() < buffer.byteLength) {
-      var alignment = jb.read('ThinBamAlignment');
-      if (!alignment) break;
-      alignments.push(alignment.contents);
-      lastStartOffset = jb.tell();
+    while (pos < buffer.byteLength) {
+      var readLength = jv.getInt32(pos); pos += 4;
+      if (pos + readLength >= buffer.byteLength) break;
+
+      var readSlice = buffer.slice(pos, pos + readLength); pos += readLength;
+      var read = new SamRead(readSlice);
+      if (isAlignmentInRange(read, idxRange, contained)) {
+        alignments.push(read);
+      }
+      lastStartOffset = pos;
+
+      // Optimization: if the last alignment started after the requested range,
+      // then no other chunks can possibly contain matching alignments.
+      // TODO: use contigInterval.isAfterInterval when that's possible.
+      var range = new ContigInterval(read.refID, read.pos, read.pos + 1);
+      if (range.contig > idxRange.contig ||
+          (range.contig == idxRange.contig && range.start() > idxRange.stop())) {
+        shouldAbort = true;
+        break;
+      }
     }
     // Code gets here if the compression block ended exactly at the end of
     // an Alignment.
@@ -69,7 +89,7 @@ function readAlignmentsToEnd(buffer: ArrayBuffer) {
   }
 
   return {
-    alignments,
+    shouldAbort,
     lastByteRead: lastStartOffset - 1
   };
 }
@@ -99,7 +119,7 @@ function fetchAlignments(remoteFile: RemoteFile,
                          idxRange: ContigInterval<number>,
                          contained: boolean,
                          chunks: Chunk[],
-                         alignments: Object[]): Q.Promise<Object[]> {
+                         alignments: SamRead[]): Q.Promise<SamRead[]> {
   if (chunks.length === 0) {
     return Q.when(alignments);
   }
@@ -128,22 +148,14 @@ function fetchAlignments(remoteFile: RemoteFile,
     var buffers = blocks.map(x => x.buffer);
     buffers[0] = buffers[0].slice(chunk.chunk_beg.uoffset);
     var decomp = utils.concatArrayBuffers(buffers);
-    var {alignments: newAlignments, lastByteRead} = readAlignmentsToEnd(decomp);
+    var {lastByteRead, shouldAbort} =
+        readAlignmentsToEnd(decomp, idxRange, contained, alignments);
     if (newChunk) {
       var lastUOffset = splitOffset(buffers, chunk, lastByteRead);
       newChunk.chunk_beg.uoffset = lastUOffset + 1;
     }
-    alignments = alignments.concat(
-        filterAlignments(newAlignments, idxRange, contained));
 
-    // Optimization: if the last alignment started after the requested range,
-    // then no other chunks can possibly contain matching alignments.
-    var lastAlignment = newAlignments[newAlignments.length - 1],
-        lastStart = lastAlignment.pos,
-        lastRange = new ContigInterval(lastAlignment.refID, lastStart, lastStart + 1);
-    // TODO: use contigInterval.isAfterInterval when that's possible.
-    if (lastRange.contig > idxRange.contig ||
-        (lastRange.contig == idxRange.contig && lastRange.start() > idxRange.stop())) {
+    if (shouldAbort) {
       return Q.when(alignments);
     } else {
       return fetchAlignments(remoteFile,
@@ -217,7 +229,7 @@ class Bam {
    * The 'contained' parameter controls whether the alignments must be fully
    * contained within the range, or need only overlap it.
    */
-  getAlignmentsInRange(range: ContigInterval<string>, contained?: boolean): Q.Promise<Object[]> {
+  getAlignmentsInRange(range: ContigInterval<string>, contained?: boolean): Q.Promise<SamRead[]> {
     contained = contained || false;
     if (!this.index) {
       throw 'Range searches are only supported on BAMs with BAI indices.';

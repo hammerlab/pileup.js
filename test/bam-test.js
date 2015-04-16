@@ -55,7 +55,8 @@ describe('BAM', function() {
       expect(aux[3]).to.contain({tag: 'PG', value: 'colt'});
 
       // This one has a more interesting Cigar string
-      expect(Bam.makeCigarString(aligns[3].cigar)).to.equal('1S2I6M1P1I1P1I4M2I');
+      expect(Bam.makeCigarString(aligns[3].cigar))
+          .to.equal('1S2I6M1P1I1P1I4M2I');
 
       // - one with a more interesting Phred string
       done();
