@@ -4,7 +4,6 @@
 var chai = require('chai');
 var expect = chai.expect;
 
-
 var Bam = require('../src/bam'),
     ContigInterval = require('../src/ContigInterval'),
     RemoteFile = require('../src/RemoteFile'),
@@ -162,14 +161,29 @@ describe('BAM', function() {
     }).done();
   });
 
-  /*
-  it('should handle ginormous files', function(done) {
+  it('should fetch from a large, dense BAM file', function(done) {
     this.timeout(5000);
-    var bamFile = new Bam(new RemoteFile('/chrM.sorted.bam'));
-    bamFile.readAll(true).then(bamData => {
-      expect(bamData.alignments).to.have.length(38461);
+
+    // See test/data/README.md for details on where these files came from.
+    var remoteBAI = new MappedRemoteFile('/test/data/dream.synth3.bam.bai.mapped',
+                                         [[8054040, 8242920]]),
+        remoteBAM = new MappedRemoteFile('/test/data/dream.synth3.bam.mapped',
+                                         [[0, 69453], [163622109888, 163622739903]]);
+
+    var bam = new Bam(remoteBAM, remoteBAI, {
+      // "chunks" is usually an array; here we take advantage of the
+      // Object-like nature of JavaScript arrays to create a sparse array.
+      "chunks": { "19": [8054040, 8242920] },
+      "minBlockIndex": 69454
+    });
+
+    var range = new ContigInterval('20', 31511349, 31514172);
+
+    bam.getAlignmentsInRange(range).then(reads => {
+      expect(reads).to.have.length(1114);
+      expect(alignmentRange(reads[0])).to.equal('19:31511251-31511351');
+      expect(alignmentRange(reads[1113])).to.equal('19:31514171-31514271');
       done();
     }).done();
   });
-  */
 });
