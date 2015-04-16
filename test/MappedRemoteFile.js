@@ -9,7 +9,7 @@
  * - In your test, use RecordedRemoteFile with the real remote file.
  *   At the end of the test, log remoteFile.requests to the console and copy it.
  * - Generate a mapped file using scripts/generate_mapped_file.py:
- *   pbpaste | ./scripts/generate_mapped_file.py http://path/to/url > out.mapped
+ *   pbpaste | ./scripts/generate_mapped_file.py http://path/to/url
  * - Replace RecordedRemoteFile in the test with MappedRemoteFile.
  *
  * @flow
