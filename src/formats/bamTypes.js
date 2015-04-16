@@ -19,18 +19,35 @@ var CIGAR_OPS = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X'];
 // Core alignment fields shared between BamAlignment and ThinBamAlignment.
 // TODO: figure out why jBinary's 'extend' type doesn't work with this in TYPE_SET.
 var ThinAlignment = {
-  refID: 'int32',
-  pos: 'int32',
-  l_read_name: 'uint8',
-  MAPQ: 'uint8',
-  bin: 'uint16',
-  n_cigar_op: 'uint16',
-  FLAG: 'uint16',
-  l_seq: 'int32',
-  next_refID: 'int32',
-  next_pos: 'int32',
-  tlen: 'int32'
-};
+  refID: 'int32',        // 0
+  pos: 'int32',          // 4
+  l_read_name: 'uint8',  // 8
+  MAPQ: 'uint8',         // 9
+  bin: 'uint16',         // 10
+  n_cigar_op: 'uint16',  // 12
+  FLAG: 'uint16',        // 14
+  l_seq: 'int32',        // 16
+  next_refID: 'int32',   // 20
+  next_pos: 'int32',     // 24
+  tlen: 'int32'          // 28
+  // length of fixed-size header = 32 bytes
+}
+
+var ThickAlignment = _.extend({}, ThinAlignment, {
+  read_name: [nullString, 'l_read_name'],
+  cigar: ['array', 'CigarOp', 'n_cigar_op'],
+  seq: ['FourBitSequence', 'l_seq'],
+  qual: ['array', 'uint8', 'l_seq'],  // 255 = unknown
+  auxiliary: ['array', {
+    tag: ['string', 2],
+    val_type: 'char',
+    value: ['if', ctx => ctx.val_type == 'B', {
+             val_type: 'char',
+             num_values: 'int32',
+             values: ['array', 'AuxiliaryValue', 'num_values']
+            }, 'AuxiliaryValue']
+  }]  // goes until the end of the block
+});
 
 var TYPE_SET: any = {
   'jBinary.littleEndian': true,
@@ -49,21 +66,7 @@ var TYPE_SET: any = {
 
   'BamAlignment': {
     block_size: 'int32',
-    contents: [sizedBlock, _.extend({}, ThinAlignment, {
-      read_name: [nullString, 'l_read_name'],
-      cigar: ['array', 'CigarOp', 'n_cigar_op'],
-      seq: ['FourBitSequence', 'l_seq'],
-      qual: ['array', 'uint8', 'l_seq'],  // 255 = unknown
-      auxiliary: ['array', {
-        tag: ['string', 2],
-        val_type: 'char',
-        value: ['if', ctx => ctx.val_type == 'B', {
-                 val_type: 'char',
-                 num_values: 'int32',
-                 values: ['array', 'AuxiliaryValue', 'num_values']
-                }, 'AuxiliaryValue']
-      }]  // goes until the end of the block
-    }), 'block_size']
+    contents: [sizedBlock, ThickAlignment, 'block_size']
   },
 
   'ThinBamAlignment': {
@@ -177,4 +180,4 @@ var TYPE_SET: any = {
 };
 
 
-module.exports = {TYPE_SET};
+module.exports = {TYPE_SET, ThinAlignment, ThickAlignment};
