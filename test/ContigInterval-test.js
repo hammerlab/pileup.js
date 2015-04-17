@@ -22,4 +22,97 @@ describe('ContigInterval', function() {
 
     expect(tp53.intersects(other)).to.be.true;
   });
+
+  it('should coalesce lists of intervals', function() {
+    var ci = (a, b, c) => new ContigInterval(a, b, c);
+
+    var coalesceToString =
+        ranges => ContigInterval.coalesce(ranges).map(r => r.toString());
+
+    expect(coalesceToString([
+      ci(0, 0, 10),
+      ci(0, 10, 20),
+      ci(0, 20, 30)
+    ])).to.deep.equal([ '0:0-30' ]);
+
+    expect(coalesceToString([
+      ci(0, 0, 10),
+      ci(0, 5, 20),
+      ci(0, 20, 30)
+    ])).to.deep.equal([ '0:0-30' ]);
+
+    expect(coalesceToString([
+      ci(0, 0, 10),
+      ci(0, 5, 19),
+      ci(0, 20, 30)  // ContigInterval are inclusive, so these are adjacent
+    ])).to.deep.equal([
+      '0:0-30'
+    ]);
+
+    expect(coalesceToString([
+      ci(0, 20, 30),  // unordered
+      ci(0, 5, 19),
+      ci(0, 0, 10)
+    ])).to.deep.equal([
+      '0:0-30'
+    ]);
+
+    expect(coalesceToString([
+      ci(0, 20, 30),
+      ci(0, 5, 18),
+      ci(0, 0, 10)
+    ])).to.deep.equal([
+      '0:0-18', '0:20-30'
+    ]);
+  });
+
+  it('should determine coverage', function() {
+    var iv = new ContigInterval(1, 10, 20);
+    expect(iv.isCoveredBy([
+      new ContigInterval(1, 0, 10),
+      new ContigInterval(1, 5, 15),
+      new ContigInterval(1, 10, 20)
+    ])).to.be.true;
+
+    expect(iv.isCoveredBy([
+      new ContigInterval(1, 0, 13),
+      new ContigInterval(1, 11, 15),
+      new ContigInterval(1, 16, 30)
+    ])).to.be.true;
+
+    expect(iv.isCoveredBy([
+      new ContigInterval(1, 0, 10),
+      new ContigInterval(1, 5, 15),
+      new ContigInterval(1, 17, 30)  // a gap!
+    ])).to.be.false;
+
+    expect(iv.isCoveredBy([
+      new ContigInterval(0, 0, 13),  // wrong contig
+      new ContigInterval(1, 11, 15),
+      new ContigInterval(1, 16, 30)
+    ])).to.be.false;
+
+    expect(iv.isCoveredBy([
+      new ContigInterval(1, 0, 30)
+    ])).to.be.true;
+
+    expect(iv.isCoveredBy([
+      new ContigInterval(1, 15, 30)
+    ])).to.be.false;
+
+    expect(iv.isCoveredBy([
+      new ContigInterval(1, 0, 15)
+    ])).to.be.false;
+
+    expect(() => iv.isCoveredBy([
+      new ContigInterval(1, 5, 15),
+      new ContigInterval(1, 0, 10)
+    ])).to.throw(/sorted ranges/);
+
+    // Coalescing fixes the sorting problem
+    expect(iv.isCoveredBy(ContigInterval.coalesce([
+      new ContigInterval(1, 5, 15),
+      new ContigInterval(1, 0, 10)
+    ]))).to.be.false;
+  });
 });

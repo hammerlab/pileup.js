@@ -45,8 +45,7 @@ type TwoBitSource = {
   trigger: (event: string, ...args:any) => void;
 }
 
-// Expand range by EXPANSION_FACTOR, allowing for boundary effects and
-// respecting MAX_BASE_PAIRS_TO_FETCH. 
+// Expand range to begin and end on multiples of BASE_PAIRS_PER_FETCH.
 function expandRange(range) {
   var roundDown = x => x - x % BASE_PAIRS_PER_FETCH;
   var newStart = Math.max(1, roundDown(range.start())),

@@ -39,6 +39,18 @@ class ContigInterval<T: (number|string)> {
             this.interval.containsInterval(other.interval));
   }
 
+  isAdjacentTo(other: ContigInterval<T>): boolean {
+    return (this.contig === other.contig &&
+            (this.start() == 1 + other.stop() ||
+             this.stop() + 1 == other.start()));
+  }
+
+  isCoveredBy(intervals: ContigInterval<T>[]): boolean {
+    var ivs = intervals.filter(iv => iv.contig === this.contig)
+                       .map(iv => iv.interval);
+    return this.interval.isCoveredBy(ivs);
+  }
+
   /*
   This method doesn't typecheck. See https://github.com/facebook/flow/issues/388
   isAfterInterval(other: ContigInterval): boolean {
@@ -49,6 +61,37 @@ class ContigInterval<T: (number|string)> {
 
   toString(): string {
     return `${this.contig}:${this.start()}-${this.stop()}`;
+  }
+
+  // Sort an array of intervals & coalesce adjacent/overlapping ranges.
+  // NB: this may re-order the intervals parameter
+  static coalesce(intervals: ContigInterval[]): ContigInterval[] {
+    intervals.sort((a, b) => {
+      if (a.contig > b.contig) {
+        return -1;
+      } else if (a.contig < b.contig) {
+        return +1;
+      } else {
+        return a.start() - b.start();
+      }
+    });
+
+    var rs = [];
+    intervals.forEach(r => {
+      if (rs.length === 0) {
+        rs.push(r);
+        return;
+      }
+
+      var lastR = rs[rs.length - 1];
+      if (r.intersects(lastR) || r.isAdjacentTo(lastR)) {
+        lastR.interval.stop = Math.max(r.interval.stop, lastR.interval.stop);
+      } else {
+        rs.push(r);
+      }
+    });
+
+    return rs;
   }
 }
 

@@ -79,4 +79,42 @@ describe('Interval', function() {
 
     expect(() => bound([])).to.throw(/bound zero intervals/);
   });
+
+  it('should determine coverage', function() {
+    var iv = new Interval(10, 20);
+    expect(iv.isCoveredBy([
+      new Interval(0, 10),
+      new Interval(5, 15),
+      new Interval(10, 20)
+    ])).to.be.true;
+
+    expect(iv.isCoveredBy([
+      new Interval(0, 10),
+      new Interval(5, 15),
+      new Interval(16, 30)
+    ])).to.be.true;
+
+    expect(iv.isCoveredBy([
+      new Interval(0, 10),
+      new Interval(5, 15),
+      new Interval(17, 30)  // a gap!
+    ])).to.be.false;
+
+    expect(iv.isCoveredBy([
+      new Interval(0, 30)
+    ])).to.be.true;
+
+    expect(iv.isCoveredBy([
+      new Interval(15, 30)
+    ])).to.be.false;
+
+    expect(iv.isCoveredBy([
+      new Interval(0, 15)
+    ])).to.be.false;
+
+    expect(() => iv.isCoveredBy([
+      new Interval(5, 15),
+      new Interval(0, 10)
+    ])).to.throw(/sorted ranges/);
+  });
 });
