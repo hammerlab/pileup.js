@@ -186,7 +186,7 @@ describe('BAM', function() {
       "minBlockIndex": 69454
     });
 
-    var range = new ContigInterval('20', 31511349, 31514172);
+    var range = new ContigInterval('chr20', 31511349, 31514172);
 
     bam.getAlignmentsInRange(range).then(reads => {
       expect(reads).to.have.length(1114);
