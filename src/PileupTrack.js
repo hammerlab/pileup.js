@@ -9,7 +9,9 @@ import type * as SamRead from './SamRead';
 var React = require('react/addons'),
     _ = require('underscore'),
     d3 = require('d3'),
-    types = require('./types');
+    types = require('./types'),
+    Interval = require('./Interval'),
+    {pileup} = require('./pileuputils');
 
 var PileupTrack = React.createClass({
   propTypes: {
@@ -74,6 +76,9 @@ var NonEmptyPileupTrack = React.createClass({
 
     var scale = this.getScale();
 
+    var rows = pileup(this.props.reads.map(
+        r => new Interval(r.pos, r.pos + r.l_seq)));
+
     svg.attr('width', width)
        .attr('height', height);
 
@@ -88,8 +93,8 @@ var NonEmptyPileupTrack = React.createClass({
     // Update
     reads.attr({
       'x': read => scale(read.pos),
-      'y': (read, i) => i * (READ_HEIGHT + READ_SPACING),
-      'width': read => (scale(read.pos + read.l_seq) - scale(read.pos)),
+      'y': (read, i) => rows[i] * (READ_HEIGHT + READ_SPACING),
+      'width': read => (scale(read.pos + read.l_seq) - scale(read.pos) - 5),
       'height': READ_HEIGHT
     });
 
