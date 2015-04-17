@@ -40,6 +40,28 @@ class Interval {
     return new Interval(this.start, this.stop);
   }
 
+  /**
+   * Is this Interval entirely covered by the union of the ranges?
+   * The ranges parameter must be sorted by range.start
+   */
+  isCoveredBy(ranges: Interval[]): boolean {
+    var remaining = this.clone();
+    for (var i = 0; i < ranges.length; i++) {
+      var r = ranges[i];
+      if (i && r.start < ranges[i - 1].start) {
+        throw 'isCoveredBy must be called with sorted ranges';
+      }
+      if (r.start > remaining.start) {
+        return false;  // A position has been missed and there's no going back.
+      }
+      remaining.start = r.stop + 1;
+      if (remaining.length() <= 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   static intersectAll(intervals: Array<Interval>): Interval {
     if (!intervals.length) {
       throw new Error('Tried to intersect zero intervals');

@@ -1,7 +1,6 @@
 /* @flow */
 'use strict';
 
-var _ = require('underscore');
 var Interval = require('./Interval');
 
 /**
@@ -44,6 +43,12 @@ class ContigInterval<T: (number|string)> {
     return (this.contig === other.contig &&
             (this.start() == 1 + other.stop() ||
              this.stop() + 1 == other.start()));
+  }
+
+  isCoveredBy(intervals: ContigInterval<T>[]): boolean {
+    var ivs = intervals.filter(iv => iv.contig === this.contig)
+                       .map(iv => iv.interval);
+    return this.interval.isCoveredBy(ivs);
   }
 
   /*
