@@ -8,10 +8,13 @@ var Q = require('q');
 
 var React = require('react/addons'),
     TwoBit = require('../src/TwoBit'),
+    Bam = require('../src/bam'),
     BigBed = require('../src/BigBed'),
     Root = require('../src/Root'),
+    RemoteFile = require('../src/RemoteFile'),
     createTwoBitDataSource = require('../src/TwoBitDataSource'),
-    createBigBedDataSource = require('../src/BigBedDataSource');
+    createBigBedDataSource = require('../src/BigBedDataSource'),
+    createBamDataSource = require('../src/BamDataSource');
 
 
 var WAIT_FOR_POLL_INTERVAL_MS = 100;
@@ -49,6 +52,10 @@ describe('Root component', function() {
   var ensembl = new BigBed('/test/data/tp53.shifted.bb');
   var ensemblDataSource = createBigBedDataSource(ensembl);
 
+  var bam = new Bam(new RemoteFile('/test/data/index_test.bam'),
+                    new RemoteFile('/test/data/index_test.bam.bai'));
+  var bamSource = createBamDataSource(bam);
+
   var testDiv = document.getElementById('testdiv');
 
   afterEach(function() {
@@ -65,6 +72,7 @@ describe('Root component', function() {
     // TODO: changing to {start:1, stop:50} makes the test fail.
     React.render(<Root referenceSource={dataSource}
                        geneSource={ensemblDataSource}
+                       bamSource={bamSource}
                        initialRange={{contig:"chr17", start: 100, stop: 150}} />, div);
 
     var ready = (() => 
