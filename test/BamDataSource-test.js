@@ -54,9 +54,10 @@ describe('BamDataSource', function() {
     this.timeout(5000);
     var source = getTestSource();
 
-    var range       = new ContigInterval('20', 31512050, 31512150),
-        rangeBefore = new ContigInterval('20', 31512000, 31512050),
-        rangeAfter  = new ContigInterval('20', 31512150, 31512199);
+    // Requests are for 'chr20', while the canonical name is just '20'.
+    var range       = new ContigInterval('chr20', 31512050, 31512150),
+        rangeBefore = new ContigInterval('chr20', 31512000, 31512050),
+        rangeAfter  = new ContigInterval('chr20', 31512150, 31512199);
 
     var reads = source.getAlignmentsInRange(range);
     expect(reads).to.deep.equal([]);

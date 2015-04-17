@@ -58,6 +58,6 @@ text.basepair {
   height: 300px;
 }
 .pileup .alignment {
-  fill: red;
+  fill: #c8c8c8;  /* matches IGV */
 }
 

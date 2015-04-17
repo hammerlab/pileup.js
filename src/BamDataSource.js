@@ -36,6 +36,9 @@ function createBamSource(remoteSource: BamFile): BamDataSource {
   // Keys are virtualOffset.toString()
   var reads: {[key:string]: SamRead} = {};
 
+  // Mapping from contig name to canonical contig name.
+  var contigNames: {[key:string]: string} = {};
+
   // Ranges for which we have complete information -- no need to hit network.
   var coveredRanges: ContigInterval<string>[] = [];
 
@@ -47,25 +50,48 @@ function createBamSource(remoteSource: BamFile): BamDataSource {
   }
 
   function fetch(range: GenomeRange) {
-    var interval = new ContigInterval(range.contig, range.start, range.stop);
-
-    // Check if this interval is already in the cache.
-    if (interval.isCoveredBy(coveredRanges)) {
-      return Q.when();
+    var refsPromise;
+    if (!_.isEmpty(contigNames)) {
+      refsPromise = Q.when();
+    } else {
+      refsPromise = remoteSource.header.then(header => {
+        header.references.forEach(ref => {
+          var name = ref.name;
+          contigNames[name] = name;
+          contigNames['chr' + name] = name;
+          if (name.slice(0, 3) == 'chr') {
+            contigNames[name.slice(3)] = name;
+          }
+        });
+      });
     }
 
-    interval = expandRange(interval);
-    return remoteSource.getAlignmentsInRange(interval).then(reads => {
-      coveredRanges.push(interval);
-      coveredRanges = ContigInterval.coalesce(coveredRanges);
-      reads.forEach(read => addRead(read));
+    return refsPromise.then(() => {
+      var contigName = contigNames[range.contig];
+      var interval = new ContigInterval(contigName, range.start, range.stop);
+
+      // Check if this interval is already in the cache.
+      if (interval.isCoveredBy(coveredRanges)) {
+        return Q.when();
+      }
+
+      interval = expandRange(interval);
+      return remoteSource.getAlignmentsInRange(interval).then(reads => {
+        coveredRanges.push(interval);
+        coveredRanges = ContigInterval.coalesce(coveredRanges);
+        reads.forEach(read => addRead(read));
+      });
     });
   }
 
   function getAlignmentsInRange(range: ContigInterval<string>): SamRead[] {
     if (!range) return [];
-    // XXX there may be an issue here with adding 'chr' to contig names.
-    return _.filter(reads, read => read.intersects(range));
+    if (_.isEmpty(contigNames)) return [];
+
+    var canonicalRange = new ContigInterval(contigNames[range.contig],
+                                            range.start(), range.stop());
+
+    return _.filter(reads, read => read.intersects(canonicalRange));
   }
 
   var o = {

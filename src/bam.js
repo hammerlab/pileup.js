@@ -259,7 +259,9 @@ class Bam {
     return this.header.then(header => {
       for (var i = 0; i < header.references.length; i++) {
         var name = header.references[i].name;
-        if (name == contigName || name == 'chr' + contigName) {
+        if (name == contigName ||
+            name == 'chr' + contigName ||
+            'chr' + name == contigName) {
           return {idx: i, name: name};
         }
       }
