@@ -72,11 +72,11 @@ describe('BAM', function() {
     var range = new ContigInterval('chrM', 10400, 10600);
     bam.getAlignmentsInRange(range, true).then(alignments => {
       expect(alignments).to.have.length(1);
-      expect(alignments[0].toString()).to.equal('0:10427-10477');
+      expect(alignments[0].toString()).to.equal('chrM:10427-10477');
       return bam.getAlignmentsInRange(range, false).then(alignments => {
         expect(alignments).to.have.length(2);
-        expect(alignments[0].toString()).to.equal('0:10388-10438');
-        expect(alignments[1].toString()).to.equal('0:10427-10477');
+        expect(alignments[0].toString()).to.equal('chrM:10388-10438');
+        expect(alignments[1].toString()).to.equal('chrM:10427-10477');
         done();
       });
     }).done();
@@ -100,20 +100,20 @@ describe('BAM', function() {
       // Note: htsjdk returns contig names like 'chr18', not 18.
       expect(reads).to.have.length(14);
       expect(reads.map(r => r.toString())).to.deep.equal([
-          '18:3653516-3653566',
-          '18:3653591-3653641',
-          '18:4215486-4215536',
-          '18:4215629-4215679',
-          '18:4782331-4782381',
-          '18:4782490-4782540',
-          '18:5383914-5383964',
-          '18:5384093-5384143',
-          '18:5904078-5904128',
-          '18:5904241-5904291',
-          '18:6412181-6412231',
-          '18:6412353-6412403',
-          '18:6953238-6953288',
-          '18:6953412-6953462'
+          'chr18:3653516-3653566',
+          'chr18:3653591-3653641',
+          'chr18:4215486-4215536',
+          'chr18:4215629-4215679',
+          'chr18:4782331-4782381',
+          'chr18:4782490-4782540',
+          'chr18:5383914-5383964',
+          'chr18:5384093-5384143',
+          'chr18:5904078-5904128',
+          'chr18:5904241-5904291',
+          'chr18:6412181-6412231',
+          'chr18:6412353-6412403',
+          'chr18:6953238-6953288',
+          'chr18:6953412-6953462'
       ]);
       done();
     }).done();
@@ -126,19 +126,19 @@ describe('BAM', function() {
     bam.getAlignmentsInRange(range).then(reads => {
       expect(reads).to.have.length(92);
       expect(reads.slice(0, 5).map(r => r.toString())).to.deep.equal([
-        '1:90071452-90071502',
-        '1:90071609-90071659',
-        '1:90622416-90622466',
-        '1:90622572-90622622',
-        '1:91182945-91182995'
+        'chr1:90071452-90071502',
+        'chr1:90071609-90071659',
+        'chr1:90622416-90622466',
+        'chr1:90622572-90622622',
+        'chr1:91182945-91182995'
       ]);
 
       expect(reads.slice(-5).map(r => r.toString())).to.deep.equal([
-        '1:115379485-115379535',
-        '1:116045704-116045754',
-        '1:116045758-116045808',
-        '1:116563764-116563814',
-        '1:116563944-116563994'
+        'chr1:115379485-115379535',
+        'chr1:116045704-116045754',
+        'chr1:116045758-116045808',
+        'chr1:116563764-116563814',
+        'chr1:116563944-116563994'
       ]);
 
       // See "should fetch an alignment at a specific offset", below.
@@ -153,7 +153,7 @@ describe('BAM', function() {
     // This verifies that alignments are tagged with the correct offset.
     var bam = new Bam(new RemoteFile('/test/data/index_test.bam'));
     bam.readAtOffset(new VirtualOffset(28269, 2247)).then(read => {
-      expect(read.toString()).to.equal('1:116563944-116563994');
+      expect(read.toString()).to.equal('chr1:116563944-116563994');
       done();
     }).done();
   });
@@ -190,8 +190,8 @@ describe('BAM', function() {
 
     bam.getAlignmentsInRange(range).then(reads => {
       expect(reads).to.have.length(1114);
-      expect(reads[0].toString()).to.equal('19:31511251-31511351');
-      expect(reads[1113].toString()).to.equal('19:31514171-31514271');
+      expect(reads[0].toString()).to.equal('20:31511251-31511351');
+      expect(reads[1113].toString()).to.equal('20:31514171-31514271');
       done();
     }).done();
   });

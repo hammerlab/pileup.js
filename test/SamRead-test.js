@@ -13,11 +13,13 @@ var RemoteFile = require('../src/RemoteFile'),
     Bam = require('../src/bam'),
     bamTypes = require('../src/formats/bamTypes'),
     SamRead = require('../src/SamRead'),
-    VirtualOffset = require('../src/VirtualOffset');
+    VirtualOffset = require('../src/VirtualOffset'),
+    ContigInterval = require('../src/ContigInterval');
 
 describe('SamRead', function() {
 
   function getSamArray(url): Q.Promise<SamRead[]> {
+    var zero = new VirtualOffset(0, 0);
     var file = new RemoteFile(url);
     return file.getAll().then(gzipBuffer => {
       var buf = utils.inflateGzip(gzipBuffer);
@@ -26,7 +28,7 @@ describe('SamRead', function() {
       return jb.read(['array', {
         block_size: 'int32',
         contents: ['blob', 'block_size']
-      }]).map(block => new SamRead(block.contents, new VirtualOffset(0, 0)));
+      }]).map(block => new SamRead(block.contents, zero, 'ref'));
     });
   }
 
@@ -46,11 +48,11 @@ describe('SamRead', function() {
       // r000 99 insert 50 30 10M = 80 30 ATTTAGCTAC AAAAAAAAAA RG:Z:cow PG:Z:bull
       var read = reads[0];
       expect(read.getName()).to.equal('r000');
-      // expect(read.FLAG).to.equal(99);
       expect(read.refID).to.equal(0);
+      expect(read.ref).to.equal('ref');
       expect(read.pos).to.equal(49);  // 0-based
       expect(read.l_seq).to.equal(10);
-      // expect(refs[r000.refID].name).to.equal('insert');
+      expect(read.toString()).to.equal('ref:50-59');
 
       done();
     }).done();
@@ -76,6 +78,20 @@ describe('SamRead', function() {
       expect(aux).to.have.length(2);
       expect(aux[0]).to.contain({tag: 'RG', value: 'cow'});
       expect(aux[1]).to.contain({tag: 'PG', value: 'bull'});
+      done();
+    }).done();
+  });
+
+  it('should find record intersections', function(done) {
+    testReads.then(reads => {
+      var read = reads[0];
+      // toString() produces a 1-based result, but ContigInterval is 0-based.
+      expect(read.toString()).to.equal('ref:50-59');
+      expect(read.intersects(new ContigInterval('ref', 40, 49))).to.be.true;
+      expect(read.intersects(new ContigInterval('ref', 40, 48))).to.be.false;
+      expect(read.intersects(new ContigInterval('0', 40, 55))).to.be.false;
+      expect(read.intersects(new ContigInterval('ref', 58, 60))).to.be.true;
+      expect(read.intersects(new ContigInterval('ref', 59, 60))).to.be.false;
       done();
     }).done();
   });

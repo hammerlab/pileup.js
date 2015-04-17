@@ -53,7 +53,8 @@ type InflatedBlock = {
 var kMaxFetch = 65536 * 2;
 
 // Read a single alignment
-function readAlignment(view: jDataView, pos: number, offset: VirtualOffset) {
+function readAlignment(view: jDataView, pos: number,
+                       offset: VirtualOffset, refName: string) {
   var readLength = view.getInt32(pos);
   pos += 4;
 
@@ -63,7 +64,7 @@ function readAlignment(view: jDataView, pos: number, offset: VirtualOffset) {
 
   var readSlice = view.buffer.slice(pos, pos + readLength);
 
-  var read = new SamRead(readSlice, offset.clone());
+  var read = new SamRead(readSlice, offset.clone(), refName);
   return {
     read,
     readLength: 4 + readLength
@@ -72,6 +73,7 @@ function readAlignment(view: jDataView, pos: number, offset: VirtualOffset) {
 
 // This tracks how many bytes were read.
 function readAlignmentsToEnd(buffer: ArrayBuffer,
+                             refName: string,
                              idxRange: ContigInterval<number>,
                              contained: boolean,
                              offset: VirtualOffset,
@@ -86,7 +88,7 @@ function readAlignmentsToEnd(buffer: ArrayBuffer,
   var blockIndex = 0;
   try {
     while (pos < buffer.byteLength) {
-      var readData = readAlignment(jv, pos, offset);
+      var readData = readAlignment(jv, pos, offset, refName);
       if (!readData) break;
 
       var {read, readLength} = readData;
@@ -134,6 +136,7 @@ function readAlignmentsToEnd(buffer: ArrayBuffer,
 // The returned promise is fulfilled once it can be proved that no more
 // alignments need to be fetched.
 function fetchAlignments(remoteFile: RemoteFile,
+                         refName: string,
                          idxRange: ContigInterval<number>,
                          contained: boolean,
                          chunks: Chunk[],
@@ -167,7 +170,7 @@ function fetchAlignments(remoteFile: RemoteFile,
     buffers[0] = buffers[0].slice(chunk.chunk_beg.uoffset);
     var decomp = utils.concatArrayBuffers(buffers);
     var {shouldAbort, nextOffset} =
-        readAlignmentsToEnd(decomp, idxRange, contained, chunk.chunk_beg, blocks, alignments);
+        readAlignmentsToEnd(decomp, refName, idxRange, contained, chunk.chunk_beg, blocks, alignments);
     if (newChunk) {
       newChunk.chunk_beg = nextOffset;
     }
@@ -176,6 +179,7 @@ function fetchAlignments(remoteFile: RemoteFile,
       return Q.when(alignments);
     } else {
       return fetchAlignments(remoteFile,
+                             refName,
                              idxRange,
                              contained,
                              (newChunk ? [newChunk] : []).concat(_.rest(chunks)),
@@ -234,24 +238,29 @@ class Bam {
     return this.remoteFile.getBytes(offset.coffset, kMaxFetch).then(gzip => {
       var buf = utils.inflateGzip(gzip);
       var jv = new jDataView(buf, 0, buf.byteLength, true /* little endian */);
-      var readData = readAlignment(jv, offset.uoffset, offset);
+      var readData = readAlignment(jv, offset.uoffset, offset, '');
       if (!readData) {
         throw `Unable to read alignment at ${offset} in ${this.remoteFile.url}`;
       } else {
-        return readData.read;
+        // Attach the human-readable ref name
+        var read = readData.read;
+        return this.header.then(header => {
+          read.ref = header.references[read.refID].name;
+          return read;
+        });
       }
     });
   }
 
   /**
-   * Map a contig name to a contig index.
+   * Map a contig name to a contig index and canonical name.
    */
-  getContigIndex(contigName: string): Q.Promise<number> {
+  getContigIndex(contigName: string): Q.Promise<{idx: number; name: string}> {
     return this.header.then(header => {
       for (var i = 0; i < header.references.length; i++) {
         var name = header.references[i].name;
         if (name == contigName || name == 'chr' + contigName) {
-          return i;
+          return {idx: i, name: name};
         }
       }
       throw `Invalid contig name: ${contigName}`;
@@ -270,10 +279,11 @@ class Bam {
     }
     var index = this.index;
 
-    return this.getContigIndex(range.contig).then(contigIdx => {
-      var idxRange = new ContigInterval(contigIdx, range.start(), range.stop());
+    return this.getContigIndex(range.contig).then(({idx, name}) => {
+      var idxRange = new ContigInterval(idx, range.start(), range.stop());
       return index.getChunksForInterval(idxRange).then(chunks => {
-        return fetchAlignments(this.remoteFile, idxRange, contained, chunks, []);
+        return fetchAlignments(
+            this.remoteFile, name, idxRange, contained, chunks, []);
       });
     });
   }
