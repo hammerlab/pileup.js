@@ -4,17 +4,21 @@
  */
 'use strict';
 
+import type * as SamRead from './SamRead';
+
 var React = require('react'),
     ContigInterval = require('./ContigInterval'),
     Controls = require('./Controls'),
     GenomeTrack = require('./GenomeTrack'),
-    GeneTrack = require('./GeneTrack');
+    GeneTrack = require('./GeneTrack'),
+    PileupTrack = require('./PileupTrack');
 
 
 var Root = React.createClass({
   propTypes: {
     referenceSource: React.PropTypes.object.isRequired,
     geneSource: React.PropTypes.object.isRequired,
+    bamSource: React.PropTypes.object.isRequired,
     initialRange: React.PropTypes.object.isRequired
   },
   getInitialState: function() {
@@ -22,7 +26,8 @@ var Root = React.createClass({
       contigList: ([]: string[]),
       range: (null: ?GenomeRange),
       basePairs: (null: any),
-      genes: ([]: Array<any>)  // TODO import Gene type
+      genes: ([]: Array<any>),  // TODO import Gene type
+      reads: ([]: SamRead[])
     };
   },
   componentDidMount: function() {
@@ -41,6 +46,9 @@ var Root = React.createClass({
     var geneSource = this.props.geneSource;
     geneSource.on('newdata', () => { this.update() });
 
+    var bamSource = this.props.bamSource;
+    bamSource.on('newdata', () => { this.update() });
+
     this.update();
   },
   update: function() {
@@ -49,7 +57,8 @@ var Root = React.createClass({
     this.setState({
       contigList: this.props.referenceSource.contigList(),
       basePairs: this.props.referenceSource.getRange(range),
-      genes: this.props.geneSource.getGenesInRange(ci)
+      genes: this.props.geneSource.getGenesInRange(ci),
+      reads: this.props.bamSource.getAlignmentsInRange(ci)
     });
   },
   handleRangeChange: function(newRange: GenomeRange) {
@@ -60,6 +69,7 @@ var Root = React.createClass({
     ref.rangeChanged(newRange);
 
     this.props.geneSource.rangeChanged(newRange);
+    this.props.bamSource.rangeChanged(newRange);
   },
   render: function(): any {
     return (
@@ -73,6 +83,9 @@ var Root = React.createClass({
         <GeneTrack range={this.state.range}
                    genes={this.state.genes}
                    onRangeChange={this.handleRangeChange} />
+        <PileupTrack range={this.state.range}
+                     reads={this.state.reads}
+                     onRangeChange={this.handleRangeChange} />
 
       </div>
     );

@@ -52,3 +52,12 @@ text.basepair {
   fill: blue;
   stroke: none;
 }
+
+/* pileup track */
+.pileup {
+  height: 300px;
+}
+.pileup .alignment {
+  fill: red;
+}
+

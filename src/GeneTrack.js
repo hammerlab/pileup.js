@@ -91,7 +91,6 @@ var NonEmptyGeneTrack = React.createClass({
   },
   componentDidUpdate: function(prevProps: any, prevState: any) {
     // Check a whitelist of properties which could change the visualization.
-    // For now, just basePairs and range.
     var newProps = this.props;
     if (!_.isEqual(newProps.genes, prevProps.genes) ||
         !_.isEqual(newProps.range, prevProps.range)) {
