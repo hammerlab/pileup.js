@@ -49,7 +49,7 @@ class SamRead {
 
   toString(): string {
     var stop = this.pos + this.l_seq;
-    return `${this.refID}:${this.pos}-${stop}`;
+    return `${this.refID}:${1+this.pos}-${stop}`;
   }
 
   _getJDataView(): jDataView {
@@ -69,10 +69,6 @@ class SamRead {
   getFull(): Object {
     var jb = new jBinary(this.buffer, bamTypes.TYPE_SET);
     return jb.read(bamTypes.ThickAlignment, 0);
-  }
-
-  intersects(range: ContigInterval<string>): boolean {
-    return false;
   }
 }
 
