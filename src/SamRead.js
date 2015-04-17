@@ -12,6 +12,9 @@
  */
 'use strict';
 
+import type * as ContigInterval from './ContigInterval';
+import type * as VirtualOffset from './VirtualOffset';
+
 var jDataView = require('jdataview'),
     jBinary = require('jbinary'),
     {nullString} = require('./formats/helpers'),
@@ -21,31 +24,41 @@ var jDataView = require('jdataview'),
 
 class SamRead {
   buffer: ArrayBuffer;
-  reader: jDataView;
+  offset: VirtualOffset;
 
   pos: number;
   refID: number;
   l_seq: number;
 
-  constructor(buffer: ArrayBuffer) {
+  /**
+   * buffer contains the raw bytes of the serialized BAM read. It must contain
+   * at least one full read (but may contain more).
+   * offset records where this alignment is located in the BAM file. It's
+   * useful as a unique ID for alignments.
+   */
+  constructor(buffer: ArrayBuffer, offset: VirtualOffset) {
     this.buffer = buffer;
+    this.offset = offset;
 
     // Go ahead and parse a few fields immediately.
-    var jv = new jDataView(buffer, 0, buffer.byteLength, true /* little endian */);
+    var jv = this._getJDataView();
     this.refID = jv.getUint32(0);
     this.pos = jv.getUint32(4);
     this.l_seq = jv.getUint32(16);
-
-    this.reader = jv;
   }
 
   toString(): string {
     var stop = this.pos + this.l_seq;
-    return `${this.refID}:${this.pos}-${stop}`;
+    return `${this.refID}:${1+this.pos}-${stop}`;
+  }
+
+  _getJDataView(): jDataView {
+    var b = this.buffer;
+    return new jDataView(b, 0, b.byteLength, true /* little endian */);
   }
 
   getName(): string {
-    var l_read_name = this.reader.getUint8(8);
+    var l_read_name = this._getJDataView().getUint8(8);
     var jb = new jBinary(this.buffer, {
       'jBinary.littleEndian': true
     });

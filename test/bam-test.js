@@ -7,7 +7,8 @@ var expect = chai.expect;
 var Bam = require('../src/bam'),
     ContigInterval = require('../src/ContigInterval'),
     RemoteFile = require('../src/RemoteFile'),
-    MappedRemoteFile = require('./MappedRemoteFile');
+    MappedRemoteFile = require('./MappedRemoteFile'),
+    VirtualOffset = require('../src/VirtualOffset');
 
 describe('BAM', function() {
   it('should parse BAM files', function(done) {
@@ -43,7 +44,6 @@ describe('BAM', function() {
       expect(aux[0]).to.contain({tag: 'RG', value: 'cow'});
       expect(aux[1]).to.contain({tag: 'PG', value: 'bull'});
 
-
       // This one has more interesting auxiliary data:
       // XX:B:S,12561,2,20,112
       aux = aligns[2].auxiliary;
@@ -62,11 +62,6 @@ describe('BAM', function() {
       done();
     }).done();
   });
-
-  function alignmentRange(alignment) {
-    var stop = alignment.pos + alignment.l_seq;
-    return `${alignment.refID}:${1+alignment.pos}-${stop}`;
-  }
   
   // This matches htsjdk's BamFileIndexTest.testSpecificQueries
   it('should find sequences using an index', function(done) {
@@ -77,11 +72,11 @@ describe('BAM', function() {
     var range = new ContigInterval('chrM', 10400, 10600);
     bam.getAlignmentsInRange(range, true).then(alignments => {
       expect(alignments).to.have.length(1);
-      expect(alignmentRange(alignments[0])).to.equal('0:10427-10477');
+      expect(alignments[0].toString()).to.equal('0:10427-10477');
       return bam.getAlignmentsInRange(range, false).then(alignments => {
         expect(alignments).to.have.length(2);
-        expect(alignmentRange(alignments[0])).to.equal('0:10388-10438');
-        expect(alignmentRange(alignments[1])).to.equal('0:10427-10477');
+        expect(alignments[0].toString()).to.equal('0:10388-10438');
+        expect(alignments[1].toString()).to.equal('0:10427-10477');
         done();
       });
     }).done();
@@ -104,7 +99,7 @@ describe('BAM', function() {
     bam.getAlignmentsInRange(range).then(reads => {
       // Note: htsjdk returns contig names like 'chr18', not 18.
       expect(reads).to.have.length(14);
-      expect(reads.map(alignmentRange)).to.deep.equal([
+      expect(reads.map(r => r.toString())).to.deep.equal([
           '18:3653516-3653566',
           '18:3653591-3653641',
           '18:4215486-4215536',
@@ -130,7 +125,7 @@ describe('BAM', function() {
     var range = new ContigInterval('chr1', 90002285, 116992285);
     bam.getAlignmentsInRange(range).then(reads => {
       expect(reads).to.have.length(92);
-      expect(reads.slice(0, 5).map(alignmentRange)).to.deep.equal([
+      expect(reads.slice(0, 5).map(r => r.toString())).to.deep.equal([
         '1:90071452-90071502',
         '1:90071609-90071659',
         '1:90622416-90622466',
@@ -138,14 +133,27 @@ describe('BAM', function() {
         '1:91182945-91182995'
       ]);
 
-      expect(reads.slice(-5).map(alignmentRange)).to.deep.equal([
+      expect(reads.slice(-5).map(r => r.toString())).to.deep.equal([
         '1:115379485-115379535',
         '1:116045704-116045754',
         '1:116045758-116045808',
         '1:116563764-116563814',
         '1:116563944-116563994'
       ]);
+
+      // See "should fetch an alignment at a specific offset", below.
+      expect(reads.slice(-1)[0].offset.toString()).to.equal('28269:2247');
       
+      done();
+    }).done();
+  });
+
+  it('should fetch an alignment at a specific offset', function(done) {
+    // This virtual offset matches the one above.
+    // This verifies that alignments are tagged with the correct offset.
+    var bam = new Bam(new RemoteFile('/test/data/index_test.bam'));
+    bam.readAtOffset(new VirtualOffset(28269, 2247)).then(read => {
+      expect(read.toString()).to.equal('1:116563944-116563994');
       done();
     }).done();
   });
@@ -182,8 +190,8 @@ describe('BAM', function() {
 
     bam.getAlignmentsInRange(range).then(reads => {
       expect(reads).to.have.length(1114);
-      expect(alignmentRange(reads[0])).to.equal('19:31511251-31511351');
-      expect(alignmentRange(reads[1113])).to.equal('19:31514171-31514271');
+      expect(reads[0].toString()).to.equal('19:31511251-31511351');
+      expect(reads[1113].toString()).to.equal('19:31514171-31514271');
       done();
     }).done();
   });
