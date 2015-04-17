@@ -42,6 +42,10 @@ class VirtualOffset {
   compareTo(other: VirtualOffset): number {
     return this.coffset - other.coffset || this.uoffset - other.uoffset;
   }
+
+  clone(): VirtualOffset {
+    return new VirtualOffset(this.coffset, this.uoffset);
+  }
 }
 
 module.exports = VirtualOffset;

@@ -43,31 +43,66 @@ type Chunk = {
   chunk_end: VirtualOffset;
 }
 
+// TODO: import from src/utils.js
+type InflatedBlock = {
+  offset: number;
+  compressedLength: number;
+  buffer: ArrayBuffer;
+}
+
 var kMaxFetch = 65536 * 2;
 
+// Read a single alignment
+function readAlignment(view: jDataView, pos: number, offset: VirtualOffset) {
+  var readLength = view.getInt32(pos);
+  pos += 4;
+
+  if (pos + readLength >= view.byteLength) {
+    return null;
+  }
+
+  var readSlice = view.buffer.slice(pos, pos + readLength);
+
+  var read = new SamRead(readSlice, offset.clone());
+  return {
+    read,
+    readLength: 4 + readLength
+  };
+}
 
 // This tracks how many bytes were read.
 function readAlignmentsToEnd(buffer: ArrayBuffer,
                              idxRange: ContigInterval<number>,
                              contained: boolean,
+                             offset: VirtualOffset,
+                             blocks: InflatedBlock[],
                              alignments: SamRead[]) {
   // We use jDataView and ArrayBuffer directly for a speedup over jBinary.
   // This parses reads ~2-3x faster than using ThinAlignment directly.
   var jv = new jDataView(buffer, 0, buffer.byteLength, true /* little endian */);
-  var lastStartOffset = 0;
   var shouldAbort = false;
   var pos = 0;
+  offset = offset.clone();
+  var blockIndex = 0;
   try {
     while (pos < buffer.byteLength) {
-      var readLength = jv.getInt32(pos); pos += 4;
-      if (pos + readLength >= buffer.byteLength) break;
+      var readData = readAlignment(jv, pos, offset);
+      if (!readData) break;
 
-      var readSlice = buffer.slice(pos, pos + readLength); pos += readLength;
-      var read = new SamRead(readSlice);
+      var {read, readLength} = readData;
+      pos += readLength;
       if (isAlignmentInRange(read, idxRange, contained)) {
         alignments.push(read);
       }
-      lastStartOffset = pos;
+
+      // Advance the VirtualOffset to reflect the new position
+      offset.uoffset += readLength;
+      var bufLen = blocks[blockIndex].buffer.byteLength;
+      if (offset.uoffset >= bufLen) {
+        offset.uoffset -= bufLen;
+        offset.coffset += blocks[blockIndex].compressedLength;
+        blockIndex++;
+      }
 
       // Optimization: if the last alignment started after the requested range,
       // then no other chunks can possibly contain matching alignments.
@@ -90,25 +125,8 @@ function readAlignmentsToEnd(buffer: ArrayBuffer,
 
   return {
     shouldAbort,
-    lastByteRead: lastStartOffset - 1
+    nextOffset: offset
   };
-}
-
-// Given an offset in a concatenated buffer, determine the offset it
-// corresponds to in the original buffer.
-function splitOffset(buffers: ArrayBuffer[], chunk: Chunk, lastByteRead: number): number {
-  for (var i = 0; i < buffers.length - 1; i++) {
-    lastByteRead -= buffers[i].byteLength;
-  }
-  if (lastByteRead < 0) {
-    throw 'Last byte read was not in last chunk';
-  }
-
-  if (buffers.length == 1) {
-    lastByteRead += chunk.chunk_beg.uoffset;
-  }
-
-  return lastByteRead;
 }
 
 // Fetch alignments from the remote source at the locations specified by Chunks.
@@ -148,11 +166,10 @@ function fetchAlignments(remoteFile: RemoteFile,
     var buffers = blocks.map(x => x.buffer);
     buffers[0] = buffers[0].slice(chunk.chunk_beg.uoffset);
     var decomp = utils.concatArrayBuffers(buffers);
-    var {lastByteRead, shouldAbort} =
-        readAlignmentsToEnd(decomp, idxRange, contained, alignments);
+    var {shouldAbort, nextOffset} =
+        readAlignmentsToEnd(decomp, idxRange, contained, chunk.chunk_beg, blocks, alignments);
     if (newChunk) {
-      var lastUOffset = splitOffset(buffers, chunk, lastByteRead);
-      newChunk.chunk_beg.uoffset = lastUOffset + 1;
+      newChunk.chunk_beg = nextOffset;
     }
 
     if (shouldAbort) {
@@ -206,6 +223,23 @@ class Bam {
       // Do some mild re-shaping.
       o.alignments = o.alignments.map(x => x.contents);
       return o;
+    });
+  }
+
+  /**
+   * Fetch a single read at the given VirtualOffset.
+   * This is insanely inefficient and should not be used outside of testing.
+   */
+  readAtOffset(offset: VirtualOffset): Q.Promise<SamRead> {
+    return this.remoteFile.getBytes(offset.coffset, kMaxFetch).then(gzip => {
+      var buf = utils.inflateGzip(gzip);
+      var jv = new jDataView(buf, 0, buf.byteLength, true /* little endian */);
+      var readData = readAlignment(jv, offset.uoffset, offset);
+      if (!readData) {
+        throw `Unable to read alignment at ${offset} in ${this.remoteFile.url}`;
+      } else {
+        return readData.read;
+      }
     });
   }
 

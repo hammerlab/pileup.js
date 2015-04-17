@@ -7,7 +7,8 @@ var expect = chai.expect;
 var Bam = require('../src/bam'),
     ContigInterval = require('../src/ContigInterval'),
     RemoteFile = require('../src/RemoteFile'),
-    MappedRemoteFile = require('./MappedRemoteFile');
+    MappedRemoteFile = require('./MappedRemoteFile'),
+    VirtualOffset = require('../src/VirtualOffset');
 
 describe('BAM', function() {
   it('should parse BAM files', function(done) {
@@ -42,7 +43,6 @@ describe('BAM', function() {
       expect(aux).to.have.length(2);
       expect(aux[0]).to.contain({tag: 'RG', value: 'cow'});
       expect(aux[1]).to.contain({tag: 'PG', value: 'bull'});
-
 
       // This one has more interesting auxiliary data:
       // XX:B:S,12561,2,20,112
@@ -145,7 +145,20 @@ describe('BAM', function() {
         '1:116563764-116563814',
         '1:116563944-116563994'
       ]);
+
+      // See "should fetch an alignment at a specific offset", below.
+      expect(reads.slice(-1)[0].offset.toString()).to.equal('28269:2247');
       
+      done();
+    }).done();
+  });
+
+  it('should fetch an alignment at a specific offset', function(done) {
+    // This virtual offset matches the one above.
+    // This verifies that alignments are tagged with the correct offset.
+    var bam = new Bam(new RemoteFile('/test/data/index_test.bam'));
+    bam.readAtOffset(new VirtualOffset(28269, 2247)).then(read => {
+      expect(alignmentRange(read)).to.equal('1:116563944-116563994');
       done();
     }).done();
   });

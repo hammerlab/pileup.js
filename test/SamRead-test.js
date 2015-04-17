@@ -12,7 +12,8 @@ var RemoteFile = require('../src/RemoteFile'),
     utils = require('../src/utils'),
     Bam = require('../src/bam'),
     bamTypes = require('../src/formats/bamTypes'),
-    SamRead = require('../src/SamRead');
+    SamRead = require('../src/SamRead'),
+    VirtualOffset = require('../src/VirtualOffset');
 
 describe('SamRead', function() {
 
@@ -25,7 +26,7 @@ describe('SamRead', function() {
       return jb.read(['array', {
         block_size: 'int32',
         contents: ['blob', 'block_size']
-      }]).map(block => new SamRead(block.contents));
+      }]).map(block => new SamRead(block.contents, new VirtualOffset(0, 0)));
     });
   }
 
