@@ -36,12 +36,46 @@ describe('BamDataSource', function() {
     var reads = source.getAlignmentsInRange(range);
     expect(reads).to.deep.equal([]);
 
-    // Fetching that one gene should cache its entire block.
     source.on('newdata', () => {
       var reads = source.getAlignmentsInRange(range);
       expect(reads).to.have.length(1114);
       expect(reads[0].toString()).to.equal('20:31511251-31511351');
       expect(reads[1113].toString()).to.equal('20:31514171-31514271');
+      done();
+    });
+    source.rangeChanged({
+      contig: range.contig,
+      start: range.start(),
+      stop: range.stop()
+    });
+  });
+
+  it('should fetch nearby features', function(done) {
+    this.timeout(5000);
+    var source = getTestSource();
+
+    var range       = new ContigInterval('20', 31512050, 31512150),
+        rangeBefore = new ContigInterval('20', 31512000, 31512050),
+        rangeAfter  = new ContigInterval('20', 31512150, 31512199);
+
+    var reads = source.getAlignmentsInRange(range);
+    expect(reads).to.deep.equal([]);
+
+    // Fetching [50, 150] should cache [0, 200]
+    source.on('newdata', () => {
+      var reads = source.getAlignmentsInRange(range);
+      expect(reads).to.have.length(19);
+      expect(reads[0].toString()).to.equal('20:31511951-31512051');
+      expect(reads[18].toString()).to.equal('20:31512146-31512246');
+
+      var readsBefore = source.getAlignmentsInRange(rangeBefore),
+          readsAfter = source.getAlignmentsInRange(rangeAfter);
+
+      expect(readsBefore).to.have.length(28);
+      expect(readsAfter).to.have.length(12);
+
+      // TODO: test that fetching readsBefore and readsAfter produces no
+      // new network fetches.
       done();
     });
     source.rangeChanged({
