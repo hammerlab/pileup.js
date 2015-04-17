@@ -28,7 +28,8 @@ var PileupTrack = React.createClass({
 });
 
 
-var READ_HEIGHT = 10;
+var READ_HEIGHT = 13;
+var READ_SPACING = 2;  // vertical pixels between reads
 
 
 var NonEmptyPileupTrack = React.createClass({
@@ -87,7 +88,7 @@ var NonEmptyPileupTrack = React.createClass({
     // Update
     reads.attr({
       'x': read => scale(read.pos),
-      'y': (read, i) => i * READ_HEIGHT,
+      'y': (read, i) => i * (READ_HEIGHT + READ_SPACING),
       'width': read => (scale(read.pos + read.l_seq) - scale(read.pos)),
       'height': READ_HEIGHT
     });
