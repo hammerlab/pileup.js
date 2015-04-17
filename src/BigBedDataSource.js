@@ -97,6 +97,7 @@ function createBigBedDataSource(remoteSource: BigBed): BigBedSource {
     var interval = new ContigInterval(range.contig, range.start, range.stop);
 
     // Check if this interval is already in the cache.
+    // XXX is this broken? should be r.contains(interval), no?
     if (_.any(coveredRanges, r => r.intersects(interval))) {
       return Q.when();
     }
