@@ -58,7 +58,7 @@ function readAlignment(view: jDataView, pos: number,
   var readLength = view.getInt32(pos);
   pos += 4;
 
-  if (pos + readLength >= view.byteLength) {
+  if (pos + readLength > view.byteLength) {
     return null;
   }
 
@@ -150,7 +150,7 @@ function fetchAlignments(remoteFile: RemoteFile,
   var chunk = chunks[0],
       chunk_beg = chunk.chunk_beg.coffset,
       chunk_end = chunk.chunk_end.coffset;
-  var bytesToFetch = Math.min(kMaxFetch, (chunk_end + 65535) - chunk_beg);
+  var bytesToFetch = Math.min(kMaxFetch, (chunk_end + 65536) - chunk_beg);
   return remoteFile.getBytes(chunk_beg, bytesToFetch).then(buffer => {
     var blocks = utils.inflateConcatenatedGzip(buffer, chunk_end - chunk_beg);
 
@@ -169,22 +169,26 @@ function fetchAlignments(remoteFile: RemoteFile,
     var buffers = blocks.map(x => x.buffer);
     buffers[0] = buffers[0].slice(chunk.chunk_beg.uoffset);
     var decomp = utils.concatArrayBuffers(buffers);
-    var {shouldAbort, nextOffset} =
-        readAlignmentsToEnd(decomp, refName, idxRange, contained, chunk.chunk_beg, blocks, alignments);
-    if (newChunk) {
-      newChunk.chunk_beg = nextOffset;
+    if (decomp.byteLength > 0) {
+      var {shouldAbort, nextOffset} =
+          readAlignmentsToEnd(decomp, refName, idxRange, contained,
+                              chunk.chunk_beg, blocks, alignments);
+      if (shouldAbort) {
+        return Q.when(alignments);
+      }
+      if (newChunk) {
+        newChunk.chunk_beg = nextOffset;
+      }
+    } else {
+      newChunk = null;  // This is most likely EOF
     }
 
-    if (shouldAbort) {
-      return Q.when(alignments);
-    } else {
-      return fetchAlignments(remoteFile,
-                             refName,
-                             idxRange,
-                             contained,
-                             (newChunk ? [newChunk] : []).concat(_.rest(chunks)),
-                             alignments);
-    }
+    return fetchAlignments(remoteFile,
+                           refName,
+                           idxRange,
+                           contained,
+                           (newChunk ? [newChunk] : []).concat(_.rest(chunks)),
+                           alignments);
   });
 }
 

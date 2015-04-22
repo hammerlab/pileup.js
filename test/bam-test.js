@@ -195,4 +195,18 @@ describe('BAM', function() {
       done();
     }).done();
   });
+
+  // Regression test for https://github.com/hammerlab/pileup.js/issues/88
+  it('should fetch reads at EOF', function(done) {
+    var bamFile = new RemoteFile('/test/data/synth3.normal.17.7500000-7515000.bam'),
+        baiFile = new RemoteFile('/test/data/synth3.normal.17.7500000-7515000.bam.bai'),
+        bam = new Bam(bamFile, baiFile);
+
+    var range = new ContigInterval('chr17', 7514800, 7515100);
+    bam.getAlignmentsInRange(range).then(reads => {
+      // TODO: samtools says 128. Figure out why there's a difference.
+      expect(reads).to.have.length(130);
+      done();
+    }).done();
+  });
 });
