@@ -1,8 +1,7 @@
 /* @flow */
 'use strict';
 
-var chai = require('chai');
-var expect = chai.expect;
+var expect = require('chai').expect;
 
 var TwoBit = require('../src/TwoBit');
 var createTwoBitDataSource = require('../src/TwoBitDataSource');

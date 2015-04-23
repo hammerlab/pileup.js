@@ -1,8 +1,7 @@
 /* @flow */
 'use strict';
 
-var chai = require('chai');
-var expect = chai.expect;
+var expect = require('chai').expect;
 
 var Q = require('q');
 var BigBed = require('../src/BigBed');
@@ -13,10 +12,10 @@ describe('BigBed', function() {
     return new BigBed('/test/data/itemRgb.bb');   // See test/data/README.md
   }
 
-  it('should extract features in a range', function(done) {
+  it('should extract features in a range', function() {
     var bb = getTestBigBed();
 
-    bb.getFeaturesInRange('chrX', 151077036, 151078532)
+    return bb.getFeaturesInRange('chrX', 151077036, 151078532)
         .then(features => {
           // Here's what these two lines in the file look like:
           // chrX 151077031 151078198 MID_BLUE 0 - 151077031 151078198 0,0,128
@@ -40,12 +39,10 @@ describe('BigBed', function() {
           expect(rest1[0]).to.equal('VIOLET_RED1');
           expect(rest1[2]).to.equal('-');
           expect(rest1[5]).to.equal('255,62,150');
-          done();
-        })
-        .done();
+        });
   });
 
-  it('should have inclusive ranges', function(done) {
+  it('should have inclusive ranges', function() {
     // The matches looks like this:
     // chrX 151071196 151072363 RED
     // chrX 151094536 151095703 PeachPuff
@@ -56,7 +53,7 @@ describe('BigBed', function() {
         expect(features).to.have.length(n);
       };
 
-    Q.all([
+    return Q.all([
         // request for precisely one row from the file.
         bb.getFeaturesInRange('chrX', red[0], red[1])
             .then(expectN(1)),
@@ -69,29 +66,25 @@ describe('BigBed', function() {
         // but this range ends one base pair before it.
         bb.getFeaturesInRange('chrX', red[0] - 1000, red[0] - 1)
             .then(expectN(0))
-    ]).then(() => {
-      done();
-    }).done();
+    ]);
   });
 
-  it('should add "chr" to contig names', function(done) {
+  it('should add "chr" to contig names', function() {
     var bb = getTestBigBed();
 
-    bb.getFeaturesInRange('X', 151077036, 151078532)
+    return bb.getFeaturesInRange('X', 151077036, 151078532)
         .then(features => {
           // (same as 'should extract features in a range' test)
           expect(features).to.have.length(2);
           expect(features[0].contig).to.equal('chrX');
           expect(features[1].contig).to.equal('chrX');
-          done();
-        })
-        .done();
+        });
   });
 
-  it('should cache requests in a block', function(done) {
+  it('should cache requests in a block', function() {
     var bb = getTestBigBed(),
         remote = bb.remoteFile;
-    bb.getFeaturesInRange('X', 151077036, 151078532).then(() => {
+    return bb.getFeaturesInRange('X', 151077036, 151078532).then(() => {
       // cache has been warmed up -- flush it to get a deterministic test.
       remote.clearCache();
       remote.numNetworkRequests = 0;
@@ -111,24 +104,21 @@ describe('BigBed', function() {
       // But a request from another block (the 'Y' block) should.
       expect(features).to.have.length(1);
       expect(remote.numNetworkRequests).to.equal(2);
-      done();
-    })
-    .done();
+    });
   });
 
-  it('should fetch full blocks', function(done) {
+  it('should fetch full blocks', function() {
     var bb = getTestBigBed();
 
-    bb.getFeatureBlocksOverlapping(new ContigInterval('X', 151077036, 151078532))
+    var range = new ContigInterval('X', 151077036, 151078532);
+    return bb.getFeatureBlocksOverlapping(range)
         .then(blockFeatures => {
           expect(blockFeatures).to.have.length(1);  // just one block fetched.
           var range = blockFeatures[0].range,
               rows = blockFeatures[0].rows;
           expect(rows).to.have.length(21);  // all the chrX features.
           expect(range.toString()).to.equal('chrX:151071196-151095703');
-          done();
-        })
-        .done();
+        });
   });
 
   // Things left to test:

@@ -1,9 +1,9 @@
 /* @flow */
 'use strict';
 
-var chai = require('chai'),
-    expect = chai.expect,
-    jBinary = require('jbinary'),
+var expect = require('chai').expect;
+
+var jBinary = require('jbinary'),
     Q = require('q');
 
 var MappedRemoteFile = require('./MappedRemoteFile');
@@ -13,7 +13,7 @@ describe('MappedRemoteFile', function() {
     return new jBinary(buf).read('string');
   }
 
-  it('should serve requests through the map', function(done) {
+  it('should serve requests through the map', function() {
     var remoteFile = new MappedRemoteFile('/test/data/0to9.txt', [
       [0, 2],  // 0,1,2
       [12345678, 12345680],  // 3,4,5
@@ -46,22 +46,21 @@ describe('MappedRemoteFile', function() {
       }),
     ];
 
-    Q.all(promises).then(() => { done(); }).done();
+    return Q.all(promises);
   });
 
-  it('should forget file length', function(done) {
+  it('should forget file length', function() {
     var remoteFile = new MappedRemoteFile('/test/data/0to9.txt', [
       [0, 2],  // 0,1,2
       [12345673, 12345690]  // 3456789\n
     ]);
 
-    remoteFile.getBytes(0, 3).then(buf => {
+    return remoteFile.getBytes(0, 3).then(buf => {
       expect(bufferToText(buf)).to.equal('012');
       // This second read would fail if the file remembered its length.
       return remoteFile.getBytes(12345673, 8).then(buf => {
         expect(bufferToText(buf)).to.equal('3456789\n');
-        done();
       });
-    }).done();
+    });
   });
 });

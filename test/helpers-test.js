@@ -1,8 +1,7 @@
 /* @flow */
 'use strict';
 
-var chai = require('chai');
-var expect = chai.expect;
+var expect = require('chai').expect;
 
 var jBinary = require('jbinary');
 var helpers = require('../src/formats/helpers');

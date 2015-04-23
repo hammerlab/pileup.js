@@ -1,8 +1,8 @@
 /* @flow */
 'use strict';
 
-var chai = require('chai');
-var expect = chai.expect;
+var expect = require('chai').expect;
+
 var jBinary = require('jbinary');
 
 var BaiFile = require('../src/bai'),
@@ -37,18 +37,18 @@ describe('BAI', function() {
   });
 
   // This matches htsjdk's BamFileIndexTest.testSpecificQueries
-  it('should parse large BAI files', function(done) {
+  it('should parse large BAI files', function() {
     var bai = new BaiFile(new RemoteFile('/test/data/index_test.bam.bai'));
 
     // contig 0 = chrM
-    bai.getChunksForInterval(new ContigInterval(0, 10400, 10600)).then(chunks => {
+    var range = new ContigInterval(0, 10400, 10600);
+    return bai.getChunksForInterval(range).then(chunks => {
       expect(chunks).to.have.length(1);
       expect(chunkToString(chunks[0])).to.equal('0:8384-0:11328');
-      done();
-    }).done();
+    });
   });
 
-  it('should use index chunks', function(done) {
+  it('should use index chunks', function() {
     var remoteFile = new RecordedRemoteFile('/test/data/index_test.bam.bai');
     var bai = new BaiFile(remoteFile,
                           {
@@ -57,21 +57,20 @@ describe('BAI', function() {
                           });
 
     // contig 0 = chrM
-    bai.getChunksForInterval(new ContigInterval(0, 10400, 10600)).then(chunks => {
+    var range = new ContigInterval(0, 10400, 10600);
+    return bai.getChunksForInterval(range).then(chunks => {
       expect(chunks).to.have.length(1);
       expect(chunkToString(chunks[0])).to.equal('0:8384-0:11328');
 
       var requests = remoteFile.requests;
       expect(requests).to.have.length(1);
       expect(requests[0].toString()).to.equal('[8, 144]');
-
-      done();
-    }).done();
+    });
   });
 
-  it('should compute index chunks', function(done) {
+  it('should compute index chunks', function() {
     var bai = new BaiFile(new RemoteFile('/test/data/index_test.bam.bai'));
-    bai.immediate.then(imm => {
+    return bai.immediate.then(imm => {
       var chunks = imm.indexChunks;
 
       // This is the output from bai-indexer
@@ -125,14 +124,12 @@ describe('BAI', function() {
         ],
         "minBlockIndex": 65536
       });
-
-      done();
-    }).done();
+    });
   });
 
-  it('should index a small BAI file', function(done) {
+  it('should index a small BAI file', function() {
     var bai = new BaiFile(new RemoteFile('/test/data/test_input_1_b.bam.bai'));
-    bai.immediate.then(imm => {
+    return bai.immediate.then(imm => {
       var chunks = imm.indexChunks;
 
       // This is the output from bai-indexer
@@ -145,8 +142,6 @@ describe('BAI', function() {
         ],
         "minBlockIndex": 224
       });
-
-      done();
-    }).done();
+    });
   });
 });
