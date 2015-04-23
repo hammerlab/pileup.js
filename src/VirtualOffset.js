@@ -46,6 +46,20 @@ class VirtualOffset {
   clone(): VirtualOffset {
     return new VirtualOffset(this.coffset, this.uoffset);
   }
+
+  // This is a faster stand-in for jBinary.read('VirtualOffset')
+  static fromBlob(u8: Uint8Array, offset?: number): VirtualOffset {
+    offset = offset || 0;
+    var uoffset = u8[offset    ] +
+                  u8[offset + 1] * 256,
+        coffset = u8[offset + 2] +
+                  u8[offset + 3] * 256 +
+                  u8[offset + 4] * 65536 +
+                  u8[offset + 5] * 16777216 +
+                  u8[offset + 6] * 4294967296 +
+                  u8[offset + 7] * 1099511627776;
+    return new VirtualOffset(coffset, uoffset);
+  }
 }
 
 module.exports = VirtualOffset;
