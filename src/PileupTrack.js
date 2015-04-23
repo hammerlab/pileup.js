@@ -40,19 +40,28 @@ var NonEmptyPileupTrack = React.createClass({
     reads: React.PropTypes.array.isRequired,
     onRangeChange: React.PropTypes.func.isRequired
   },
+  getInitialState: function() {
+    return {
+      width: 0,
+      height: 0
+    };
+  },
   render: function(): any {
     return <div className='pileup'></div>;
   },
   componentDidMount: function() {
     var div = this.getDOMNode();
+    this.setState({
+      width: div.offsetWidth,
+      height: div.offsetWidth
+    });
     d3.select(div)
       .append('svg');
     this.updateVisualization();
   },
   getScale: function() {
-    var div = this.getDOMNode(),
-        range = this.props.range,
-        width = div.offsetWidth,
+    var range = this.props.range,
+        width = this.state.width,
         offsetPx = range.offsetPx || 0;
     var scale = d3.scale.linear()
             .domain([range.start, range.stop + 1])  // 1 bp wide
@@ -64,15 +73,19 @@ var NonEmptyPileupTrack = React.createClass({
     // TODO: this is imprecise; it would be better to deep check reads.
     var newProps = this.props;
     if (!_.isEqual(newProps.reads, prevProps.reads) ||
-        !_.isEqual(newProps.range, prevProps.range)) {
+        !_.isEqual(newProps.range, prevProps.range) ||
+       prevState != this.state) {
       this.updateVisualization();
     }
   },
   updateVisualization: function() {
     var div = this.getDOMNode(),
-        width = div.offsetWidth,
-        height = div.offsetHeight,
+        width = this.state.width,
+        height = this.state.height,
         svg = d3.select(div).select('svg');
+
+    // Hold off until height & width are known.
+    if (width === 0) return;
 
     var scale = this.getScale();
 

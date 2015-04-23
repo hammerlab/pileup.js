@@ -53,6 +53,12 @@ var NonEmptyGeneTrack = React.createClass({
     genes: React.PropTypes.array.isRequired,
     onRangeChange: React.PropTypes.func.isRequired
   },
+  getInitialState: function() {
+    return {
+      width: 0,
+      height: 0
+    };
+  },
   render: function() {
     return <div className="genes"></div>;
   },
@@ -60,6 +66,11 @@ var NonEmptyGeneTrack = React.createClass({
     var div = this.getDOMNode(),
         svg = d3.select(div)
                 .append('svg');
+
+    this.setState({
+      width: div.offsetWidth,
+      height: div.offsetHeight
+    });
 
     // These define the left/right arrow patterns for sense/antisense genes.
     // The second <path> allows the arrow to be seen on top of an exon.
@@ -80,28 +91,30 @@ var NonEmptyGeneTrack = React.createClass({
     this.updateVisualization();
   },
   getScale: function() {
-    var div = this.getDOMNode(),
-        range = this.props.range,
-        width = div.offsetWidth,
+    var range = this.props.range,
         offsetPx = range.offsetPx || 0;
     var scale = d3.scale.linear()
             .domain([range.start, range.stop + 1])  // 1 bp wide
-            .range([-offsetPx, width - offsetPx]);
+            .range([-offsetPx, this.state.width - offsetPx]);
     return scale;
   },
   componentDidUpdate: function(prevProps: any, prevState: any) {
     // Check a whitelist of properties which could change the visualization.
     var newProps = this.props;
     if (!_.isEqual(newProps.genes, prevProps.genes) ||
-        !_.isEqual(newProps.range, prevProps.range)) {
+        !_.isEqual(newProps.range, prevProps.range) ||
+       prevState != this.state) {
       this.updateVisualization();
     }
   },
   updateVisualization: function() {
     var div = this.getDOMNode(),
-        width = div.offsetWidth,
-        height = div.offsetHeight,
+        width = this.state.width,
+        height = this.state.height,
         svg = d3.select(div).select('svg');
+
+    // Hold off until height & width are known.
+    if (width === 0) return;
 
     var scale = this.getScale(),
         // We can't clamp scale directly because of offsetPx.

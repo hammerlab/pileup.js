@@ -152,7 +152,11 @@ function fetchAlignments(remoteFile: RemoteFile,
       chunk_end = chunk.chunk_end.coffset;
   var bytesToFetch = Math.min(kMaxFetch, (chunk_end + 65536) - chunk_beg);
   return remoteFile.getBytes(chunk_beg, bytesToFetch).then(buffer => {
-    var blocks = utils.inflateConcatenatedGzip(buffer, chunk_end - chunk_beg);
+    var cacheKey = {
+      filename: remoteFile.url,
+      initialOffset: chunk_beg
+    };
+    var blocks = utils.inflateConcatenatedGzip(buffer, chunk_end - chunk_beg, cacheKey);
 
     // If the chunk hasn't been exhausted, resume it at an appropriate place.
     // The last block needs to be re-read, since it may not have been exhausted.
