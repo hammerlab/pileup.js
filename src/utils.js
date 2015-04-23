@@ -77,7 +77,6 @@ function _inflateOne(buffer, position): PakoResult {
 }
 
 function cachedInflateOne(buffer, position, cache?: InflateCacheKey) {
-  // return _inflateOne(buffer, position);
   if (!cache) {
     return _inflateOne(buffer, position);
   }
