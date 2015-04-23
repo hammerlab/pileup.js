@@ -51,6 +51,52 @@ type InflatedBlock = {
   buffer: ArrayBuffer;
 }
 
+type InflateCacheKey = {
+  filename: string;
+  initialOffset: number;
+}
+
+type PakoResult = {
+  err: number;
+  msg: string;
+  buffer: ?ArrayBuffer;
+  total_in: number;
+}
+var inflationCache: {[key: string]: PakoResult} = {};
+
+// extracted for caching
+function _inflateOne(buffer, position): PakoResult {
+  var inflator = new pako.Inflate();
+  inflator.push(buffer.slice(position));
+  return {
+    err: inflator.err,
+    msg: inflator.msg,
+    buffer: inflator.result ? inflator.result.buffer : null,
+    total_in: inflator.strm.total_in
+  };
+}
+
+function cachedInflateOne(buffer, position, cache?: InflateCacheKey) {
+  // return _inflateOne(buffer, position);
+  if (!cache) {
+    return _inflateOne(buffer, position);
+  }
+  var cacheKey = cache.filename + ':' + (cache.initialOffset + position);
+  var v = inflationCache[cacheKey];
+  if (v && (position + v.total_in > buffer.byteLength)) {
+    // It should fail.
+    return _inflateOne(buffer, position);
+  }
+
+  if (!v) {
+    v = _inflateOne(buffer, position);
+  }
+  if (!v.err && v.buffer) {
+    inflationCache[cacheKey] = v;
+  }
+  return v;
+}
+
 /**
  * BAM files are written in "BGZF" format, which consists of many concatenated
  * gzip blocks. gunzip concatenates all the inflated blocks, but pako only
@@ -58,26 +104,29 @@ type InflatedBlock = {
  * If specified, lastBlockStart will stop inflation before all the blocks
  * have been processed.
  */
-function inflateConcatenatedGzip(buffer: ArrayBuffer, lastBlockStart?: number): InflatedBlock[] {
+function inflateConcatenatedGzip(buffer: ArrayBuffer,
+                                 lastBlockStart?: number,
+                                 cache?: InflateCacheKey): InflatedBlock[] {
   var position = 0,
-      blocks = [],
-      inflator;
+      blocks = [];
   if (lastBlockStart === undefined) {
     lastBlockStart = buffer.byteLength;
   }
   do {
-    inflator = new pako.Inflate();
-    inflator.push(buffer.slice(position));
-    if (inflator.err) { throw inflator.msg; }
-    if (inflator.result) {
+    var result = cachedInflateOne(buffer, position, cache);
+
+    if (result.err) {
+      throw 'Gzip error: ' + result.msg;
+    }
+    if (result.buffer) {
       blocks.push({
         offset: position,
-        compressedLength: inflator.strm.total_in,
-        buffer: inflator.result.buffer
+        compressedLength: result.total_in,
+        buffer: result.buffer
       });
     }
-    position += inflator.strm.total_in;
-  } while (inflator.strm.avail_in > 0 && position <= lastBlockStart);
+    position += result.total_in;
+  } while (position <= lastBlockStart && position < buffer.byteLength);
   return blocks;
 }
 
