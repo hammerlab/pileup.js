@@ -31,7 +31,7 @@ import type * as TwoBit from './TwoBit';
 // additional network requests.
 var BASE_PAIRS_PER_FETCH = 1000;
 
-var MAX_BASE_PAIRS_TO_FETCH = 10000;
+var MAX_BASE_PAIRS_TO_FETCH = 2000;
 
 
 // Flow type for export.
