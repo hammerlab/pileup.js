@@ -3,8 +3,7 @@
 
 import type * as Q from 'q';
 
-var chai = require('chai');
-var expect = chai.expect;
+var expect = require('chai').expect;
 
 var jBinary = require('jbinary');
 
@@ -35,15 +34,14 @@ describe('SamRead', function() {
   var testReads = getSamArray('/test/data/test_input_1_a.bam');
 
   // This is more of a test for the test than for SamRead.
-  it('should pull records from a BAM file', function(done) {
-    testReads.then(reads => {
+  it('should pull records from a BAM file', function() {
+    return testReads.then(reads => {
       expect(reads).to.have.length(15);
-      done();
-    }).done();
+    });
   });
 
-  it('should parse BAM records', function(done) {
-    testReads.then(reads => {
+  it('should parse BAM records', function() {
+    return testReads.then(reads => {
       // The first record in test_input_1_a.sam is:
       // r000 99 insert 50 30 10M = 80 30 ATTTAGCTAC AAAAAAAAAA RG:Z:cow PG:Z:bull
       var read = reads[0];
@@ -53,13 +51,11 @@ describe('SamRead', function() {
       expect(read.pos).to.equal(49);  // 0-based
       expect(read.l_seq).to.equal(10);
       expect(read.toString()).to.equal('ref:50-59');
-
-      done();
-    }).done();
+    });
   });
 
-  it('should read thick records', function(done) {
-    testReads.then(reads => {
+  it('should read thick records', function() {
+    return testReads.then(reads => {
       // This mirrors the "BAM > should parse BAM files" test.
       var r000 = reads[0].getFull();
       expect(r000.read_name).to.equal('r000');
@@ -78,12 +74,11 @@ describe('SamRead', function() {
       expect(aux).to.have.length(2);
       expect(aux[0]).to.contain({tag: 'RG', value: 'cow'});
       expect(aux[1]).to.contain({tag: 'PG', value: 'bull'});
-      done();
-    }).done();
+    });
   });
 
-  it('should find record intersections', function(done) {
-    testReads.then(reads => {
+  it('should find record intersections', function() {
+    return testReads.then(reads => {
       var read = reads[0];
       // toString() produces a 1-based result, but ContigInterval is 0-based.
       expect(read.toString()).to.equal('ref:50-59');
@@ -92,7 +87,6 @@ describe('SamRead', function() {
       expect(read.intersects(new ContigInterval('0', 40, 55))).to.be.false;
       expect(read.intersects(new ContigInterval('ref', 58, 60))).to.be.true;
       expect(read.intersects(new ContigInterval('ref', 59, 60))).to.be.false;
-      done();
-    }).done();
+    });
   });
 });

@@ -1,8 +1,7 @@
 /* @flow */
 'use strict';
 
-var chai = require('chai');
-var expect = chai.expect;
+var expect = require('chai').expect;
 
 var Q = require('q');
 
@@ -62,7 +61,7 @@ describe('Root component', function() {
     testDiv.innerHTML = '';  // avoid pollution between tests.
   });
 
-  it('should render reference genome and genes', function(done) {
+  it('should render reference genome and genes', function() {
     this.timeout(5000);
 
     var div = document.createElement('div');
@@ -80,7 +79,7 @@ describe('Root component', function() {
       div.querySelectorAll('.gene').length > 0
     );
 
-    waitFor(ready, 5000)
+    return waitFor(ready, 5000)
       .then(() => {
         var basepairs = div.querySelectorAll('.basepair');
         expect(basepairs).to.have.length.at.least(10);
@@ -90,8 +89,6 @@ describe('Root component', function() {
 
         // Note: there are 11 exons, but two are split into coding/non-coding
         expect(div.querySelectorAll('.gene .exon').length).to.equal(13);
-        done();
-      })
-      .done();
+      });
   });
 });
