@@ -124,6 +124,7 @@ class ImmediateBaiFile {
   remoteFile: RemoteFile;
   indexChunks: Object;
   indexCache: Q.Promise<Object>[];  // ref ID -> parsed BaiIndex
+  intervalsCache: Array<?VirtualOffset[]>;  // ref ID -> linear index
 
   constructor(buffer: ?ArrayBuffer, remoteFile: RemoteFile, indexChunks?: Object) {
     this.buffer = buffer;
@@ -138,6 +139,7 @@ class ImmediateBaiFile {
       }
     }
     this.indexCache = new Array(this.indexChunks.chunks.length);
+    this.intervalsCache = new Array(this.indexChunks.chunks.length);
   }
 
   getChunksForInterval(range: ContigInterval<number>): Q.Promise<Chunk[]> {
@@ -154,7 +156,7 @@ class ImmediateBaiFile {
                     .flatten()
                     .value();
 
-      var linearIndex = readIntervals(contigIndex.intervals);
+      var linearIndex = this.getIntervals(contigIndex.intervals, range.contig);
       var startIdx = Math.max(0, Math.floor(range.start() / 16384));
       var minimumOffset = linearIndex[startIdx];
 
@@ -185,6 +187,17 @@ class ImmediateBaiFile {
     } else {
       return this.remoteFile.getBytes(start, stop - start + 1);
     }
+  }
+
+  // Cached wrapper around readIntervals()
+  getIntervals(blob: Uint8Array, refId: number): VirtualOffset[] {
+    var linearIndex = this.intervalsCache[refId];
+    if (linearIndex) {
+      return linearIndex;
+    }
+    linearIndex = readIntervals(blob);
+    this.intervalsCache[refId] = linearIndex;
+    return linearIndex;
   }
 }
 
