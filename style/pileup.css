@@ -60,4 +60,5 @@ text.basepair {
 .pileup .alignment {
   fill: #c8c8c8;  /* matches IGV */
 }
-
+.pileup .alignment.negative {
+}

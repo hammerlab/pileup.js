@@ -33,6 +33,33 @@ var PileupTrack = React.createClass({
 var READ_HEIGHT = 13;
 var READ_SPACING = 2;  // vertical pixels between reads
 
+var READ_STRAND_ARROW_WIDTH = 6;
+
+// Returns an SVG path string for the read, with an arrow indicating strand.
+function makePath(read, scale, row) {
+  var left = scale(read.pos),
+      top = row * (READ_HEIGHT + READ_SPACING),
+      right = scale(read.pos + read.l_seq) - 5,
+      bottom = top + READ_HEIGHT,
+      path = read.getStrand() == '+' ? [
+        [left, top],
+        [right - READ_STRAND_ARROW_WIDTH, top],
+        [right, (top + bottom) / 2],
+        [right - READ_STRAND_ARROW_WIDTH, bottom],
+        [left, bottom]
+      ] : [
+        [right, top],
+        [left + READ_STRAND_ARROW_WIDTH, top],
+        [left, (top + bottom) / 2],
+        [left + READ_STRAND_ARROW_WIDTH, bottom],
+        [right, bottom]
+      ];
+  return d3.svg.line()(path);
+}
+
+function readClass(read) {
+  return 'alignment' + (read.getStrand() == '-' ? ' negative' : ' positive');
+}
 
 var NonEmptyPileupTrack = React.createClass({
   propTypes: {
@@ -95,21 +122,16 @@ var NonEmptyPileupTrack = React.createClass({
     svg.attr('width', width)
        .attr('height', height);
 
-    var reads = svg.selectAll('rect.alignment')
+    var reads = svg.selectAll('path.alignment')
        .data(this.props.reads, read => read.offset.toString());
 
     // Enter
     reads.enter()
-        .append('rect')
-        .attr('class', 'alignment');
+        .append('path')
+        .attr('class', readClass);
 
     // Update
-    reads.attr({
-      'x': read => scale(read.pos),
-      'y': (read, i) => rows[i] * (READ_HEIGHT + READ_SPACING),
-      'width': read => (scale(read.pos + read.l_seq) - scale(read.pos) - 5),
-      'height': READ_HEIGHT
-    });
+    reads.attr('d', (read, i) => makePath(read, scale, rows[i]));
 
     // Exit
     reads.exit().remove();
