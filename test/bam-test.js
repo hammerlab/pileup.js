@@ -75,6 +75,10 @@ describe('BAM', function() {
         expect(alignments).to.have.length(2);
         expect(alignments[0].toString()).to.equal('chrM:10388-10438');
         expect(alignments[1].toString()).to.equal('chrM:10427-10477');
+
+        // These values match IGV
+        expect(alignments[0].getStrand()).to.equal('+');
+        expect(alignments[1].getStrand()).to.equal('-');
       });
     });
   });

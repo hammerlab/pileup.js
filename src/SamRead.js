@@ -69,6 +69,16 @@ class SamRead {
     return jb.read([nullString, l_read_name], 32);
   }
 
+  getFlag(): number {
+    return this._getJDataView().getUint16(14);
+  }
+
+  // TODO: enum for strand?
+  getStrand(): string {
+    var reverse = this.getFlag() & 0x10;
+    return reverse ? '-' : '+';
+  }
+
   // TODO: get rid of this; move all methods into SamRead.
   getFull(): Object {
     var jb = new jBinary(this.buffer, bamTypes.TYPE_SET);
