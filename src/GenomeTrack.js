@@ -32,6 +32,13 @@ var GenomeTrack = React.createClass({
   }
 });
 
+var DisplayMode = {
+  TIGHT: 1,
+  LOOSE: 2,
+  BLOCKS: 3,
+  HIDDEN: 4
+};
+
 var NonEmptyGenomeTrack = React.createClass({
   // This prevents updates if state & props have not changed.
   mixins: [React.addons.PureRenderMixin],
@@ -137,10 +144,11 @@ var NonEmptyGenomeTrack = React.createClass({
 
     var scale = this.getScale();
     var pxPerLetter = scale(1) - scale(0);
+    var mode = this.getDisplayMode(pxPerLetter);
 
     var contigColon = this.props.range.contig + ':';
     var absBasePairs;
-    if (pxPerLetter > MIN_PX_PER_LETTER) {
+    if (mode != DisplayMode.HIDDEN) {
       absBasePairs = _.range(range.start - 1, range.stop + 1)
           .map(locus => ({
             position: locus,
@@ -162,15 +170,29 @@ var NonEmptyGenomeTrack = React.createClass({
     // Enter
     letter.enter().append('text');
 
+    var baseClass = 'basepair ' + (mode == DisplayMode.LOOSE ? 'loose' : 'tight') + ' ';
+
     // Enter & update
     letter
         .attr('x', bp => scale(bp.position))
         .attr('y', height)
-        .attr('class', bp => 'basepair ' + bp.letter)
+        .attr('class', bp => baseClass + bp.letter)
         .text(bp => bp.letter);
 
     // Exit
     letter.exit().remove();
+  },
+
+  getDisplayMode(pxPerLetter): number {
+    if (pxPerLetter >= 25) {
+      return DisplayMode.LOOSE;
+    } else if (pxPerLetter >= 10) {
+      return DisplayMode.TIGHT;
+    } else if (pxPerLetter >= 1) {
+      return DisplayMode.BLOCKS;
+    } else {
+      return DisplayMode.HIDDEN;
+    }
   }
 });
 
