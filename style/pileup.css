@@ -14,14 +14,30 @@
 .background {
   fill: white;
 }
-.basepair.a { fill: #188712; }
-.basepair.g { fill: #C45C16; }
-.basepair.c { fill: #0600F9; }
-.basepair.t { fill: #F70016; }
-.basepair.u { fill: #F70016; }
-text.basepair {
-  font-size: 36;
+.basepair .a { fill: #188712; }
+.basepair .g { fill: #C45C16; }
+.basepair .c { fill: #0600F9; }
+.basepair .t { fill: #F70016; }
+.basepair .u { fill: #F70016; }
+.basepair text {
+  font-family: Helvetica Neue, Helvetica, Arial, sans;
+}
+.basepair.loose text {
+  font-size: 28;
+}
+.basepair.tight text {
+  font-size: 12;
   font-weight: bold;
+}
+.basepair text, .basepair rect {
+  visibility: hidden;
+}
+.basepair.loose text,
+.basepair.tight text {
+  visibility: visible;
+}
+.basepair.blocks rect {
+  visibility: visible;
 }
 
 /* gene track */

@@ -9,8 +9,6 @@ var React = require('react/addons'),
     d3 = require('d3'),
     types = require('./types');
 
-var MIN_PX_PER_LETTER = 6;  // hide individual base pairs at this resolution.
-
 
 var GenomeTrack = React.createClass({
   propTypes: {
@@ -32,6 +30,14 @@ var GenomeTrack = React.createClass({
   }
 });
 
+// Individual base pairs are rendered differently depending on the scale.
+var DisplayMode = {
+  LOOSE: 1,   // Lots of space -- a big font is OK.
+  TIGHT: 2,   // Letters need to be shrunk to fit.
+  BLOCKS: 3,  // Change from letters to blocks of color
+  HIDDEN: 4
+};
+
 var NonEmptyGenomeTrack = React.createClass({
   // This prevents updates if state & props have not changed.
   mixins: [React.addons.PureRenderMixin],
@@ -41,6 +47,12 @@ var NonEmptyGenomeTrack = React.createClass({
     basePairs: React.PropTypes.object.isRequired,
     onRangeChange: React.PropTypes.func.isRequired
   },
+  getInitialState: function() {
+    return {
+      width: 0,
+      height: 0
+    };
+  },
   render: function(): any {
     return <div className="reference"></div>;
   },
@@ -48,6 +60,11 @@ var NonEmptyGenomeTrack = React.createClass({
     var div = this.getDOMNode(),
         svg = d3.select(div)
                 .append('svg');
+
+    this.setState({
+      width: div.offsetWidth,
+      height: div.offsetHeight
+    });
 
     var originalRange, originalScale, dx=0;
     var dragstarted = () => {
@@ -80,11 +97,12 @@ var NonEmptyGenomeTrack = React.createClass({
     }
 
     var drag = d3.behavior.drag()
-        .on("dragstart", dragstarted)
-        .on("drag", dragmove)
-        .on("dragend", dragended);
+        .on('dragstart', dragstarted)
+        .on('drag', dragmove)
+        .on('dragend', dragended);
 
     var g = svg.append('g')
+               .attr('class', 'wrapper')
                .call(drag);
 
     g.append('rect')
@@ -109,23 +127,28 @@ var NonEmptyGenomeTrack = React.createClass({
     // For now, just basePairs and range.
     var newProps = this.props;
     if (!_.isEqual(newProps.basePairs, prevProps.basePairs) ||
-        !_.isEqual(newProps.range, prevProps.range)) {
+        !_.isEqual(newProps.range, prevProps.range) ||
+       this.state != prevState) {
       this.updateVisualization();
     }
   },
   updateVisualization: function() {
     var div = this.getDOMNode(),
         range = this.props.range,
-        width = div.offsetWidth,
-        height = div.offsetHeight,
+        width = this.state.width,
+        height = this.state.height,
         svg = d3.select(div).select('svg');
+
+    // Hold off until height & width are known.
+    if (width === 0) return;
 
     var scale = this.getScale();
     var pxPerLetter = scale(1) - scale(0);
+    var mode = this.getDisplayMode(pxPerLetter);
 
     var contigColon = this.props.range.contig + ':';
     var absBasePairs;
-    if (pxPerLetter > MIN_PX_PER_LETTER) {
+    if (mode != DisplayMode.HIDDEN) {
       absBasePairs = _.range(range.start - 1, range.stop + 1)
           .map(locus => ({
             position: locus,
@@ -139,23 +162,51 @@ var NonEmptyGenomeTrack = React.createClass({
        .attr('height', height);
     svg.select('rect').attr({width, height});
 
-    var g = svg.select('g');
+    var g = svg.select('g.wrapper');
 
-    var letter = g.selectAll('text')
+    var letter = g.selectAll('.basepair')
        .data(absBasePairs, bp => bp.position);
 
     // Enter
-    letter.enter().append('text');
+    var basePairGs = letter.enter()
+      .append('g');
+    // TODO: look into only creating one or the other of these -- only one is ever visible.
+    basePairGs.append('text');
+    basePairGs.append('rect');
+    
+    var baseClass = (mode == DisplayMode.LOOSE ? 'loose' :
+                     mode == DisplayMode.TIGHT ? 'tight' : 'blocks');
 
     // Enter & update
-    letter
+    letter.attr('class', 'basepair ' + baseClass);
+
+    letter.select('text')
         .attr('x', bp => scale(bp.position))
         .attr('y', height)
-        .attr('class', bp => 'basepair ' + bp.letter)
+        .attr('class', bp => bp.letter)
         .text(bp => bp.letter);
+
+    letter.select('rect')
+        .attr('x', bp => scale(bp.position))
+        .attr('y', height - 14)
+        .attr('height', 14)
+        .attr('width', pxPerLetter - 1)
+        .attr('class', bp => bp.letter);
 
     // Exit
     letter.exit().remove();
+  },
+
+  getDisplayMode(pxPerLetter): number {
+    if (pxPerLetter >= 25) {
+      return DisplayMode.LOOSE;
+    } else if (pxPerLetter >= 10) {
+      return DisplayMode.TIGHT;
+    } else if (pxPerLetter >= 1) {
+      return DisplayMode.BLOCKS;
+    } else {
+      return DisplayMode.HIDDEN;
+    }
   }
 });
 
