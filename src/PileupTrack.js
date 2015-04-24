@@ -11,7 +11,7 @@ var React = require('react/addons'),
     d3 = require('d3'),
     types = require('./types'),
     Interval = require('./Interval'),
-    {pileup} = require('./pileuputils');
+    {addToPileup} = require('./pileuputils');
 
 var PileupTrack = React.createClass({
   propTypes: {
@@ -60,6 +60,10 @@ function makePath(read, scale, row) {
 function readClass(read) {
   return 'alignment' + (read.getStrand() == '-' ? ' negative' : ' positive');
 }
+
+// TODO: scope to PileupTrack
+var pileup = [];
+var keyToRow = {};
 
 var NonEmptyPileupTrack = React.createClass({
   propTypes: {
@@ -116,9 +120,6 @@ var NonEmptyPileupTrack = React.createClass({
 
     var scale = this.getScale();
 
-    var rows = pileup(this.props.reads.map(
-        r => new Interval(r.pos, r.pos + r.l_seq)));
-
     svg.attr('width', width)
        .attr('height', height);
 
@@ -128,10 +129,17 @@ var NonEmptyPileupTrack = React.createClass({
     // Enter
     reads.enter()
         .append('path')
-        .attr('class', readClass);
+        .attr('class', readClass)
+        .each((read, i) => {
+          var k = read.offset.toString();
+          if (k in keyToRow) return;
+
+          // assign this read to a row in the pileup
+          keyToRow[k] = addToPileup(new Interval(read.pos, read.pos + read.l_seq), pileup);
+        });
 
     // Update
-    reads.attr('d', (read, i) => makePath(read, scale, rows[i]));
+    reads.attr('d', (read, i) => makePath(read, scale, keyToRow[read.offset.toString()]));
 
     // Exit
     reads.exit().remove();
