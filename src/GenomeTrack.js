@@ -41,6 +41,12 @@ var NonEmptyGenomeTrack = React.createClass({
     basePairs: React.PropTypes.object.isRequired,
     onRangeChange: React.PropTypes.func.isRequired
   },
+  getInitialState: function() {
+    return {
+      width: 0,
+      height: 0
+    };
+  },
   render: function(): any {
     return <div className="reference"></div>;
   },
@@ -48,6 +54,11 @@ var NonEmptyGenomeTrack = React.createClass({
     var div = this.getDOMNode(),
         svg = d3.select(div)
                 .append('svg');
+
+    this.setState({
+      width: div.offsetWidth,
+      height: div.offsetHeight
+    });
 
     var originalRange, originalScale, dx=0;
     var dragstarted = () => {
@@ -109,16 +120,20 @@ var NonEmptyGenomeTrack = React.createClass({
     // For now, just basePairs and range.
     var newProps = this.props;
     if (!_.isEqual(newProps.basePairs, prevProps.basePairs) ||
-        !_.isEqual(newProps.range, prevProps.range)) {
+        !_.isEqual(newProps.range, prevProps.range) ||
+       this.state != prevState) {
       this.updateVisualization();
     }
   },
   updateVisualization: function() {
     var div = this.getDOMNode(),
         range = this.props.range,
-        width = div.offsetWidth,
-        height = div.offsetHeight,
+        width = this.state.width,
+        height = this.state.height,
         svg = d3.select(div).select('svg');
+
+    // Hold off until height & width are known.
+    if (width === 0) return;
 
     var scale = this.getScale();
     var pxPerLetter = scale(1) - scale(0);
