@@ -5,7 +5,7 @@ var expect = require('chai').expect;
 
 var _ = require('underscore');
 
-var {pileup} = require('../src/pileuputils'),
+var {pileup, addToPileup} = require('../src/pileuputils'),
     Interval = require('../src/Interval');
 
 describe('pileuputils', function() {
@@ -67,6 +67,20 @@ describe('pileuputils', function() {
       new Interval(15, 24)
     ];
     var rows = pileup(reads);
+    checkGuarantee(reads, rows);
+    expect(rows).to.deep.equal([0,1,2,0,2]);
+  });
+
+  it('should build a pileup progressively', function() {
+    var reads = [
+      new Interval(1, 9),
+      new Interval(0, 100),
+      new Interval(5, 14),
+      new Interval(10, 19),
+      new Interval(15, 24)
+    ];
+    var pileup = [];
+    var rows = reads.map(read => addToPileup(read, pileup));
     checkGuarantee(reads, rows);
     expect(rows).to.deep.equal([0,1,2,0,2]);
   });

@@ -18,8 +18,10 @@ var dataSource = createTwoBitDataSource(genome);
 var ensembl = new BigBed('/ensGene.bb');
 var ensemblDataSource = createBigBedDataSource(ensembl);
 
-var bamFile = new RemoteFile('/test/data/synth3.normal.17.7500000-7515000.bam'),
-    baiFile = new RemoteFile('/test/data/synth3.normal.17.7500000-7515000.bam.bai');
+var bamURL = '/test/data/synth3.normal.17.7500000-7515000.bam';
+
+var bamFile = new RemoteFile(bamURL),
+    baiFile = new RemoteFile(bamURL + '.bai');
 
 var bam = new Bam(bamFile, baiFile);
 

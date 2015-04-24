@@ -31,4 +31,37 @@ function pileup(reads: Interval[]): number[] {
   return rows;
 }
 
-module.exports = {pileup};
+/**
+ * Add a read to an existing pileup.
+ * pileup maps {row --> reads in that row}
+ * This modifies pileup by inserting the read in the appropriate row.
+ * Returns the chosen row number.
+ */
+function addToPileup(read: Interval, pileup: Array<Interval[]>): number {
+  var chosenRow = -1;
+  for (var i = 0; i < pileup.length; i++) {
+    var reads = pileup[i];
+    var ok = true;
+    for (var j = 0; j < reads.length; j++) {
+      if (reads[j].intersects(read)) {
+        ok = false;
+        break;
+      }
+    }
+
+    if (ok) {
+      chosenRow = i;
+      break;
+    }
+  }
+
+  if (chosenRow == -1) {
+    chosenRow = pileup.length;
+    pileup[chosenRow] = [];  // go deeper
+  }
+
+  pileup[chosenRow].push(read);
+  return chosenRow;
+}
+
+module.exports = {pileup, addToPileup};
