@@ -9,8 +9,6 @@ var React = require('react/addons'),
     d3 = require('d3'),
     types = require('./types');
 
-var MIN_PX_PER_LETTER = 6;  // hide individual base pairs at this resolution.
-
 
 var GenomeTrack = React.createClass({
   propTypes: {
@@ -32,10 +30,11 @@ var GenomeTrack = React.createClass({
   }
 });
 
+// Individual base pairs are rendered differently depending on the scale.
 var DisplayMode = {
-  TIGHT: 1,
-  LOOSE: 2,
-  BLOCKS: 3,
+  LOOSE: 1,   // Lots of space -- a big font is OK.
+  TIGHT: 2,   // Letters need to be shrunk to fit.
+  BLOCKS: 3,  // Change from letters to blocks of color
   HIDDEN: 4
 };
 
@@ -98,11 +97,12 @@ var NonEmptyGenomeTrack = React.createClass({
     }
 
     var drag = d3.behavior.drag()
-        .on("dragstart", dragstarted)
-        .on("drag", dragmove)
-        .on("dragend", dragended);
+        .on('dragstart', dragstarted)
+        .on('drag', dragmove)
+        .on('dragend', dragended);
 
     var g = svg.append('g')
+               .attr('class', 'wrapper')
                .call(drag);
 
     g.append('rect')
@@ -162,22 +162,36 @@ var NonEmptyGenomeTrack = React.createClass({
        .attr('height', height);
     svg.select('rect').attr({width, height});
 
-    var g = svg.select('g');
+    var g = svg.select('g.wrapper');
 
-    var letter = g.selectAll('text')
+    var letter = g.selectAll('.basepair')
        .data(absBasePairs, bp => bp.position);
 
     // Enter
-    letter.enter().append('text');
-
-    var baseClass = 'basepair ' + (mode == DisplayMode.LOOSE ? 'loose' : 'tight') + ' ';
+    var basePairGs = letter.enter()
+      .append('g');
+    // TODO: look into only creating one or the other of these -- only one is ever visible.
+    basePairGs.append('text');
+    basePairGs.append('rect');
+    
+    var baseClass = (mode == DisplayMode.LOOSE ? 'loose' :
+                     mode == DisplayMode.TIGHT ? 'tight' : 'blocks');
 
     // Enter & update
-    letter
+    letter.attr('class', 'basepair ' + baseClass);
+
+    letter.select('text')
         .attr('x', bp => scale(bp.position))
         .attr('y', height)
-        .attr('class', bp => baseClass + bp.letter)
+        .attr('class', bp => bp.letter)
         .text(bp => bp.letter);
+
+    letter.select('rect')
+        .attr('x', bp => scale(bp.position))
+        .attr('y', height - 14)
+        .attr('height', 14)
+        .attr('width', pxPerLetter - 1)
+        .attr('class', bp => bp.letter);
 
     // Exit
     letter.exit().remove();
