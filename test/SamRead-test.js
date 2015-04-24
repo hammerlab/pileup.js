@@ -9,7 +9,6 @@ var jBinary = require('jbinary');
 
 var RemoteFile = require('../src/RemoteFile'),
     utils = require('../src/utils'),
-    Bam = require('../src/bam'),
     bamTypes = require('../src/formats/bamTypes'),
     SamRead = require('../src/SamRead'),
     VirtualOffset = require('../src/VirtualOffset'),
@@ -63,12 +62,12 @@ describe('SamRead', function() {
       expect(r000.refID).to.equal(0);
       // .. POS
       expect(r000.MAPQ).to.equal(30);
-      expect(Bam.makeCigarString(r000.cigar)).to.equal('10M');
+      expect(reads[0].getCigarString()).to.equal('10M');
       // next ref
       // next pos
       expect(r000.tlen).to.equal(30);
       expect(r000.seq).to.equal('ATTTAGCTAC');
-      expect(Bam.makeAsciiPhred(r000.qual)).to.equal('AAAAAAAAAA');
+      expect(reads[0].getQualPhred()).to.equal('AAAAAAAAAA');
 
       var aux = r000.auxiliary;
       expect(aux).to.have.length(2);

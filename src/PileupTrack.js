@@ -136,6 +136,9 @@ var NonEmptyPileupTrack = React.createClass({
 
           // assign this read to a row in the pileup
           keyToRow[k] = addToPileup(new Interval(read.pos, read.pos + read.l_seq), pileup);
+        })
+        .on('click', (read, i) => {
+          window.alert(read.debugString());
         });
 
     // Update

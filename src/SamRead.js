@@ -16,6 +16,7 @@ import type * as VirtualOffset from './VirtualOffset';
 
 var jDataView = require('jdataview'),
     jBinary = require('jbinary'),
+    _ = require('underscore'),
     {nullString} = require('./formats/helpers'),
     bamTypes = require('./formats/bamTypes'),
     ContigInterval = require('./ContigInterval');
@@ -30,6 +31,7 @@ class SamRead {
   refID: number;
   ref: string;
   l_seq: number;
+  _full: ?Object;
 
   /**
    * @param buffer contains the raw bytes of the serialized BAM read. It must
@@ -81,8 +83,11 @@ class SamRead {
 
   // TODO: get rid of this; move all methods into SamRead.
   getFull(): Object {
+    if (this._full) return this._full;
     var jb = new jBinary(this.buffer, bamTypes.TYPE_SET);
-    return jb.read(bamTypes.ThickAlignment, 0);
+    var full = jb.read(bamTypes.ThickAlignment, 0);
+    this._full = full;
+    return full;
   }
 
   getInterval(): ContigInterval<string> {
@@ -92,6 +97,39 @@ class SamRead {
   intersects(interval: ContigInterval<string>): boolean {
     return interval.intersects(this.getInterval());
   }
+
+  getCigarString(): string {
+    return makeCigarString(this.getFull().cigar);
+  }
+
+  getQualPhred(): string {
+    return makeAsciiPhred(this.getFull().qual);
+  }
+
+  debugString(): string {
+    var f = this.getFull();
+
+    return `Name: ${this.getName()}
+FLAG: ${this.getFlag()}
+Position: ${this.getInterval()}
+CIGAR: ${this.getCigarString()}
+Sequence: ${f.seq}
+Quality:  ${this.getQualPhred()}
+Tags: ${JSON.stringify(f.auxiliary, null, '  ')}
+    `;
+  }
+}
+
+// Convert a structured Cigar object into the string format we all love.
+function makeCigarString(cigarOps: Array<{op:string; length:number}>) {
+  return cigarOps.map(({op, length}) => length + op).join('');
+}
+
+// Convert an array of Phred scores to a printable string.
+function makeAsciiPhred(qualities: number[]): string {
+  if (qualities.length === 0) return '';
+  if (_.every(qualities, x => x == 255)) return '*';
+  return qualities.map(q => String.fromCharCode(33 + q)).join('');
 }
 
 module.exports = SamRead;
