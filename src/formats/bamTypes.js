@@ -10,7 +10,7 @@ var jBinary = require('jbinary');
 var _ = require('underscore');
 var VirtualOffset = require('../VirtualOffset');
 
-var {sizedBlock, nullString, uint64native} = require('./helpers');
+var {nullString, uint64native} = require('./helpers');
 
 var SEQUENCE_VALUES = ['=', 'A', 'C', 'M', 'G', 'R', 'S', 'V', 'T', 'W', 'Y', 'H', 'K', 'D', 'B', 'N'];
 var CIGAR_OPS = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X'];
@@ -66,12 +66,7 @@ var TYPE_SET: any = {
 
   'BamAlignment': {
     block_size: 'int32',
-    contents: [sizedBlock, ThickAlignment, 'block_size']
-  },
-
-  'ThinBamAlignment': {
-    block_size: 'int32',
-    contents: [sizedBlock, ThinAlignment, 'block_size']
+    contents: ['blob', 'block_size']
   },
 
   // TODO: make a "case" construct for jBinary & implement the rest of these.
@@ -123,11 +118,6 @@ var TYPE_SET: any = {
   'BamFile': {
     header: 'BamHeader',
     alignments: ['array', 'BamAlignment']
-  },
-
-  'ThinBamFile': {
-    header: 'BamHeader',
-    alignments: ['array', 'ThinBamAlignment']
   },
 
   // BAI index formats

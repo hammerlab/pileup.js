@@ -222,18 +222,18 @@ class Bam {
    * Reads the entire BAM file from the remote source and parses it.
    * Since BAM files can be enormous (hundreds of GB), this is only recommended
    * for small test inputs.
-   *
-   * If thinReads is set, only the fields needed to place the read in the
-   * genome will be parsed. This typically results in a dramatic (~40x)
-   * speedup.
    */
-  readAll(thinReads?: boolean): Q.Promise<Object> {
+  readAll(): Q.Promise<Object> {
     return this.remoteFile.getAll().then(buf => {
       var decomp = utils.inflateGzip(buf);
       var jb = new jBinary(decomp, bamTypes.TYPE_SET);
-      var o = jb.read(thinReads ? 'ThinBamFile' : 'BamFile');
+      var o = jb.read('BamFile');
       // Do some mild re-shaping.
-      o.alignments = o.alignments.map(x => x.contents);
+      var vo = new VirtualOffset(0, 0);
+      var slice = function(u8: Uint8Array) {
+        return u8.buffer.slice(u8.byteOffset, u8.byteOffset + u8.byteLength - 1);
+      };
+      o.alignments = o.alignments.map(x => new SamRead(slice(x.contents), vo, ''));
       return o;
     });
   }
@@ -298,17 +298,6 @@ class Bam {
     });
   }
 
-  // Convert a structured Cigar object into the string format we all love.
-  static makeCigarString(cigarOps: Array<{op:string; length:number}>) {
-    return cigarOps.map(({op, length}) => length + op).join('');
-  }
-
-  // Convert an array of Phred scores to a printable string.
-  static makeAsciiPhred(qualities: number[]): string {
-    if (qualities.length === 0) return '';
-    if (_.every(qualities, x => x == 255)) return '*';
-    return qualities.map(q => String.fromCharCode(33 + q)).join('');
-  }
 }
 
 module.exports = Bam;
