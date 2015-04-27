@@ -282,8 +282,8 @@ class Bam {
    * The 'contained' parameter controls whether the alignments must be fully
    * contained within the range, or need only overlap it.
    */
-  getAlignmentsInRange(range: ContigInterval<string>, contained?: boolean): Q.Promise<SamRead[]> {
-    contained = contained || false;
+  getAlignmentsInRange(range: ContigInterval<string>, opt_contained?: boolean): Q.Promise<SamRead[]> {
+    var contained = opt_contained || false;
     if (!this.index) {
       throw 'Range searches are only supported on BAMs with BAI indices.';
     }
