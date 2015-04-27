@@ -50,6 +50,20 @@ describe('SamRead', function() {
       expect(read.pos).to.equal(49);  // 0-based
       expect(read.l_seq).to.equal(10);
       expect(read.toString()).to.equal('ref:50-59');
+      expect(read.getCigarOps()).to.deep.equal([{op: 'M', length: 10}]);
+
+      // This one has a more interesting Cigar string
+      expect(reads[3].getCigarOps()).to.deep.equal([
+        {op: 'S', length: 1},
+        {op: 'I', length: 2},
+        {op: 'M', length: 6},
+        {op: 'P', length: 1},
+        {op: 'I', length: 1},
+        {op: 'P', length: 1},
+        {op: 'I', length: 1},
+        {op: 'M', length: 4},
+        {op: 'I', length: 2}
+      ]);
     });
   });
 

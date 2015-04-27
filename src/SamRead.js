@@ -23,6 +23,14 @@ var jDataView = require('jdataview'),
 
 // TODO: Make more extensive use of the jBinary specs.
 
+
+var CIGAR_OPS = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X'];
+type CigarOp = {
+  op: string;  // M, I, D, N, S, H, P, =, X
+  length: number
+}
+
+
 class SamRead {
   buffer: ArrayBuffer;
   offset: VirtualOffset;
@@ -96,6 +104,22 @@ class SamRead {
 
   intersects(interval: ContigInterval<string>): boolean {
     return interval.intersects(this.getInterval());
+  }
+
+  getCigarOps(): CigarOp[] {
+    var jv = this._getJDataView(),
+        l_read_name = jv.getUint8(8),
+        n_cigar_op = jv.getUint16(12),
+        pos = 32 + l_read_name,
+        ops = new Array(n_cigar_op);
+    for (var i = 0; i < n_cigar_op; i++) {
+      var v = jv.getUint32(pos + 4 * i);
+      ops[i] = {
+        op: CIGAR_OPS[v & 0xf],
+        length: v >> 4
+      };
+    }
+    return ops;
   }
 
   getCigarString(): string {
