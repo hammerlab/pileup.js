@@ -81,6 +81,7 @@ describe('SamRead', function() {
       // next pos
       expect(r000.tlen).to.equal(30);
       expect(r000.seq).to.equal('ATTTAGCTAC');
+      expect(reads[0].getSequence()).to.equal('ATTTAGCTAC');
       expect(reads[0].getQualPhred()).to.equal('AAAAAAAAAA');
 
       var aux = r000.auxiliary;

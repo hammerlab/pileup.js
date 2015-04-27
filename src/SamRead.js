@@ -30,6 +30,9 @@ type CigarOp = {
   length: number
 }
 
+var SEQUENCE_VALUES = ['=', 'A', 'C', 'M', 'G', 'R', 'S', 'V',
+                       'T', 'W', 'Y', 'H', 'K', 'D', 'B', 'N'];
+
 
 class SamRead {
   buffer: ArrayBuffer;
@@ -39,7 +42,11 @@ class SamRead {
   refID: number;
   ref: string;
   l_seq: number;
+
+  // cached values
   _full: ?Object;
+  _refLength: ?number;
+  _seq: ?string;
 
   /**
    * @param buffer contains the raw bytes of the serialized BAM read. It must
@@ -99,7 +106,9 @@ class SamRead {
   }
 
   getInterval(): ContigInterval<string> {
-    return new ContigInterval(this.ref, this.pos, this.pos + this.l_seq - 1);
+    return new ContigInterval(this.ref,
+                              this.pos,
+                              this.pos + this.getReferenceLength() - 1);
   }
 
   intersects(interval: ContigInterval<string>): boolean {
@@ -128,6 +137,47 @@ class SamRead {
 
   getQualPhred(): string {
     return makeAsciiPhred(this.getFull().qual);
+  }
+
+  getSequence(): string {
+    if (this._seq) return this._seq;
+    var jv = this._getJDataView(),
+        l_read_name = jv.getUint8(8),
+        n_cigar_op = jv.getUint16(12),
+        l_seq = jv.getInt32(16),
+        pos = 32 + l_read_name + 4 * n_cigar_op,
+        basePairs = new Array(l_seq),
+        numBytes = Math.ceil(l_seq / 2);
+
+    for (var i = 0; i < numBytes; i++) {
+      var b = jv.getUint8(pos + i);
+      basePairs[2 * i] = SEQUENCE_VALUES[b >> 4];
+      if (2 * i + 1 < l_seq) {
+        basePairs[2 * i + 1] = SEQUENCE_VALUES[b & 0xf];
+      }
+    }
+
+    var seq = basePairs.join('');
+    this._seq = seq;
+    return seq;
+  }
+
+  // Returns the length of the alignment from first aligned read to last aligned read.
+  getReferenceLength(): number {
+    if (this._refLength) return this._refLength;
+    var refLength = 0;
+    this.getCigarOps().forEach(({op, length}) => {
+      switch (op) {
+        case 'M':
+        case 'D':
+        case 'N':
+        case '=':
+        case 'X':
+          refLength += length;
+      }
+    });
+    this._refLength = refLength;
+    return refLength;
   }
 
   debugString(): string {
