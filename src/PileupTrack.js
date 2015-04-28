@@ -17,7 +17,8 @@ var PileupTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange,
     reads: React.PropTypes.array.isRequired,
-    onRangeChange: React.PropTypes.func.isRequired
+    onRangeChange: React.PropTypes.func.isRequired,
+    basePairs: React.PropTypes.object
   },
   render: function(): any {
     var range = this.props.range;
@@ -36,10 +37,11 @@ var READ_SPACING = 2;  // vertical pixels between reads
 var READ_STRAND_ARROW_WIDTH = 6;
 
 // Returns an SVG path string for the read, with an arrow indicating strand.
-function makePath(read, scale, row) {
-  var left = scale(read.pos),
-      top = row * (READ_HEIGHT + READ_SPACING),
-      right = scale(read.pos + read.l_seq) - 5,
+function makePath(scale, visualRead: VisualAlignment) {
+  var read = visualRead.read,
+      left = scale(visualRead.read.pos),
+      top = visualRead.row * (READ_HEIGHT + READ_SPACING),
+      right = scale(read.pos + visualRead.refLength) - 5,
       bottom = top + READ_HEIGHT,
       path = read.getStrand() == '+' ? [
         [left, top],
@@ -61,14 +63,42 @@ function readClass(read) {
   return 'alignment' + (read.getStrand() == '-' ? ' negative' : ' positive');
 }
 
+// This bundles everything intrinsic to the alignment that we need to display
+// it, i.e. everything not dependend on scale/viewport.
+type VisualAlignment = {
+  read: SamRead;
+  strand: number;  // see Strand below
+  row: number;  // pileup row.
+  refLength: number;  // span on the reference (accounting for indels)
+};
+var Strand = {
+  POSITIVE: 0,
+  NEGATIVE: 1
+};
+
 // TODO: scope to PileupTrack
 var pileup = [];
-var keyToRow = {};
+var keyToVisualAlignment = {};
+
+// Attach visualization info to the read and cache it.
+function addRead(read: SamRead) {
+  var k = read.offset.toString();
+  if (k in keyToVisualAlignment) return;
+
+  // assign this read to a row in the pileup
+  keyToVisualAlignment[k] = {
+    read: read,
+    strand: read.getStrand() == '+' ? Strand.POSITIVE : Strand.NEGATIVE,
+    row: addToPileup(new Interval(read.pos, read.pos + read.l_seq), pileup),
+    refLength: read.getReferenceLength()
+  };
+}
 
 var NonEmptyPileupTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange.isRequired,
     reads: React.PropTypes.array.isRequired,
+    basePairs: React.PropTypes.object,
     onRangeChange: React.PropTypes.func.isRequired
   },
   getInitialState: function() {
@@ -130,19 +160,13 @@ var NonEmptyPileupTrack = React.createClass({
     reads.enter()
         .append('path')
         .attr('class', readClass)
-        .each((read, i) => {
-          var k = read.offset.toString();
-          if (k in keyToRow) return;
-
-          // assign this read to a row in the pileup
-          keyToRow[k] = addToPileup(new Interval(read.pos, read.pos + read.l_seq), pileup);
-        })
+        .each(addRead)
         .on('click', (read, i) => {
           window.alert(read.debugString());
         });
 
     // Update
-    reads.attr('d', (read, i) => makePath(read, scale, keyToRow[read.offset.toString()]));
+    reads.attr('d', (read, i) => makePath(scale, keyToVisualAlignment[read.offset.toString()]));
 
     // Exit
     reads.exit().remove();
