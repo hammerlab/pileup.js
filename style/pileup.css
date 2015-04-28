@@ -14,12 +14,12 @@
 .background {
   fill: white;
 }
-.basepair .a { fill: #188712; }
-.basepair .g { fill: #C45C16; }
-.basepair .c { fill: #0600F9; }
-.basepair .t { fill: #F70016; }
-.basepair .u { fill: #F70016; }
-.basepair text {
+.basepair.a, .basepair .a { fill: #188712; }
+.basepair.g, .basepair .g { fill: #C45C16; }
+.basepair.c, .basepair .c { fill: #0600F9; }
+.basepair.t, .basepair .t { fill: #F70016; }
+.basepair.u, .basepair .u { fill: #F70016; }
+.basepair text, text.basepair {
   font-family: Helvetica Neue, Helvetica, Arial, sans;
 }
 .basepair.loose text {
@@ -73,8 +73,13 @@
 .pileup {
   height: 300px;
 }
-.pileup .alignment {
+.pileup .alignment path {
   fill: #c8c8c8;  /* matches IGV */
 }
-.pileup .alignment.negative {
+.pileup .alignment.negative path {
+}
+.pileup text.basepair {
+  alignment-baseline: hanging;
+  font-size: 12;
+  font-weight: bold;
 }

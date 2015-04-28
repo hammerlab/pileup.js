@@ -42,9 +42,9 @@ var READ_STRAND_ARROW_WIDTH = 6;
 function makePath(scale, visualRead: VisualAlignment) {
   var read = visualRead.read,
       left = scale(visualRead.read.pos),
-      top = visualRead.row * (READ_HEIGHT + READ_SPACING),
+      top = 0,
       right = scale(read.pos + visualRead.refLength) - 5,
-      bottom = top + READ_HEIGHT,
+      bottom = READ_HEIGHT,
       path = visualRead.strand == Strand.POSITIVE ? [
         [left, top],
         [right - READ_STRAND_ARROW_WIDTH, top],
@@ -122,6 +122,10 @@ function addRead(read: SamRead, referenceSource) {
   return visualAlignment;
 }
 
+function yForRow(row) {
+  return row * (READ_HEIGHT + READ_SPACING);
+}
+
 var NonEmptyPileupTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange.isRequired,
@@ -184,19 +188,29 @@ var NonEmptyPileupTrack = React.createClass({
     svg.attr('width', width)
        .attr('height', height);
 
-    var reads = svg.selectAll('path.alignment')
+    var reads = svg.selectAll('.alignment')
        .data(vReads, vRead => vRead.key);
 
     // Enter
-    reads.enter()
-        .append('path')
+    var readsG = reads.enter()
+        .append('g')
         .attr('class', readClass)
-        .on('click', (read, i) => {
-          window.alert(read.debugString());
+        .attr('transform', vRead => `translate(0, ${yForRow(vRead.row)})`)
+        .on('click', vRead => {
+          window.alert(vRead.read.debugString());
         });
 
+    readsG.append('path');  // the alignment arrow
+    readsG.selectAll('text.basepair')
+        .data(vRead => vRead.mismatches)
+        .enter()
+        .append('text')
+          .attr('class', mismatch => 'basepair ' + mismatch.basePair)
+          .text(mismatch => mismatch.basePair);
+
     // Update
-    reads.attr('d', (read, i) => makePath(scale, read));
+    reads.select('path').attr('d', (read, i) => makePath(scale, read));
+    reads.selectAll('text').attr('x', mismatch => scale(mismatch.pos));
 
     // Exit
     reads.exit().remove();
