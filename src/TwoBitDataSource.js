@@ -39,6 +39,7 @@ type TwoBitSource = {
   rangeChanged: (newRange: GenomeRange) => void;
   needContigs: () => void;
   getRange: (range: GenomeRange) => ?{[key:string]: string};
+  getRangeAsString: (range: GenomeRange) => string;
   contigList: () => string[];
   on: (event: string, handler: Function) => void;
   off: (event: string) => void;
@@ -108,6 +109,14 @@ var createTwoBitDataSource = function(remoteSource: TwoBit): TwoBitSource {
         .value();
   }
 
+  // Returns a string of base pairs for this range.
+  function getRangeAsString(range: GenomeRange): string {
+    if (!range) return '';
+    return _.range(range.start, range.stop + 1)
+        .map(x => getBasePair(range.contig, x))
+        .join('');
+  }
+
   var o = {
     rangeChanged: function(newRange: GenomeRange) {
       // Range has changed! Fetch new data.
@@ -123,7 +132,8 @@ var createTwoBitDataSource = function(remoteSource: TwoBit): TwoBitSource {
         o.trigger('contigs', contigList);
       }).done();
     },
-    getRange: getRange,
+    getRange,
+    getRangeAsString,
     contigList: () => contigList,
 
     // These are here to make Flow happy.

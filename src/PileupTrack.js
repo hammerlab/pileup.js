@@ -5,20 +5,22 @@
 'use strict';
 
 import type * as SamRead from './SamRead';
+// import type * as TwoBitSource from './TwoBitDataSource';
+// import type {BasePair} from './pileuputils';
 
 var React = require('react/addons'),
     _ = require('underscore'),
     d3 = require('d3'),
     types = require('./types'),
     Interval = require('./Interval'),
-    {addToPileup} = require('./pileuputils');
+    {addToPileup, getDifferingBasePairs} = require('./pileuputils');
 
 var PileupTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange,
     reads: React.PropTypes.array.isRequired,
     onRangeChange: React.PropTypes.func.isRequired,
-    basePairs: React.PropTypes.object
+    referenceSource: React.PropTypes.object.isRequired
   },
   render: function(): any {
     var range = this.props.range;
@@ -63,6 +65,12 @@ function readClass(read) {
   return 'alignment' + (read.getStrand() == '-' ? ' negative' : ' positive');
 }
 
+// Copied from pileuputils.js
+type BasePair = {
+  pos: number;
+  basePair: string;
+}
+
 // This bundles everything intrinsic to the alignment that we need to display
 // it, i.e. everything not dependend on scale/viewport.
 type VisualAlignment = {
@@ -70,6 +78,7 @@ type VisualAlignment = {
   strand: number;  // see Strand below
   row: number;  // pileup row.
   refLength: number;  // span on the reference (accounting for indels)
+  mismatches: Array<BasePair>
 };
 var Strand = {
   POSITIVE: 0,
@@ -80,17 +89,29 @@ var Strand = {
 var pileup = [];
 var keyToVisualAlignment = {};
 
+window.vreads = keyToVisualAlignment;
+
 // Attach visualization info to the read and cache it.
-function addRead(read: SamRead) {
+function addRead(read: SamRead, referenceSource) {
+  // reference: {[key:string]: string}) {
   var k = read.offset.toString();
   if (k in keyToVisualAlignment) return;
 
+  var refLength = read.getReferenceLength();
+  var range = read.getInterval();
+  var reference = referenceSource.getRangeAsString({
+     contig: 'chr' + range.contig,
+     start: range.start() + 1,  // why the +1?
+     stop: range.stop() + 1
+  });
+
   // assign this read to a row in the pileup
   keyToVisualAlignment[k] = {
-    read: read,
+    read,
     strand: read.getStrand() == '+' ? Strand.POSITIVE : Strand.NEGATIVE,
-    row: addToPileup(new Interval(read.pos, read.pos + read.l_seq), pileup),
-    refLength: read.getReferenceLength()
+    row: addToPileup(new Interval(read.pos, read.pos + refLength), pileup),
+    refLength,
+    mismatches: getDifferingBasePairs(read, reference)
   };
 }
 
@@ -98,7 +119,7 @@ var NonEmptyPileupTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange.isRequired,
     reads: React.PropTypes.array.isRequired,
-    basePairs: React.PropTypes.object,
+    referenceSource: React.PropTypes.object.isRequired,
     onRangeChange: React.PropTypes.func.isRequired
   },
   getInitialState: function() {
@@ -157,10 +178,11 @@ var NonEmptyPileupTrack = React.createClass({
        .data(this.props.reads, read => read.offset.toString());
 
     // Enter
+    var referenceSource = this.props.referenceSource;
     reads.enter()
         .append('path')
         .attr('class', readClass)
-        .each(addRead)
+        .each(read => addRead(read, referenceSource))
         .on('click', (read, i) => {
           window.alert(read.debugString());
         });

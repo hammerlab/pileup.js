@@ -1,6 +1,7 @@
 /** @flow */
 'use strict';
 
+import type * as SamRead from './SamRead';
 import type * as Interval from './Interval';
 
 /**
@@ -64,4 +65,39 @@ function addToPileup(read: Interval, pileup: Array<Interval[]>): number {
   return chosenRow;
 }
 
-module.exports = {pileup, addToPileup};
+type BasePair = {
+  pos: number;
+  basePair: string;
+}
+
+// TODO: document reference type
+function getDifferingBasePairs(read: SamRead, reference: string): Array<BasePair> {
+  var cigar = read.getCigarOps();
+
+  // TODO: account for Cigars with clipping and indels
+  if (cigar.length != 1 || cigar[0].op != 'M') {
+    return [];
+  }
+  var range = read.getInterval(),
+      seq = read.getSequence(),
+      start = range.start();
+  var out = [];
+  for (var i = 0; i < seq.length; i++) {
+    var pos = start + i,
+        ref = reference.charAt(i),
+        basePair = seq.charAt(i);
+    if (ref != basePair) {
+      out.push({
+        pos,
+        basePair
+      });
+    }
+  }
+  return out;
+}
+
+module.exports = {
+  pileup,
+  addToPileup,
+  getDifferingBasePairs
+};

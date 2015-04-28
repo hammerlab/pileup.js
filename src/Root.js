@@ -85,6 +85,7 @@ var Root = React.createClass({
                    onRangeChange={this.handleRangeChange} />
         <PileupTrack range={this.state.range}
                      reads={this.state.reads}
+                     referenceSource={this.props.referenceSource}
                      onRangeChange={this.handleRangeChange} />
 
       </div>
