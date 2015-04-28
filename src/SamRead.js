@@ -62,10 +62,10 @@ class SamRead {
 
     // Go ahead and parse a few fields immediately.
     var jv = this._getJDataView();
-    this.refID = jv.getUint32(0);
+    this.refID = jv.getInt32(0);
     this.ref = ref;
-    this.pos = jv.getUint32(4);
-    this.l_seq = jv.getUint32(16);
+    this.pos = jv.getInt32(4);
+    this.l_seq = jv.getInt32(16);
   }
 
   toString(): string {

@@ -113,7 +113,7 @@ var createTwoBitDataSource = function(remoteSource: TwoBit): TwoBitSource {
   function getRangeAsString(range: GenomeRange): string {
     if (!range) return '';
     return _.range(range.start, range.stop + 1)
-        .map(x => getBasePair(range.contig, x))
+        .map(x => getBasePair(range.contig, x) || '.')
         .join('');
   }
 
