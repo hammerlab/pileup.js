@@ -5,8 +5,6 @@
 'use strict';
 
 import type * as SamRead from './SamRead';
-// import type * as TwoBitSource from './TwoBitDataSource';
-// import type {BasePair} from './pileuputils';
 
 var React = require('react/addons'),
     _ = require('underscore'),
@@ -62,7 +60,7 @@ function makePath(scale, visualRead: VisualAlignment) {
 }
 
 function readClass(vread: VisualAlignment) {
-  return 'alignment' + (vread.strand == Strand.NEGATIVE ? ' negative' : ' positive');
+  return 'alignment ' + (vread.strand == Strand.NEGATIVE ? 'negative' : 'positive');
 }
 
 // Copied from pileuputils.js
@@ -88,12 +86,10 @@ var Strand = {
 
 // TODO: scope to PileupTrack
 var pileup = [];
-var keyToVisualAlignment = {};  // TODO: add type
-
-window.vreads = keyToVisualAlignment;
+var keyToVisualAlignment: {[key:string]: VisualAlignment} = {};
 
 // Attach visualization info to the read and cache it.
-function addRead(read: SamRead, referenceSource) {
+function addRead(read: SamRead, referenceSource): VisualAlignment {
   var k = read.offset.toString();
   var v = keyToVisualAlignment[k];
   if (v) return v;
@@ -108,7 +104,6 @@ function addRead(read: SamRead, referenceSource) {
 
   var key = read.offset.toString();
 
-  // assign this read to a row in the pileup
   var visualAlignment = {
     key,
     read,

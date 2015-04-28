@@ -70,7 +70,6 @@ type BasePair = {
   basePair: string;
 }
 
-// TODO: document reference type
 function getDifferingBasePairs(read: SamRead, reference: string): Array<BasePair> {
   var cigar = read.getCigarOps();
 
