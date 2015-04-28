@@ -11,13 +11,14 @@ var React = require('react/addons'),
     d3 = require('d3'),
     types = require('./types'),
     Interval = require('./Interval'),
-    {addToPileup} = require('./pileuputils');
+    {addToPileup, getDifferingBasePairs} = require('./pileuputils');
 
 var PileupTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange,
     reads: React.PropTypes.array.isRequired,
-    onRangeChange: React.PropTypes.func.isRequired
+    onRangeChange: React.PropTypes.func.isRequired,
+    referenceSource: React.PropTypes.object.isRequired
   },
   render: function(): any {
     var range = this.props.range;
@@ -36,12 +37,13 @@ var READ_SPACING = 2;  // vertical pixels between reads
 var READ_STRAND_ARROW_WIDTH = 6;
 
 // Returns an SVG path string for the read, with an arrow indicating strand.
-function makePath(read, scale, row) {
-  var left = scale(read.pos),
-      top = row * (READ_HEIGHT + READ_SPACING),
-      right = scale(read.pos + read.l_seq) - 5,
-      bottom = top + READ_HEIGHT,
-      path = read.getStrand() == '+' ? [
+function makePath(scale, visualRead: VisualAlignment) {
+  var read = visualRead.read,
+      left = scale(visualRead.read.pos),
+      top = 0,
+      right = scale(read.pos + visualRead.refLength) - 5,
+      bottom = READ_HEIGHT,
+      path = visualRead.strand == Strand.POSITIVE ? [
         [left, top],
         [right - READ_STRAND_ARROW_WIDTH, top],
         [right, (top + bottom) / 2],
@@ -57,18 +59,73 @@ function makePath(read, scale, row) {
   return d3.svg.line()(path);
 }
 
-function readClass(read) {
-  return 'alignment' + (read.getStrand() == '-' ? ' negative' : ' positive');
+function readClass(vread: VisualAlignment) {
+  return 'alignment ' + (vread.strand == Strand.NEGATIVE ? 'negative' : 'positive');
 }
+
+// Copied from pileuputils.js
+type BasePair = {
+  pos: number;
+  basePair: string;
+}
+
+// This bundles everything intrinsic to the alignment that we need to display
+// it, i.e. everything not dependend on scale/viewport.
+type VisualAlignment = {
+  key: string;
+  read: SamRead;
+  strand: number;  // see Strand below
+  row: number;  // pileup row.
+  refLength: number;  // span on the reference (accounting for indels)
+  mismatches: Array<BasePair>;
+};
+var Strand = {
+  POSITIVE: 0,
+  NEGATIVE: 1
+};
 
 // TODO: scope to PileupTrack
 var pileup = [];
-var keyToRow = {};
+var keyToVisualAlignment: {[key:string]: VisualAlignment} = {};
+
+// Attach visualization info to the read and cache it.
+function addRead(read: SamRead, referenceSource): VisualAlignment {
+  var k = read.offset.toString();
+  var v = keyToVisualAlignment[k];
+  if (v) return v;
+
+  var refLength = read.getReferenceLength();
+  var range = read.getInterval();
+  var reference = referenceSource.getRangeAsString({
+     contig: 'chr' + range.contig,
+     start: range.start() + 1,  // why the +1?
+     stop: range.stop() + 1
+  });
+
+  var key = read.offset.toString();
+
+  var visualAlignment = {
+    key,
+    read,
+    strand: read.getStrand() == '+' ? Strand.POSITIVE : Strand.NEGATIVE,
+    row: addToPileup(new Interval(read.pos, read.pos + refLength), pileup),
+    refLength,
+    mismatches: getDifferingBasePairs(read, reference)
+  };
+
+  keyToVisualAlignment[k] = visualAlignment;
+  return visualAlignment;
+}
+
+function yForRow(row) {
+  return row * (READ_HEIGHT + READ_SPACING);
+}
 
 var NonEmptyPileupTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange.isRequired,
     reads: React.PropTypes.array.isRequired,
+    referenceSource: React.PropTypes.object.isRequired,
     onRangeChange: React.PropTypes.func.isRequired
   },
   getInitialState: function() {
@@ -118,31 +175,37 @@ var NonEmptyPileupTrack = React.createClass({
     // Hold off until height & width are known.
     if (width === 0) return;
 
+    var referenceSource = this.props.referenceSource;
+    var vReads = this.props.reads.map(read => addRead(read, referenceSource));
+
     var scale = this.getScale();
 
     svg.attr('width', width)
        .attr('height', height);
 
-    var reads = svg.selectAll('path.alignment')
-       .data(this.props.reads, read => read.offset.toString());
+    var reads = svg.selectAll('.alignment')
+       .data(vReads, vRead => vRead.key);
 
     // Enter
-    reads.enter()
-        .append('path')
+    var readsG = reads.enter()
+        .append('g')
         .attr('class', readClass)
-        .each((read, i) => {
-          var k = read.offset.toString();
-          if (k in keyToRow) return;
-
-          // assign this read to a row in the pileup
-          keyToRow[k] = addToPileup(new Interval(read.pos, read.pos + read.l_seq), pileup);
-        })
-        .on('click', (read, i) => {
-          window.alert(read.debugString());
+        .attr('transform', vRead => `translate(0, ${yForRow(vRead.row)})`)
+        .on('click', vRead => {
+          window.alert(vRead.read.debugString());
         });
 
+    readsG.append('path');  // the alignment arrow
+    readsG.selectAll('text.basepair')
+        .data(vRead => vRead.mismatches)
+        .enter()
+        .append('text')
+          .attr('class', mismatch => 'basepair ' + mismatch.basePair)
+          .text(mismatch => mismatch.basePair);
+
     // Update
-    reads.attr('d', (read, i) => makePath(read, scale, keyToRow[read.offset.toString()]));
+    reads.select('path').attr('d', (read, i) => makePath(scale, read));
+    reads.selectAll('text').attr('x', mismatch => scale(mismatch.pos));
 
     // Exit
     reads.exit().remove();

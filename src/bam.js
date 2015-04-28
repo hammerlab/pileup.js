@@ -233,7 +233,13 @@ class Bam {
       var slice = function(u8: Uint8Array) {
         return u8.buffer.slice(u8.byteOffset, u8.byteOffset + u8.byteLength - 1);
       };
-      o.alignments = o.alignments.map(x => new SamRead(slice(x.contents), vo, ''));
+      o.alignments = o.alignments.map(x => {
+        var r = new SamRead(slice(x.contents), vo, '');
+        if (r.refID != -1) {
+          r.ref = o.header.references[r.refID].name;
+        }
+        return r;
+      });
       return o;
     });
   }

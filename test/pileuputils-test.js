@@ -5,8 +5,10 @@ var expect = require('chai').expect;
 
 var _ = require('underscore');
 
-var {pileup, addToPileup} = require('../src/pileuputils'),
-    Interval = require('../src/Interval');
+var {pileup, addToPileup, getDifferingBasePairs} = require('../src/pileuputils'),
+    Interval = require('../src/Interval'),
+    Bam = require('../src/bam'),
+    RemoteFile = require('../src/RemoteFile');
 
 describe('pileuputils', function() {
   // This checks that pileup's guarantee is met.
@@ -83,5 +85,30 @@ describe('pileuputils', function() {
     var rows = reads.map(read => addToPileup(read, pileup));
     checkGuarantee(reads, rows);
     expect(rows).to.deep.equal([0,1,2,0,2]);
+  });
+
+  function getSamArray(url) {
+    return new Bam(new RemoteFile(url)).readAll().then(d => d.alignments);
+  }
+
+  it('should find differences between ref and read', function() {
+    return getSamArray('/test/data/test_input_1_a.bam').then(reads => {
+      var read = reads[0];
+      expect(read.pos).to.equal(49);
+      expect(read.getCigarString()).to.equal('10M');
+      //                                   0123456789
+      expect(read.getSequence()).to.equal('ATTTAGCTAC');
+      var ref =                           'TTTTAGCGAC';
+
+      expect(getDifferingBasePairs(read, ref)).to.deep.equal([
+        {pos: 49+0, basePair: 'A'},
+        {pos: 49+7, basePair: 'T'}
+      ]);
+
+      // More complex CIGAR strings are not supported yet.
+      var read3 = reads[3];
+      expect(read3.getCigarString()).to.equal('1S2I6M1P1I1P1I4M2I');
+      expect(getDifferingBasePairs(read3, ref)).to.deep.equal([]);
+    });
   });
 });

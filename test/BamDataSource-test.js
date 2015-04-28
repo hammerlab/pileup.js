@@ -37,9 +37,9 @@ describe('BamDataSource', function() {
 
     source.on('newdata', () => {
       var reads = source.getAlignmentsInRange(range);
-      expect(reads).to.have.length(1114);
+      expect(reads).to.have.length(1112);
       expect(reads[0].toString()).to.equal('20:31511251-31511351');
-      expect(reads[1113].toString()).to.equal('20:31514171-31514271');
+      expect(reads[1111].toString()).to.equal('20:31514171-31514271');
       done();
     });
     source.rangeChanged({
@@ -64,14 +64,14 @@ describe('BamDataSource', function() {
     // Fetching [50, 150] should cache [0, 200]
     source.on('newdata', () => {
       var reads = source.getAlignmentsInRange(range);
-      expect(reads).to.have.length(19);
+      expect(reads).to.have.length(18);
       expect(reads[0].toString()).to.equal('20:31511951-31512051');
-      expect(reads[18].toString()).to.equal('20:31512146-31512246');
+      expect(reads[17].toString()).to.equal('20:31512146-31512246');
 
       var readsBefore = source.getAlignmentsInRange(rangeBefore),
           readsAfter = source.getAlignmentsInRange(rangeAfter);
 
-      expect(readsBefore).to.have.length(28);
+      expect(readsBefore).to.have.length(26);
       expect(readsAfter).to.have.length(12);
 
       // TODO: test that fetching readsBefore and readsAfter produces no

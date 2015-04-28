@@ -33,6 +33,7 @@ describe('TwoBitDataSource', function() {
       'chr22:3': null,
       'chr22:4': null
     });
+    expect(source.getRangeAsString(range)).to.equal('....');
 
     source.on('newdata', () => {
       expect(source.getRange(range)).to.deep.equal({
@@ -41,6 +42,7 @@ describe('TwoBitDataSource', function() {
         'chr22:3': 'C',
         'chr22:4': 'A'
       });
+      expect(source.getRangeAsString(range)).to.equal('NTCA');
       done();
     });
     source.rangeChanged(range);
