@@ -45,7 +45,7 @@ function makePath(scale, visualRead: VisualAlignment) {
       top = visualRead.row * (READ_HEIGHT + READ_SPACING),
       right = scale(read.pos + visualRead.refLength) - 5,
       bottom = top + READ_HEIGHT,
-      path = read.getStrand() == '+' ? [
+      path = visualRead.strand == Strand.POSITIVE ? [
         [left, top],
         [right - READ_STRAND_ARROW_WIDTH, top],
         [right, (top + bottom) / 2],
@@ -61,8 +61,8 @@ function makePath(scale, visualRead: VisualAlignment) {
   return d3.svg.line()(path);
 }
 
-function readClass(read) {
-  return 'alignment' + (read.getStrand() == '-' ? ' negative' : ' positive');
+function readClass(vread: VisualAlignment) {
+  return 'alignment' + (vread.strand == Strand.NEGATIVE ? ' negative' : ' positive');
 }
 
 // Copied from pileuputils.js
@@ -74,11 +74,12 @@ type BasePair = {
 // This bundles everything intrinsic to the alignment that we need to display
 // it, i.e. everything not dependend on scale/viewport.
 type VisualAlignment = {
+  key: string;
   read: SamRead;
   strand: number;  // see Strand below
   row: number;  // pileup row.
   refLength: number;  // span on the reference (accounting for indels)
-  mismatches: Array<BasePair>
+  mismatches: Array<BasePair>;
 };
 var Strand = {
   POSITIVE: 0,
@@ -87,15 +88,15 @@ var Strand = {
 
 // TODO: scope to PileupTrack
 var pileup = [];
-var keyToVisualAlignment = {};
+var keyToVisualAlignment = {};  // TODO: add type
 
 window.vreads = keyToVisualAlignment;
 
 // Attach visualization info to the read and cache it.
 function addRead(read: SamRead, referenceSource) {
-  // reference: {[key:string]: string}) {
   var k = read.offset.toString();
-  if (k in keyToVisualAlignment) return;
+  var v = keyToVisualAlignment[k];
+  if (v) return v;
 
   var refLength = read.getReferenceLength();
   var range = read.getInterval();
@@ -105,14 +106,20 @@ function addRead(read: SamRead, referenceSource) {
      stop: range.stop() + 1
   });
 
+  var key = read.offset.toString();
+
   // assign this read to a row in the pileup
-  keyToVisualAlignment[k] = {
+  var visualAlignment = {
+    key,
     read,
     strand: read.getStrand() == '+' ? Strand.POSITIVE : Strand.NEGATIVE,
     row: addToPileup(new Interval(read.pos, read.pos + refLength), pileup),
     refLength,
     mismatches: getDifferingBasePairs(read, reference)
   };
+
+  keyToVisualAlignment[k] = visualAlignment;
+  return visualAlignment;
 }
 
 var NonEmptyPileupTrack = React.createClass({
@@ -169,26 +176,27 @@ var NonEmptyPileupTrack = React.createClass({
     // Hold off until height & width are known.
     if (width === 0) return;
 
+    var referenceSource = this.props.referenceSource;
+    var vReads = this.props.reads.map(read => addRead(read, referenceSource));
+
     var scale = this.getScale();
 
     svg.attr('width', width)
        .attr('height', height);
 
     var reads = svg.selectAll('path.alignment')
-       .data(this.props.reads, read => read.offset.toString());
+       .data(vReads, vRead => vRead.key);
 
     // Enter
-    var referenceSource = this.props.referenceSource;
     reads.enter()
         .append('path')
         .attr('class', readClass)
-        .each(read => addRead(read, referenceSource))
         .on('click', (read, i) => {
           window.alert(read.debugString());
         });
 
     // Update
-    reads.attr('d', (read, i) => makePath(scale, keyToVisualAlignment[read.offset.toString()]));
+    reads.attr('d', (read, i) => makePath(scale, read));
 
     // Exit
     reads.exit().remove();
