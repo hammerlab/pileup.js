@@ -136,6 +136,9 @@ var NonEmptyVariantTrack = React.createClass({
         .attr('y', height - 15)
         .attr('height', 14)
         .attr('width', pxPerLetter - 1);
+
+    // Exit
+    variantRects.exit().remove();
   }
 });
 
