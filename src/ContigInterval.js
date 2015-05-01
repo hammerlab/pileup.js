@@ -51,6 +51,11 @@ class ContigInterval<T: (number|string)> {
     return this.interval.isCoveredBy(ivs);
   }
 
+  containsLocus(contig: T, position: number): boolean {
+    if (this.contig !== contig) return false;
+    return this.interval.contains(position);
+  }
+
   /*
   This method doesn't typecheck. See https://github.com/facebook/flow/issues/388
   isAfterInterval(other: ContigInterval): boolean {
