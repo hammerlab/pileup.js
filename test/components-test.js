@@ -9,11 +9,13 @@ var React = require('react/addons'),
     TwoBit = require('../src/TwoBit'),
     Bam = require('../src/bam'),
     BigBed = require('../src/BigBed'),
+    VcfFile = require('../src/vcf'),
     Root = require('../src/Root'),
     RemoteFile = require('../src/RemoteFile'),
     createTwoBitDataSource = require('../src/TwoBitDataSource'),
     createBigBedDataSource = require('../src/BigBedDataSource'),
-    createBamDataSource = require('../src/BamDataSource');
+    createBamDataSource = require('../src/BamDataSource'),
+    createVcfDataSource = require('../src/VcfDataSource');
 
 
 var WAIT_FOR_POLL_INTERVAL_MS = 100;
@@ -55,6 +57,9 @@ describe('Root component', function() {
                     new RemoteFile('/test/data/index_test.bam.bai'));
   var bamSource = createBamDataSource(bam);
 
+  var vcf = new VcfFile(new RemoteFile('/test/data/snv.chr17.vcf'));
+  var vcfSource = createVcfDataSource(vcf);
+
   var testDiv = document.getElementById('testdiv');
 
   afterEach(function() {
@@ -72,6 +77,7 @@ describe('Root component', function() {
     React.render(<Root referenceSource={dataSource}
                        geneSource={ensemblDataSource}
                        bamSource={bamSource}
+                       variantSource={vcfSource}
                        initialRange={{contig:"chr17", start: 100, stop: 150}} />, div);
 
     var ready = (() => 

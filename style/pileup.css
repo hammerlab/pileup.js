@@ -83,3 +83,12 @@
   font-size: 12;
   font-weight: bold;
 }
+
+/* variants */
+.variants {
+  height: 25px;
+}
+.variants rect {
+  fill: #ddd;
+  stroke: blue;
+}

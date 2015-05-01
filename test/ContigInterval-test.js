@@ -22,6 +22,15 @@ describe('ContigInterval', function() {
     expect(tp53.intersects(other)).to.be.true;
   });
 
+  it('should determine containment', function() {
+    var ci = new ContigInterval('20', 1000, 2000);
+    expect(ci.containsLocus('20', 999)).to.be.false;
+    expect(ci.containsLocus('20', 1000)).to.be.true;
+    expect(ci.containsLocus('20', 2000)).to.be.true;
+    expect(ci.containsLocus('20', 2001)).to.be.false;
+    expect(ci.containsLocus('21', 1500)).to.be.false;
+  });
+
   it('should coalesce lists of intervals', function() {
     var ci = (a, b, c) => new ContigInterval(a, b, c);
 

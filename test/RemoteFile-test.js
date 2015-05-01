@@ -129,4 +129,11 @@ describe('RemoteFile', () => {
       });
     });
   });
+
+  it('should fetch entire files as strings', function() {
+    var f = new RemoteFile('/test/data/0to9.txt');
+    return f.getAllString().then(txt => {
+      expect(txt).to.equal('0123456789\n');
+    });
+  });
 });

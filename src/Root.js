@@ -11,7 +11,8 @@ var React = require('react'),
     Controls = require('./Controls'),
     GenomeTrack = require('./GenomeTrack'),
     GeneTrack = require('./GeneTrack'),
-    PileupTrack = require('./PileupTrack');
+    PileupTrack = require('./PileupTrack'),
+    VariantTrack = require('./VariantTrack');
 
 
 var Root = React.createClass({
@@ -70,6 +71,7 @@ var Root = React.createClass({
 
     this.props.geneSource.rangeChanged(newRange);
     this.props.bamSource.rangeChanged(newRange);
+    this.props.variantSource.rangeChanged(newRange);
   },
   render: function(): any {
     return (
@@ -80,6 +82,9 @@ var Root = React.createClass({
         <GenomeTrack range={this.state.range}
                      basePairs={this.state.basePairs}
                      onRangeChange={this.handleRangeChange} />
+        <VariantTrack range={this.state.range}
+                      variantSource={this.props.variantSource}
+                      onRangeChange={this.handleRangeChange} />
         <GeneTrack range={this.state.range}
                    genes={this.state.genes}
                    onRangeChange={this.handleRangeChange} />

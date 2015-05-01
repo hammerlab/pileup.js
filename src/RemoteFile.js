@@ -71,6 +71,16 @@ class RemoteFile {
     });
   }
 
+  // Reads the entire file as a string (not an ArrayBuffer).
+  // This does not use the cache.
+  getAllString(): Q.Promise<string> {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', this.url);
+    return this.promiseXHR(xhr).then(([string]) => {
+      return string;
+    });
+  }
+
   // Returns a promise for the number of bytes in the remote file.
   getSize(): Q.Promise<number> {
     if (this.fileLength != -1) {
