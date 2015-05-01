@@ -28,4 +28,14 @@ describe('VCF', function() {
       expect(v5.alt).to.equal('A');
     });
   });
+
+  it('should add chr', function() {
+    var vcf = new VcfFile(new RemoteFile('/test/data/snv.vcf'));
+    var range = new ContigInterval('chr20', 63799, 69094);
+    return vcf.getFeaturesInRange(range).then(features => {
+      expect(features).to.have.length(6);
+      expect(features[0].contig).to.equal('20');  // not chr20
+      expect(features[5].contig).to.equal('20');
+    });
+  });
 });

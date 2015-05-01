@@ -52,8 +52,16 @@ class ContigInterval<T: (number|string)> {
   }
 
   containsLocus(contig: T, position: number): boolean {
-    if (this.contig !== contig) return false;
-    return this.interval.contains(position);
+    return this.contig === contig &&
+           this.interval.contains(position);
+  }
+
+  // Like containsLocus, but allows 'chr17' vs '17'-style mismatches
+  chrContainsLocus(contig: T, position: number): boolean {
+    return (this.contig === contig ||
+            this.contig === 'chr' + contig ||
+            'chr' + this.contig === contig) &&
+           this.interval.contains(position);
   }
 
   /*

@@ -81,49 +81,94 @@ function lowestIndex<T>(haystack: T[], needle: T, compare: (a: T, b: T)=>number)
 }
 
 
+class ImmediateVcfFile {
+  lines: LocusLine[];
+  contigMap: {[key:string]:string};  // canonical map
+
+  constructor(lines: LocusLine[]) {
+    this.lines = lines;
+    this.contigMap = this.extractContigs();
+  }
+
+  extractContigs(): {[key:string]:string} {
+    var contigs = [],
+        lastContig = '';
+    for (var i = 0; i < this.lines.length; i++) {
+      var line = this.lines[i];
+      if (line.contig != lastContig) {
+        contigs.push(line.contig);
+      }
+    }
+
+    var contigMap = {};
+    contigs.forEach(contig => {
+      if (contig.slice(0, 3) == 'chr') {
+        contigMap[contig.slice(4)] = contig;
+      } else {
+        contigMap['chr' + contig] = contig;
+      }
+      contigMap[contig] = contig;
+    });
+    return contigMap;
+  }
+
+  getFeaturesInRange(range: ContigInterval<string>): Variant[] {
+    var lines = this.lines;
+    var contig = this.contigMap[range.contig];
+    if (!contig) {
+      return [];
+    }
+
+    var startLocus = {
+        contig: contig,
+        position: range.start(),
+        line: ''
+      },
+      endLocus = {
+        contig: contig,
+        position: range.stop(),
+        line: ''
+      };
+    var startIndex = lowestIndex(lines, startLocus, compareLocusLine);
+
+    var result: LocusLine[] = [];
+
+    for (var i = startIndex; i < lines.length; i++) {
+      if (compareLocusLine(lines[i], endLocus) > 0) {
+        break;
+      }
+      result.push(lines[i]);
+    }
+
+    return result.map(line => extractVariant(line.line));
+  }
+}
+
+
 class VcfFile {
   remoteFile: RemoteFile;
-  lines: Q.Promise<LocusLine[]>;
+  immediate: Q.Promise<ImmediateVcfFile>;
 
   constructor(remoteFile: RemoteFile) {
     this.remoteFile = remoteFile;
 
-    this.lines = this.remoteFile.getAllString().then(txt => {
+    this.immediate = this.remoteFile.getAllString().then(txt => {
       // Running this on a 12MB string takes ~80ms on my 2014 Macbook Pro
-      var lines = txt.split('\n').filter(line => (line.length && line[0] != '#')).map(extractLocusLine);
+      var lines = txt.split('\n')
+                     .filter(line => (line.length && line[0] != '#'))
+                     .map(extractLocusLine);
       return lines;
     }).then(lines => {
       // Sorting this structure from the 12MB VCF file takes ~60ms
       lines.sort(compareLocusLine);
-      return lines;
+      return new ImmediateVcfFile(lines);
     });
-    this.lines.done();
+    this.immediate.done();
   }
 
-  getFeaturesInRange(range: ContigInterval<string>): Q.Promise<LocusLine[]> {
-    return this.lines.then(lines => {
-      var startLocus = {
-          contig: range.contig,
-          position: range.start(),
-          line: ''
-        },
-        endLocus = {
-          contig: range.contig,
-          position: range.stop(),
-          line: ''
-        };
-      var startIndex = lowestIndex(lines, startLocus, compareLocusLine);
-
-      var result: LocusLine[] = [];
-
-      for (var i = startIndex; i < lines.length; i++) {
-        if (compareLocusLine(lines[i], endLocus) > 0) {
-          break;
-        }
-        result.push(lines[i]);
-      }
-
-      return result.map(line => extractVariant(line.line));
+  getFeaturesInRange(range: ContigInterval<string>): Q.Promise<Variant[]> {
+    return this.immediate.then(immediate => {
+      return immediate.getFeaturesInRange(range);
     });
   }
 }

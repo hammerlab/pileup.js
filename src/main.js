@@ -11,7 +11,8 @@ var React = require('react'),
     Root = require('./Root'),
     createTwoBitDataSource = require('./TwoBitDataSource'),
     createBigBedDataSource = require('./BigBedDataSource'),
-    createBamDataSource = require('./BamDataSource');
+    createBamDataSource = require('./BamDataSource'),
+    createVcfDataSource = require('./VcfDataSource');
 
 // var vcf = new VcfFile(new RemoteFile('/large.vcf'));
 
@@ -29,11 +30,13 @@ var bamFile = new RemoteFile(bamURL),
 var bam = new Bam(bamFile, baiFile);
 var bamSource = createBamDataSource(bam);
 
-var vcf = new VcfFile(new RemoteFile('/snv.vcf'));
+var vcf = new VcfFile(new RemoteFile('/test/data/snv.chr17.vcf'));
+var vcfSource = createVcfDataSource(vcf);
 
 React.render(<Root referenceSource={dataSource}
                    geneSource={ensemblDataSource}
                    bamSource={bamSource}
+                   variantSource={vcfSource}
                    initialRange={{contig: "chr17", start: 7512444, stop: 7512484}} />,
              document.getElementById('root'));
 
