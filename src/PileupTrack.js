@@ -121,24 +121,21 @@ function yForRow(row) {
   return row * (READ_HEIGHT + READ_SPACING);
 }
 
-var NonEmptyPileupTrack = React.createClass({
-  propTypes: {
-    range: types.GenomeRange.isRequired,
-    reads: React.PropTypes.array.isRequired,
-    referenceSource: React.PropTypes.object.isRequired,
-    onRangeChange: React.PropTypes.func.isRequired
-  },
-  getInitialState: function() {
-    return {
+class NonEmptyPileupTrack extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
       width: 0,
       height: 0
     };
-  },
-  render: function(): any {
+  }
+
+  render(): any {
     return <div className='pileup'></div>;
-  },
-  componentDidMount: function() {
-    var div = this.getDOMNode();
+  }
+
+  componentDidMount() {
+    var div = React.findDOMNode(this);
     this.setState({
       width: div.offsetWidth,
       height: div.offsetWidth
@@ -146,8 +143,9 @@ var NonEmptyPileupTrack = React.createClass({
     d3.select(div)
       .append('svg');
     this.updateVisualization();
-  },
-  getScale: function() {
+  }
+
+  getScale() {
     var range = this.props.range,
         width = this.state.width,
         offsetPx = range.offsetPx || 0;
@@ -155,8 +153,9 @@ var NonEmptyPileupTrack = React.createClass({
             .domain([range.start, range.stop + 1])  // 1 bp wide
             .range([-offsetPx, width - offsetPx]);
     return scale;
-  },
-  componentDidUpdate: function(prevProps: any, prevState: any) {
+  }
+
+  componentDidUpdate(prevProps: any, prevState: any) {
     // Check a whitelist of properties which could change the visualization.
     // TODO: this is imprecise; it would be better to deep check reads.
     var newProps = this.props;
@@ -165,9 +164,10 @@ var NonEmptyPileupTrack = React.createClass({
        prevState != this.state) {
       this.updateVisualization();
     }
-  },
-  updateVisualization: function() {
-    var div = this.getDOMNode(),
+  }
+
+  updateVisualization() {
+    var div = React.findDOMNode(this),
         width = this.state.width,
         height = this.state.height,
         svg = d3.select(div).select('svg');
@@ -211,7 +211,14 @@ var NonEmptyPileupTrack = React.createClass({
     reads.exit().remove();
   }
 
-});
+}
+
+NonEmptyPileupTrack.propTypes = {
+  range: types.GenomeRange.isRequired,
+  reads: React.PropTypes.array.isRequired,
+  referenceSource: React.PropTypes.object.isRequired,
+  onRangeChange: React.PropTypes.func.isRequired
+};
 
 
 var EmptyTrack = React.createClass({
