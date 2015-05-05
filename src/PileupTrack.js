@@ -5,12 +5,12 @@
 'use strict';
 
 import type * as SamRead from './SamRead';
+import type * as Interval from './Interval';
 
 var React = require('react/addons'),
     _ = require('underscore'),
     d3 = require('d3'),
     types = require('./types'),
-    Interval = require('./Interval'),
     {addToPileup, getDifferingBasePairs} = require('./pileuputils');
 
 var PileupTrack = React.createClass({
@@ -84,61 +84,31 @@ var Strand = {
   NEGATIVE: 1
 };
 
-// TODO: scope to PileupTrack
-var pileup = [];
-var keyToVisualAlignment: {[key:string]: VisualAlignment} = {};
-
-// Attach visualization info to the read and cache it.
-function addRead(read: SamRead, referenceSource): VisualAlignment {
-  var k = read.offset.toString();
-  var v = keyToVisualAlignment[k];
-  if (v) return v;
-
-  var refLength = read.getReferenceLength();
-  var range = read.getInterval();
-  var reference = referenceSource.getRangeAsString({
-     contig: 'chr' + range.contig,
-     start: range.start() + 1,  // why the +1?
-     stop: range.stop() + 1
-  });
-
-  var key = read.offset.toString();
-
-  var visualAlignment = {
-    key,
-    read,
-    strand: read.getStrand() == '+' ? Strand.POSITIVE : Strand.NEGATIVE,
-    row: addToPileup(new Interval(read.pos, read.pos + refLength), pileup),
-    refLength,
-    mismatches: getDifferingBasePairs(read, reference)
-  };
-
-  keyToVisualAlignment[k] = visualAlignment;
-  return visualAlignment;
-}
 
 function yForRow(row) {
   return row * (READ_HEIGHT + READ_SPACING);
 }
 
-var NonEmptyPileupTrack = React.createClass({
-  propTypes: {
-    range: types.GenomeRange.isRequired,
-    reads: React.PropTypes.array.isRequired,
-    referenceSource: React.PropTypes.object.isRequired,
-    onRangeChange: React.PropTypes.func.isRequired
-  },
-  getInitialState: function() {
-    return {
+class NonEmptyPileupTrack extends React.Component {
+  pileup: Array<Interval[]>;
+  keyToVisualAlignment: {[key:string]: VisualAlignment};
+
+  constructor(props) {
+    super(props);
+    this.state = {
       width: 0,
       height: 0
     };
-  },
-  render: function(): any {
+    this.pileup = [];
+    this.keyToVisualAlignment = {};
+  }
+
+  render(): any {
     return <div className='pileup'></div>;
-  },
-  componentDidMount: function() {
-    var div = this.getDOMNode();
+  }
+
+  componentDidMount() {
+    var div = React.findDOMNode(this);
     this.setState({
       width: div.offsetWidth,
       height: div.offsetWidth
@@ -146,8 +116,9 @@ var NonEmptyPileupTrack = React.createClass({
     d3.select(div)
       .append('svg');
     this.updateVisualization();
-  },
-  getScale: function() {
+  }
+
+  getScale() {
     var range = this.props.range,
         width = this.state.width,
         offsetPx = range.offsetPx || 0;
@@ -155,8 +126,9 @@ var NonEmptyPileupTrack = React.createClass({
             .domain([range.start, range.stop + 1])  // 1 bp wide
             .range([-offsetPx, width - offsetPx]);
     return scale;
-  },
-  componentDidUpdate: function(prevProps: any, prevState: any) {
+  }
+
+  componentDidUpdate(prevProps: any, prevState: any) {
     // Check a whitelist of properties which could change the visualization.
     // TODO: this is imprecise; it would be better to deep check reads.
     var newProps = this.props;
@@ -165,9 +137,39 @@ var NonEmptyPileupTrack = React.createClass({
        prevState != this.state) {
       this.updateVisualization();
     }
-  },
-  updateVisualization: function() {
-    var div = this.getDOMNode(),
+  }
+
+  // Attach visualization info to the read and cache it.
+  addRead(read: SamRead, referenceSource): VisualAlignment {
+    var k = read.offset.toString();
+    var v = this.keyToVisualAlignment[k];
+    if (v) return v;
+
+    var refLength = read.getReferenceLength();
+    var range = read.getInterval();
+    var reference = referenceSource.getRangeAsString({
+       contig: 'chr' + range.contig,
+       start: range.start() + 1,  // why the +1?
+       stop: range.stop() + 1
+    });
+
+    var key = read.offset.toString();
+
+    var visualAlignment = {
+      key,
+      read,
+      strand: read.getStrand() == '+' ? Strand.POSITIVE : Strand.NEGATIVE,
+      row: addToPileup(range.interval, this.pileup),
+      refLength,
+      mismatches: getDifferingBasePairs(read, reference)
+    };
+
+    this.keyToVisualAlignment[k] = visualAlignment;
+    return visualAlignment;
+  }
+
+  updateVisualization() {
+    var div = React.findDOMNode(this),
         width = this.state.width,
         height = this.state.height,
         svg = d3.select(div).select('svg');
@@ -176,7 +178,8 @@ var NonEmptyPileupTrack = React.createClass({
     if (width === 0) return;
 
     var referenceSource = this.props.referenceSource;
-    var vReads = this.props.reads.map(read => addRead(read, referenceSource));
+    var vReads = this.props.reads.map(
+        read => this.addRead(read, referenceSource));
 
     var scale = this.getScale();
 
@@ -211,7 +214,14 @@ var NonEmptyPileupTrack = React.createClass({
     reads.exit().remove();
   }
 
-});
+}
+
+NonEmptyPileupTrack.propTypes = {
+  range: types.GenomeRange.isRequired,
+  reads: React.PropTypes.array.isRequired,
+  referenceSource: React.PropTypes.object.isRequired,
+  onRangeChange: React.PropTypes.func.isRequired
+};
 
 
 var EmptyTrack = React.createClass({
