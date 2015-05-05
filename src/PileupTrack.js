@@ -5,12 +5,12 @@
 'use strict';
 
 import type * as SamRead from './SamRead';
+import type * as Interval from './Interval';
 
 var React = require('react/addons'),
     _ = require('underscore'),
     d3 = require('d3'),
     types = require('./types'),
-    Interval = require('./Interval'),
     {addToPileup, getDifferingBasePairs} = require('./pileuputils');
 
 var PileupTrack = React.createClass({
@@ -84,50 +84,23 @@ var Strand = {
   NEGATIVE: 1
 };
 
-// TODO: scope to PileupTrack
-var pileup = [];
-var keyToVisualAlignment: {[key:string]: VisualAlignment} = {};
-
-// Attach visualization info to the read and cache it.
-function addRead(read: SamRead, referenceSource): VisualAlignment {
-  var k = read.offset.toString();
-  var v = keyToVisualAlignment[k];
-  if (v) return v;
-
-  var refLength = read.getReferenceLength();
-  var range = read.getInterval();
-  var reference = referenceSource.getRangeAsString({
-     contig: 'chr' + range.contig,
-     start: range.start() + 1,  // why the +1?
-     stop: range.stop() + 1
-  });
-
-  var key = read.offset.toString();
-
-  var visualAlignment = {
-    key,
-    read,
-    strand: read.getStrand() == '+' ? Strand.POSITIVE : Strand.NEGATIVE,
-    row: addToPileup(new Interval(read.pos, read.pos + refLength), pileup),
-    refLength,
-    mismatches: getDifferingBasePairs(read, reference)
-  };
-
-  keyToVisualAlignment[k] = visualAlignment;
-  return visualAlignment;
-}
 
 function yForRow(row) {
   return row * (READ_HEIGHT + READ_SPACING);
 }
 
 class NonEmptyPileupTrack extends React.Component {
+  pileup: Array<Interval[]>;
+  keyToVisualAlignment: {[key:string]: VisualAlignment};
+
   constructor(props) {
     super(props);
     this.state = {
       width: 0,
       height: 0
     };
+    this.pileup = [];
+    this.keyToVisualAlignment = {};
   }
 
   render(): any {
@@ -166,6 +139,35 @@ class NonEmptyPileupTrack extends React.Component {
     }
   }
 
+  // Attach visualization info to the read and cache it.
+  addRead(read: SamRead, referenceSource): VisualAlignment {
+    var k = read.offset.toString();
+    var v = this.keyToVisualAlignment[k];
+    if (v) return v;
+
+    var refLength = read.getReferenceLength();
+    var range = read.getInterval();
+    var reference = referenceSource.getRangeAsString({
+       contig: 'chr' + range.contig,
+       start: range.start() + 1,  // why the +1?
+       stop: range.stop() + 1
+    });
+
+    var key = read.offset.toString();
+
+    var visualAlignment = {
+      key,
+      read,
+      strand: read.getStrand() == '+' ? Strand.POSITIVE : Strand.NEGATIVE,
+      row: addToPileup(range.interval, this.pileup),
+      refLength,
+      mismatches: getDifferingBasePairs(read, reference)
+    };
+
+    this.keyToVisualAlignment[k] = visualAlignment;
+    return visualAlignment;
+  }
+
   updateVisualization() {
     var div = React.findDOMNode(this),
         width = this.state.width,
@@ -176,7 +178,8 @@ class NonEmptyPileupTrack extends React.Component {
     if (width === 0) return;
 
     var referenceSource = this.props.referenceSource;
-    var vReads = this.props.reads.map(read => addRead(read, referenceSource));
+    var vReads = this.props.reads.map(
+        read => this.addRead(read, referenceSource));
 
     var scale = this.getScale();
 
