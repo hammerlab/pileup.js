@@ -5,10 +5,12 @@ var Events = require('backbone').Events,
     _ = require('underscore'),
     Q = require('q');
 
-import type * as BamFile from './bam';
-import type * as SamRead from './SamRead';
+var ContigInterval = require('./ContigInterval'),
+    BamFile = require('./bam'),
+    RemoteFile = require('./RemoteFile');
 
-var ContigInterval = require('./ContigInterval');
+import type * as SamRead from './SamRead';
+import type {Track} from './types';
 
 type BamDataSource = {
   rangeChanged: (newRange: GenomeRange) => void;
@@ -32,7 +34,7 @@ function expandRange(range: ContigInterval<string>) {
 }
 
 
-function createBamSource(remoteSource: BamFile): BamDataSource {
+function create(remoteSource: BamFile): BamDataSource {
   // Keys are virtualOffset.toString()
   var reads: {[key:string]: SamRead} = {};
 
@@ -112,4 +114,20 @@ function createBamSource(remoteSource: BamFile): BamDataSource {
   return o;
 }
 
-module.exports = createBamSource;
+function createFromTrack(track: Track): BamDataSource {
+  var url = track.data.url;
+  if (!url) {
+    throw new Error(`Missing URL from track: ${JSON.stringify(track)}`);
+  }
+  var indexUrl = track.data.indexUrl;
+  if (!indexUrl) {
+    throw new Error(`Missing indexURL from track: ${JSON.stringify(track)}`);
+  }
+
+  return create(new BamFile(new RemoteFile(url), new RemoteFile(indexUrl)));
+}
+
+module.exports = {
+  create,
+  createFromTrack
+}

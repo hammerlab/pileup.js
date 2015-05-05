@@ -19,11 +19,12 @@
 
 var Events = require('backbone').Events,
     Q = require('q'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    TwoBit = require('./TwoBit');
 
 var ContigInterval = require('./ContigInterval');
 
-import type * as TwoBit from './TwoBit';
+import type {Track} from './types';
 
 
 // Requests for 2bit ranges are expanded to begin & end at multiples of this
@@ -56,8 +57,7 @@ function expandRange(range) {
 }
 
 
-// TODO: make the return type more precise
-var createTwoBitDataSource = function(remoteSource: TwoBit): TwoBitSource {
+var create = function(remoteSource: TwoBit): TwoBitSource {
   // Local cache of genomic data.
   var contigList = [];
   var basePairs = {};  // contig -> locus -> letter
@@ -146,4 +146,20 @@ var createTwoBitDataSource = function(remoteSource: TwoBit): TwoBitSource {
   return o;
 };
 
-module.exports = createTwoBitDataSource;
+function createFromTrack(track: Track): TwoBitSource {
+  if (track.type != 'reference') throw 'Miswired track';
+  var url = track.data.url;
+  if (!url) {
+    throw new Error(`Missing URL from track: ${JSON.stringify(track)}`);
+  }
+  if (url.slice(-5) != '.2bit') {
+    console.warn(`Expected reference track URL to have a .2bit extension: ${url}`);
+  }
+
+  return create(new TwoBit(url));
+}
+
+module.exports = {
+  create,
+  createFromTrack
+};

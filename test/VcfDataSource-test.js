@@ -4,14 +4,14 @@
 var expect = require('chai').expect;
 
 var VcfFile = require('../src/vcf'),
-    createVcfDataSource = require('../src/VcfDataSource'),
+    VcfDataSource = require('../src/VcfDataSource'),
     ContigInterval = require('../src/ContigInterval'),
     RemoteFile = require('../src/RemoteFile');
 
 describe('VcfDataSource', function() {
   function getTestSource() {
     var vcf = new VcfFile(new RemoteFile('/test/data/snv.vcf'));
-    return createVcfDataSource(vcf);
+    return VcfDataSource.create(vcf);
   }
 
   it('should extract features in a range', function(done) {

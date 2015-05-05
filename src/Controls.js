@@ -5,7 +5,7 @@
 'use strict';
 
 var React = require('react'),
-    types = require('./types'),
+    types = require('./react-types'),
     _ = require('underscore');
 
 var Controls = React.createClass({

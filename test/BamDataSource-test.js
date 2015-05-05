@@ -4,7 +4,7 @@
 var expect = require('chai').expect;
 
 var Bam = require('../src/bam'),
-    createBamDataSource = require('../src/BamDataSource'),
+    BamDataSource = require('../src/BamDataSource'),
     ContigInterval = require('../src/ContigInterval'),
     MappedRemoteFile = require('./MappedRemoteFile');
 
@@ -23,7 +23,7 @@ describe('BamDataSource', function() {
       "minBlockIndex": 69454
     });
 
-    return createBamDataSource(bam);
+    return BamDataSource.create(bam);
   }
 
   it('should extract features in a range', function(done) {
