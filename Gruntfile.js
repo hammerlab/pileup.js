@@ -49,13 +49,12 @@ module.exports = function(grunt) {
       options: {
         transform: [
           [
-            "reactify",
+            "jstransformify",
             {
+              react: true,
               harmony: true,
               stripTypes: true,
-              reactOptions: {
-                nonStrictEs6module: true
-              }
+              nonStrictEs6module: true
             }
           ]
         ],
