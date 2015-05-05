@@ -7,14 +7,16 @@
 var React = require('react/addons'),
     _ = require('underscore'),
     d3 = require('d3'),
+    shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     bedtools = require('./bedtools'),
-    Interval = require('./Interval');
+    Interval = require('./Interval'),
+    ContigInterval = require('./ContigInterval');
 
 var GeneTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange,
-    genes: React.PropTypes.array.isRequired,
+    source: React.PropTypes.object.isRequired,
     onRangeChange: React.PropTypes.func.isRequired
   },
   render: function(): any {
@@ -50,13 +52,14 @@ function removeOverlapping(selection) {
 var NonEmptyGeneTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange.isRequired,
-    genes: React.PropTypes.array.isRequired,
+    source: React.PropTypes.object.isRequired,
     onRangeChange: React.PropTypes.func.isRequired
   },
   getInitialState: function() {
     return {
       width: 0,
-      height: 0
+      height: 0,
+      genes: []
     };
   },
   render: function() {
@@ -70,6 +73,15 @@ var NonEmptyGeneTrack = React.createClass({
     this.setState({
       width: div.offsetWidth,
       height: div.offsetHeight
+    });
+
+    // Visualize new reference data as it comes in from the network.
+    this.props.source.on('newdata', () => {
+      var range = this.props.range,
+          ci = new ContigInterval(range.contig, range.start, range.stop);
+      this.setState({
+        genes: this.props.source.getGenesInRange(ci)
+      });
     });
 
     // These define the left/right arrow patterns for sense/antisense genes.
@@ -99,11 +111,8 @@ var NonEmptyGeneTrack = React.createClass({
     return scale;
   },
   componentDidUpdate: function(prevProps: any, prevState: any) {
-    // Check a whitelist of properties which could change the visualization.
-    var newProps = this.props;
-    if (!_.isEqual(newProps.genes, prevProps.genes) ||
-        !_.isEqual(newProps.range, prevProps.range) ||
-       prevState != this.state) {
+    if (!shallowEquals(prevProps, this.props) ||
+        !shallowEquals(prevState, this.state)) {
       this.updateVisualization();
     }
   },
@@ -127,7 +136,7 @@ var NonEmptyGeneTrack = React.createClass({
        .attr('height', height);
 
     var genes = svg.selectAll('g.gene')
-       .data(this.props.genes, gene => gene.id);
+       .data(this.state.genes, gene => gene.id);
 
     // By default, the left of the arrow pattern goes to x=0 in SVG space.
     // We'd prefer it start at genome coordinate 0.

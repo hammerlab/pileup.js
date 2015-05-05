@@ -43,8 +43,8 @@ var Root = React.createClass({
       this.handleRangeChange(this.props.initialRange);
     });
 
-    var geneSource = this.props.geneSource;
-    geneSource.on('newdata', () => { this.update() });
+    // var geneSource = this.props.geneSource;
+    // geneSource.on('newdata', () => { this.update() });
 
     var bamSource = this.props.bamSource;
     bamSource.on('newdata', () => { this.update() });
@@ -56,8 +56,8 @@ var Root = React.createClass({
         ci = range && new ContigInterval(range.contig, range.start, range.stop);
     this.setState({
       contigList: this.props.referenceSource.contigList(),
-      basePairs: this.props.referenceSource.getRange(range),
-      genes: this.props.geneSource.getGenesInRange(ci),
+      // basePairs: this.props.referenceSource.getRange(range),
+      // genes: this.props.geneSource.getGenesInRange(ci),
       reads: this.props.bamSource.getAlignmentsInRange(ci)
     });
   },
@@ -85,7 +85,8 @@ var Root = React.createClass({
                       variantSource={this.props.variantSource}
                       onRangeChange={this.handleRangeChange} />
         <GeneTrack range={this.state.range}
-                   genes={this.state.genes}
+                   source={this.props.geneSource}
+                   referenceSource={this.props.referenceSource}
                    onRangeChange={this.handleRangeChange} />
         <PileupTrack range={this.state.range}
                      reads={this.state.reads}
