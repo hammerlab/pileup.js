@@ -15,7 +15,11 @@ var React = require('react/addons'),
     TwoBitDataSource = require('../src/TwoBitDataSource'),
     BigBedDataSource = require('../src/BigBedDataSource'),
     BamDataSource = require('../src/BamDataSource'),
-    VcfDataSource = require('../src/VcfDataSource');
+    VcfDataSource = require('../src/VcfDataSource'),
+    GenomeTrack = require('../src/GenomeTrack'),
+    GeneTrack = require('../src/GeneTrack'),
+    PileupTrack = require('../src/PileupTrack'),
+    VariantTrack = require('../src/VariantTrack');
 
 
 var WAIT_FOR_POLL_INTERVAL_MS = 100;
@@ -60,6 +64,41 @@ describe('Root component', function() {
   var vcf = new VcfFile(new RemoteFile('/test/data/snv.chr17.vcf'));
   var vcfSource = VcfDataSource.create(vcf);
 
+  var tracks = [
+    {
+      visualization: GenomeTrack,
+      source: dataSource,
+      track: {
+        type: 'reference',
+        data: {}
+      }
+    },
+    {
+      visualization: VariantTrack,
+      source: vcfSource,
+      track: {
+        type: 'variants',
+        data: {}
+      }
+    },
+    {
+      visualization: GeneTrack,
+      source: ensemblDataSource,
+      track: {
+        type: 'genes',
+        data: {}
+      }
+    },
+    {
+      visualization: PileupTrack,
+      source: bamSource,
+      track: {
+        type: 'pileup',
+        data: {}
+      }
+    }
+  ];
+
   var testDiv = document.getElementById('testdiv');
 
   afterEach(function() {
@@ -75,9 +114,7 @@ describe('Root component', function() {
 
     // TODO: changing to {start:1, stop:50} makes the test fail.
     React.render(<Root referenceSource={dataSource}
-                       geneSource={ensemblDataSource}
-                       bamSource={bamSource}
-                       variantSource={vcfSource}
+                       tracks={tracks}
                        initialRange={{contig:"chr17", start: 100, stop: 150}} />, div);
 
     var ready = (() => 
