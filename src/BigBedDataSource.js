@@ -146,4 +146,4 @@ function createFromTrack(track: Track): BigBedSource {
 module.exports = {
   create,
   createFromTrack
-}
+};

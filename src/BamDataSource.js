@@ -130,4 +130,4 @@ function createFromTrack(track: Track): BamDataSource {
 module.exports = {
   create,
   createFromTrack
-}
+};

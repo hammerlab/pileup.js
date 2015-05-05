@@ -48,7 +48,7 @@
     "grunt-mocha-phantomjs": ">=0.6.1",
     "grunt-mocha-test": "^0.12.7",
     "jstransformify": "git://github.com/danvk/jstransformify.git",
-    "jsxhint": "^0.13.0",
+    "jsxhint": "git://github.com/strml/JSXHint.git",
     "lcov-parse": "0.0.9",
     "mocha": "^2.1.0",
     "mocha-lcov-reporter": ">=0.0.2",
