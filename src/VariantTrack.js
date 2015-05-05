@@ -34,7 +34,7 @@ var VariantTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange,
     onRangeChange: React.PropTypes.func.isRequired,
-    variantSource: React.PropTypes.object.isRequired
+    source: React.PropTypes.object.isRequired
   },
   render: function(): any {
     var range = this.props.range;
@@ -53,7 +53,7 @@ function variantKey(v: Variant): string {
 var NonEmptyVariantTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange.isRequired,
-    variantSource: React.PropTypes.object.isRequired,
+    source: React.PropTypes.object.isRequired,
     onRangeChange: React.PropTypes.func.isRequired
   },
   getInitialState: function() {
@@ -66,7 +66,7 @@ var NonEmptyVariantTrack = React.createClass({
     return <div className='variants'></div>;
   },
   getVariantSource(): VcfDataSource {
-    return this.props.variantSource;
+    return this.props.source;
   },
   componentDidMount: function() {
     var div = this.getDOMNode();

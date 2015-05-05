@@ -12,7 +12,11 @@ var React = require('react'),
     BamDataSource = require('./BamDataSource'),
     BigBedDataSource = require('./BigBedDataSource'),
     TwoBitDataSource = require('./TwoBitDataSource'),
-    VcfDataSource = require('./VcfDataSource');
+    VcfDataSource = require('./VcfDataSource'),
+    GenomeTrack = require('./GenomeTrack'),
+    GeneTrack = require('./GeneTrack'),
+    PileupTrack = require('./PileupTrack'),
+    VariantTrack = require('./VariantTrack');
 
 // var vcf = new VcfFile(new RemoteFile('/large.vcf'));
 
@@ -33,10 +37,43 @@ var bamSource = BamDataSource.create(bam);
 var vcf = new VcfFile(new RemoteFile('/test/data/snv.chr17.vcf'));
 var vcfSource = VcfDataSource.create(vcf);
 
+var tracks = [
+  {
+    visualization: GenomeTrack,
+    source: dataSource,
+    track: {
+      type: 'reference',
+      data: {}
+    }
+  },
+  {
+    visualization: VariantTrack,
+    source: vcfSource,
+    track: {
+      type: 'variants',
+      data: {}
+    }
+  },
+  {
+    visualization: GeneTrack,
+    source: ensemblDataSource,
+    track: {
+      type: 'genes',
+      data: {}
+    }
+  },
+  {
+    visualization: PileupTrack,
+    source: bamSource,
+    track: {
+      type: 'pileup',
+      data: {}
+    }
+  }
+];
+
 React.render(<Root referenceSource={dataSource}
-                   geneSource={ensemblDataSource}
-                   bamSource={bamSource}
-                   variantSource={vcfSource}
+                   tracks={tracks}
                    initialRange={{contig: "chr17", start: 7512444, stop: 7512484}} />,
              document.getElementById('root'));
 
