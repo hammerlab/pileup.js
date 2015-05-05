@@ -7,11 +7,12 @@
 import type * as React from 'react';
 
 export type Track = {
-  type: string;
+  viz: string;  // in the future: string|Object
   data: {
-    url?: string,
-    source?: Object,
-    indexUrl?: string  // e.g. for BamFile
+    type?: string;
+    url?: string;
+    source?: Object;
+    indexUrl?: string;  // e.g. for BamFile
   };  // either url: string or source: Object
   cssClass?: string;
   options?: Object;

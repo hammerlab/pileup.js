@@ -148,7 +148,6 @@ var create = function(remoteSource: TwoBit): TwoBitSource {
 };
 
 function createFromTrack(track: Track): TwoBitSource {
-  if (track.type != 'reference') throw 'Miswired track';
   var url = track.data.url;
   if (!url) {
     throw new Error(`Missing URL from track: ${JSON.stringify(track)}`);

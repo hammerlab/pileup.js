@@ -33,33 +33,57 @@ type PileupParams = {
 }
 
 function findReference(tracks: VisualizedTrack[]): ?VisualizedTrack {
-  return _.findWhere(tracks, t => t.track.type == 'reference');
+  return _.findWhere(tracks, t => t.track.isReference);
 }
 
+var typeToSource = {
+  '2bit': TwoBitDataSource,
+  'bigbed': BigBedDataSource,
+  'vcf': VcfDataSource,
+  'bam': BamDataSource
+};
+
+var extToSource = {
+  '2bit': '2bit',
+  '2b': '2bit',
+  'bb': 'bigbed',
+  'vcf': 'vcf',
+  'bam': 'bam'
+};
+
 function getSource(track: Track): Object {
-  if (track.data.source) {
-    return track.data.source;
+  var data = track.data;
+  if (data.source) {
+    return data.source;
   }
 
-  // TODO: switch to some kind of registration system?
-  switch (track.type) {
-    case 'reference':
-      return TwoBitDataSource.createFromTrack(track);
-    case 'genes':
-      return BigBedDataSource.createFromTrack(track);
-    case 'variants':
-      return VcfDataSource.createFromTrack(track);
-    case 'pileup':
-      return BamDataSource.createFromTrack(track);
+  var url = data.url;
+  if (!url) {
+    throw new Error(`You must specify either 'source' or 'url' in a data source (got ${data})`);
   }
 
-  throw new Error(`Unknown track type: ${track.type}`);
+  // Base the data source on 'type' if specified, otherwise deduce from extension.
+  if (data.type) {
+    var source = typeToSource[data.type.toLowerCase()];
+    if (source) {
+      return source.createFromTrack(track);
+    }
+
+    throw new Error(`Unknown track type: ${data.type}`);
+  }
+
+  var ext = url.slice(url.lastIndexOf('.') + 1);
+  var type = extToSource[ext.toLowerCase()];
+  if (!type) {
+    throw new Error(`Unable to deduce data type frome extension ${ext}: ${url}}`);
+  }
+  return typeToSource[type].createFromTrack(track);
 }
 
 function makeVisualization(track: Track): React.Component {
   // TODO: switch to some kind of registration system?
-  switch (track.type) {
-    case 'reference':
+  switch (track.viz) {
+    case 'genome':
       return GenomeTrack;
     case 'genes':
       return GeneTrack;

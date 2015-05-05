@@ -100,7 +100,6 @@ function create(remoteSource: VcfFile): VcfDataSource {
 }
 
 function createFromTrack(track: Track): VcfDataSource {
-  if (track.type != 'variants') throw 'Miswired track';
   var url = track.data.url;
   if (!url) {
     throw new Error(`Missing URL from track: ${JSON.stringify(track)}`);

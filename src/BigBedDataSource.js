@@ -132,7 +132,6 @@ function create(remoteSource: BigBed): BigBedSource {
 }
 
 function createFromTrack(track: Track): BigBedSource {
-  if (track.type != 'genes') throw 'Miswired track';
   var url = track.data.url;
   if (!url) {
     throw new Error(`Missing URL from track: ${JSON.stringify(track)}`);
