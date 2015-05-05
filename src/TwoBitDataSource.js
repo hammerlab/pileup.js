@@ -120,6 +120,7 @@ var create = function(remoteSource: TwoBit): TwoBitSource {
   var o = {
     rangeChanged: function(newRange: GenomeRange) {
       // Range has changed! Fetch new data.
+      // TODO: make this a no-op if the range is already covered.
       var range = new ContigInterval(newRange.contig, newRange.start, newRange.stop);
 
       fetch(range)

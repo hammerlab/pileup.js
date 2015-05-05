@@ -113,6 +113,7 @@ function create(remoteSource: BigBed): BigBedSource {
   }
 
   var o = {
+    // TODO: only fire newdata when new data arrives
     rangeChanged: function(newRange: GenomeRange) {
       fetch(newRange)
           .then(() => o.trigger('newdata', newRange))

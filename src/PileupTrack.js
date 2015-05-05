@@ -8,16 +8,17 @@ import type * as SamRead from './SamRead';
 import type * as Interval from './Interval';
 
 var React = require('react/addons'),
-    _ = require('underscore'),
     d3 = require('d3'),
+    shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
-    {addToPileup, getDifferingBasePairs} = require('./pileuputils');
+    {addToPileup, getDifferingBasePairs} = require('./pileuputils'),
+    ContigInterval = require('./ContigInterval');
 
 var PileupTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange,
-    reads: React.PropTypes.array.isRequired,
     onRangeChange: React.PropTypes.func.isRequired,
+    source: React.PropTypes.object.isRequired,
     referenceSource: React.PropTypes.object.isRequired
   },
   render: function(): any {
@@ -97,7 +98,8 @@ class NonEmptyPileupTrack extends React.Component {
     super(props);
     this.state = {
       width: 0,
-      height: 0
+      height: 0,
+      reads: []
     };
     this.pileup = [];
     this.keyToVisualAlignment = {};
@@ -115,6 +117,15 @@ class NonEmptyPileupTrack extends React.Component {
     });
     d3.select(div)
       .append('svg');
+
+    this.props.source.on('newdata', () => {
+      var range = this.props.range,
+          ci = new ContigInterval(range.contig, range.start, range.stop);
+      this.setState({
+        reads: this.props.source.getAlignmentsInRange(ci)
+      });
+    });
+
     this.updateVisualization();
   }
 
@@ -129,12 +140,8 @@ class NonEmptyPileupTrack extends React.Component {
   }
 
   componentDidUpdate(prevProps: any, prevState: any) {
-    // Check a whitelist of properties which could change the visualization.
-    // TODO: this is imprecise; it would be better to deep check reads.
-    var newProps = this.props;
-    if (!_.isEqual(newProps.reads, prevProps.reads) ||
-        !_.isEqual(newProps.range, prevProps.range) ||
-       prevState != this.state) {
+    if (!shallowEquals(this.props, prevProps) ||
+        !shallowEquals(this.state, prevState)) {
       this.updateVisualization();
     }
   }
@@ -178,7 +185,7 @@ class NonEmptyPileupTrack extends React.Component {
     if (width === 0) return;
 
     var referenceSource = this.props.referenceSource;
-    var vReads = this.props.reads.map(
+    var vReads = this.state.reads.map(
         read => this.addRead(read, referenceSource));
 
     var scale = this.getScale();
@@ -218,7 +225,7 @@ class NonEmptyPileupTrack extends React.Component {
 
 NonEmptyPileupTrack.propTypes = {
   range: types.GenomeRange.isRequired,
-  reads: React.PropTypes.array.isRequired,
+  source: React.PropTypes.object.isRequired,
   referenceSource: React.PropTypes.object.isRequired,
   onRangeChange: React.PropTypes.func.isRequired
 };
