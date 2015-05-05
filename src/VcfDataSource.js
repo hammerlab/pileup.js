@@ -12,6 +12,7 @@ var Events = require('backbone').Events,
     Q = require('q');
 
 var ContigInterval = require('./ContigInterval'),
+    RemoteFile = require('./RemoteFile'),
     VcfFile = require('./vcf');
 
 // Copy from vcf.js
@@ -108,7 +109,7 @@ function createFromTrack(track: Track): VcfDataSource {
     console.warn(`Expected reference track URL to have a .bb extension: ${url}`);
   }
 
-  return create(new VcfFile(url));
+  return create(new VcfFile(new RemoteFile(url)));
 }
 
 module.exports = {

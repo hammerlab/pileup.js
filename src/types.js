@@ -8,9 +8,13 @@ import type * as React from 'react';
 
 export type Track = {
   type: string;
-  data: Object;  // either url: string or source: Object
-  cssClass: ?string;
-  options: ?Object;
+  data: {
+    url?: string,
+    source?: Object,
+    indexUrl?: string  // e.g. for BamFile
+  };  // either url: string or source: Object
+  cssClass?: string;
+  options?: Object;
 }
 
 export type VisualizedTrack = {
