@@ -4,13 +4,13 @@
 var expect = require('chai').expect;
 
 var BigBed = require('../src/BigBed'),
-    createBigBedDataSource = require('../src/BigBedDataSource'),
+    BigBedDataSource = require('../src/BigBedDataSource'),
     ContigInterval = require('../src/ContigInterval');
 
 describe('BigBedDataSource', function() {
   function getTestSource() {
     // See test/data/README.md
-    return createBigBedDataSource(new BigBed('/test/data/ensembl.chr17.bb'));
+    return BigBedDataSource.create(new BigBed('/test/data/ensembl.chr17.bb'));
   }
 
   it('should extract features in a range', function(done) {

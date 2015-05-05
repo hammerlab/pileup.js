@@ -9,18 +9,18 @@ var React = require('react'),
     Bam = require('./bam'),
     VcfFile = require('./vcf'),
     Root = require('./Root'),
-    createTwoBitDataSource = require('./TwoBitDataSource'),
-    createBigBedDataSource = require('./BigBedDataSource'),
-    createBamDataSource = require('./BamDataSource'),
-    createVcfDataSource = require('./VcfDataSource');
+    BamDataSource = require('./BamDataSource'),
+    BigBedDataSource = require('./BigBedDataSource'),
+    TwoBitDataSource = require('./TwoBitDataSource'),
+    VcfDataSource = require('./VcfDataSource');
 
 // var vcf = new VcfFile(new RemoteFile('/large.vcf'));
 
 var genome = new TwoBit('/hg19.2bit');
-var dataSource = createTwoBitDataSource(genome);
+var dataSource = TwoBitDataSource.create(genome);
 
 var ensembl = new BigBed('/ensGene.bb');
-var ensemblDataSource = createBigBedDataSource(ensembl);
+var ensemblDataSource = BigBedDataSource.create(ensembl);
 
 var bamURL = '/test/data/synth3.normal.17.7500000-7515000.bam';
 
@@ -28,10 +28,10 @@ var bamFile = new RemoteFile(bamURL),
     baiFile = new RemoteFile(bamURL + '.bai');
 
 var bam = new Bam(bamFile, baiFile);
-var bamSource = createBamDataSource(bam);
+var bamSource = BamDataSource.create(bam);
 
 var vcf = new VcfFile(new RemoteFile('/test/data/snv.chr17.vcf'));
-var vcfSource = createVcfDataSource(vcf);
+var vcfSource = VcfDataSource.create(vcf);
 
 React.render(<Root referenceSource={dataSource}
                    geneSource={ensemblDataSource}

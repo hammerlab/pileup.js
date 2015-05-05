@@ -7,9 +7,10 @@ var Events = require('backbone').Events,
 
 
 var ContigInterval = require('./ContigInterval'),
-    Interval = require('./Interval');
+    Interval = require('./Interval'),
+    BigBed = require('./BigBed');
 
-import type * as BigBed from './BigBed';
+import type {Track} from './types';
 
 
 type Gene = {
@@ -69,7 +70,7 @@ function parseBedFeature(f): Gene {
 }
 
 
-function createBigBedDataSource(remoteSource: BigBed): BigBedSource {
+function create(remoteSource: BigBed): BigBedSource {
   // Collection of genes that have already been loaded.
   var genes: {[key:string]: Gene} = {};
 
@@ -129,4 +130,20 @@ function createBigBedDataSource(remoteSource: BigBed): BigBedSource {
   return o;
 }
 
-module.exports = createBigBedDataSource;
+function createFromTrack(track: Track): BigBedSource {
+  if (track.type != 'genes') throw 'Miswired track';
+  var url = track.data.url;
+  if (!url) {
+    throw new Error(`Missing URL from track: ${JSON.stringify(track)}`);
+  }
+  if (url.slice(-3) != '.bb') {
+    console.warn(`Expected reference track URL to have a .bb extension: ${url}`);
+  }
+
+  return create(new BigBed(url));
+}
+
+module.exports = {
+  create,
+  createFromTrack
+};

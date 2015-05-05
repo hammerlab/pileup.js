@@ -9,7 +9,7 @@ import type * as VcfDataSource from './VcfDataSource';
 var React = require('react/addons'),
     _ = require('underscore'),
     d3 = require('d3'),
-    types = require('./types'),
+    types = require('./react-types'),
     ContigInterval = require('./ContigInterval');
 
 // Copy from vcf.js

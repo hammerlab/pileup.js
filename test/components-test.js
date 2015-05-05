@@ -12,10 +12,10 @@ var React = require('react/addons'),
     VcfFile = require('../src/vcf'),
     Root = require('../src/Root'),
     RemoteFile = require('../src/RemoteFile'),
-    createTwoBitDataSource = require('../src/TwoBitDataSource'),
-    createBigBedDataSource = require('../src/BigBedDataSource'),
-    createBamDataSource = require('../src/BamDataSource'),
-    createVcfDataSource = require('../src/VcfDataSource');
+    TwoBitDataSource = require('../src/TwoBitDataSource'),
+    BigBedDataSource = require('../src/BigBedDataSource'),
+    BamDataSource = require('../src/BamDataSource'),
+    VcfDataSource = require('../src/VcfDataSource');
 
 
 var WAIT_FOR_POLL_INTERVAL_MS = 100;
@@ -46,19 +46,19 @@ function waitFor(predFn, timeoutMs) {
 
 describe('Root component', function() {
   var genome = new TwoBit('/test/data/test.2bit');
-  var dataSource = createTwoBitDataSource(genome);
+  var dataSource = TwoBitDataSource.create(genome);
 
   // This file contains just the TP53 gene, shifted so that it starts at the
   // beginning of chr17 (to match test.2bit). See test/data/README.md.
   var ensembl = new BigBed('/test/data/tp53.shifted.bb');
-  var ensemblDataSource = createBigBedDataSource(ensembl);
+  var ensemblDataSource = BigBedDataSource.create(ensembl);
 
   var bam = new Bam(new RemoteFile('/test/data/index_test.bam'),
                     new RemoteFile('/test/data/index_test.bam.bai'));
-  var bamSource = createBamDataSource(bam);
+  var bamSource = BamDataSource.create(bam);
 
   var vcf = new VcfFile(new RemoteFile('/test/data/snv.chr17.vcf'));
-  var vcfSource = createVcfDataSource(vcf);
+  var vcfSource = VcfDataSource.create(vcf);
 
   var testDiv = document.getElementById('testdiv');
 

@@ -10,7 +10,7 @@ import type * as Interval from './Interval';
 var React = require('react/addons'),
     _ = require('underscore'),
     d3 = require('d3'),
-    types = require('./types'),
+    types = require('./react-types'),
     {addToPileup, getDifferingBasePairs} = require('./pileuputils');
 
 var PileupTrack = React.createClass({

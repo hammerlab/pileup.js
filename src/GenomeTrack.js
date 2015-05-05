@@ -7,7 +7,7 @@
 var React = require('react/addons'),
     _ = require('underscore'),
     d3 = require('d3'),
-    types = require('./types');
+    types = require('./react-types');
 
 
 var GenomeTrack = React.createClass({

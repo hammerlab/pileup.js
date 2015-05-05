@@ -5,13 +5,14 @@
  */
 'use strict';
 
-import type * as VcfFile from './vcf';
+import type {Track} from './types';
 
 var Events = require('backbone').Events,
     _ = require('underscore'),
     Q = require('q');
 
-var ContigInterval = require('./ContigInterval');
+var ContigInterval = require('./ContigInterval'),
+    VcfFile = require('./vcf');
 
 // Copy from vcf.js
 type Variant = {
@@ -45,7 +46,7 @@ function variantKey(v: Variant): string {
 }
 
 
-function createVcfSource(remoteSource: VcfFile): VcfDataSource {
+function create(remoteSource: VcfFile): VcfDataSource {
   var variants: {[key: string]: Variant} = {};
 
   // Ranges for which we have complete information -- no need to hit network.
@@ -97,4 +98,20 @@ function createVcfSource(remoteSource: VcfFile): VcfDataSource {
   return o;
 }
 
-module.exports = createVcfSource;
+function createFromTrack(track: Track): VcfDataSource {
+  if (track.type != 'variants') throw 'Miswired track';
+  var url = track.data.url;
+  if (!url) {
+    throw new Error(`Missing URL from track: ${JSON.stringify(track)}`);
+  }
+  if (url.slice(-4) != '.vcf') {
+    console.warn(`Expected reference track URL to have a .bb extension: ${url}`);
+  }
+
+  return create(new VcfFile(url));
+}
+
+module.exports = {
+  create,
+  createFromTrack
+};
