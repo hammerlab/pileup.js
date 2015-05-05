@@ -33,13 +33,12 @@ var Root = React.createClass({
   },
   componentDidMount: function() {
     // Note: flow is unable to infer this type through `this.propTypes`.
-    var source = this.props.referenceSource;
-    source.needContigs();
+    var referenceSource = this.props.referenceSource;
+    referenceSource.needContigs();
 
-    source.on('contigs', () => { this.update() })
-          .on('newdata', () => { this.update() });
+    referenceSource.on('contigs', () => { this.update() });
 
-    source.on('contigs', () => {
+    referenceSource.on('contigs', () => {
       // this is here to facilitate faster iteration
       this.handleRangeChange(this.props.initialRange);
     });
@@ -80,7 +79,7 @@ var Root = React.createClass({
                   range={this.state.range}
                   onChange={this.handleRangeChange} />
         <GenomeTrack range={this.state.range}
-                     basePairs={this.state.basePairs}
+                     source={this.props.referenceSource}
                      onRangeChange={this.handleRangeChange} />
         <VariantTrack range={this.state.range}
                       variantSource={this.props.variantSource}

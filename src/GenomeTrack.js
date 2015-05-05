@@ -7,23 +7,20 @@
 var React = require('react/addons'),
     _ = require('underscore'),
     d3 = require('d3'),
+    shallowEquals = require('shallow-equals'),
     types = require('./react-types');
 
 
 var GenomeTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange,
-    basePairs: React.PropTypes.object,
+    source: React.PropTypes.object.isRequired,
     onRangeChange: React.PropTypes.func.isRequired
   },
   render: function(): any {
     var range = this.props.range;
     if (!range) {
       return <EmptyTrack />;
-    }
-
-    if (!this.props.basePairs) {
-      return <div className="reference empty">no data</div>;
     }
 
     return <NonEmptyGenomeTrack {...this.props} />;
@@ -44,13 +41,14 @@ var NonEmptyGenomeTrack = React.createClass({
 
   propTypes: {
     range: types.GenomeRange.isRequired,
-    basePairs: React.PropTypes.object.isRequired,
+    source: React.PropTypes.object.isRequired,
     onRangeChange: React.PropTypes.func.isRequired
   },
   getInitialState: function() {
     return {
       width: 0,
-      height: 0
+      height: 0,
+      basePairs: []
     };
   },
   render: function(): any {
@@ -64,6 +62,13 @@ var NonEmptyGenomeTrack = React.createClass({
     this.setState({
       width: div.offsetWidth,
       height: div.offsetHeight
+    });
+
+    // Visualize new reference data as it comes in from the network.
+    this.props.source.on('newdata', () => {
+      this.setState({
+        basePairs: this.props.source.getRange(this.props.range),
+      });
     });
 
     var originalRange, originalScale, dx=0;
@@ -123,12 +128,8 @@ var NonEmptyGenomeTrack = React.createClass({
     return scale;
   },
   componentDidUpdate: function(prevProps: any, prevState: any) {
-    // Check a whitelist of properties which could change the visualization.
-    // For now, just basePairs and range.
-    var newProps = this.props;
-    if (!_.isEqual(newProps.basePairs, prevProps.basePairs) ||
-        !_.isEqual(newProps.range, prevProps.range) ||
-       this.state != prevState) {
+    if (!shallowEquals(prevProps, this.props) ||
+        !shallowEquals(prevState, this.state)) {
       this.updateVisualization();
     }
   },
@@ -152,7 +153,7 @@ var NonEmptyGenomeTrack = React.createClass({
       absBasePairs = _.range(range.start - 1, range.stop + 1)
           .map(locus => ({
             position: locus,
-            letter: this.props.basePairs[contigColon + locus]
+            letter: this.state.basePairs[contigColon + locus]
           }));
     } else {
       absBasePairs = [];  // TODO: show a "zoom out" message.
