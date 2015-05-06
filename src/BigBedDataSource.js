@@ -136,9 +136,6 @@ function createFromTrack(track: Track): BigBedSource {
   if (!url) {
     throw new Error(`Missing URL from track: ${JSON.stringify(track)}`);
   }
-  if (url.slice(-3) != '.bb') {
-    console.warn(`Expected reference track URL to have a .bb extension: ${url}`);
-  }
 
   return create(new BigBed(url));
 }

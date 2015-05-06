@@ -152,9 +152,6 @@ function createFromTrack(track: Track): TwoBitSource {
   if (!url) {
     throw new Error(`Missing URL from track: ${JSON.stringify(track)}`);
   }
-  if (url.slice(-5) != '.2bit') {
-    console.warn(`Expected reference track URL to have a .2bit extension: ${url}`);
-  }
 
   return create(new TwoBit(url));
 }

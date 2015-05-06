@@ -104,9 +104,6 @@ function createFromTrack(track: Track): VcfDataSource {
   if (!url) {
     throw new Error(`Missing URL from track: ${JSON.stringify(track)}`);
   }
-  if (url.slice(-4) != '.vcf') {
-    console.warn(`Expected reference track URL to have a .bb extension: ${url}`);
-  }
 
   return create(new VcfFile(new RemoteFile(url)));
 }
