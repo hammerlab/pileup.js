@@ -23,7 +23,7 @@ describe('BamDataSource', function() {
       "minBlockIndex": 69454
     });
 
-    return BamDataSource.create(bam);
+    return BamDataSource.createFromBamFile(bam);
   }
 
   it('should extract features in a range', function(done) {

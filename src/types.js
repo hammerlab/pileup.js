@@ -7,10 +7,9 @@
 import type * as React from 'react';
 
 export type Track = {
-  type: string;
-  data: Object;  // either url: string or source: Object
-  cssClass: ?string;
-  options: ?Object;
+  viz: Object;  // for now, a React class
+  data: Object;  // This is a DataSource object
+  cssClass?: string;
 }
 
 export type VisualizedTrack = {

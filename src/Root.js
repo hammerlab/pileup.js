@@ -55,7 +55,6 @@ var Root = React.createClass({
       source: track.source,
       referenceSource: this.props.referenceSource,
       cssClass: track.track.cssClass,
-      options: track.track.options
     });
   },
   render: function(): any {

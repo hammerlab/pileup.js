@@ -10,8 +10,6 @@ var ContigInterval = require('./ContigInterval'),
     Interval = require('./Interval'),
     BigBed = require('./BigBed');
 
-import type {Track} from './types';
-
 
 type Gene = {
   position: ContigInterval<string>;
@@ -70,7 +68,7 @@ function parseBedFeature(f): Gene {
 }
 
 
-function create(remoteSource: BigBed): BigBedSource {
+function createFromBigBedFile(remoteSource: BigBed): BigBedSource {
   // Collection of genes that have already been loaded.
   var genes: {[key:string]: Gene} = {};
 
@@ -131,20 +129,16 @@ function create(remoteSource: BigBed): BigBedSource {
   return o;
 }
 
-function createFromTrack(track: Track): BigBedSource {
-  if (track.type != 'genes') throw 'Miswired track';
-  var url = track.data.url;
+function create(data: {url:string}): BigBedSource {
+  var url = data.url;
   if (!url) {
-    throw new Error(`Missing URL from track: ${JSON.stringify(track)}`);
-  }
-  if (url.slice(-3) != '.bb') {
-    console.warn(`Expected reference track URL to have a .bb extension: ${url}`);
+    throw new Error(`Missing URL from track: ${JSON.stringify(data)}`);
   }
 
-  return create(new BigBed(url));
+  return createFromBigBedFile(new BigBed(url));
 }
 
 module.exports = {
   create,
-  createFromTrack
+  createFromBigBedFile
 };

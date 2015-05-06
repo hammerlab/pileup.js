@@ -11,7 +11,7 @@ var VcfFile = require('../src/vcf'),
 describe('VcfDataSource', function() {
   function getTestSource() {
     var vcf = new VcfFile(new RemoteFile('/test/data/snv.vcf'));
-    return VcfDataSource.create(vcf);
+    return VcfDataSource.createFromVcfFile(vcf);
   }
 
   it('should extract features in a range', function(done) {

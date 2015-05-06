@@ -10,7 +10,6 @@ var ContigInterval = require('./ContigInterval'),
     RemoteFile = require('./RemoteFile');
 
 import type * as SamRead from './SamRead';
-import type {Track} from './types';
 
 type BamDataSource = {
   rangeChanged: (newRange: GenomeRange) => void;
@@ -34,7 +33,7 @@ function expandRange(range: ContigInterval<string>) {
 }
 
 
-function create(remoteSource: BamFile): BamDataSource {
+function createFromBamFile(remoteSource: BamFile): BamDataSource {
   // Keys are virtualOffset.toString()
   var reads: {[key:string]: SamRead} = {};
 
@@ -114,20 +113,28 @@ function create(remoteSource: BamFile): BamDataSource {
   return o;
 }
 
-function createFromTrack(track: Track): BamDataSource {
-  var url = track.data.url;
+type BamSpec = {
+  url: string;
+  indexUrl: string;
+  indexChunks?: Object;
+}
+
+function create(spec: BamSpec): BamDataSource {
+  var url = spec.url;
   if (!url) {
-    throw new Error(`Missing URL from track: ${JSON.stringify(track)}`);
+    throw new Error(`Missing URL from track data: ${JSON.stringify(spec)}`);
   }
-  var indexUrl = track.data.indexUrl;
+  var indexUrl = spec.indexUrl;
   if (!indexUrl) {
-    throw new Error(`Missing indexURL from track: ${JSON.stringify(track)}`);
+    throw new Error(`Missing indexURL from track data: ${JSON.stringify(spec)}`);
   }
 
-  return create(new BamFile(new RemoteFile(url), new RemoteFile(indexUrl)));
+  // TODO: pass indexChunks, see flow issue facebook/flow#437
+  return createFromBamFile(new BamFile(new RemoteFile(url),
+                                       new RemoteFile(indexUrl)));
 }
 
 module.exports = {
   create,
-  createFromTrack
+  createFromBamFile
 };
