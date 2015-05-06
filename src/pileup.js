@@ -36,20 +36,6 @@ function findReference(tracks: VisualizedTrack[]): ?VisualizedTrack {
   return _.findWhere(tracks, t => t.track.isReference);
 }
 
-function makeVisualization(track: Track): React.Component {
-  // TODO: switch to some kind of registration system?
-  switch (track.viz) {
-    case 'genome':
-      return GenomeTrack;
-    case 'genes':
-      return GeneTrack;
-    case 'variants':
-      return VariantTrack;
-    case 'pileup':
-      return PileupTrack;
-  }
-}
-
 function create(elOrId: string|Element, params: PileupParams): Pileup {
   var el = typeof(elOrId) == 'string' ? document.getElementById(elOrId) : elOrId;
   if (!el) {
@@ -57,7 +43,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
   }
 
   var vizTracks = params.tracks.map(track => ({
-    visualization: makeVisualization(track),
+    visualization: track.viz,
     source: track.data,
     track
   }));
@@ -79,5 +65,11 @@ module.exports = {
     vcf: VcfDataSource.create,
     twoBit: TwoBitDataSource.create,
     bigBed: BigBedDataSource.create
+  },
+  viz: {
+    genome: () => GenomeTrack,
+    genes: () => GeneTrack,
+    variants: () => VariantTrack,
+    pileup: () => PileupTrack
   }
 };
