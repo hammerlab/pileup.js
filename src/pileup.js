@@ -53,31 +53,22 @@ var extToSource = {
 
 function getSource(track: Track): Object {
   var data = track.data;
-  if (data.source) {
-    return data.source;
+  if (data.type) {
+    return data.type(data);
   }
 
   var url = data.url;
   if (!url) {
-    throw new Error(`You must specify either 'source' or 'url' in a data source (got ${data})`);
+    throw new Error(`You must specify either 'type' or 'url' in a data source (got ${data})`);
   }
 
-  // Base the data source on 'type' if specified, otherwise deduce from extension.
-  if (data.type) {
-    var source = typeToSource[data.type.toLowerCase()];
-    if (source) {
-      return source.createFromTrack(track);
-    }
-
-    throw new Error(`Unknown track type: ${data.type}`);
-  }
-
+  // Attempt to deduce the data type from the URL's file extension
   var ext = url.slice(url.lastIndexOf('.') + 1);
   var type = extToSource[ext.toLowerCase()];
   if (!type) {
     throw new Error(`Unable to deduce data type frome extension ${ext}: ${url}}`);
   }
-  return typeToSource[type].createFromTrack(track);
+  return typeToSource[type].createFromTrack(data);
 }
 
 function makeVisualization(track: Track): React.Component {
@@ -117,5 +108,11 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
 }
 
 module.exports = {
-  create
+  create,
+  formats: {
+    bam: BamDataSource.createFromTrack,
+    vcf: VcfDataSource.createFromTrack,
+    twoBit: TwoBitDataSource.createFromTrack,
+    bigBed: BigBedDataSource.createFromTrack
+  }
 };

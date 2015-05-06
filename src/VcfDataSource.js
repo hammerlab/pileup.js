@@ -5,7 +5,7 @@
  */
 'use strict';
 
-import type {Track} from './types';
+import type {TrackData} from './types';
 
 var Events = require('backbone').Events,
     _ = require('underscore'),
@@ -99,10 +99,10 @@ function create(remoteSource: VcfFile): VcfDataSource {
   return o;
 }
 
-function createFromTrack(track: Track): VcfDataSource {
-  var url = track.data.url;
+function createFromTrack(data: TrackData): VcfDataSource {
+  var url = data.url;
   if (!url) {
-    throw new Error(`Missing URL from track: ${JSON.stringify(track)}`);
+    throw new Error(`Missing URL from track: ${JSON.stringify(data)}`);
   }
 
   return create(new VcfFile(new RemoteFile(url)));

@@ -6,14 +6,18 @@
 
 import type * as React from 'react';
 
+export type TrackData = {
+  // A data source, e.g. pileup.formats.bam
+  type?: (data: TrackData)=>Object;
+
+  // Alternatively the track type will be deduced from the URL.
+  url?: string;
+  indexUrl?: string;  // e.g. for BamFile
+}
+
 export type Track = {
   viz: string;  // in the future: string|Object
-  data: {
-    type?: string;
-    url?: string;
-    source?: Object;
-    indexUrl?: string;  // e.g. for BamFile
-  };  // either url: string or source: Object
+  data: TrackData|Object;  // Object is a DataSource
   cssClass?: string;
   options?: Object;
 }

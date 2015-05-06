@@ -33,7 +33,7 @@ function waitFor(predFn, timeoutMs) {
 }
 
 
-describe('Root component', function() {
+describe('pileup', function() {
   var tracks = [
     {
       viz: 'genome',
@@ -53,6 +53,7 @@ describe('Root component', function() {
       data: {
         // This file contains just TP53, shifted so that it starts at the
         // beginning of chr17 (to match test.2bit). See test/data/README.md.
+        type: pileup.formats.bigBed,
         url: '/test/data/tp53.shifted.bb'
       }
     },

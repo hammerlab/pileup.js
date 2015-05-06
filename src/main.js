@@ -26,7 +26,7 @@ var sources = [
   {
     viz: 'pileup',
     data: {
-      type: 'bam',
+      type: pileup.formats.bam,
       url: '/test/data/synth3.normal.17.7500000-7515000.bam',
       indexUrl: '/test/data/synth3.normal.17.7500000-7515000.bam.bai'
     },

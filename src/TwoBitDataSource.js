@@ -15,8 +15,6 @@
  */
 'use strict';
 
-// import type * as TwoBit from './TwoBit';
-
 var Events = require('backbone').Events,
     Q = require('q'),
     _ = require('underscore'),
@@ -24,7 +22,7 @@ var Events = require('backbone').Events,
 
 var ContigInterval = require('./ContigInterval');
 
-import type {Track} from './types';
+import type {TrackData} from './types';
 
 
 // Requests for 2bit ranges are expanded to begin & end at multiples of this
@@ -147,10 +145,10 @@ var create = function(remoteSource: TwoBit): TwoBitSource {
   return o;
 };
 
-function createFromTrack(track: Track): TwoBitSource {
-  var url = track.data.url;
+function createFromTrack(data: TrackData): TwoBitSource {
+  var url = data.url;
   if (!url) {
-    throw new Error(`Missing URL from track: ${JSON.stringify(track)}`);
+    throw new Error(`Missing URL from track: ${JSON.stringify(data)}`);
   }
 
   return create(new TwoBit(url));

@@ -10,7 +10,7 @@ var ContigInterval = require('./ContigInterval'),
     RemoteFile = require('./RemoteFile');
 
 import type * as SamRead from './SamRead';
-import type {Track} from './types';
+import type {TrackData} from './types';
 
 type BamDataSource = {
   rangeChanged: (newRange: GenomeRange) => void;
@@ -114,14 +114,14 @@ function create(remoteSource: BamFile): BamDataSource {
   return o;
 }
 
-function createFromTrack(track: Track): BamDataSource {
-  var url = track.data.url;
+function createFromTrack(data: TrackData): BamDataSource {
+  var url = data.url;
   if (!url) {
-    throw new Error(`Missing URL from track: ${JSON.stringify(track)}`);
+    throw new Error(`Missing URL from track data: ${JSON.stringify(data)}`);
   }
-  var indexUrl = track.data.indexUrl;
+  var indexUrl = data.indexUrl;
   if (!indexUrl) {
-    throw new Error(`Missing indexURL from track: ${JSON.stringify(track)}`);
+    throw new Error(`Missing indexURL from track data: ${JSON.stringify(data)}`);
   }
 
   return create(new BamFile(new RemoteFile(url), new RemoteFile(indexUrl)));
