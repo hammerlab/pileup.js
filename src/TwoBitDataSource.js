@@ -22,8 +22,6 @@ var Events = require('backbone').Events,
 
 var ContigInterval = require('./ContigInterval');
 
-import type {TrackData} from './types';
-
 
 // Requests for 2bit ranges are expanded to begin & end at multiples of this
 // constant. Doing this means that panning typically won't require
@@ -55,7 +53,7 @@ function expandRange(range) {
 }
 
 
-var create = function(remoteSource: TwoBit): TwoBitSource {
+var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
   // Local cache of genomic data.
   var contigList = [];
   var basePairs = {};  // contig -> locus -> letter
@@ -145,16 +143,16 @@ var create = function(remoteSource: TwoBit): TwoBitSource {
   return o;
 };
 
-function createFromTrack(data: TrackData): TwoBitSource {
+function create(data: {url:string}): TwoBitSource {
   var url = data.url;
   if (!url) {
     throw new Error(`Missing URL from track: ${JSON.stringify(data)}`);
   }
 
-  return create(new TwoBit(url));
+  return createFromTwoBitFile(new TwoBit(url));
 }
 
 module.exports = {
   create,
-  createFromTrack
+  createFromTwoBitFile
 };

@@ -36,41 +36,6 @@ function findReference(tracks: VisualizedTrack[]): ?VisualizedTrack {
   return _.findWhere(tracks, t => t.track.isReference);
 }
 
-var typeToSource = {
-  '2bit': TwoBitDataSource,
-  'bigbed': BigBedDataSource,
-  'vcf': VcfDataSource,
-  'bam': BamDataSource
-};
-
-var extToSource = {
-  '2bit': '2bit',
-  '2b': '2bit',
-  'bb': 'bigbed',
-  'vcf': 'vcf',
-  'bam': 'bam'
-};
-
-function getSource(track: Track): Object {
-  var data = track.data;
-  if (data.type) {
-    return data.type(data);
-  }
-
-  var url = data.url;
-  if (!url) {
-    throw new Error(`You must specify either 'type' or 'url' in a data source (got ${data})`);
-  }
-
-  // Attempt to deduce the data type from the URL's file extension
-  var ext = url.slice(url.lastIndexOf('.') + 1);
-  var type = extToSource[ext.toLowerCase()];
-  if (!type) {
-    throw new Error(`Unable to deduce data type frome extension ${ext}: ${url}}`);
-  }
-  return typeToSource[type].createFromTrack(data);
-}
-
 function makeVisualization(track: Track): React.Component {
   // TODO: switch to some kind of registration system?
   switch (track.viz) {
@@ -93,7 +58,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
 
   var vizTracks = params.tracks.map(track => ({
     visualization: makeVisualization(track),
-    source: getSource(track),
+    source: track.data,
     track
   }));
 
@@ -110,9 +75,9 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
 module.exports = {
   create,
   formats: {
-    bam: BamDataSource.createFromTrack,
-    vcf: VcfDataSource.createFromTrack,
-    twoBit: TwoBitDataSource.createFromTrack,
-    bigBed: BigBedDataSource.createFromTrack
+    bam: BamDataSource.create,
+    vcf: VcfDataSource.create,
+    twoBit: TwoBitDataSource.create,
+    bigBed: BigBedDataSource.create
   }
 };

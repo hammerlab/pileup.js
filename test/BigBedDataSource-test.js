@@ -10,7 +10,8 @@ var BigBed = require('../src/BigBed'),
 describe('BigBedDataSource', function() {
   function getTestSource() {
     // See test/data/README.md
-    return BigBedDataSource.create(new BigBed('/test/data/ensembl.chr17.bb'));
+    return BigBedDataSource.createFromBigBedFile(
+        new BigBed('/test/data/ensembl.chr17.bb'));
   }
 
   it('should extract features in a range', function(done) {

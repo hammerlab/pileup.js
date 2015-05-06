@@ -38,31 +38,30 @@ describe('pileup', function() {
     {
       viz: 'genome',
       isReference: true,
-      data: {
+      data: pileup.formats.twoBit({
         url: '/test/data/test.2bit'
-      }
+      })
     },
     {
       viz: 'variants',
-      data: {
+      data: pileup.formats.vcf({
         url: '/test/data/snv.chr17.vcf'
-      }
+      })
     },
     {
       viz: 'genes',
-      data: {
+      data: pileup.formats.bigBed({
         // This file contains just TP53, shifted so that it starts at the
         // beginning of chr17 (to match test.2bit). See test/data/README.md.
-        type: pileup.formats.bigBed,
         url: '/test/data/tp53.shifted.bb'
-      }
+      })
     },
     {
       viz: 'pileup',
-      data: {
+      data: pileup.formats.bam({
         url: '/test/data/index_test.bam',
         indexUrl: '/test/data/index_test.bam.bai'
-      }
+      })
     }
   ];
 

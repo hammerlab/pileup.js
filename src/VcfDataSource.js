@@ -5,8 +5,6 @@
  */
 'use strict';
 
-import type {TrackData} from './types';
-
 var Events = require('backbone').Events,
     _ = require('underscore'),
     Q = require('q');
@@ -47,7 +45,7 @@ function variantKey(v: Variant): string {
 }
 
 
-function create(remoteSource: VcfFile): VcfDataSource {
+function createFromVcfFile(remoteSource: VcfFile): VcfDataSource {
   var variants: {[key: string]: Variant} = {};
 
   // Ranges for which we have complete information -- no need to hit network.
@@ -99,16 +97,16 @@ function create(remoteSource: VcfFile): VcfDataSource {
   return o;
 }
 
-function createFromTrack(data: TrackData): VcfDataSource {
+function create(data: {url:string}): VcfDataSource {
   var url = data.url;
   if (!url) {
     throw new Error(`Missing URL from track: ${JSON.stringify(data)}`);
   }
 
-  return create(new VcfFile(new RemoteFile(url)));
+  return createFromVcfFile(new VcfFile(new RemoteFile(url)));
 }
 
 module.exports = {
   create,
-  createFromTrack
+  createFromVcfFile
 };

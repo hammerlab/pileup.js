@@ -7,29 +7,28 @@ var sources = [
   {
     viz: 'genome',
     isReference: true,
-    data: {
+    data: pileup.formats.twoBit({
       url: '/hg19.2bit'
-    }
+    })
   },
   {
     viz: 'variants',
-    data: {
+    data: pileup.formats.vcf({
       url: '/test/data/snv.chr17.vcf'
-    }
+    })
   },
   {
     viz: 'genes',
-    data: {
+    data: pileup.formats.bigBed({
       url: '/ensGene.bb'
-    }
+    })
   },
   {
     viz: 'pileup',
-    data: {
-      type: pileup.formats.bam,
+    data: pileup.formats.bam({
       url: '/test/data/synth3.normal.17.7500000-7515000.bam',
       indexUrl: '/test/data/synth3.normal.17.7500000-7515000.bam.bai'
-    },
+    }),
     cssClass: 'normal'
   }
 ];
