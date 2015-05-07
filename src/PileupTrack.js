@@ -108,11 +108,24 @@ class NonEmptyPileupTrack extends React.Component {
 
   render(): any {
     var className = ['pileup', this.props.cssClass || ''].join(' ');
-    return <div className={className}></div>;
+    // These styles allow vertical scrolling to see the full pileup.
+    // Adding a vertical scrollbar shrinks the visible area, but we have to act
+    // as though it doesn't, since adjusting the scale would put it out of sync
+    // with other tracks.
+    var containerStyles = {
+      'overflowY': 'auto',
+      'overflowX': 'hidden',
+      'height': '100%'
+    };
+    return (
+      <div className={className}>
+        <div ref='container' style={containerStyles}></div>
+      </div>
+    );
   }
 
   componentDidMount() {
-    var div = React.findDOMNode(this);
+    var div = this.refs.container.getDOMNode();
     this.setState({
       width: div.offsetWidth,
       height: div.offsetHeight
@@ -178,9 +191,8 @@ class NonEmptyPileupTrack extends React.Component {
   }
 
   updateVisualization() {
-    var div = React.findDOMNode(this),
+    var div = this.refs.container.getDOMNode(),
         width = this.state.width,
-        height = this.state.height,
         svg = d3.select(div).select('svg');
 
     // Hold off until height & width are known.
@@ -190,6 +202,8 @@ class NonEmptyPileupTrack extends React.Component {
     var vReads = this.state.reads.map(
         read => this.addRead(read, referenceSource));
 
+    // Height can only be computed after the pileup has been updated.
+    var height = yForRow(this.pileup.length);
     var scale = this.getScale();
 
     svg.attr('width', width)
