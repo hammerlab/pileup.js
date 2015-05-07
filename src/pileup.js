@@ -27,8 +27,8 @@ type GenomeRange = {
 }
 
 type Pileup = {
-  setLocation: (range: GenomeRange)=>void;
-  getLocation(): GenomeRange;
+  setRange: (range: GenomeRange)=>void;
+  getRange(): GenomeRange;
 }
 
 type PileupParams = {
@@ -66,10 +66,10 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
                          tracks={vizTracks}
                          initialRange={params.range} />, el);
   return {
-    setLocation(range: GenomeRange) {
+    setRange(range: GenomeRange) {
       reactElement.handleRangeChange(range);
     },
-    getLocation(): GenomeRange {
+    getRange(): GenomeRange {
       return reactElement.state.range;
     }
   };

@@ -109,7 +109,7 @@ describe('pileup', function() {
         expect(div.querySelector('div > .c').className).to.equal('genes c');
         expect(div.querySelector('div > .d').className).to.equal('pileup d');
 
-        expect(p.getLocation()).to.deep.equal({
+        expect(p.getRange()).to.deep.equal({
           contig: 'chr17',
           start: 100,
           stop: 150
