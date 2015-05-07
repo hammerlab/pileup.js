@@ -82,8 +82,8 @@ describe('pileup', function() {
     div.setAttribute('style', 'width: 800px; height: 200px;');
     testDiv.appendChild(div);
 
-    pileup.create(div, {
-      range: {contig:"chr17", start: 100, stop: 150},
+    var p = pileup.create(div, {
+      range: {contig: 'chr17', start: 100, stop: 150},
       tracks: tracks
     });
 
@@ -108,6 +108,12 @@ describe('pileup', function() {
         expect(div.querySelector('div > .b').className).to.equal('variants b');
         expect(div.querySelector('div > .c').className).to.equal('genes c');
         expect(div.querySelector('div > .d').className).to.equal('pileup d');
+
+        expect(p.getLocation()).to.deep.equal({
+          contig: 'chr17',
+          start: 100,
+          stop: 150
+        });
       });
   });
 });
