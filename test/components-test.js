@@ -40,13 +40,15 @@ describe('pileup', function() {
       isReference: true,
       data: pileup.formats.twoBit({
         url: '/test/data/test.2bit'
-      })
+      }),
+      cssClass: 'a'
     },
     {
       viz: pileup.viz.variants(),
       data: pileup.formats.vcf({
         url: '/test/data/snv.chr17.vcf'
-      })
+      }),
+      cssClass: 'b'
     },
     {
       viz: pileup.viz.genes(),
@@ -54,14 +56,16 @@ describe('pileup', function() {
         // This file contains just TP53, shifted so that it starts at the
         // beginning of chr17 (to match test.2bit). See test/data/README.md.
         url: '/test/data/tp53.shifted.bb'
-      })
+      }),
+      cssClass: 'c'
     },
     {
       viz: pileup.viz.pileup(),
       data: pileup.formats.bam({
-        url: '/test/data/index_test.bam',
-        indexUrl: '/test/data/index_test.bam.bai'
-      })
+        url: '/test/data/chr17.1-250.bam',
+        indexUrl: '/test/data/chr17.1-250.bam.bai'
+      }),
+      cssClass: 'd'
     }
   ];
 
@@ -85,7 +89,8 @@ describe('pileup', function() {
 
     var ready = (() => 
       div.querySelectorAll('.basepair').length > 0 &&
-      div.querySelectorAll('.gene').length > 0
+      div.querySelectorAll('.gene').length > 0 &&
+      div.querySelectorAll('.alignment').length > 0
     );
 
     return waitFor(ready, 5000)
@@ -98,6 +103,11 @@ describe('pileup', function() {
 
         // Note: there are 11 exons, but two are split into coding/non-coding
         expect(div.querySelectorAll('.gene .exon').length).to.equal(13);
+
+        expect(div.querySelector('div > .a').className).to.equal('reference a');
+        expect(div.querySelector('div > .b').className).to.equal('variants b');
+        expect(div.querySelector('div > .c').className).to.equal('genes c');
+        expect(div.querySelector('div > .d').className).to.equal('pileup d');
       });
   });
 });
