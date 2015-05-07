@@ -20,7 +20,15 @@ var _ = require('underscore'),
 
 import type {Track, VisualizedTrack} from './types';
 
+type GenomeRange = {
+  contig: string;
+  start: number;
+  stop: number;
+}
+
 type Pileup = {
+  setRange: (range: GenomeRange)=>void;
+  getRange(): GenomeRange;
 }
 
 type PileupParams = {
@@ -53,11 +61,20 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
     throw new Error('You must include at least one track with type=reference');
   }
 
-  return React.render(<Root referenceSource={referenceTrack.source}
-                            tracks={vizTracks}
-                            initialRange={params.range} />, el);
+  var reactElement =
+      React.render(<Root referenceSource={referenceTrack.source}
+                         tracks={vizTracks}
+                         initialRange={params.range} />, el);
+  return {
+    setRange(range: GenomeRange) {
+      reactElement.handleRangeChange(range);
+    },
+    getRange(): GenomeRange {
+      return reactElement.state.range;
+    }
+  };
 }
-
+ 
 module.exports = {
   create,
   formats: {

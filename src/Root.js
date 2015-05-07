@@ -35,7 +35,6 @@ var Root = React.createClass({
     });
 
     referenceSource.on('contigs', () => {
-      // this is here to facilitate faster iteration
       this.handleRangeChange(this.props.initialRange);
     });
   },
