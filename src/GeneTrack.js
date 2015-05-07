@@ -17,7 +17,8 @@ var GeneTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange,
     source: React.PropTypes.object.isRequired,
-    onRangeChange: React.PropTypes.func.isRequired
+    onRangeChange: React.PropTypes.func.isRequired,
+    cssClass: React.PropTypes.string
   },
   render: function(): any {
     var range = this.props.range;
@@ -53,7 +54,8 @@ var NonEmptyGeneTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange.isRequired,
     source: React.PropTypes.object.isRequired,
-    onRangeChange: React.PropTypes.func.isRequired
+    onRangeChange: React.PropTypes.func.isRequired,
+    cssClass: React.PropTypes.string
   },
   getInitialState: function() {
     return {
@@ -63,7 +65,8 @@ var NonEmptyGeneTrack = React.createClass({
     };
   },
   render: function() {
-    return <div className="genes"></div>;
+    var className = ['genes', this.props.cssClass || ''].join(' ');
+    return <div className={className}></div>;
   },
   componentDidMount: function() {
     var div = this.getDOMNode(),

@@ -52,6 +52,11 @@ This is a subset of `ensembl.chr17.bb`, shifted to match the coordinates in
 These BAM and BAI files come from the [samtools][1] tests. You can find
 corresponding SAM files for them in the same repo.
 
+#### chr17.1-250.bam
+
+This was hand-edited from the SAM equivalent of `test_input_1_a.bam` to have
+reads in chr17:1-250. It was then converted back to BAM/BAI using `samtools view`.
+
 #### index_test.bam
 
 This BAM/BAI file pair comes from [htsjdk][2] tests.
