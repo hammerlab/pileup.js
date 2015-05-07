@@ -19,7 +19,8 @@ var PileupTrack = React.createClass({
     range: types.GenomeRange,
     onRangeChange: React.PropTypes.func.isRequired,
     source: React.PropTypes.object.isRequired,
-    referenceSource: React.PropTypes.object.isRequired
+    referenceSource: React.PropTypes.object.isRequired,
+    cssClass: React.PropTypes.string
   },
   render: function(): any {
     var range = this.props.range;
@@ -106,7 +107,8 @@ class NonEmptyPileupTrack extends React.Component {
   }
 
   render(): any {
-    return <div className='pileup'></div>;
+    var className = ['pileup', this.props.cssClass || ''].join(' ');
+    return <div className={className}></div>;
   }
 
   componentDidMount() {
@@ -227,7 +229,8 @@ NonEmptyPileupTrack.propTypes = {
   range: types.GenomeRange.isRequired,
   source: React.PropTypes.object.isRequired,
   referenceSource: React.PropTypes.object.isRequired,
-  onRangeChange: React.PropTypes.func.isRequired
+  onRangeChange: React.PropTypes.func.isRequired,
+  cssClass: React.PropTypes.string
 };
 
 
