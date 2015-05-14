@@ -10,26 +10,15 @@ module.exports = function(grunt) {
         }
       }
     },
-    watch: {
-      flow: {
-        files: [
-          'src/**/*.js',
-          'test/**/*.js',
-          'lib/**/*.js',
-          'types/**/*.js'
-        ],
-        tasks: ['flow:app:status']
-      },
-    },
     browserify: {
       dist: {
         files: {
-          'build/all.js': ['src/**/*.js']
+          'build/pileup.js': ['src/**/*.js']
         },
       },
       test: {
         files: {
-          'build/tests.js': ['src/**/*.js', 'test/**/*-test.js', '!src/main.js']
+          'build/tests.js': ['src/**/*.js', 'test/**/*-test.js']
         }
       },
       watchDist: {
@@ -66,7 +55,7 @@ module.exports = function(grunt) {
     uglify: {
       dist: {
         files: {
-          'build/all.min.js': ['build/all.js']
+          'build/pileup.min.js': ['build/pileup.js']
         }
       }
     },
@@ -113,18 +102,15 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-connect');
-  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-flow-type-check');
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
   grunt.loadNpmTasks("grunt-jscoverage");
   grunt.loadNpmTasks("grunt-exorcise");
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
-  grunt.registerTask('watchFlow', ['flow:app:start', 'watch:flow']);
   grunt.registerTask('prod', ['browserify:dist', 'uglify:dist']);
-  grunt.registerTask('browsertests', ['browserify:test']);
-  grunt.registerTask('test', ['browsertests', 'connect', 'mocha_phantomjs:run']);
+  grunt.registerTask('test', ['browserify:test', 'connect', 'mocha_phantomjs:run']);
   grunt.registerTask('travis', ['flow', 'test']);
   grunt.registerTask('coverage',
-                     ['browsertests', 'exorcise:bundle', 'jscoverage', 'connect', 'mocha_phantomjs:cov']);
+                     ['browserify:test', 'exorcise:bundle', 'jscoverage', 'connect', 'mocha_phantomjs:cov']);
 };

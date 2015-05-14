@@ -1,8 +1,14 @@
 {
-  "name": "pileup.js",
+  "name": "pileup",
   "version": "0.0.0",
   "description": "JavaScript track viewer",
-  "main": "2bit.js",
+  "main": "build/pileup.js",
+  "browser": "build/pileup.js",
+  "files": [
+    "build",
+    "src",
+    "style"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/danvk/pileup.js.git"
@@ -41,7 +47,6 @@
     "grunt-browserify": "^3.3.0",
     "grunt-contrib-connect": "^0.9.0",
     "grunt-contrib-uglify": "^0.8.0",
-    "grunt-contrib-watch": "^0.6.1",
     "grunt-env": "^0.4.2",
     "grunt-exorcise": "^1.0.0",
     "grunt-flow-type-check": "^0.4.2",
