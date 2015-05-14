@@ -55,8 +55,8 @@ var Controls = React.createClass({
         newSpan = factor * span;
     this.props.onChange({
       contig: r.contig,
-      start: Math.max(0, center - newSpan / 2),
-      stop: center + newSpan / 2  // TODO: clamp
+      start: Math.floor(Math.max(0, center - newSpan / 2)),
+      stop: Math.floor(center + newSpan / 2)  // TODO: clamp
     });
   },
   render: function(): any {

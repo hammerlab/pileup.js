@@ -48,7 +48,7 @@ type TwoBitSource = {
 // Expand range to begin and end on multiples of BASE_PAIRS_PER_FETCH.
 function expandRange(range) {
   var roundDown = x => x - x % BASE_PAIRS_PER_FETCH;
-  var newStart = Math.max(1, roundDown(range.start())),
+  var newStart = Math.max(0, roundDown(range.start())),
       newStop = roundDown(range.stop() + BASE_PAIRS_PER_FETCH - 1);
 
   return new ContigInterval(range.contig, newStart, newStop);
@@ -82,11 +82,11 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
     console.log(`Fetching ${span} base pairs`);
     remoteSource.getFeaturesInRange(range.contig, range.start(), range.stop())
       .then(letters => {
-        coveredRanges.push(range);
-        coveredRanges = ContigInterval.coalesce(coveredRanges);
         for (var i = 0; i < letters.length; i++) {
           setBasePair(range.contig, range.start() + i, letters[i]);
         }
+        coveredRanges.push(range);
+        coveredRanges = ContigInterval.coalesce(coveredRanges);
       })
       .then(() => {
         o.trigger('newdata', range);
@@ -116,9 +116,12 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
   }
 
   var o = {
+    // The range here is 0-based, inclusive
     rangeChanged: function(newRange: GenomeRange) {
       // Range has changed! Fetch new data.
-      var range = new ContigInterval(newRange.contig, newRange.start, newRange.stop);
+      var range = new ContigInterval(newRange.contig,
+                                     newRange.start,
+                                     newRange.stop);
 
       // Check if this interval is already in the cache.
       if (range.isCoveredBy(coveredRanges)) {
@@ -133,6 +136,7 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
         o.trigger('contigs', contigList);
       }).done();
     },
+    // The ranges passed to these methods are 0-based
     getRange,
     getRangeAsString,
     contigList: () => contigList,
