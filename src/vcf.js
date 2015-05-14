@@ -56,7 +56,7 @@ function compareLocusLine(a: LocusLine, b: LocusLine): number {
   // Sort lexicographically by contig, then numerically by position.
   if (a.contig < b.contig) {
     return -1;
-  } else if (b.contig > a.contig) {
+  } else if (a.contig > b.contig) {
     return +1;
   } else {
     return a.position - b.position;
