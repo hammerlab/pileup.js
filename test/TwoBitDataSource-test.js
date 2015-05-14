@@ -26,23 +26,23 @@ describe('TwoBitDataSource', function() {
 
   it('should fetch base pairs', function(done) {
     var source = getTestSource();
-    var range = {contig: 'chr22', start: 1, stop: 4};
+    var range = {contig: 'chr22', start: 0, stop: 3};
 
     // Before data has been fetched, all base pairs are null.
     expect(source.getRange(range)).to.deep.equal({
+      'chr22:0': null,
       'chr22:1': null,
       'chr22:2': null,
-      'chr22:3': null,
-      'chr22:4': null
+      'chr22:3': null
     });
     expect(source.getRangeAsString(range)).to.equal('....');
 
     source.on('newdata', () => {
       expect(source.getRange(range)).to.deep.equal({
-        'chr22:1': 'N',
-        'chr22:2': 'T',
-        'chr22:3': 'C',
-        'chr22:4': 'A'
+        'chr22:0': 'N',
+        'chr22:1': 'T',
+        'chr22:2': 'C',
+        'chr22:3': 'A'
       });
       expect(source.getRangeAsString(range)).to.equal('NTCA');
       done();
@@ -54,27 +54,27 @@ describe('TwoBitDataSource', function() {
     var source = getTestSource();
 
     source.on('newdata', () => {
-      expect(source.getRange({contig: 'chr22', start: 1, stop: 15}))
+      expect(source.getRange({contig: 'chr22', start: 0, stop: 14}))
           .to.deep.equal({
-            'chr22:1':  'N',
-            'chr22:2':  'T',
-            'chr22:3':  'C',
-            'chr22:4':  'A',
-            'chr22:5':  'C',  // start of actual request
-            'chr22:6':  'A',
-            'chr22:7':  'G',
-            'chr22:8':  'A',
-            'chr22:9':  'T',
-            'chr22:10': 'C',  // end of actual requuest
-            'chr22:11': 'A',
+            'chr22:0':  'N',
+            'chr22:1':  'T',
+            'chr22:2':  'C',
+            'chr22:3':  'A',
+            'chr22:4':  'C',  // start of actual request
+            'chr22:5':  'A',
+            'chr22:6':  'G',
+            'chr22:7':  'A',
+            'chr22:8':  'T',
+            'chr22:9':  'C',  // end of actual requuest
+            'chr22:10': 'A',
+            'chr22:11': 'C',
             'chr22:12': 'C',
-            'chr22:13': 'C',
-            'chr22:14': 'A',
-            'chr22:15': 'T',
+            'chr22:13': 'A',
+            'chr22:14': 'T'
           });
       done();
     });
-    source.rangeChanged({contig: 'chr22', start: 5, stop: 10});
+    source.rangeChanged({contig: 'chr22', start: 4, stop: 9});
   });
 
   it('should not fetch data twice', function(done) {

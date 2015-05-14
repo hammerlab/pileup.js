@@ -25,7 +25,7 @@ describe('TwoBit', function() {
   it('should extract unknowns', function() {
     // This test mirrors dalliance's (chr22:19178140-19178170)
     var twoBit = getTestTwoBit();
-    return twoBit.getFeaturesInRange('chr22', 1, 31)
+    return twoBit.getFeaturesInRange('chr22', 0, 30)
         .then(basePairs => {
           expect(basePairs).to.equal('NTCACAGATCACCATACCATNTNNNGNNCNA');
         });

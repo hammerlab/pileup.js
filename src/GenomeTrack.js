@@ -70,9 +70,7 @@ var NonEmptyGenomeTrack = React.createClass({
 
     // Visualize new reference data as it comes in from the network.
     this.props.source.on('newdata', () => {
-      this.setState({
-        basePairs: this.props.source.getRange(this.props.range),
-      });
+      this.updateVisualization();
     });
 
     var originalRange, originalScale, dx=0;
@@ -151,13 +149,15 @@ var NonEmptyGenomeTrack = React.createClass({
     var pxPerLetter = scale(1) - scale(0);
     var mode = this.getDisplayMode(pxPerLetter);
 
+    var basePairs = this.props.source.getRange(range);
+
     var contigColon = this.props.range.contig + ':';
     var absBasePairs;
     if (mode != DisplayMode.HIDDEN) {
       absBasePairs = _.range(range.start - 1, range.stop + 1)
           .map(locus => ({
             position: locus,
-            letter: this.state.basePairs[contigColon + locus]
+            letter: basePairs[contigColon + locus]
           }));
     } else {
       absBasePairs = [];  // TODO: show a "zoom out" message.
@@ -186,13 +186,13 @@ var NonEmptyGenomeTrack = React.createClass({
     letter.attr('class', 'pair ' + baseClass);
 
     letter.select('text')
-        .attr('x', bp => scale(bp.position))
+        .attr('x', bp => scale(1 + bp.position))
         .attr('y', height)
         .attr('class', bp => utils.basePairClass(bp.letter))
         .text(bp => bp.letter);
 
     letter.select('rect')
-        .attr('x', bp => scale(bp.position))
+        .attr('x', bp => scale(1 + bp.position))
         .attr('y', height - 14)
         .attr('height', 14)
         .attr('width', pxPerLetter - 1)

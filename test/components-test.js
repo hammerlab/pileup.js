@@ -3,34 +3,8 @@
 
 var expect = require('chai').expect;
 
-var Q = require('q');
-var pileup = require('../src/pileup');
-
-
-var WAIT_FOR_POLL_INTERVAL_MS = 100;
-function waitFor(predFn, timeoutMs) {
-  var def = Q.defer();
-
-  var checkTimeoutId = null;
-
-  var timeoutId = window.setTimeout(() => {
-    if (checkTimeoutId) window.clearTimeout(checkTimeoutId);
-    def.reject('Timed out');
-  }, timeoutMs);
-
-  var check = function() {
-    if (def.promise.isRejected()) return;
-    if (predFn()) {
-      def.resolve(null);  // no arguments needed
-      window.clearTimeout(timeoutId);
-    } else {
-      checkTimeoutId = window.setTimeout(check, WAIT_FOR_POLL_INTERVAL_MS);
-    }
-  };
-  checkTimeoutId = window.setTimeout(check, 0);
-
-  return def.promise;
-}
+var pileup = require('../src/pileup'),
+    {waitFor} = require('./async');
 
 
 describe('pileup', function() {
