@@ -6,7 +6,7 @@
 
 import type * as VcfDataSource from './VcfDataSource';
 
-var React = require('react/addons'),
+var React = require('./react-shim'),
     _ = require('underscore'),
     d3 = require('d3'),
     types = require('./react-types'),

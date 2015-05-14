@@ -7,7 +7,7 @@
 import type * as SamRead from './SamRead';
 import type * as Interval from './Interval';
 
-var React = require('react/addons'),
+var React = require('./react-shim'),
     d3 = require('d3'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),

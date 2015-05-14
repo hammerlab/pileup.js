@@ -5,7 +5,7 @@
 'use strict';
 
 var _ = require('underscore'),
-    React = require('react'),
+    React = require('./react-shim'),
     // Data sources
     TwoBitDataSource = require('./TwoBitDataSource'),
     BigBedDataSource = require('./BigBedDataSource'),
