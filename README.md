@@ -25,16 +25,12 @@ Run the tests from the command line:
 
 Run the tests in a real browser:
 
-    grunt browsertests
+    grunt browserify:watchTest
     open tests/runner.html
 
 To continuously regenerate the combined JS, run:
 
     grunt browserify:watchDist
-
-To continuously regenerate the testing JS, run:
-
-    grunt browserify:watchTest
 
 To typecheck the code, run
 

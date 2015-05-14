@@ -90,3 +90,9 @@ module.exports = {
     pileup: () => PileupTrack
   }
 };
+
+// Export a global until the distributed package works with CommonJS
+// See https://github.com/hammerlab/pileup.js/issues/136
+if (typeof window !== 'undefined') {
+  window.pileup = module.exports;
+}
