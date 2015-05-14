@@ -4,7 +4,7 @@
  */
 'use strict';
 
-var React = require('react'),
+var React = require('./react-shim'),
     types = require('./react-types'),
     _ = require('underscore');
 
