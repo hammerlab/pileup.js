@@ -2,6 +2,7 @@
 'use strict';
 
 var expect = require('chai').expect;
+var Q = require('q');
 
 var TwoBit = require('../src/TwoBit'),
     TwoBitDataSource = require('../src/TwoBitDataSource'),
@@ -74,5 +75,30 @@ describe('TwoBitDataSource', function() {
       done();
     });
     source.rangeChanged({contig: 'chr22', start: 5, stop: 10});
+  });
+
+  it('should not fetch data twice', function(done) {
+    var file = new RemoteFile('/test/data/test.2bit'),
+        tb = new TwoBit(file),
+        source = TwoBitDataSource.createFromTwoBitFile(tb);
+
+    // pre-load headers & the data.
+    tb.getFeaturesInRange('chr22', 5, 10).then(function() {
+      var newDataCount = 0;
+      source.on('newdata', function() {
+        newDataCount++;
+      });
+      source.once('newdata', function() {
+        expect(newDataCount).to.equal(1);
+        // do the same request again.
+        source.rangeChanged({contig: 'chr22', start: 5, stop: 10});
+
+        Q.delay(100 /*ms*/).then(function() {
+          expect(newDataCount).to.equal(1);  // no new requests
+          done();
+        }).done();
+      });
+      source.rangeChanged({contig: 'chr22', start: 5, stop: 10});
+    }).done();
   });
 });
