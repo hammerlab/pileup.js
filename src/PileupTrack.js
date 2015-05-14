@@ -11,6 +11,7 @@ var React = require('./react-shim'),
     d3 = require('d3'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
+    utils = require('./utils'),
     {addToPileup, getDifferingBasePairs} = require('./pileuputils'),
     ContigInterval = require('./ContigInterval');
 
@@ -226,7 +227,7 @@ class NonEmptyPileupTrack extends React.Component {
         .data(vRead => vRead.mismatches)
         .enter()
         .append('text')
-          .attr('class', mismatch => 'basepair ' + mismatch.basePair)
+          .attr('class', mismatch => utils.basePairClass(mismatch.basePair))
           .text(mismatch => mismatch.basePair);
 
     // Update
