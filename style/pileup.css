@@ -14,29 +14,29 @@
 .background {
   fill: white;
 }
-.basepair.a, .basepair .a { fill: #188712; }
-.basepair.g, .basepair .g { fill: #C45C16; }
-.basepair.c, .basepair .c { fill: #0600F9; }
-.basepair.t, .basepair .t { fill: #F70016; }
-.basepair.u, .basepair .u { fill: #F70016; }
+.basepair.A, .basepair .A { fill: #188712; }
+.basepair.G, .basepair .G { fill: #C45C16; }
+.basepair.C, .basepair .C { fill: #0600F9; }
+.basepair.T, .basepair .T { fill: #F70016; }
+.basepair.U, .basepair .U { fill: #F70016; }
 .basepair text, text.basepair {
   font-family: Helvetica Neue, Helvetica, Arial, sans;
 }
-.basepair.loose text {
+.pair.loose text {
   font-size: 28;
 }
-.basepair.tight text {
+.pair.tight text {
   font-size: 12;
   font-weight: bold;
 }
-.basepair text, .basepair rect {
+.pair text, .pair rect {
   visibility: hidden;
 }
-.basepair.loose text,
-.basepair.tight text {
+.pair.loose text,
+.pair.tight text {
   visibility: visible;
 }
-.basepair.blocks rect {
+.pair.blocks rect {
   visibility: visible;
 }
 

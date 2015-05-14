@@ -138,4 +138,20 @@ function inflateGzip(buffer: ArrayBuffer): ArrayBuffer {
   return concatArrayBuffers(inflateConcatenatedGzip(buffer).map(x => x.buffer));
 }
 
-module.exports = {tupleLessOrEqual, tupleRangeOverlaps, concatArrayBuffers, inflateConcatenatedGzip, inflateGzip};
+
+/**
+ * Generate a space-separated css class name for a base pair.
+ */
+function basePairClass(basePair: ?string): string {
+  if (!basePair) return 'basepair';
+  return 'basepair ' + basePair;
+}
+
+module.exports = {
+  tupleLessOrEqual,
+  tupleRangeOverlaps,
+  concatArrayBuffers,
+  inflateConcatenatedGzip,
+  inflateGzip,
+  basePairClass
+};

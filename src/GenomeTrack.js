@@ -8,7 +8,8 @@ var React = require('./react-shim'),
     _ = require('underscore'),
     d3 = require('d3'),
     shallowEquals = require('shallow-equals'),
-    types = require('./react-types');
+    types = require('./react-types'),
+    utils = require('./utils');
 
 
 var GenomeTrack = React.createClass({
@@ -168,7 +169,7 @@ var NonEmptyGenomeTrack = React.createClass({
 
     var g = svg.select('g.wrapper');
 
-    var letter = g.selectAll('.basepair')
+    var letter = g.selectAll('.pair')
        .data(absBasePairs, bp => bp.position);
 
     // Enter
@@ -182,12 +183,12 @@ var NonEmptyGenomeTrack = React.createClass({
                      mode == DisplayMode.TIGHT ? 'tight' : 'blocks');
 
     // Enter & update
-    letter.attr('class', 'basepair ' + baseClass);
+    letter.attr('class', 'pair ' + baseClass);
 
     letter.select('text')
         .attr('x', bp => scale(bp.position))
         .attr('y', height)
-        .attr('class', bp => bp.letter)
+        .attr('class', bp => utils.basePairClass(bp.letter))
         .text(bp => bp.letter);
 
     letter.select('rect')
@@ -195,7 +196,7 @@ var NonEmptyGenomeTrack = React.createClass({
         .attr('y', height - 14)
         .attr('height', 14)
         .attr('width', pxPerLetter - 1)
-        .attr('class', bp => bp.letter);
+        .attr('class', bp => utils.basePairClass(bp.letter));
 
     // Exit
     letter.exit().remove();
