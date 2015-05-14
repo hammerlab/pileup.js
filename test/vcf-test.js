@@ -38,4 +38,16 @@ describe('VCF', function() {
       expect(features[5].contig).to.equal('20');
     });
   });
+
+  it('should handle unsorted VCFs', function() {
+    var vcf = new VcfFile(new RemoteFile('/test/data/sort-bug.vcf'));
+    var chr1 = new ContigInterval('chr1', 1, 1234567890),  // all of chr1
+        chr5 = new ContigInterval('chr5', 1, 1234567890);
+    return vcf.getFeaturesInRange(chr1).then(features => {
+      expect(features).to.have.length(5);
+      return vcf.getFeaturesInRange(chr5);
+    }).then(features => {
+      expect(features).to.have.length(5);
+    });
+  });
 });
