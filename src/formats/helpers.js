@@ -68,6 +68,11 @@ var uint64native = jBinary.Template({
 // Type returned by lazyArray helper, below.
 // Has a .length property, a .get() method and a .getAll() method.
 class LazyArray {
+  bytesPerItem: number;
+  jb: Object;
+  itemType: Object;
+  length: number;
+
   constructor(jb, bytesPerItem: number, itemType) {
     this.bytesPerItem = bytesPerItem;
     this.jb = jb;

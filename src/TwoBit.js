@@ -128,8 +128,8 @@ class TwoBit {
   remoteFile: RemoteFile;
   header: Q.Promise<TwoBitHeader>;
 
-  constructor(url: string) {
-    this.remoteFile = new RemoteFile(url);
+  constructor(remoteFile: RemoteFile) {
+    this.remoteFile = remoteFile;
     var deferredHeader = Q.defer();
     this.header = deferredHeader.promise;
 

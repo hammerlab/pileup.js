@@ -3,13 +3,14 @@
 
 var expect = require('chai').expect;
 
-var TwoBit = require('../src/TwoBit');
-var TwoBitDataSource = require('../src/TwoBitDataSource');
+var TwoBit = require('../src/TwoBit'),
+    TwoBitDataSource = require('../src/TwoBitDataSource'),
+    RemoteFile = require('../src/RemoteFile');
 
 describe('TwoBitDataSource', function() {
   function getTestSource() {
     // See description of this file in TwoBit-test.js
-    var tb = new TwoBit('/test/data/test.2bit');
+    var tb = new TwoBit(new RemoteFile('/test/data/test.2bit'));
     return TwoBitDataSource.createFromTwoBitFile(tb);
   }
 
@@ -49,8 +50,7 @@ describe('TwoBitDataSource', function() {
   });
 
   it('should fetch nearby base pairs', function(done) {
-    var tb = new TwoBit('/test/data/test.2bit'),
-        source = TwoBitDataSource.createFromTwoBitFile(tb);
+    var source = getTestSource();
 
     source.on('newdata', () => {
       expect(source.getRange({contig: 'chr22', start: 1, stop: 15}))

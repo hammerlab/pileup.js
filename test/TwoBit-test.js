@@ -5,11 +5,13 @@ var chai = require('chai');
 var expect = chai.expect;
 var assert = chai.assert;
 
-var TwoBit = require('../src/TwoBit');
+var TwoBit = require('../src/TwoBit'),
+    RemoteFile = require('../src/RemoteFile');
 
 describe('TwoBit', function() {
   function getTestTwoBit() {
-    return new TwoBit('/test/data/test.2bit');   // See test/data/README.md
+    // See test/data/README.md for provenance
+    return new TwoBit(new RemoteFile('/test/data/test.2bit'));
   }
 
   it('should have the right contigs', function() {

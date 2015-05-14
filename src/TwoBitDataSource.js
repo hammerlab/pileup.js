@@ -18,7 +18,8 @@
 var Events = require('backbone').Events,
     Q = require('q'),
     _ = require('underscore'),
-    TwoBit = require('./TwoBit');
+    TwoBit = require('./TwoBit'),
+    RemoteFile = require('./RemoteFile');
 
 var ContigInterval = require('./ContigInterval');
 
@@ -149,7 +150,7 @@ function create(data: {url:string}): TwoBitSource {
     throw new Error(`Missing URL from track: ${JSON.stringify(data)}`);
   }
 
-  return createFromTwoBitFile(new TwoBit(url));
+  return createFromTwoBitFile(new TwoBit(new RemoteFile(url)));
 }
 
 module.exports = {

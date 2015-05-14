@@ -73,6 +73,10 @@ type BasePair = {
 function getDifferingBasePairs(read: SamRead, reference: string): Array<BasePair> {
   var cigar = read.getCigarOps();
 
+  if (read.getName() == 'cb9b557a-3fdc-47c5-9651-825afb4f0d25') {
+    console.log(reference);
+  }
+
   // TODO: account for Cigars with clipping and indels
   if (cigar.length != 1 || cigar[0].op != 'M') {
     return [];
