@@ -9,8 +9,9 @@ var Q = require('q'),
     _ = require('underscore'),
     jBinary = require('jbinary');
 
-var RemoteFile = require('./RemoteFile'),
-    twoBitTypes = require('./formats/twoBitTypes');
+import type * as RemoteFile from './RemoteFile';
+
+var twoBitTypes = require('./formats/twoBitTypes');
 
 var BASE_PAIRS = [
   'T',  // 0=00
@@ -128,8 +129,8 @@ class TwoBit {
   remoteFile: RemoteFile;
   header: Q.Promise<TwoBitHeader>;
 
-  constructor(url: string) {
-    this.remoteFile = new RemoteFile(url);
+  constructor(remoteFile: RemoteFile) {
+    this.remoteFile = remoteFile;
     var deferredHeader = Q.defer();
     this.header = deferredHeader.promise;
 

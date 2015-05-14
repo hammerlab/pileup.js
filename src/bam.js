@@ -200,6 +200,7 @@ function fetchAlignments(remoteFile: RemoteFile,
 class Bam {
   index: ?BaiFile;
   header: Q.Promise<Object>;
+  remoteFile: RemoteFile;
 
   constructor(remoteFile: RemoteFile,
               remoteIndexFile?: RemoteFile,

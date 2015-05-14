@@ -18,7 +18,8 @@
 var Events = require('backbone').Events,
     Q = require('q'),
     _ = require('underscore'),
-    TwoBit = require('./TwoBit');
+    TwoBit = require('./TwoBit'),
+    RemoteFile = require('./RemoteFile');
 
 var ContigInterval = require('./ContigInterval');
 
@@ -39,6 +40,7 @@ type TwoBitSource = {
   getRangeAsString: (range: GenomeRange) => string;
   contigList: () => string[];
   on: (event: string, handler: Function) => void;
+  once: (event: string, handler: Function) => void;
   off: (event: string) => void;
   trigger: (event: string, ...args:any) => void;
 }
@@ -57,6 +59,10 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
   // Local cache of genomic data.
   var contigList = [];
   var basePairs = {};  // contig -> locus -> letter
+
+  // Ranges for which we have complete information -- no need to hit network.
+  var coveredRanges: ContigInterval<string>[] = [];
+
   function getBasePair(contig: string, position: number) {
     return (basePairs[contig] && basePairs[contig][position]) || null;
   }
@@ -64,32 +70,28 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
     if (!basePairs[contig]) basePairs[contig] = {};
     basePairs[contig][position] = letter;
   }
-  // Are all base pairs in the interval known? If so, no need to fetch.
-  function isEntirelyKnown(interval: ContigInterval<string>) {
-    for (var i = interval.start(); i <= interval.stop(); i++) {
-      if (getBasePair(interval.contig, i) === null) return false;
-    }
-    return true;
-  }
 
   function fetch(range: ContigInterval) {
     var span = range.stop() - range.start();
     if (span > MAX_BASE_PAIRS_TO_FETCH) {
       return Q.when();  // empty promise
     }
-    if (isEntirelyKnown(range)) {
-      return Q.when();
-    }
 
     range = expandRange(range);
 
     console.log(`Fetching ${span} base pairs`);
-    return remoteSource.getFeaturesInRange(range.contig, range.start(), range.stop())
-        .then(letters => {
-          for (var i = 0; i < letters.length; i++) {
-            setBasePair(range.contig, range.start() + i, letters[i]);
-          }
-        });
+    remoteSource.getFeaturesInRange(range.contig, range.start(), range.stop())
+      .then(letters => {
+        coveredRanges.push(range);
+        coveredRanges = ContigInterval.coalesce(coveredRanges);
+        for (var i = 0; i < letters.length; i++) {
+          setBasePair(range.contig, range.start() + i, letters[i]);
+        }
+      })
+      .then(() => {
+        o.trigger('newdata', range);
+      })
+      .done();
   }
 
   // Returns a {"chr12:123" -> "[ATCG]"} mapping for the range.
@@ -116,12 +118,14 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
   var o = {
     rangeChanged: function(newRange: GenomeRange) {
       // Range has changed! Fetch new data.
-      // TODO: make this a no-op if the range is already covered.
       var range = new ContigInterval(newRange.contig, newRange.start, newRange.stop);
 
-      fetch(range)
-          .then(() => o.trigger('newdata', range))
-          .done();
+      // Check if this interval is already in the cache.
+      if (range.isCoveredBy(coveredRanges)) {
+        return;
+      }
+
+      fetch(range);
     },
     needContigs: () => {
       remoteSource.getContigList().then(c => {
@@ -135,6 +139,7 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
 
     // These are here to make Flow happy.
     on: () => {},
+    once: () => {},
     off: () => {},
     trigger: () => {}
   };
@@ -149,7 +154,7 @@ function create(data: {url:string}): TwoBitSource {
     throw new Error(`Missing URL from track: ${JSON.stringify(data)}`);
   }
 
-  return createFromTwoBitFile(new TwoBit(url));
+  return createFromTwoBitFile(new TwoBit(new RemoteFile(url)));
 }
 
 module.exports = {
