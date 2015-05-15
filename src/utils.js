@@ -138,7 +138,6 @@ function inflateGzip(buffer: ArrayBuffer): ArrayBuffer {
   return concatArrayBuffers(inflateConcatenatedGzip(buffer).map(x => x.buffer));
 }
 
-
 /**
  * Generate a space-separated css class name for a base pair.
  */
@@ -147,11 +146,21 @@ function basePairClass(basePair: ?string): string {
   return 'basepair ' + basePair;
 }
 
+// Given 'chr9', return '9'. Given '9', return 'chr9'.
+function altContigName(contig: string): string {
+  if (contig.slice(0, 3) == 'chr') {
+    return contig.slice(3);
+  } else {
+    return 'chr' + contig;
+  }
+}
+
 module.exports = {
   tupleLessOrEqual,
   tupleRangeOverlaps,
   concatArrayBuffers,
   inflateConcatenatedGzip,
   inflateGzip,
-  basePairClass
+  basePairClass,
+  altContigName
 };

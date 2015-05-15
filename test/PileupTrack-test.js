@@ -144,6 +144,8 @@ describe('PileupTrack', function() {
       _.each(mismatches, mm => {
         expect(mm.textContent).to.equal('T');
       });
+      // Make sure there are no variants in the previous column, just the reference.
+      expect(testDiv.querySelectorAll('text[x^="387"]').length).to.equal(1);
     };
 
   it('should indicate mismatches when the reference loads first', function() {
@@ -160,7 +162,7 @@ describe('PileupTrack', function() {
       // Some number of mismatches are expected, but it should be dramatically
       // lower than the number of total base pairs in alignments.
       var mismatches = testDiv.querySelectorAll('.pileup .alignment .basepair');
-      expect(mismatches).to.have.length.below(20);
+      expect(mismatches).to.have.length.below(40);
       assertHasColumnOfTs();
     });
   });
@@ -178,7 +180,7 @@ describe('PileupTrack', function() {
       return waitFor(hasReference, 2000);
     }).then(() => {
       var mismatches = testDiv.querySelectorAll('.pileup .alignment .basepair');
-      expect(mismatches).to.have.length.below(20);
+      expect(mismatches).to.have.length.below(40);
       assertHasColumnOfTs();
     });
   });

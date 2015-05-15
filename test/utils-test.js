@@ -112,4 +112,11 @@ describe('utils', function() {
     expect(inflated).to.have.length(1);
     expect(bufferToText(inflated[0].buffer)).to.equal('Hello World');
   });
+
+  it('should add or remove chr from contig names', function() {
+    expect(utils.altContigName('21')).to.equal('chr21');
+    expect(utils.altContigName('chr21')).to.equal('21');
+    expect(utils.altContigName('M')).to.equal('chrM');
+    expect(utils.altContigName('chrM')).to.equal('M');
+  });
 });
