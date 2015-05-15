@@ -34,8 +34,10 @@ var Root = React.createClass({
       });
     });
 
-    referenceSource.on('contigs', () => {
-      this.handleRangeChange(this.props.initialRange);
+    referenceSource.once('contigs', () => {
+      if (!this.state.range) {
+        this.handleRangeChange(this.props.initialRange);
+      }
     });
   },
   handleRangeChange: function(newRange: GenomeRange) {
