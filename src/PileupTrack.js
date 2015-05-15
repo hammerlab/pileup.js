@@ -44,7 +44,7 @@ function makePath(scale, visualRead: VisualAlignment) {
   var read = visualRead.read,
       left = scale(visualRead.read.pos + 1),
       top = 0,
-      right = scale(read.pos + visualRead.refLength) - 5,
+      right = scale(read.pos + visualRead.refLength + 1) - 5,
       bottom = READ_HEIGHT,
       path = visualRead.strand == Strand.POSITIVE ? [
         [left, top],
@@ -175,7 +175,7 @@ class NonEmptyPileupTrack extends React.Component {
     var refLength = read.getReferenceLength();
     var range = read.getInterval();
     var reference = referenceSource.getRangeAsString({
-       contig: 'chr' + range.contig,  // XXX remove 'chr'--TwoBit should handle it
+       contig: range.contig,
        start: range.start(),
        stop: range.stop()
     });
@@ -203,7 +203,7 @@ class NonEmptyPileupTrack extends React.Component {
           read = vRead.read,
           range = read.getInterval(),
           reference = referenceSource.getRangeAsString({
-            contig: 'chr' + range.contig,
+            contig: range.contig,
             start: range.start(),
             stop: range.stop()
           });
@@ -245,7 +245,7 @@ class NonEmptyPileupTrack extends React.Component {
 
     readsG.append('path');  // the alignment arrow
     var mismatchTexts = reads.selectAll('text.basepair')
-        .data(vRead => vRead.mismatches, m => m.position + m.basePair);
+        .data(vRead => vRead.mismatches, m => m.pos + m.basePair);
     
     mismatchTexts
         .enter()

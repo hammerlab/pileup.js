@@ -40,5 +40,13 @@ describe('TwoBit', function() {
           });
   });
 
+  it('should add chr', function() {
+    var twoBit = getTestTwoBit();
+    return twoBit.getFeaturesInRange('22', 0, 4)  // 22, not chr22
+        .then(basePairs => {
+          expect(basePairs).to.equal('NTCAC');
+        });
+  });
+
   // TODO: masked regions
 });

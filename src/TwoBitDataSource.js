@@ -19,7 +19,8 @@ var Events = require('backbone').Events,
     Q = require('q'),
     _ = require('underscore'),
     TwoBit = require('./TwoBit'),
-    RemoteFile = require('./RemoteFile');
+    RemoteFile = require('./RemoteFile'),
+    utils = require('./utils');
 
 var ContigInterval = require('./ContigInterval');
 
@@ -94,22 +95,40 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
       .done();
   }
 
+  // This either adds or removes a 'chr' as needed.
+  function normalizeRange(range: GenomeRange): GenomeRange {
+    if (contigList.indexOf(range.contig) >= 0) {
+      return range;
+    }
+    var altContig = utils.altContigName(range.contig);
+    if (contigList.indexOf(altContig) >= 0) {
+      return {
+        contig: altContig,
+        start: range.start,
+        stop: range.stop
+      };
+    }
+    return range;  // let it fail with the original contig
+  }
+
   // Returns a {"chr12:123" -> "[ATCG]"} mapping for the range.
-  function getRange(range: GenomeRange) {
-    if (!range) return null;
+  function getRange(inputRange: GenomeRange) {
+    if (!inputRange) return null;
+    var range = normalizeRange(inputRange);
     var span = range.stop - range.start;
     if (span > MAX_BASE_PAIRS_TO_FETCH) {
       return {};
     }
     return _.chain(_.range(range.start, range.stop + 1))
-        .map(x => [range.contig + ':' + x, getBasePair(range.contig, x)])
+        .map(x => [inputRange.contig + ':' + x, getBasePair(range.contig, x)])
         .object()
         .value();
   }
 
   // Returns a string of base pairs for this range.
-  function getRangeAsString(range: GenomeRange): string {
-    if (!range) return '';
+  function getRangeAsString(inputRange: GenomeRange): string {
+    if (!inputRange) return '';
+    var range = normalizeRange(inputRange);
     return _.range(range.start, range.stop + 1)
         .map(x => getBasePair(range.contig, x) || '.')
         .join('');

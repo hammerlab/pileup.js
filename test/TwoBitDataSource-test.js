@@ -101,4 +101,40 @@ describe('TwoBitDataSource', function() {
       source.rangeChanged({contig: 'chr22', start: 5, stop: 10});
     }).done();
   });
+
+  it('should add chr', function(done) {
+    var source = getTestSource();
+    var range = {contig: '22', start: 0, stop: 3};
+
+    source.on('newdata', () => {
+      expect(source.getRange(range)).to.deep.equal({
+        '22:0': 'N',
+        '22:1': 'T',
+        '22:2': 'C',
+        '22:3': 'A'
+      });
+      expect(source.getRangeAsString(range)).to.equal('NTCA');
+      done();
+    });
+    source.rangeChanged(range);
+  });
+
+  it('should allow a mix of chr and non-chr', function(done) {
+    var source = getTestSource();
+    var chrRange = {contig: 'chr22', start: 0, stop: 3},
+        range = {contig: '22', start: 0, stop: 3};
+
+    source.on('newdata', () => {
+      expect(source.getRange(range)).to.deep.equal({
+        '22:0': 'N',
+        '22:1': 'T',
+        '22:2': 'C',
+        '22:3': 'A'
+      });
+      expect(source.getRangeAsString(range)).to.equal('NTCA');
+      done();
+    });
+    source.needContigs();
+    source.rangeChanged(chrRange);
+  });
 });
