@@ -42,7 +42,7 @@ var READ_STRAND_ARROW_WIDTH = 6;
 // Returns an SVG path string for the read, with an arrow indicating strand.
 function makePath(scale, visualRead: VisualAlignment) {
   var read = visualRead.read,
-      left = scale(visualRead.read.pos),
+      left = scale(visualRead.read.pos + 1),
       top = 0,
       right = scale(read.pos + visualRead.refLength) - 5,
       bottom = READ_HEIGHT,
@@ -141,6 +141,10 @@ class NonEmptyPileupTrack extends React.Component {
         reads: this.props.source.getAlignmentsInRange(ci)
       });
     });
+    this.props.referenceSource.on('newdata', () => {
+      this.updateMismatches();
+      this.updateVisualization();
+    });
 
     this.updateVisualization();
   }
@@ -171,9 +175,9 @@ class NonEmptyPileupTrack extends React.Component {
     var refLength = read.getReferenceLength();
     var range = read.getInterval();
     var reference = referenceSource.getRangeAsString({
-       contig: 'chr' + range.contig,
-       start: range.start() + 1,  // why the +1?
-       stop: range.stop() + 1
+       contig: 'chr' + range.contig,  // XXX remove 'chr'--TwoBit should handle it
+       start: range.start(),
+       stop: range.stop()
     });
 
     var key = read.offset.toString();
@@ -189,6 +193,23 @@ class NonEmptyPileupTrack extends React.Component {
 
     this.keyToVisualAlignment[k] = visualAlignment;
     return visualAlignment;
+  }
+
+  updateMismatches() {
+    // TODO: dedupe with addRead()
+    var referenceSource = this.props.referenceSource;
+    for (var k in this.keyToVisualAlignment) {
+      var vRead = this.keyToVisualAlignment[k],
+          read = vRead.read,
+          range = read.getInterval(),
+          reference = referenceSource.getRangeAsString({
+            contig: 'chr' + range.contig,
+            start: range.start(),
+            stop: range.stop()
+          });
+
+      vRead.mismatches = getDifferingBasePairs(read, reference);
+    }
   }
 
   updateVisualization() {
@@ -223,8 +244,10 @@ class NonEmptyPileupTrack extends React.Component {
         });
 
     readsG.append('path');  // the alignment arrow
-    readsG.selectAll('text.basepair')
-        .data(vRead => vRead.mismatches)
+    var mismatchTexts = reads.selectAll('text.basepair')
+        .data(vRead => vRead.mismatches, m => m.position + m.basePair);
+    
+    mismatchTexts
         .enter()
         .append('text')
           .attr('class', mismatch => utils.basePairClass(mismatch.basePair))
@@ -232,10 +255,11 @@ class NonEmptyPileupTrack extends React.Component {
 
     // Update
     reads.select('path').attr('d', (read, i) => makePath(scale, read));
-    reads.selectAll('text').attr('x', mismatch => scale(mismatch.pos));
+    reads.selectAll('text').attr('x', mismatch => scale(1 + mismatch.pos));
 
     // Exit
     reads.exit().remove();
+    mismatchTexts.exit().remove();
   }
 
 }
