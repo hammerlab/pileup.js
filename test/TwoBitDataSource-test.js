@@ -21,7 +21,6 @@ describe('TwoBitDataSource', function() {
       expect(contigs).to.deep.equal(['chr1', 'chr17', 'chr22']);
       done();
     });
-    source.needContigs();
   });
 
   it('should fetch base pairs', function(done) {
@@ -134,7 +133,6 @@ describe('TwoBitDataSource', function() {
       expect(source.getRangeAsString(range)).to.equal('NTCA');
       done();
     });
-    source.needContigs();
     source.rangeChanged(chrRange);
   });
 });

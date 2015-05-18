@@ -36,10 +36,10 @@ var MAX_BASE_PAIRS_TO_FETCH = 2000;
 // Flow type for export.
 type TwoBitSource = {
   rangeChanged: (newRange: GenomeRange) => void;
-  needContigs: () => void;
   getRange: (range: GenomeRange) => ?{[key:string]: string};
   getRangeAsString: (range: GenomeRange) => string;
   contigList: () => string[];
+  normalizeRange: (range: GenomeRange) => Q.Promise<GenomeRange>;
   on: (event: string, handler: Function) => void;
   once: (event: string, handler: Function) => void;
   off: (event: string) => void;
@@ -96,7 +96,7 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
   }
 
   // This either adds or removes a 'chr' as needed.
-  function normalizeRange(range: GenomeRange): GenomeRange {
+  function normalizeRangeSync(range: GenomeRange): GenomeRange {
     if (contigList.indexOf(range.contig) >= 0) {
       return range;
     }
@@ -111,10 +111,14 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
     return range;  // let it fail with the original contig
   }
 
+  function normalizeRange(range: GenomeRange): Q.Promise<GenomeRange> {
+    return contigPromise.then(() => normalizeRangeSync(range));
+  }
+
   // Returns a {"chr12:123" -> "[ATCG]"} mapping for the range.
   function getRange(inputRange: GenomeRange) {
     if (!inputRange) return null;
-    var range = normalizeRange(inputRange);
+    var range = normalizeRangeSync(inputRange);
     var span = range.stop - range.start;
     if (span > MAX_BASE_PAIRS_TO_FETCH) {
       return {};
@@ -128,37 +132,39 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
   // Returns a string of base pairs for this range.
   function getRangeAsString(inputRange: GenomeRange): string {
     if (!inputRange) return '';
-    var range = normalizeRange(inputRange);
+    var range = normalizeRangeSync(inputRange);
     return _.range(range.start, range.stop + 1)
         .map(x => getBasePair(range.contig, x) || '.')
         .join('');
   }
 
+  // Fetch the contig list immediately.
+  var contigPromise = remoteSource.getContigList().then(c => {
+    contigList = c;
+    o.trigger('contigs', contigList);
+    return c;
+  });
+  contigPromise.done();
+
   var o = {
     // The range here is 0-based, inclusive
     rangeChanged: function(newRange: GenomeRange) {
-      // Range has changed! Fetch new data.
-      var range = new ContigInterval(newRange.contig,
-                                     newRange.start,
-                                     newRange.stop);
+      normalizeRange(newRange).then(r => {
+        var range = new ContigInterval(r.contig, r.start, r.stop);
 
-      // Check if this interval is already in the cache.
-      if (range.isCoveredBy(coveredRanges)) {
-        return;
-      }
+        // Check if this interval is already in the cache.
+        if (range.isCoveredBy(coveredRanges)) {
+          return;
+        }
 
-      fetch(range);
-    },
-    needContigs: () => {
-      remoteSource.getContigList().then(c => {
-        contigList = c;
-        o.trigger('contigs', contigList);
+        fetch(range);
       }).done();
     },
     // The ranges passed to these methods are 0-based
     getRange,
     getRangeAsString,
     contigList: () => contigList,
+    normalizeRange,
 
     // These are here to make Flow happy.
     on: () => {},
