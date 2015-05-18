@@ -1,6 +1,6 @@
 {
   "name": "pileup",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "JavaScript track viewer",
   "main": "build/pileup.js",
   "browser": "build/pileup.js",
