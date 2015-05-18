@@ -19,14 +19,13 @@ var Root = React.createClass({
   },
   getInitialState: function() {
     return {
-      contigList: ([]: string[]),
+      contigList: this.props.referenceSource.contigList(),
       range: (null: ?GenomeRange)
     };
   },
   componentDidMount: function() {
     // Note: flow is unable to infer this type through `this.propTypes`.
     var referenceSource = this.props.referenceSource;
-    referenceSource.needContigs();
 
     referenceSource.on('contigs', () => {
       this.setState({
@@ -34,18 +33,20 @@ var Root = React.createClass({
       });
     });
 
-    referenceSource.once('contigs', () => {
-      if (!this.state.range) {
-        this.handleRangeChange(this.props.initialRange);
-      }
-    });
+    if (!this.state.range) {
+      this.handleRangeChange(this.props.initialRange);
+    }
+    // in case the contigs came in between getInitialState() and here.
+    this.setState({contigList: this.props.referenceSource.contigList()});
   },
   handleRangeChange: function(newRange: GenomeRange) {
-    this.setState({range: newRange});
+    this.props.referenceSource.normalizeRange(newRange).then(range => {
+      this.setState({range: range});
 
-    // Inform all the sources of the range change (including referenceSource).
-    this.props.tracks.forEach(track => {
-      track.source.rangeChanged(newRange);
+      // Inform all the sources of the range change (including referenceSource).
+      this.props.tracks.forEach(track => {
+        track.source.rangeChanged(range);
+      });
     });
   },
   makeReactElementFromTrack(key: string, track: VisualizedTrack): React.Element {
