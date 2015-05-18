@@ -9,6 +9,8 @@
 
 var expect = require('chai').expect;
 
+var React = require('../src/react-shim');
+
 var pileup = require('../src/pileup'),
     TwoBit = require('../src/TwoBit'),
     TwoBitDataSource = require('../src/TwoBitDataSource'),
@@ -64,6 +66,50 @@ describe('GenomeTrack', function() {
         start: 7500730,
         stop: 7500790
       });
+    });
+  });
+
+  it('should zoom in and out', function() {
+    var p = pileup.create(testDiv, {
+      range: {contig: '17', start: 7500725, stop: 7500775},
+      tracks: [
+        {
+          data: referenceSource,
+          viz: pileup.viz.genome(),
+          isReference: true
+        }
+      ]
+    });
+
+    var buttons = testDiv.querySelectorAll('.controls button');
+    var [goBtn, minusBtn, plusBtn] = buttons;
+    var [startTxt, stopTxt] =
+        testDiv.querySelectorAll('.controls input[type="text"]');
+    expect(goBtn.textContent).to.equal('Go');
+    expect(minusBtn.textContent).to.equal('-');
+    expect(plusBtn.textContent).to.equal('+');
+
+    return waitFor(hasReference, 2000).then(() => {
+      expect(startTxt.value).to.equal('7500725');
+      expect(stopTxt.value).to.equal('7500775');
+      React.addons.TestUtils.Simulate.click(minusBtn);
+    }).delay(50).then(() => {
+      expect(p.getRange()).to.deep.equal({
+        contig: 'chr17',
+        start: 7500700,
+        stop: 7500800
+      });
+      expect(startTxt.value).to.equal('7500700');
+      expect(stopTxt.value).to.equal('7500800');
+      React.addons.TestUtils.Simulate.click(plusBtn);
+    }).delay(50).then(() => {
+      expect(p.getRange()).to.deep.equal({
+        contig: 'chr17',
+        start: 7500725,
+        stop: 7500775
+      });
+      expect(startTxt.value).to.equal('7500725');
+      expect(stopTxt.value).to.equal('7500775');
     });
   });
 });
