@@ -40,7 +40,7 @@
   "devDependencies": {
     "arraybuffer-slice": "^0.1.2",
     "chai": "^2.0.0",
-    "coveralls": "^2.11.2",
+    "coveralls": "2.10.x",
     "es5-shim": "^4.1.0",
     "flow-bin": "^0.11.0",
     "grunt": "^0.4.5",
