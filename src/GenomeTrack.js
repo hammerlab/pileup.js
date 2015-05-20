@@ -156,7 +156,7 @@ var NonEmptyGenomeTrack = React.createClass({
     if (mode != DisplayMode.HIDDEN) {
       absBasePairs = _.range(range.start - 1, range.stop + 1)
           .map(locus => ({
-            position: locus,
+            pos: locus,
             letter: basePairs[contigColon + locus]
           }));
     } else {
@@ -170,7 +170,7 @@ var NonEmptyGenomeTrack = React.createClass({
     var g = svg.select('g.wrapper');
 
     var letter = g.selectAll('.pair')
-       .data(absBasePairs, bp => bp.position);
+       .data(absBasePairs, bp => bp.pos);
 
     // Enter
     var basePairGs = letter.enter()
@@ -186,13 +186,13 @@ var NonEmptyGenomeTrack = React.createClass({
     letter.attr('class', 'pair ' + baseClass);
 
     letter.select('text')
-        .attr('x', bp => scale(1 + 0.5 + bp.position))  // 0.5 = centered
+        .attr('x', bp => scale(1 + 0.5 + bp.pos))  // 0.5 = centered
         .attr('y', height)
         .attr('class', bp => utils.basePairClass(bp.letter))
         .text(bp => bp.letter);
 
     letter.select('rect')
-        .attr('x', bp => scale(1 + bp.position))
+        .attr('x', bp => scale(1 + bp.pos))
         .attr('y', height - 14)
         .attr('height', 14)
         .attr('width', pxPerLetter - 1)

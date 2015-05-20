@@ -81,10 +81,16 @@ describe('GenomeTrack', function() {
       ]
     });
 
+    var getInputs = function(selector): HTMLInputElement[] {
+      var els = testDiv.querySelectorAll(selector);
+      // note: this isn't really true, but it makes flow happy
+      return ((els: any): HTMLInputElement[]);
+    };
+
     var buttons = testDiv.querySelectorAll('.controls button');
     var [goBtn, minusBtn, plusBtn] = buttons;
-    var [startTxt, stopTxt] =
-        testDiv.querySelectorAll('.controls input[type="text"]');
+    var [startTxt, stopTxt] = getInputs('.controls input[type="text"]');
+        // testDiv.querySelectorAll('.controls input[type="text"]');
     expect(goBtn.textContent).to.equal('Go');
     expect(minusBtn.textContent).to.equal('-');
     expect(plusBtn.textContent).to.equal('+');

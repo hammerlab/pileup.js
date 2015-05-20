@@ -40,11 +40,11 @@ var Controls = React.createClass({
       this.refs.contig.getDOMNode().selectedIndex = contigIdx;
     }
   },
-  zoomIn: function(e) {
+  zoomIn: function(e: any) {
     e.preventDefault();
     this.zoomByFactor(0.5);
   },
-  zoomOut: function(e) {
+  zoomOut: function(e: any) {
     e.preventDefault();
     this.zoomByFactor(2.0);
   },

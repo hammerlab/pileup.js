@@ -8,7 +8,8 @@
 var expect = require('chai').expect;
 
 var Q = require('q'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    d3 = require('d3');
 
 import type * as SamRead from '../src/SamRead';
 
@@ -134,18 +135,27 @@ describe('PileupTrack', function() {
     hasAlignments = () => {
       return testDiv.querySelectorAll('.pileup .alignment').length > 0;
     },
+
+    // Returns SVG elements at the given position by querying D3 data.
+    // This is more robust than checking pixel coordinates.
+    elementsAtPos = (selector, pos) => {
+      return d3.select(testDiv)
+               .selectAll(selector)
+               .filter(function(d) { return (d.pos == pos) })[0];
+    },
+
     // This checks that there are 12 C/T SNVs at chr17:7,500,765
     assertHasColumnOfTs = () => {
-      var ref = testDiv.querySelectorAll('.reference text.basepair[x="400"]');
+      var ref = elementsAtPos('.reference text.basepair', 7500765 - 1);
       expect(ref).to.have.length(1);
       expect(ref[0].textContent).to.equal('C');
-      var mismatches = testDiv.querySelectorAll('.pileup .basepair[x="400"]');
+      var mismatches = elementsAtPos('.pileup text.basepair', 7500765 - 1);
       expect(mismatches).to.have.length(12);
       _.each(mismatches, mm => {
         expect(mm.textContent).to.equal('T');
       });
       // Make sure there are no variants in the previous column, just the reference.
-      expect(testDiv.querySelectorAll('text[x^="387"]').length).to.equal(1);
+      expect(elementsAtPos('text', 7500764 - 1).length).to.equal(1);
     };
 
   it('should indicate mismatches when the reference loads first', function() {
