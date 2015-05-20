@@ -255,7 +255,8 @@ class NonEmptyPileupTrack extends React.Component {
 
     // Update
     reads.select('path').attr('d', (read, i) => makePath(scale, read));
-    reads.selectAll('text').attr('x', mismatch => scale(1 + mismatch.pos));
+    reads.selectAll('text')
+         .attr('x', mismatch => scale(1 + 0.5 + mismatch.pos));  // 0.5 = centered
 
     // Exit
     reads.exit().remove();

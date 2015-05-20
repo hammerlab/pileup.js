@@ -21,6 +21,7 @@
 .basepair.U, .basepair .U { fill: #F70016; }
 .basepair text, text.basepair {
   font-family: Helvetica Neue, Helvetica, Arial, sans;
+  text-anchor: middle;
 }
 .pair.loose text {
   font-size: 28;
