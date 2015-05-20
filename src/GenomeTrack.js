@@ -186,7 +186,7 @@ var NonEmptyGenomeTrack = React.createClass({
     letter.attr('class', 'pair ' + baseClass);
 
     letter.select('text')
-        .attr('x', bp => scale(1 + bp.position))
+        .attr('x', bp => scale(1 + 0.5 + bp.position))  // 0.5 = centered
         .attr('y', height)
         .attr('class', bp => utils.basePairClass(bp.letter))
         .text(bp => bp.letter);
