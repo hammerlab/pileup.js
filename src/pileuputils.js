@@ -70,19 +70,10 @@ type BasePair = {
   basePair: string;
 }
 
-function getDifferingBasePairs(read: SamRead, reference: string): Array<BasePair> {
-  var cigar = read.getCigarOps();
-
-  // TODO: account for Cigars with clipping and indels
-  if (cigar.length != 1 || cigar[0].op != 'M') {
-    return [];
-  }
-  var range = read.getInterval(),
-      seq = read.getSequence(),
-      start = range.start();
+function findMismatches(reference: string, seq: string, refPos: number): BasePair[] {
   var out = [];
   for (var i = 0; i < seq.length; i++) {
-    var pos = start + i,
+    var pos = refPos + i,
         ref = reference.charAt(i),
         basePair = seq.charAt(i);
     if (ref != basePair) {
@@ -95,8 +86,95 @@ function getDifferingBasePairs(read: SamRead, reference: string): Array<BasePair
   return out;
 }
 
+type OpInfo = {
+  ops: Object[],
+  mismatches: BasePair[]
+}
+
+// Determine which alignment segment to render as an arrow.
+// This is either the first or last 'M' section, excluding soft clipping.
+function getArrowIndex(read: SamRead): number {
+  var i, op, ops = read.getCigarOps();
+  if (read.getStrand() == '-') {
+    for (i = 0; i < ops.length; i++) {
+      op = ops[i];
+      if (op.op == 'S') continue;
+      if (op.op == 'M') return i;
+      return -1;
+    }
+  } else {
+    for (i = ops.length - 1; i >= 0; i--) {
+      op = ops[i];
+      if (op.op == 'S') continue;
+      if (op.op == 'M') return i;
+      return -1;
+    }
+  }
+  return -1;
+}
+
+// Breaks the read down into Cigar Ops suitable for display
+function getOpInfo(read: SamRead, referenceSource: Object): OpInfo {
+  var ops = read.getCigarOps();
+
+  var range = read.getInterval(),
+      start = range.start(),
+      seq = read.getSequence(),
+      seqPos = 0,
+      refPos = start,
+      arrowIndex = getArrowIndex(read);
+
+  var result = [];
+  var mismatches = ([]: BasePair[]);
+  for (var i = 0; i < ops.length; i++) {
+    var op = ops[i];
+    if (op.op == 'M') {
+      var ref = referenceSource.getRangeAsString({
+        contig: range.contig,
+        start: refPos,
+        stop: refPos + op.length - 1
+      });
+      var mSeq = seq.slice(seqPos, seqPos + op.length);
+      mismatches = mismatches.concat(findMismatches(ref, mSeq, refPos));
+    }
+
+    result.push({
+      op: op.op,
+      length: op.length,
+      pos: refPos
+    });
+
+    switch (op.op) {
+      case 'M':
+      case 'D':
+      case 'N':
+      case '=':
+      case 'X':
+        refPos += op.length;
+    }
+
+    // TODO: flesh out this list.
+    switch (op.op) {
+      case 'M':
+      case 'I':
+      case 'S':
+        seqPos += op.length;
+    }
+
+  }
+
+  if (arrowIndex >= 0) {
+    result[arrowIndex].arrow = read.getStrand() == '-' ? 'L' : 'R';
+  }
+
+  return {
+    ops: result,
+    mismatches
+  };
+}
+
 module.exports = {
   pileup,
   addToPileup,
-  getDifferingBasePairs
+  getOpInfo
 };

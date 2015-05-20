@@ -74,15 +74,19 @@
 .pileup {
   height: 300px;
 }
-.pileup .alignment path {
+.pileup .alignment .match {
   fill: #c8c8c8;  /* matches IGV */
-}
-.pileup .alignment.negative path {
 }
 .pileup text.basepair {
   alignment-baseline: hanging;
   font-size: 12;
   font-weight: bold;
+}
+.pileup .insert {
+  fill: rgb(97, 0, 216);  /* matches IGV */
+}
+.pileup .delete {
+  fill: black;
 }
 
 /* variants */
