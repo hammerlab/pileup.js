@@ -169,8 +169,9 @@ class NonEmptyPileupTrack extends React.Component {
   // Attach visualization info to the read and cache it.
   addRead(read: SamRead, referenceSource): VisualAlignment {
     var k = read.offset.toString();
-    var v = this.keyToVisualAlignment[k];
-    if (v) return v;
+    if (k in this.keyToVisualAlignment) {
+      return this.keyToVisualAlignment[k];
+    }
 
     var refLength = read.getReferenceLength();
     var range = read.getInterval();
@@ -222,7 +223,8 @@ class NonEmptyPileupTrack extends React.Component {
 
     var referenceSource = this.props.referenceSource;
     var vReads = this.state.reads.map(
-        read => this.addRead(read, referenceSource));
+            read => this.addRead(read, referenceSource))
+        .filter(read => read.refLength);  // drop alignments w/o CIGARs
 
     // Height can only be computed after the pileup has been updated.
     var height = yForRow(this.pileup.length);
