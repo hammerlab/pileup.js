@@ -70,19 +70,10 @@ type BasePair = {
   basePair: string;
 }
 
-function getDifferingBasePairs(read: SamRead, reference: string): Array<BasePair> {
-  var cigar = read.getCigarOps();
-
-  // TODO: account for Cigars with clipping and indels
-  if (cigar.length != 1 || cigar[0].op != 'M') {
-    return [];
-  }
-  var range = read.getInterval(),
-      seq = read.getSequence(),
-      start = range.start();
+function findMismatches(reference: string, seq: string, refPos: number): BasePair[] {
   var out = [];
   for (var i = 0; i < seq.length; i++) {
-    var pos = start + i,
+    var pos = refPos + i,
         ref = reference.charAt(i),
         basePair = seq.charAt(i);
     if (ref != basePair) {
@@ -95,8 +86,112 @@ function getDifferingBasePairs(read: SamRead, reference: string): Array<BasePair
   return out;
 }
 
+type OpInfo = {
+  ops: Object[],
+  mismatches: BasePair[]
+}
+
+// Determine which alignment segment to render as an arrow.
+// This is either the first or last 'M' section, excluding soft clipping.
+function getArrowIndex(read: SamRead): number {
+  var i, op, ops = read.getCigarOps();
+  if (read.getStrand() == '-') {
+    for (i = 0; i < ops.length; i++) {
+      op = ops[i];
+      if (op.op == 'S') continue;
+      if (op.op == 'M') return i;
+      return -1;
+    }
+  } else {
+    for (i = ops.length - 1; i >= 0; i--) {
+      op = ops[i];
+      if (op.op == 'S') continue;
+      if (op.op == 'M') return i;
+      return -1;
+    }
+  }
+  return -1;
+}
+
+// The comments below come from the SAM spec
+var CigarOp = {
+  MATCH: 'M',  // alignment match (can be a sequence match or mismatch)
+  INSERT: 'I',  // insertion to the reference
+  DELETE: 'D',  // deletion from the reference
+  SKIP: 'N',  // skipped region from the reference
+  SOFTCLIP: 'S',  // soft clipping (clipped sequences present in SEQ)
+  HARDCLIP: 'H',  // hard clipping (clipped sequences NOT present in SEQ)
+  PADDING: 'P',  // padding (silent deletion from padded reference)
+  SEQMATCH: '=',  // sequence match
+  SEQMISMATCH: 'X'  // sequence mismatch
+};
+
+// Breaks the read down into Cigar Ops suitable for display
+function getOpInfo(read: SamRead, referenceSource: Object): OpInfo {
+  var ops = read.getCigarOps();
+
+  var range = read.getInterval(),
+      start = range.start(),
+      seq = read.getSequence(),
+      seqPos = 0,
+      refPos = start,
+      arrowIndex = getArrowIndex(read);
+
+  var result = [];
+  var mismatches = ([]: BasePair[]);
+  for (var i = 0; i < ops.length; i++) {
+    var op = ops[i];
+    if (op.op == 'M') {
+      var ref = referenceSource.getRangeAsString({
+        contig: range.contig,
+        start: refPos,
+        stop: refPos + op.length - 1
+      });
+      var mSeq = seq.slice(seqPos, seqPos + op.length);
+      mismatches = mismatches.concat(findMismatches(ref, mSeq, refPos));
+    }
+
+    result.push({
+      op: op.op,
+      length: op.length,
+      pos: refPos
+    });
+
+    // These are the cigar operations which advance position in the reference
+    switch (op.op) {
+      case CigarOp.MATCH:
+      case CigarOp.DELETE:
+      case CigarOp.SKIP:
+      case CigarOp.SEQMATCH:
+      case CigarOp.SEQMISMATCH:
+        refPos += op.length;
+    }
+
+    // These are the cigar operations which advance the per-alignment sequence.
+    switch (op.op) {
+      case CigarOp.MATCH:
+      case CigarOp.INSERT:
+      case CigarOp.SOFTCLIP:
+      case CigarOp.SEQMATCH:
+      case CigarOp.SEQMISMATCH:
+        seqPos += op.length;
+    }
+
+  }
+
+  if (arrowIndex >= 0) {
+    result[arrowIndex].arrow = read.getStrand() == '-' ? 'L' : 'R';
+  }
+
+  return {
+    ops: result,
+    mismatches
+  };
+}
+
 module.exports = {
   pileup,
   addToPileup,
-  getDifferingBasePairs
+  getOpInfo,
+  CigarOp
 };

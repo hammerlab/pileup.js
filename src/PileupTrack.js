@@ -12,7 +12,7 @@ var React = require('./react-shim'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     utils = require('./utils'),
-    {addToPileup, getDifferingBasePairs} = require('./pileuputils'),
+    {addToPileup, getOpInfo, CigarOp} = require('./pileuputils'),
     ContigInterval = require('./ContigInterval');
 
 var PileupTrack = React.createClass({
@@ -40,13 +40,12 @@ var READ_SPACING = 2;  // vertical pixels between reads
 var READ_STRAND_ARROW_WIDTH = 6;
 
 // Returns an SVG path string for the read, with an arrow indicating strand.
-function makePath(scale, visualRead: VisualAlignment) {
-  var read = visualRead.read,
-      left = scale(visualRead.read.pos + 1),
+function makeArrow(scale, pos, refLength, direction) {
+  var left = scale(pos + 1),
       top = 0,
-      right = scale(read.pos + visualRead.refLength + 1) - 5,
+      right = scale(pos + refLength + 1),
       bottom = READ_HEIGHT,
-      path = visualRead.strand == Strand.POSITIVE ? [
+      path = direction == 'R' ? [
         [left, top],
         [right - READ_STRAND_ARROW_WIDTH, top],
         [right, (top + bottom) / 2],
@@ -60,6 +59,80 @@ function makePath(scale, visualRead: VisualAlignment) {
         [right, bottom]
       ];
   return d3.svg.line()(path);
+}
+
+// Create the SVG element for a single Cigar op in an alignment.
+function enterSegment(parentNode, op, scale) {
+  var parent = d3.select(parentNode);
+  switch (op.op) {
+    case CigarOp.MATCH:
+      return parent.append(op.arrow ? 'path' : 'rect')
+                   .attr('class', 'segment match');
+
+    case CigarOp.DELETE:
+      return parent.append('line')
+                   .attr('class', 'segment delete');
+
+    case CigarOp.INSERT:
+      return parent.append('line')
+                   .attr('class', 'segment insert');
+
+    default:
+      throw `Invalid op! ${op.op}`;
+  }
+}
+
+// Update the selection for a single Cigar op, e.g. in response to a pan or zoom.
+function updateSegment(node, op, scale) {
+  switch (op.op) {
+    case CigarOp.MATCH:
+      if (op.arrow) {
+        // an arrow pointing in the direction of the alignment
+        d3.select(node).attr('d', makeArrow(scale, op.pos, op.length, op.arrow));
+      } else {
+        // a rectangle (interior part of an alignment)
+        d3.select(node)
+          .attr({
+            'x': scale(op.pos + 1),
+            'height': READ_HEIGHT,
+            'width': scale(op.length) - scale(0)
+          });
+      }
+      break;
+
+    case CigarOp.DELETE:
+      // A thin line in the middle of the alignments indicating the deletion.
+      d3.select(node)
+        .attr({
+          'x1': scale(op.pos + 1),
+          'x2': scale(op.pos + 1 + op.length),
+          'y1': READ_HEIGHT / 2 - 0.5,
+          'y2': READ_HEIGHT / 2 - 0.5
+        });
+      break;
+
+    case CigarOp.INSERT:
+      // A thin vertical line. This is shifted to the left so that it's not
+      // hidden by the segment following it.
+      d3.select(node)
+        .attr({
+          'x1': scale(op.pos + 1) - 2,  // to cover a bit of the previous segment
+          'x2': scale(op.pos + 1) - 2,
+          'y1': -1,
+          'y2': READ_HEIGHT + 2
+        });
+      break;
+
+    default:
+      throw `Invalid op! ${op.op}`;
+  }
+}
+
+// Should the Cigar op be rendered to the screen?
+function isRendered(op) {
+  return (op.op == CigarOp.MATCH ||
+          op.op == CigarOp.DELETE ||
+          op.op == CigarOp.INSERT);
 }
 
 function readClass(vread: VisualAlignment) {
@@ -169,18 +242,15 @@ class NonEmptyPileupTrack extends React.Component {
   // Attach visualization info to the read and cache it.
   addRead(read: SamRead, referenceSource): VisualAlignment {
     var k = read.offset.toString();
-    var v = this.keyToVisualAlignment[k];
-    if (v) return v;
+    if (k in this.keyToVisualAlignment) {
+      return this.keyToVisualAlignment[k];
+    }
 
     var refLength = read.getReferenceLength();
     var range = read.getInterval();
-    var reference = referenceSource.getRangeAsString({
-       contig: range.contig,
-       start: range.start(),
-       stop: range.stop()
-    });
-
     var key = read.offset.toString();
+
+    var opInfo = getOpInfo(read, referenceSource);
 
     var visualAlignment = {
       key,
@@ -188,7 +258,8 @@ class NonEmptyPileupTrack extends React.Component {
       strand: read.getStrand() == '+' ? Strand.POSITIVE : Strand.NEGATIVE,
       row: addToPileup(range.interval, this.pileup),
       refLength,
-      mismatches: getDifferingBasePairs(read, reference)
+      ops: opInfo.ops,
+      mismatches: opInfo.mismatches
     };
 
     this.keyToVisualAlignment[k] = visualAlignment;
@@ -201,14 +272,9 @@ class NonEmptyPileupTrack extends React.Component {
     for (var k in this.keyToVisualAlignment) {
       var vRead = this.keyToVisualAlignment[k],
           read = vRead.read,
-          range = read.getInterval(),
-          reference = referenceSource.getRangeAsString({
-            contig: range.contig,
-            start: range.start(),
-            stop: range.stop()
-          });
+          opInfo = getOpInfo(read, referenceSource);
 
-      vRead.mismatches = getDifferingBasePairs(read, reference);
+      vRead.mismatches = opInfo.mismatches;
     }
   }
 
@@ -222,7 +288,8 @@ class NonEmptyPileupTrack extends React.Component {
 
     var referenceSource = this.props.referenceSource;
     var vReads = this.state.reads.map(
-        read => this.addRead(read, referenceSource));
+            read => this.addRead(read, referenceSource))
+        .filter(read => read.refLength);  // drop alignments w/o CIGARs
 
     // Height can only be computed after the pileup has been updated.
     var height = yForRow(this.pileup.length);
@@ -243,7 +310,23 @@ class NonEmptyPileupTrack extends React.Component {
           window.alert(vRead.read.debugString());
         });
 
+    var segments = reads.selectAll('.segment')
+        .data(read => read.ops.filter(isRendered));
+
+    // This is like segments.append(), but allows for different types of
+    // elements depending on the datum.
+    segments.enter().call(function(sel) {
+      sel.forEach(function(el) {
+        el.forEach(function(op) {
+          var d = d3.select(op).datum();
+          var element = enterSegment(el.parentNode, d, scale);
+          updateSegment(element[0][0], d, scale);
+        });
+      });
+    });
+
     readsG.append('path');  // the alignment arrow
+
     var mismatchTexts = reads.selectAll('text.basepair')
         .data(vRead => vRead.mismatches, m => m.pos + m.basePair);
     
@@ -254,13 +337,16 @@ class NonEmptyPileupTrack extends React.Component {
           .text(mismatch => mismatch.basePair);
 
     // Update
-    reads.select('path').attr('d', (read, i) => makePath(scale, read));
+    segments.each(function(d, i) {
+      updateSegment(this, d, scale);
+    });
     reads.selectAll('text')
          .attr('x', mismatch => scale(1 + 0.5 + mismatch.pos));  // 0.5 = centered
 
     // Exit
     reads.exit().remove();
     mismatchTexts.exit().remove();
+    segments.exit().remove();
   }
 
 }

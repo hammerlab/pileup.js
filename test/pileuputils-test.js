@@ -3,12 +3,17 @@
 
 var expect = require('chai').expect;
 
+require('chai').config.truncateThreshold = 0; // disable truncating
+
 var _ = require('underscore');
 
-var {pileup, addToPileup, getDifferingBasePairs} = require('../src/pileuputils'),
+var {pileup, addToPileup,  getOpInfo} = require('../src/pileuputils'),
     Interval = require('../src/Interval'),
+    ContigInterval = require('../src/ContigInterval'),
     Bam = require('../src/bam'),
     RemoteFile = require('../src/RemoteFile');
+
+import type * as SamRead from '../src/SamRead';
 
 describe('pileuputils', function() {
   // This checks that pileup's guarantee is met.
@@ -87,28 +92,89 @@ describe('pileuputils', function() {
     expect(rows).to.deep.equal([0,1,2,0,2]);
   });
 
-  function getSamArray(url) {
-    return new Bam(new RemoteFile(url)).readAll().then(d => d.alignments);
-  }
+  var ref =  // chr17:7513000-7513500
+    "CCTTTTGGGTTCTTCCCTTAGCTCCTGCTCAAGTGTCCTCCCCACTCCCACAACCACTAATATTTTATCCA" +
+    "TTCCCTCTTCTTTTCCCTGTAATCCCAACACTTGGAGGCCGAGGTCGGTAGATCAGCTGAGGCCAGGAGTT" +
+    "CGAGACCAGTCTGGCCAATATGGCAAAACCCCATTGCTACTATATATATATGTATACATATACATATATAT" +
+    "ACACATACATATATATGTATATATACATGTATATGTATATATATACATGTATATGTATACATATATATACA" +
+    "TGTATATGTATACATATATATATACATGTATATGTATACATATATATATACATGTATATGTATACATGTAT" +
+    "GTATATATATACACACACACACACACACATATATATAAATTAGCCAGGCGTGGTGGCACATGGCTGTAACC" +
+    "TCAGCTATTCAGGGTGGCTGAGATATGAGAATCACTTGAAGCCAGGAGGCAGAGGCTGCAGGGTCGTCTGG" +
+    "ATTT";
+  it('should split reads into ops', function() {
+    var bamFile = new RemoteFile('/test/data/synth3.normal.17.7500000-7515000.bam'),
+        bamIndexFile = new RemoteFile('/test/data/synth3.normal.17.7500000-7515000.bam.bai'),
+        bam = new Bam(bamFile, bamIndexFile);
 
-  it('should find differences between ref and read', function() {
-    return getSamArray('/test/data/test_input_1_a.bam').then(reads => {
-      var read = reads[0];
-      expect(read.pos).to.equal(49);
-      expect(read.getCigarString()).to.equal('10M');
-      //                                   0123456789
-      expect(read.getSequence()).to.equal('ATTTAGCTAC');
-      var ref =                           'TTTTAGCGAC';
+    var range = new ContigInterval('chr17', 7513106, 7513400);
 
-      expect(getDifferingBasePairs(read, ref)).to.deep.equal([
-        {pos: 49+0, basePair: 'A'},
-        {pos: 49+7, basePair: 'T'}
-      ]);
+    var fakeReferenceSource = {
+      getRangeAsString: function({contig,start,stop}) {
+        expect(contig).to.equal('17');
+        expect(start).to.be.within(7513000, 7513500);
+        expect(stop).to.be.within(7513000, 7513500);
+        return ref.slice(start - 7513000, stop - 7513000 + 1);
+      }
+    };
 
-      // More complex CIGAR strings are not supported yet.
-      var read3 = reads[3];
-      expect(read3.getCigarString()).to.equal('1S2I6M1P1I1P1I4M2I');
-      expect(getDifferingBasePairs(read3, ref)).to.deep.equal([]);
+    return bam.getAlignmentsInRange(range).then(reads => {
+      var findRead = function(startPos): SamRead {
+        var r = null;
+        for (var i = 0; i < reads.length; i++) {
+          if (reads[i].pos == startPos) {
+            expect(r).to.be.null;  // duplicate read
+            r = reads[i];
+          }
+        }
+        if (r) return r;
+        throw `Unable to find read starting at position ${startPos}`;
+      };
+
+      var simpleMismatch = findRead(7513223 - 1),
+          deleteRead = findRead(7513329 - 1),
+          insertRead = findRead(7513205 - 1),
+          softClipRead = findRead(7513109 - 1);
+
+      expect(simpleMismatch.getCigarString()).to.equal('101M');
+      expect(deleteRead.getCigarString()).to.equal('37M4D64M');
+      expect(insertRead.getCigarString()).to.equal('73M20I8M');
+      expect(softClipRead.getCigarString()).to.equal('66S35M');
+
+      expect(getOpInfo(simpleMismatch, fakeReferenceSource)).to.deep.equal({
+        ops: [
+          { op: 'M', length: 101, pos: 7513222, arrow: 'R' }
+        ],
+        mismatches: [{pos: 7513272, basePair: 'G'}]
+      });
+
+      expect(getOpInfo(deleteRead, fakeReferenceSource)).to.deep.equal({
+        ops: [
+          { op: 'M', length: 37, pos: 7513328 + 0 },
+          { op: 'D', length:  4, pos: 7513328 + 37 },
+          { op: 'M', length: 64, pos: 7513328 + 41, arrow: 'R' }
+        ],
+        mismatches: []
+      });
+
+      expect(getOpInfo(insertRead, fakeReferenceSource)).to.deep.equal({
+        ops: [
+          { op: 'M', length: 73, pos: 7513204 + 0, arrow: 'L' },
+          { op: 'I', length: 20, pos: 7513204 + 73 },
+          { op: 'M', length:  8, pos: 7513204 + 73 }
+        ],
+        mismatches: []
+      });
+
+      expect(getOpInfo(softClipRead, fakeReferenceSource)).to.deep.equal({
+          ops: [
+            { op: 'S', length: 66, pos: 7513108 + 0 },
+            { op: 'M', length: 35, pos: 7513108 + 0, arrow: 'L' }
+          ],
+          mismatches: [
+            { pos: 7513109, basePair: 'G' },
+            { pos: 7513112, basePair: 'C' }
+          ]
+        });
     });
   });
 });
