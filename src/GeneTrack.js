@@ -68,15 +68,20 @@ var NonEmptyGeneTrack = React.createClass({
     var className = ['genes', this.props.cssClass || ''].join(' ');
     return <div className={className}></div>;
   },
+  updateSize: function() {
+    var div = this.getDOMNode();
+    this.setState({
+      width: div.offsetWidth,
+      height: div.offsetHeight
+    });
+  },
   componentDidMount: function() {
     var div = this.getDOMNode(),
         svg = d3.select(div)
                 .append('svg');
 
-    this.setState({
-      width: div.offsetWidth,
-      height: div.offsetHeight
-    });
+    window.addEventListener('resize', () => this.updateSize());
+    this.updateSize();
 
     // Visualize new reference data as it comes in from the network.
     this.props.source.on('newdata', () => {

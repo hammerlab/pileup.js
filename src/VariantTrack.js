@@ -71,12 +71,18 @@ var NonEmptyVariantTrack = React.createClass({
   getVariantSource(): VcfDataSource {
     return this.props.source;
   },
-  componentDidMount: function() {
+  updateSize: function() {
     var div = this.getDOMNode();
     this.setState({
       width: div.offsetWidth,
       height: div.offsetHeight
     });
+  },
+  componentDidMount: function() {
+    window.addEventListener('resize', () => this.updateSize());
+    this.updateSize();
+
+    var div = this.getDOMNode();
     d3.select(div)
       .append('svg');
     this.updateVisualization();
