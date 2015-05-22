@@ -198,12 +198,19 @@ class NonEmptyPileupTrack extends React.Component {
     );
   }
 
-  componentDidMount() {
+  updateSize() {
     var div = this.refs.container.getDOMNode();
     this.setState({
       width: div.offsetWidth,
       height: div.offsetHeight
     });
+  }
+
+  componentDidMount() {
+    window.addEventListener('resize', () => this.updateSize());
+    this.updateSize();
+
+    var div = this.refs.container.getDOMNode();
     d3.select(div)
       .append('svg');
 
