@@ -12,7 +12,7 @@ var React = require('./react-shim'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     utils = require('./utils'),
-    {addToPileup, getOpInfo} = require('./pileuputils'),
+    {addToPileup, getOpInfo, CigarOp} = require('./pileuputils'),
     ContigInterval = require('./ContigInterval');
 
 var PileupTrack = React.createClass({
@@ -63,61 +63,76 @@ function makeArrow(scale, pos, refLength, direction) {
 
 // Create the SVG element for a single Cigar op in an alignment.
 function enterSegment(parentNode, op, scale) {
-  if (op.op == 'M') {
-    if (op.arrow) {
-      return d3.select(parentNode)
-        .append('path')
-        .attr('class', 'segment match');
-    } else {
-      return d3.select(parentNode)
-        .append('rect')
-        .attr('class', 'segment match')
-        .attr('height', READ_HEIGHT);
-    }
-  } else if (op.op == 'D') {
-    return d3.select(parentNode)
-      .append('rect')
-      .attr('class', 'segment delete')
-      .attr('transform', `translate(0, ${READ_HEIGHT / 2 - 1})`)
-      .attr('height', 2);
-  } else if (op.op == 'I') {
-    return d3.select(parentNode)
-      .append('rect')
-      .attr('class', 'segment insert')
-      .attr('width', 2)
-      .attr('y', -1)
-      .attr('height', READ_HEIGHT + 2);
-  } else {
-    throw `Invalid op! ${op.op}`;
+  var parent = d3.select(parentNode);
+  switch (op.op) {
+    case CigarOp.MATCH:
+      return parent.append(op.arrow ? 'path' : 'rect')
+                   .attr('class', 'segment match');
+
+    case CigarOp.DELETE:
+      return parent.append('line')
+                   .attr('class', 'segment delete');
+
+    case CigarOp.INSERT:
+      return parent.append('line')
+                   .attr('class', 'segment insert');
+
+    default:
+      throw `Invalid op! ${op.op}`;
   }
 }
 
 // Update the selection for a single Cigar op, e.g. in response to a pan or zoom.
 function updateSegment(node, op, scale) {
-  if (op.op == 'M') {
-    if (op.arrow) {
+  switch (op.op) {
+    case CigarOp.MATCH:
+      if (op.arrow) {
+        // an arrow pointing in the direction of the alignment
+        d3.select(node).attr('d', makeArrow(scale, op.pos, op.length, op.arrow));
+      } else {
+        // a rectangle (interior part of an alignment)
+        d3.select(node)
+          .attr({
+            'x': scale(op.pos + 1),
+            'height': READ_HEIGHT,
+            'width': scale(op.length) - scale(0)
+          });
+      }
+      break;
+
+    case CigarOp.DELETE:
+      // A thin line in the middle of the alignments indicating the deletion.
       d3.select(node)
-        .attr('d', makeArrow(scale, op.pos, op.length, op.arrow));
-    } else {
+        .attr({
+          'x1': scale(op.pos + 1),
+          'x2': scale(op.pos + 1 + op.length),
+          'y1': READ_HEIGHT / 2 - 0.5,
+          'y2': READ_HEIGHT / 2 - 0.5
+        });
+      break;
+
+    case CigarOp.INSERT:
+      // A thin vertical line. This is shifted to the left so that it's not
+      // hidden by the segment following it.
       d3.select(node)
-        .attr('x', scale(op.pos + 1))
-        .attr('width', scale(op.length) - scale(0));
-    }
-  } else if (op.op == 'D') {
-    d3.select(node)
-      .attr('x', scale(op.pos + 1))
-      .attr('width', scale(op.length) - scale(0));
-  } else if (op.op == 'I') {
-    d3.select(node)
-      .attr('x', scale(op.pos + 1) - 2);  // to cover a bit of the previous segment
-  } else {
-    throw `Invalid op! ${op.op}`;
+        .attr({
+          'x1': scale(op.pos + 1) - 2,  // to cover a bit of the previous segment
+          'x2': scale(op.pos + 1) - 2,
+          'y1': -1,
+          'y2': READ_HEIGHT + 2
+        });
+      break;
+
+    default:
+      throw `Invalid op! ${op.op}`;
   }
 }
 
 // Should the Cigar op be rendered to the screen?
 function isRendered(op) {
-  return (op.op == 'M' || op.op == 'D' || op.op == 'I');
+  return (op.op == CigarOp.MATCH ||
+          op.op == CigarOp.DELETE ||
+          op.op == CigarOp.INSERT);
 }
 
 function readClass(vread: VisualAlignment) {

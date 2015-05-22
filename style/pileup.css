@@ -83,10 +83,12 @@
   font-weight: bold;
 }
 .pileup .insert {
-  fill: rgb(97, 0, 216);  /* matches IGV */
+  stroke: rgb(97, 0, 216);  /* matches IGV */
+  stroke-width: 2;
 }
 .pileup .delete {
-  fill: black;
+  stroke: black;
+  stroke-width: 2;
 }
 
 /* variants */

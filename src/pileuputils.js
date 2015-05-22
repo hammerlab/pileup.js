@@ -113,6 +113,19 @@ function getArrowIndex(read: SamRead): number {
   return -1;
 }
 
+// The comments below come from the SAM spec
+var CigarOp = {
+  MATCH: 'M',  // alignment match (can be a sequence match or mismatch)
+  INSERT: 'I',  // insertion to the reference
+  DELETE: 'D',  // deletion from the reference
+  SKIP: 'N',  // skipped region from the reference
+  SOFTCLIP: 'S',  // soft clipping (clipped sequences present in SEQ)
+  HARDCLIP: 'H',  // hard clipping (clipped sequences NOT present in SEQ)
+  PADDING: 'P',  // padding (silent deletion from padded reference)
+  SEQMATCH: '=',  // sequence match
+  SEQMISMATCH: 'X'  // sequence mismatch
+};
+
 // Breaks the read down into Cigar Ops suitable for display
 function getOpInfo(read: SamRead, referenceSource: Object): OpInfo {
   var ops = read.getCigarOps();
@@ -144,20 +157,23 @@ function getOpInfo(read: SamRead, referenceSource: Object): OpInfo {
       pos: refPos
     });
 
+    // These are the cigar operations which advance position in the reference
     switch (op.op) {
-      case 'M':
-      case 'D':
-      case 'N':
-      case '=':
-      case 'X':
+      case CigarOp.MATCH:
+      case CigarOp.DELETE:
+      case CigarOp.SKIP:
+      case CigarOp.SEQMATCH:
+      case CigarOp.SEQMISMATCH:
         refPos += op.length;
     }
 
-    // TODO: flesh out this list.
+    // These are the cigar operations which advance the per-alignment sequence.
     switch (op.op) {
-      case 'M':
-      case 'I':
-      case 'S':
+      case CigarOp.MATCH:
+      case CigarOp.INSERT:
+      case CigarOp.SOFTCLIP:
+      case CigarOp.SEQMATCH:
+      case CigarOp.SEQMISMATCH:
         seqPos += op.length;
     }
 
@@ -176,5 +192,6 @@ function getOpInfo(read: SamRead, referenceSource: Object): OpInfo {
 module.exports = {
   pileup,
   addToPileup,
-  getOpInfo
+  getOpInfo,
+  CigarOp
 };
