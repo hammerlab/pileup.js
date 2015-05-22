@@ -129,9 +129,11 @@ function create(spec: BamSpec): BamDataSource {
     throw new Error(`Missing indexURL from track data: ${JSON.stringify(spec)}`);
   }
 
-  // TODO: pass indexChunks, see flow issue facebook/flow#437
-  return createFromBamFile(new BamFile(new RemoteFile(url),
-                                       new RemoteFile(indexUrl)));
+  // TODO: this is overly repetitive, see flow issue facebook/flow#437
+  var bamFile = spec.indexChunks ?
+      new BamFile(new RemoteFile(url), new RemoteFile(indexUrl), spec.indexChunks) :
+      new BamFile(new RemoteFile(url), new RemoteFile(indexUrl));
+  return createFromBamFile(bamFile);
 }
 
 module.exports = {
