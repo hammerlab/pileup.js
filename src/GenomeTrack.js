@@ -154,7 +154,11 @@ var NonEmptyGenomeTrack = React.createClass({
     var pxPerLetter = scale(1) - scale(0);
     var mode = this.getDisplayMode(pxPerLetter);
 
-    var basePairs = this.props.source.getRange(range);
+    var basePairs = this.props.source.getRange({
+      contig: range.contig,
+      start: Math.max(0, range.start - 1),
+      stop: range.stop
+    });
 
     var contigColon = this.props.range.contig + ':';
     var absBasePairs;
