@@ -63,6 +63,7 @@
     "react-tools": "^0.13.1",
     "reactify": "danvk/reactify",
     "sinon": "^1.12.2",
-    "source-map": "^0.3.0"
+    "source-map": "^0.3.0",
+    "watchify": "^3.2.1"
   }
 }
