@@ -5,7 +5,7 @@ Interactive in-browser track viewer
 
 ## Quickstart
 
-    git clone https://github.com/danvk/pileup.js.git
+    git clone https://github.com/hammerlab/pileup.js.git
     cd pileup.js
     npm install
     grunt prod
