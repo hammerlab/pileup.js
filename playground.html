@@ -21,7 +21,7 @@ var sources = [
     viz: pileup.viz.genome(),
     isReference: true,
     data: pileup.formats.twoBit({
-      url: '/hg19.2bit'
+      url: 'http://www.biodalliance.org/datasets/hg19.2bit'
     })
   },
   {
@@ -33,7 +33,7 @@ var sources = [
   {
     viz: pileup.viz.genes(),
     data: pileup.formats.bigBed({
-      url: '/ensGene.bb'
+      url: 'http://www.biodalliance.org/datasets/ensGene.bb'
     })
   },
   {
