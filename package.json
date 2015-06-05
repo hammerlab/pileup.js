@@ -2,6 +2,17 @@
   "name": "pileup",
   "version": "0.1.0",
   "description": "JavaScript track viewer",
+  "keywords": [
+    "genome",
+    "track",
+    "bam",
+    "gene",
+    "bioinformatics",
+    "genomics",
+    "sequencing",
+    "reads",
+    "interactive"
+  ],
   "main": "build/pileup.js",
   "browser": "build/pileup.js",
   "files": [
@@ -11,7 +22,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/danvk/pileup.js.git"
+    "url": "https://github.com/hammerlab/pileup.js.git"
   },
   "scripts": {
     "lint": "./scripts/lint.sh",
@@ -20,9 +31,9 @@
   "author": "Dan Vanderkam",
   "license": "Apache2",
   "bugs": {
-    "url": "https://github.com/danvk/pileup.js/issues"
+    "url": "https://github.com/hammerlab/pileup.js/issues"
   },
-  "homepage": "https://github.com/danvk/pileup.js",
+  "homepage": "https://github.com/hammerlab/pileup.js",
   "prepush": [
     "lint"
   ],
