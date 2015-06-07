@@ -75,8 +75,8 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
   };
 }
  
-module.exports = {
-  create,
+var pileup = {
+  create: create,
   formats: {
     bam: BamDataSource.create,
     vcf: VcfDataSource.create,
@@ -91,8 +91,10 @@ module.exports = {
   }
 };
 
+module.exports = pileup;
+
 // Export a global until the distributed package works with CommonJS
 // See https://github.com/hammerlab/pileup.js/issues/136
 if (typeof window !== 'undefined') {
-  window.pileup = module.exports;
+  window.pileup = pileup;
 }
