@@ -10,12 +10,17 @@ Interactive in-browser track viewer
     npm install
     grunt prod
 
-To play with the demo, you'll need to install the node.js [http-server][hs]:
+To play with the demo, you will be needing [BioJS sniper](https://github.com/biojs/sniper):
+    
+    npm install -g sniper # installs sniper globally
 
-    npm install http-server
-    http-server
+Once installed, start sniper in the `pileup.js` folder:
 
-Then open `http://localhost:8080/playground.html` in your browser of choice.
+    sniper # and keep it running
+
+Then open [http://localhost:9090/playground](http://localhost:9090/playground) in your browser of choice.
+
+![Playground screenshot](examples/playground-screenshot.png)
 
 ## Development
 
@@ -37,5 +42,3 @@ To typecheck the code, run
     flow status .
 
 For best results, use one of the flowtype editor integrations.
-
-[hs]: https://github.com/nodeapps/http-server

@@ -31,6 +31,6 @@ var sources = [
 ];
 
 var p = pileup.create(yourDiv, {
-  range: {contig: 'chr17', start: 7512444, stop: 7512484},
+  range: { contig: 'chr17', start: 7512384, stop: 7512544 },
   tracks: sources
 });
