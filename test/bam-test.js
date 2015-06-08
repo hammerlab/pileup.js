@@ -203,4 +203,19 @@ describe('BAM', function() {
       expect(reads).to.have.length(130);
     });
   });
+
+  // Regression test for https://github.com/hammerlab/pileup.js/issues/172
+  // TODO: find a simpler BAM which exercises this code path.
+  it('should progress through the chunk list', function() {
+    this.timeout(5000);
+    var bamFile = new MappedRemoteFile('/test/data/small-chunks.bam.mapped', [[0, 65535], [6536374255, 6536458689], [6536533365, 6536613506], [6536709837, 6536795141]]),
+        baiFile = new MappedRemoteFile('/test/data/small-chunks.bam.bai.mapped', [[6942576, 7102568]]),
+        chunks = {'chunks': {'19': [6942576, 7102568]}, 'minBlockIndex': 65536},
+        bam = new Bam(bamFile, baiFile, chunks);
+
+    var range = new ContigInterval('chr20', 2684600, 2684800);
+    return bam.getAlignmentsInRange(range).then(reads => {
+      expect(reads).to.have.length(7);
+    });
+  });
 });
