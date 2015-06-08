@@ -29,7 +29,7 @@
     "test": "grunt test"
   },
   "author": "Dan Vanderkam",
-  "license": "Apache2",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/hammerlab/pileup.js/issues"
   },
