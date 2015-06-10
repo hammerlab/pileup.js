@@ -28,7 +28,7 @@ and starting it with:
 
     http-server
 
-You can then browse [http://localhost:9090/examples/playground.html](http://localhost:9090/examples/playground.html).
+You can then browse [http://localhost:8080/examples/playground.html](http://localhost:8080/examples/playground.html).
 
 ![Playground screenshot](examples/playground-screenshot.png)
 
@@ -54,3 +54,4 @@ To typecheck the code, run
 For best results, use one of the flowtype editor integrations.
 
 [sniper]: https://github.com/biojs/sniper
+[hs]: https://github.com/nodeapps/http-server
