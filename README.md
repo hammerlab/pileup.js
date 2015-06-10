@@ -20,6 +20,16 @@ Once installed, start sniper in the `pileup.js` folder:
 
 Then open [http://localhost:9090/playground](http://localhost:9090/playground) in your browser of choice.
 
+Alternatively, you can also see the demo by installing the node.js [http-server][hs]:
+
+    npm install http-server
+
+and starting it with:
+
+    http-server
+
+You can then browse [http://localhost:9090/examples/playground.html](http://localhost:9090/examples/playground.html).
+
 ![Playground screenshot](examples/playground-screenshot.png)
 
 ## Development
