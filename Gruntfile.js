@@ -36,7 +36,7 @@ module.exports = function(grunt) {
         }
       },
       options: {
-        require: [ './src/pileup.js:pileup' ],
+        require: ['./src/pileup.js:pileup'],
         transform: [
           [
             "jstransformify",
