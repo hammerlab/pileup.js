@@ -10,7 +10,7 @@ Interactive in-browser track viewer
     npm install
     grunt prod
 
-To play with the demo, you will be needing [BioJS sniper](https://github.com/biojs/sniper):
+To play with the demo, you will be needing [BioJS sniper][sniper]:
     
     npm install -g sniper # installs sniper globally
 
@@ -42,3 +42,5 @@ To typecheck the code, run
     flow status .
 
 For best results, use one of the flowtype editor integrations.
+
+[sniper]: https://github.com/biojs/sniper
