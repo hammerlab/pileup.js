@@ -163,7 +163,7 @@ function fetchAlignments(remoteFile: RemoteFile,
     var lastBlock = blocks[blocks.length - 1],
         lastByte = chunk_beg + lastBlock.offset - 1,
         newChunk = null;
-    if (lastByte < chunk_end) {
+    if (blocks.length > 1 && lastByte < chunk_end) {
       newChunk = {
         chunk_beg: new VirtualOffset(lastByte + 1, 0),
         chunk_end: chunk.chunk_end

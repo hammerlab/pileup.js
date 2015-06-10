@@ -1,6 +1,6 @@
 {
   "name": "pileup",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "JavaScript track viewer",
   "keywords": [
     "genome",
@@ -37,7 +37,7 @@
       "email": "arman@aksoy.org"
     }
   ],
-  "license": "Apache2",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/hammerlab/pileup.js/issues"
   },
