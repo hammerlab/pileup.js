@@ -1,21 +1,5 @@
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" href="style/pileup.css" />
-<style>
-#root {
-  width: 100%;
-  /* height: 200px; */
-}
-</style>
-</head>
+var pileup = require("pileup");
 
-<body>
-<div id="root"></div>
-</body>
-
-<script src="build/pileup.js"></script>
-
-<script>
 var sources = [
   {
     viz: pileup.viz.genome(),
@@ -46,9 +30,7 @@ var sources = [
   }
 ];
 
-
-var p = pileup.create('root', {
-  range: {contig: 'chr17', start: 7512444, stop: 7512484},
+var p = pileup.create(yourDiv, {
+  range: {contig: 'chr17', start: 7512384, stop: 7512544},
   tracks: sources
 });
-</script>
