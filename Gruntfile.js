@@ -1,6 +1,9 @@
 'use strict';
 
 module.exports = function(grunt) {
+  // We read package.json to access shared settings
+  var packageSettings = grunt.file.readJSON('package.json');
+
   grunt.initConfig({
     flow: {
       app: {
@@ -37,17 +40,8 @@ module.exports = function(grunt) {
       },
       options: {
         require: ['./src/pileup.js:pileup'],
-        transform: [
-          [
-            "jstransformify",
-            {
-              react: true,
-              harmony: true,
-              stripTypes: true,
-              nonStrictEs6module: true
-            }
-          ]
-        ],
+        // read shared transformation options from package.json
+        transform: packageSettings.browserify.transform,
         browserifyOptions: {
           debug: true  // generate a source map
         }
