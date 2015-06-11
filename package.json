@@ -15,7 +15,20 @@
     "biojs"
   ],
   "main": "build/pileup.js",
-  "browser": "build/pileup.js",
+  "browser": "src/pileup.js",
+  "browserify": {
+    "transform": [
+      [
+        "jstransformify", 
+        {
+          "react": true,
+          "harmony": true,
+          "stripTypes": true,
+          "nonStrictEs6module": true
+        } 
+      ]
+    ]
+  },
   "files": [
     "build",
     "src",
