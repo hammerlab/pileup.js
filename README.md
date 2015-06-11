@@ -15,7 +15,7 @@ To play with the demo, you'll need to install the node.js [http-server][hs]:
     npm install http-server
     http-server
 
-Then open [http://localhost:8080/examples/playground.html](http://localhost:8080/examples/playground.html) in your browser of choice.
+Then open [http://localhost:8080/examples/playground-complete.html](http://localhost:8080/examples/playground-complete.html) in your browser of choice.
 
 Alternatively you can use [BioJS sniper][sniper] for the demo:
     
@@ -25,7 +25,7 @@ Once installed, start sniper in the `pileup.js` folder:
 
     sniper # and keep it running
 
-And browse to [http://localhost:9090/playground](http://localhost:9090/playground).
+And browse to [http://localhost:9090/examples/playground](http://localhost:9090/examples/playground).
 
 ![pileup.js screenshot](./pileup-screenshot.png)
 
