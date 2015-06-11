@@ -27,7 +27,7 @@ Once installed, start sniper in the `pileup.js` folder:
 
 And browse to [http://localhost:9090/playground](http://localhost:9090/playground).
 
-![Playground screenshot](examples/playground-screenshot.png)
+![pileup.js screenshot](./pileup-screenshot.png)
 
 ## Development
 
