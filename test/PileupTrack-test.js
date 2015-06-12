@@ -13,7 +13,7 @@ var Q = require('q'),
 
 import type * as SamRead from '../src/SamRead';
 
-var pileup = require('../src/pileup'),
+var pileup = require('pileup'),
     TwoBit = require('../src/TwoBit'),
     TwoBitDataSource = require('../src/TwoBitDataSource'),
     Bam = require('../src/bam'),

@@ -3,7 +3,7 @@
 
 var expect = require('chai').expect;
 
-var pileup = require('../src/pileup'),
+var pileup = require('pileup'),
     {waitFor} = require('./async');
 
 

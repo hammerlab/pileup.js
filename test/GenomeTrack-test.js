@@ -11,7 +11,7 @@ var expect = require('chai').expect;
 
 var React = require('../src/react-shim');
 
-var pileup = require('../src/pileup'),
+var pileup = require('pileup'),
     TwoBit = require('../src/TwoBit'),
     TwoBitDataSource = require('../src/TwoBitDataSource'),
     MappedRemoteFile = require('./MappedRemoteFile'),
