@@ -2,7 +2,7 @@
 
 which flow
 flow --version
-echo "/**@flow*/\nimport type * as Point from './point'; function f(p: Point) { return new Point(); }" | flow check-contents
+flow status .
 
 noflow=$(git ls-files | egrep '^(src|test).*\.js$' | xargs grep --files-without-match '@flow')
 if [ -n "$noflow" ]; then
