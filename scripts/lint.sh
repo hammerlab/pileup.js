@@ -4,6 +4,7 @@
 # which flow
 # flow --version
 # flow status .
+echo 'Hello!'
 flow check --debug
 
 noflow=$(git ls-files | egrep '^(src|test).*\.js$' | xargs grep --files-without-match '@flow')

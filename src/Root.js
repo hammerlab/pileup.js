@@ -11,11 +11,6 @@ var React = require('./react-shim'),
     Controls = require('./Controls');
 
 
-function foo(): string {
-  return 1;
-}
-
-
 var Root = React.createClass({
   propTypes: {
     referenceSource: React.PropTypes.object.isRequired,
