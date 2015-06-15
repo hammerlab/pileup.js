@@ -63,7 +63,7 @@ var Root = React.createClass({
     // TODO: use a better key than index.
     var trackEls = this.props.tracks.map((t, i) => this.makeReactElementFromTrack(''+i, t));
     return (
-      <div>
+      <div className="pileup-root">
         <Controls contigList={this.state.contigList}
                   range={this.state.range}
                   onChange={this.handleRangeChange} />

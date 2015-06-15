@@ -187,8 +187,6 @@ class NonEmptyPileupTrack extends React.Component {
     // as though it doesn't, since adjusting the scale would put it out of sync
     // with other tracks.
     var containerStyles = {
-      'overflowY': 'auto',
-      'overflowX': 'hidden',
       'height': '100%'
     };
     return (

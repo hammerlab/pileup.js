@@ -4,11 +4,20 @@
  * You are encouraged to override anything you like.
  */
 
+.pileup-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 /* controls */
+.pileup-root > .controls {
+  flex: 0 0 30px;  /* fixed height */
+}
 
 /* reference track */
-.reference {
-  height: 50px;
+.pileup-root > .reference {
+  flex: 0 0 50px;  /* fixed height */
 }
 
 .background {
@@ -42,8 +51,8 @@
 }
 
 /* gene track */
-.genes {
-  height: 50px;
+.pileup-root > .genes {
+  flex: 0 0 50px;
 }
 .gene {
   stroke-width: 1;
@@ -71,8 +80,9 @@
 }
 
 /* pileup track */
-.pileup {
-  height: 300px;
+.pileup-root > .pileup {
+  flex: 1;  /* stretch to fill remaining space */
+  overflow-y: auto;
 }
 .pileup .alignment .match {
   fill: #c8c8c8;  /* matches IGV */
@@ -92,8 +102,8 @@
 }
 
 /* variants */
-.variants {
-  height: 25px;
+.pileup-root > .variants {
+  flex: 0 0 25px;  /* fixed height */
 }
 .variants rect {
   fill: #ddd;
