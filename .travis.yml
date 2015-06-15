@@ -5,4 +5,4 @@ node_js:
 
 before_install: npm install -g grunt-cli
 
-script: ./scripts/lint.sh
+script: grunt travis && ./scripts/lint.sh && ./scripts/post-coverage.sh
