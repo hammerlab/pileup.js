@@ -4,7 +4,7 @@ pwd
 which flow
 flow --version
 flow status .
-flow check --verbose
+flow check
 
 noflow=$(git ls-files | egrep '^(src|test).*\.js$' | xargs grep --files-without-match '@flow')
 if [ -n "$noflow" ]; then
