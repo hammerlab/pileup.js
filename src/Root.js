@@ -49,19 +49,30 @@ var Root = React.createClass({
       });
     });
   },
-  makeReactElementFromTrack(key: string, track: VisualizedTrack): React.Element {
-    return React.createElement(track.visualization, {
-      key,
+  makeDivForTrack(key: string, track: VisualizedTrack): React.Element {
+    var trackEl = React.createElement(track.visualization, {
       range: this.state.range,
       onRangeChange: this.handleRangeChange,
       source: track.source,
-      referenceSource: this.props.referenceSource,
-      cssClass: track.track.cssClass,
+      referenceSource: this.props.referenceSource
     });
+
+    var className = ['track', track.visualization.displayName || '', track.track.cssClass || ''].join(' ');
+
+    return (
+      <div key={key} className={className}>
+        <div className='track-label'>
+          {track.track.name || '(track name)'}
+        </div>
+        <div className='track-content'>
+          {trackEl}
+        </div>
+      </div>
+    );
   },
   render: function(): any {
     // TODO: use a better key than index.
-    var trackEls = this.props.tracks.map((t, i) => this.makeReactElementFromTrack(''+i, t));
+    var trackEls = this.props.tracks.map((t, i) => this.makeDivForTrack(''+i, t));
     return (
       <div className="pileup-root">
         <Controls contigList={this.state.contigList}

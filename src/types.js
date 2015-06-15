@@ -10,6 +10,7 @@ export type Track = {
   viz: Object;  // for now, a React class
   data: Object;  // This is a DataSource object
   cssClass?: string;
+  name: string;
 }
 
 export type VisualizedTrack = {

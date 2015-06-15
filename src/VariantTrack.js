@@ -31,6 +31,7 @@ type VcfDataSource = {
 };
 
 var VariantTrack = React.createClass({
+  displayName: 'variants',
   propTypes: {
     range: types.GenomeRange,
     onRangeChange: React.PropTypes.func.isRequired,
@@ -65,17 +66,16 @@ var NonEmptyVariantTrack = React.createClass({
     };
   },
   render: function(): any {
-    var className = ['variants', this.props.cssClass || ''].join(' ');
-    return <div className={className}></div>;
+    return <div></div>;
   },
   getVariantSource(): VcfDataSource {
     return this.props.source;
   },
   updateSize: function() {
-    var div = this.getDOMNode();
+    var parentDiv = this.getDOMNode().parentNode;
     this.setState({
-      width: div.offsetWidth,
-      height: div.offsetHeight
+      width: parentDiv.offsetWidth,
+      height: parentDiv.offsetHeight
     });
   },
   componentDidMount: function() {

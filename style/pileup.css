@@ -10,6 +10,17 @@
   height: 100%;
 }
 
+.pileup-root > .track {
+  display: flex;
+  flex-direction: row;
+}
+.track-label {
+  flex: 0 0 100px;  /* fixed-width track labels */
+}
+.track-content {
+  flex: 1;  /* stretch to fill remaining space */
+}
+
 /* controls */
 .pileup-root > .controls {
   flex: 0 0 30px;  /* fixed height */
