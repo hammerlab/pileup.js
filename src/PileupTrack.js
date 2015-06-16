@@ -16,12 +16,12 @@ var React = require('./react-shim'),
     ContigInterval = require('./ContigInterval');
 
 var PileupTrack = React.createClass({
+  displayName: 'pileup',
   propTypes: {
     range: types.GenomeRange,
     onRangeChange: React.PropTypes.func.isRequired,
     source: React.PropTypes.object.isRequired,
-    referenceSource: React.PropTypes.object.isRequired,
-    cssClass: React.PropTypes.string
+    referenceSource: React.PropTypes.object.isRequired
   },
   render: function(): any {
     var range = this.props.range;
@@ -181,28 +181,26 @@ class NonEmptyPileupTrack extends React.Component {
   }
 
   render(): any {
-    var className = ['pileup', this.props.cssClass || ''].join(' ');
     // These styles allow vertical scrolling to see the full pileup.
     // Adding a vertical scrollbar shrinks the visible area, but we have to act
     // as though it doesn't, since adjusting the scale would put it out of sync
     // with other tracks.
     var containerStyles = {
-      'overflowY': 'auto',
-      'overflowX': 'hidden',
       'height': '100%'
     };
+    // TODO: are the nested divs necessary?
     return (
-      <div className={className}>
+      <div>
         <div ref='container' style={containerStyles}></div>
       </div>
     );
   }
 
   updateSize() {
-    var div = this.refs.container.getDOMNode();
+    var parentDiv = this.refs.container.getDOMNode().parentNode;
     this.setState({
-      width: div.offsetWidth,
-      height: div.offsetHeight
+      width: parentDiv.offsetWidth,
+      height: parentDiv.offsetHeight
     });
   }
 
@@ -362,8 +360,7 @@ NonEmptyPileupTrack.propTypes = {
   range: types.GenomeRange.isRequired,
   source: React.PropTypes.object.isRequired,
   referenceSource: React.PropTypes.object.isRequired,
-  onRangeChange: React.PropTypes.func.isRequired,
-  cssClass: React.PropTypes.string
+  onRangeChange: React.PropTypes.func.isRequired
 };
 
 

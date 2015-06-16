@@ -14,11 +14,11 @@ var React = require('./react-shim'),
     ContigInterval = require('./ContigInterval');
 
 var GeneTrack = React.createClass({
+  displayName: 'genes',
   propTypes: {
     range: types.GenomeRange,
     source: React.PropTypes.object.isRequired,
     onRangeChange: React.PropTypes.func.isRequired,
-    cssClass: React.PropTypes.string
   },
   render: function(): any {
     var range = this.props.range;
@@ -55,7 +55,6 @@ var NonEmptyGeneTrack = React.createClass({
     range: types.GenomeRange.isRequired,
     source: React.PropTypes.object.isRequired,
     onRangeChange: React.PropTypes.func.isRequired,
-    cssClass: React.PropTypes.string
   },
   getInitialState: function() {
     return {
@@ -65,14 +64,13 @@ var NonEmptyGeneTrack = React.createClass({
     };
   },
   render: function() {
-    var className = ['genes', this.props.cssClass || ''].join(' ');
-    return <div className={className}></div>;
+    return <div></div>;
   },
   updateSize: function() {
-    var div = this.getDOMNode();
+    var parentDiv = this.getDOMNode().parentNode;
     this.setState({
-      width: div.offsetWidth,
-      height: div.offsetHeight
+      width: parentDiv.offsetWidth,
+      height: parentDiv.offsetHeight
     });
   },
   componentDidMount: function() {

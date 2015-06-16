@@ -69,15 +69,14 @@ var Controls = React.createClass({
     // Note: input values are set in componentDidUpdate.
     return (
       <form className='controls' onSubmit={this.handleFormSubmit}>
-        Contig:
         <select ref='contig' onChange={this.handleContigChange}>
           {contigOptions}
-        </select>
-        <input ref='start' type='text' />
-        <input ref='stop' type='text' />
-        <button>Go</button>
+        </select>{' '}
+        <input ref='start' type='text' />–
+        <input ref='stop' type='text' />{' '}
+        <button>Go</button>{' '}
 
-        <button onClick={this.zoomOut}>-</button>
+        <button onClick={this.zoomOut}>-</button>{' '}
         <button onClick={this.zoomIn}>+</button>
       </form>
     );

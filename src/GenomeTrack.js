@@ -13,11 +13,11 @@ var React = require('./react-shim'),
 
 
 var GenomeTrack = React.createClass({
+  displayName: 'reference',
   propTypes: {
     range: types.GenomeRange,
     source: React.PropTypes.object.isRequired,
     onRangeChange: React.PropTypes.func.isRequired,
-    cssClass: React.PropTypes.string
   },
   render: function(): any {
     var range = this.props.range;
@@ -45,7 +45,6 @@ var NonEmptyGenomeTrack = React.createClass({
     range: types.GenomeRange.isRequired,
     source: React.PropTypes.object.isRequired,
     onRangeChange: React.PropTypes.func.isRequired,
-    cssClass: React.PropTypes.string
   },
   getInitialState: function() {
     return {
@@ -55,14 +54,13 @@ var NonEmptyGenomeTrack = React.createClass({
     };
   },
   render: function(): any {
-    var className = ['reference', this.props.cssClass || ''].join(' ');
-    return <div className={className}></div>;
+    return <div></div>;
   },
   updateSize: function() {
-    var div = this.getDOMNode();
+    var parentDiv = this.getDOMNode().parentNode;
     this.setState({
-      width: div.offsetWidth,
-      height: div.offsetHeight
+      width: parentDiv.offsetWidth,
+      height: parentDiv.offsetHeight
     });
   },
   componentDidMount: function() {
