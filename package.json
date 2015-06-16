@@ -63,7 +63,7 @@
     "d3": "^3.5.5",
     "jbinary": "^2.1.3",
     "jdataview": "^2.5.0",
-    "jstransformify": "git://github.com/danvk/jstransformify.git",
+    "jstransformify": "^1.0.0",
     "pako": "^0.2.5",
     "q": "^1.1.2",
     "react": "^0.13.2",
