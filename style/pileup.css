@@ -16,6 +16,21 @@
 }
 .track-label {
   flex: 0 0 100px;  /* fixed-width track labels */
+  text-align: right;
+  font-family: Helvetica Neue, Helvetica, Arial, sans;
+  font-size: 0.9em;
+  position: relative;  /* make this an offset parent for positioning the label. */
+}
+.track-label > span {
+  padding-right: 5px;
+}
+/* bottom-justify these track labels */
+.track.reference .track-label > span,
+.track.variants .track-label > span
+{
+  position: absolute;
+  bottom: 0;
+  right: 0;
 }
 .track-content {
   flex: 1;  /* stretch to fill remaining space */
@@ -24,11 +39,12 @@
 /* controls */
 .pileup-root > .controls {
   flex: 0 0 30px;  /* fixed height */
+  margin-bottom: 0;  /* overrides browser default */
 }
 
 /* reference track */
 .pileup-root > .reference {
-  flex: 0 0 50px;  /* fixed height */
+  flex: 0 0 20px;  /* fixed height */
 }
 
 .background {
@@ -44,7 +60,7 @@
   text-anchor: middle;
 }
 .pair.loose text {
-  font-size: 28;
+  font-size: 24;
 }
 .pair.tight text {
   font-size: 12;

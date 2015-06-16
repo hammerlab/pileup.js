@@ -62,7 +62,7 @@ var Root = React.createClass({
     return (
       <div key={key} className={className}>
         <div className='track-label'>
-          {track.track.name || '(track name)'}
+          <span>{track.track.name || '(track name)'}</span>
         </div>
         <div className='track-content'>
           {trackEl}
@@ -74,10 +74,17 @@ var Root = React.createClass({
     // TODO: use a better key than index.
     var trackEls = this.props.tracks.map((t, i) => this.makeDivForTrack(''+i, t));
     return (
-      <div className="pileup-root">
-        <Controls contigList={this.state.contigList}
-                  range={this.state.range}
-                  onChange={this.handleRangeChange} />
+      <div className='pileup-root'>
+        <div className='track controls'>
+          <div className='track-label'>
+            &nbsp;
+          </div>
+          <div className='track-content'>
+            <Controls contigList={this.state.contigList}
+                      range={this.state.range}
+                      onChange={this.handleRangeChange} />
+          </div>
+        </div>
         {trackEls}
       </div>
     );
