@@ -78,10 +78,10 @@ describe('pileup', function() {
         // Note: there are 11 exons, but two are split into coding/non-coding
         expect(div.querySelectorAll('.gene .exon').length).to.equal(13);
 
-        expect(div.querySelector('div > .a').className).to.equal('reference a');
-        expect(div.querySelector('div > .b').className).to.equal('variants b');
-        expect(div.querySelector('div > .c').className).to.equal('genes c');
-        expect(div.querySelector('div > .d').className).to.equal('pileup d');
+        expect(div.querySelector('div > .a').className).to.equal('track reference a');
+        expect(div.querySelector('div > .b').className).to.equal('track variants b');
+        expect(div.querySelector('div > .c').className).to.equal('track genes c');
+        expect(div.querySelector('div > .d').className).to.equal('track pileup d');
 
         expect(p.getRange()).to.deep.equal({
           contig: 'chr17',
