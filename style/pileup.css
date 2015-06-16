@@ -86,6 +86,7 @@
   stroke: blue;
 }
 .gene text {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 16px;
   text-anchor: middle;
   stroke: black;
