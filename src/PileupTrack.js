@@ -21,8 +21,7 @@ var PileupTrack = React.createClass({
     range: types.GenomeRange,
     onRangeChange: React.PropTypes.func.isRequired,
     source: React.PropTypes.object.isRequired,
-    referenceSource: React.PropTypes.object.isRequired,
-    cssClass: React.PropTypes.string
+    referenceSource: React.PropTypes.object.isRequired
   },
   render: function(): any {
     var range = this.props.range;
@@ -361,8 +360,7 @@ NonEmptyPileupTrack.propTypes = {
   range: types.GenomeRange.isRequired,
   source: React.PropTypes.object.isRequired,
   referenceSource: React.PropTypes.object.isRequired,
-  onRangeChange: React.PropTypes.func.isRequired,
-  cssClass: React.PropTypes.string
+  onRangeChange: React.PropTypes.func.isRequired
 };
 
 
