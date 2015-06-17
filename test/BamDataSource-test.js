@@ -61,6 +61,10 @@ describe('BamDataSource', function() {
     var reads = source.getAlignmentsInRange(range);
     expect(reads).to.deep.equal([]);
 
+    var networkEvents = [];
+    source.on('networkprogress', event => { networkEvents.push(event) });
+    source.on('networkdone', () => { networkEvents.push('networkdone') });
+
     // Fetching [50, 150] should cache [0, 200]
     source.on('newdata', () => {
       var reads = source.getAlignmentsInRange(range);
@@ -73,6 +77,14 @@ describe('BamDataSource', function() {
 
       expect(readsBefore).to.have.length(26);
       expect(readsAfter).to.have.length(12);
+
+      expect(networkEvents).to.deep.equal([
+        {'numRequests': 1},
+        {'numRequests': 2},
+        {'numRequests': 3},
+        {'numRequests': 4},
+        'networkdone'
+      ]);
 
       // TODO: test that fetching readsBefore and readsAfter produces no
       // new network fetches.
