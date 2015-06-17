@@ -128,6 +128,13 @@
   stroke: black;
   stroke-width: 2;
 }
+.pileup .network-status {
+  position: absolute;
+  font-size: small;
+  background: #eee;
+  border: 1px solid #777;
+  padding: 2px;
+}
 
 /* variants */
 .pileup-root > .variants {

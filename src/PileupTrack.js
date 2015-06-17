@@ -188,9 +188,22 @@ class NonEmptyPileupTrack extends React.Component {
     var containerStyles = {
       'height': '100%'
     };
-    // TODO: are the nested divs necessary?
+
+    var statusEl = null,
+        networkStatus = this.state.networkStatus;
+    if (networkStatus) {
+      var numRequests = networkStatus.numRequests,
+          pluralS = numRequests > 1 ? 's' : '';
+      statusEl = (
+        <div ref='status' className='network-status'>
+          Loading alignments… (issued {numRequests} request{pluralS})
+        </div>
+      );
+    }
+
     return (
       <div>
+        {statusEl}
         <div ref='container' style={containerStyles}></div>
       </div>
     );
@@ -222,6 +235,11 @@ class NonEmptyPileupTrack extends React.Component {
     this.props.referenceSource.on('newdata', () => {
       this.updateMismatches();
       this.updateVisualization();
+    });
+    this.props.source.on('networkprogress', e => {
+      this.setState({networkStatus: e});
+    }).on('networkdone', e => {
+      this.setState({networkStatus: null});
     });
 
     this.updateVisualization();
