@@ -139,61 +139,69 @@ function fetchAlignments(remoteFile: RemoteFile,
                          refName: string,
                          idxRange: ContigInterval<number>,
                          contained: boolean,
-                         chunks: Chunk[],
-                         alignments: SamRead[]): Q.Promise<SamRead[]> {
-  if (chunks.length === 0) {
-    return Q.when(alignments);
+                         chunks: Chunk[]): Q.Promise<SamRead[]> {
+
+  var numRequests = 0,
+      alignments = [],
+      deferred = Q.defer();
+
+  function fetch(chunks) {
+    if (chunks.length === 0) {
+      deferred.resolve(alignments);
+      return;
+    }
+
+    // Never fetch more than 128k at a time -- this reduces contention on the
+    // main thread and can avoid sending unnecessary bytes over the network.
+    var chunk = chunks[0],
+        chunk_beg = chunk.chunk_beg.coffset,
+        chunk_end = chunk.chunk_end.coffset;
+    var bytesToFetch = Math.min(kMaxFetch, (chunk_end + 65536) - chunk_beg);
+    remoteFile.getBytes(chunk_beg, bytesToFetch).then(buffer => {
+      numRequests++;
+      deferred.notify({numRequests});
+      var cacheKey = {
+        filename: remoteFile.url,
+        initialOffset: chunk_beg
+      };
+      var blocks = utils.inflateConcatenatedGzip(buffer, chunk_end - chunk_beg, cacheKey);
+
+      // If the chunk hasn't been exhausted, resume it at an appropriate place.
+      // The last block needs to be re-read, since it may not have been exhausted.
+      var lastBlock = blocks[blocks.length - 1],
+          lastByte = chunk_beg + lastBlock.offset - 1,
+          newChunk = null;
+      if (blocks.length > 1 && lastByte < chunk_end) {
+        newChunk = {
+          chunk_beg: new VirtualOffset(lastByte + 1, 0),
+          chunk_end: chunk.chunk_end
+        };
+      }
+
+      var buffers = blocks.map(x => x.buffer);
+      buffers[0] = buffers[0].slice(chunk.chunk_beg.uoffset);
+      var decomp = utils.concatArrayBuffers(buffers);
+      if (decomp.byteLength > 0) {
+        var {shouldAbort, nextOffset} =
+            readAlignmentsToEnd(decomp, refName, idxRange, contained,
+                                chunk.chunk_beg, blocks, alignments);
+        if (shouldAbort) {
+          deferred.resolve(alignments);
+          return;
+        }
+        if (newChunk) {
+          newChunk.chunk_beg = nextOffset;
+        }
+      } else {
+        newChunk = null;  // This is most likely EOF
+      }
+
+      fetch((newChunk ? [newChunk] : []).concat(_.rest(chunks)));
+    });
   }
 
-  // Never fetch more than 128k at a time -- this reduces contention on the
-  // main thread and can avoid sending unnecessary bytes over the network.
-  var chunk = chunks[0],
-      chunk_beg = chunk.chunk_beg.coffset,
-      chunk_end = chunk.chunk_end.coffset;
-  var bytesToFetch = Math.min(kMaxFetch, (chunk_end + 65536) - chunk_beg);
-  return remoteFile.getBytes(chunk_beg, bytesToFetch).then(buffer => {
-    var cacheKey = {
-      filename: remoteFile.url,
-      initialOffset: chunk_beg
-    };
-    var blocks = utils.inflateConcatenatedGzip(buffer, chunk_end - chunk_beg, cacheKey);
-
-    // If the chunk hasn't been exhausted, resume it at an appropriate place.
-    // The last block needs to be re-read, since it may not have been exhausted.
-    var lastBlock = blocks[blocks.length - 1],
-        lastByte = chunk_beg + lastBlock.offset - 1,
-        newChunk = null;
-    if (blocks.length > 1 && lastByte < chunk_end) {
-      newChunk = {
-        chunk_beg: new VirtualOffset(lastByte + 1, 0),
-        chunk_end: chunk.chunk_end
-      };
-    }
-
-    var buffers = blocks.map(x => x.buffer);
-    buffers[0] = buffers[0].slice(chunk.chunk_beg.uoffset);
-    var decomp = utils.concatArrayBuffers(buffers);
-    if (decomp.byteLength > 0) {
-      var {shouldAbort, nextOffset} =
-          readAlignmentsToEnd(decomp, refName, idxRange, contained,
-                              chunk.chunk_beg, blocks, alignments);
-      if (shouldAbort) {
-        return Q.when(alignments);
-      }
-      if (newChunk) {
-        newChunk.chunk_beg = nextOffset;
-      }
-    } else {
-      newChunk = null;  // This is most likely EOF
-    }
-
-    return fetchAlignments(remoteFile,
-                           refName,
-                           idxRange,
-                           contained,
-                           (newChunk ? [newChunk] : []).concat(_.rest(chunks)),
-                           alignments);
-  });
+  fetch(chunks);
+  return deferred.promise;
 }
 
  
@@ -299,8 +307,7 @@ class Bam {
     return this.getContigIndex(range.contig).then(({idx, name}) => {
       var idxRange = new ContigInterval(idx, range.start(), range.stop());
       return index.getChunksForInterval(idxRange).then(chunks => {
-        return fetchAlignments(
-            this.remoteFile, name, idxRange, contained, chunks, []);
+        return fetchAlignments(this.remoteFile, name, idxRange, contained, chunks);
       });
     });
   }

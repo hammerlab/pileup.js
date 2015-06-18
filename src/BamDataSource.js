@@ -77,11 +77,16 @@ function createFromBamFile(remoteSource: BamFile): BamDataSource {
       }
 
       interval = expandRange(interval);
-      return remoteSource.getAlignmentsInRange(interval).then(reads => {
-        coveredRanges.push(interval);
-        coveredRanges = ContigInterval.coalesce(coveredRanges);
-        reads.forEach(read => addRead(read));
-      });
+      return remoteSource.getAlignmentsInRange(interval)
+        .progress(progressEvent => {
+          o.trigger('networkprogress', progressEvent);
+        })
+        .then(reads => {
+          coveredRanges.push(interval);
+          coveredRanges = ContigInterval.coalesce(coveredRanges);
+          reads.forEach(read => addRead(read));
+          o.trigger('networkdone');
+        });
     });
   }
 
