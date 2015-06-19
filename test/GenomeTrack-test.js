@@ -92,8 +92,8 @@ describe('GenomeTrack', function() {
     var [startTxt, stopTxt] = getInputs('.controls input[type="text"]');
         // testDiv.querySelectorAll('.controls input[type="text"]');
     expect(goBtn.textContent).to.equal('Go');
-    expect(minusBtn.textContent).to.equal('-');
-    expect(plusBtn.textContent).to.equal('+');
+    expect(minusBtn.className).to.equal('btn-zoom-out');
+    expect(plusBtn.className).to.equal('btn-zoom-in');
 
     return waitFor(hasReference, 2000).then(() => {
       expect(startTxt.value).to.equal('7500725');

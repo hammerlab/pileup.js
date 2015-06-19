@@ -41,6 +41,15 @@
   flex: 0 0 30px;  /* fixed height */
   margin-bottom: 0;  /* overrides browser default */
 }
+.pileup-root > .controls > .zoom-controls {
+  display: inline-block;
+}
+.pileup-root > .controls > .btn-zoom-out:before {
+  content: '-';
+}
+.pileup-root > .controls > .btn-zoom-in:before {
+  content: '+';
+}
 
 /* reference track */
 .pileup-root > .reference {

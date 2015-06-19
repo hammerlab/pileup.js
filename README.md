@@ -10,11 +10,12 @@ Interactive in-browser track viewer. [**Try a demo**][demo]!
     git clone https://github.com/hammerlab/pileup.js.git
     cd pileup.js
     npm install
+    npm install -g grunt-cli
     grunt prod
 
 To play with the demo, you'll need to install the node.js [http-server][hs]:
 
-    npm install http-server
+    npm install -g http-server
     http-server
 
 Then open [http://localhost:8080/examples/playground-complete.html](http://localhost:8080/examples/playground-complete.html) in your browser of choice.

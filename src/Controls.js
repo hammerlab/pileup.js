@@ -74,10 +74,11 @@ var Controls = React.createClass({
         </select>{' '}
         <input ref='start' type='text' />–
         <input ref='stop' type='text' />{' '}
-        <button>Go</button>{' '}
-
-        <button onClick={this.zoomOut}>-</button>{' '}
-        <button onClick={this.zoomIn}>+</button>
+        <button className='btn-submit'>Go</button>{' '}
+        <div class='zoom-controls'>
+          <button className='btn-zoom-out' onClick={this.zoomOut}></button>{' '}
+          <button className='btn-zoom-in' onClick={this.zoomIn}></button>
+        </div>
       </form>
     );
   },
