@@ -106,6 +106,10 @@ To typecheck the code, run
 
 For best results, use one of the flowtype editor integrations.
 
+## License
+
+pileup.js is [Apache v2](/LICENSE) licensed.
+
 [sniper]: https://github.com/biojs/sniper
 [hs]: https://github.com/nodeapps/http-server
 [layout]: http://codepen.io/anon/pen/VLzbBe?editors=110
