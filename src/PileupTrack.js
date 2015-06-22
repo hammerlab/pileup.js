@@ -192,11 +192,10 @@ class NonEmptyPileupTrack extends React.Component {
     var statusEl = null,
         networkStatus = this.state.networkStatus;
     if (networkStatus) {
-      var numRequests = networkStatus.numRequests,
-          pluralS = numRequests > 1 ? 's' : '';
+      var message = this.formatStatus(networkStatus);
       statusEl = (
         <div ref='status' className='network-status'>
-          Loading alignments… (issued {numRequests} request{pluralS})
+          Loading alignments… ({message})
         </div>
       );
     }
@@ -207,6 +206,16 @@ class NonEmptyPileupTrack extends React.Component {
         <div ref='container' style={containerStyles}></div>
       </div>
     );
+  }
+
+  formatStatus(state): string {
+    if (state.numRequests) {
+      var pluralS = state.numRequests > 1 ? 's' : '';
+      return `issued ${state.numRequests} request${pluralS}`;
+    } else if (state.status) {
+      return state.status;
+    }
+    throw 'invalid';
   }
 
   updateSize() {
