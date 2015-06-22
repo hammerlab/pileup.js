@@ -158,13 +158,7 @@ function altContigName(contig: string): string {
  * notifications from the promise to bubble through.
  */
 function pipePromise<T>(deferred: Q.Deferred<T>, promise: Q.Promise<T>) {
-  promise.then(function(o) {
-    deferred.resolve(o);
-  }, function(e) {
-    deferred.reject(e);
-  }, function(e) {
-    deferred.notify(e);
-  });
+  promise.then(deferred.resolve, deferred.reject, deferred.notify);
 }
 
 module.exports = {
