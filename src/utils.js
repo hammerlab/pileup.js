@@ -4,6 +4,7 @@
  */
 'use strict';
 
+import type {InflatedBlock} from './types';
 var pako = require('pako');
 
 // Compare two tuples of equal length. Is t1 <= t2?
@@ -43,12 +44,6 @@ function concatArrayBuffers(buffers: ArrayBuffer[]): ArrayBuffer {
     position += buf.byteLength;
   });
   return output.buffer;
-}
-
-type InflatedBlock = {
-  offset: number;
-  compressedLength: number;
-  buffer: ArrayBuffer;
 }
 
 type InflateCacheKey = {

@@ -21,20 +21,6 @@ type Gene = {
   name: string;  // human-readable name, e.g. "TP53"
 }
 
-// TODO: move this into BigBed.js and get it to type check.
-type BedRow = {
-  // Half-open interval for the BED row.
-  contig: string;
-  start: number;
-  stop: number;
-  // Remaining fields in the BED row (typically tab-delimited)
-  rest: string;
-}
-type BedBlock = {
-  range: ContigInterval<string>;
-  rows: BedRow[];
-}
-
 // Flow type for export.
 type BigBedSource = {
   rangeChanged: (newRange: GenomeRange) => void;
