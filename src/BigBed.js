@@ -1,7 +1,7 @@
 /**
  * Parser for bigBed format.
  * Based on UCSC's src/inc/bbiFile.h
- * @flow weak
+ * @flow
  */
 'use strict';
 
