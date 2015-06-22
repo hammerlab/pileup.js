@@ -12,6 +12,8 @@ var jBinary = require('jbinary'),
     _ = require('underscore'),
     Q = require('q');
 
+import type {Chunk, InflatedBlock} from './types';
+
 var bamTypes = require('./formats/bamTypes'),
     utils = require('./utils'),
     BaiFile = require('./bai'),
@@ -36,19 +38,6 @@ function isAlignmentInRange(read: SamRead,
   }
 }
 
-
-// TODO: import from src/bai.js
-type Chunk = {
-  chunk_beg: VirtualOffset;
-  chunk_end: VirtualOffset;
-}
-
-// TODO: import from src/utils.js
-type InflatedBlock = {
-  offset: number;
-  compressedLength: number;
-  buffer: ArrayBuffer;
-}
 
 var kMaxFetch = 65536 * 2;
 

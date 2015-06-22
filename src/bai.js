@@ -8,6 +8,7 @@
 
 import type * as RemoteFile from './RemoteFile';
 import type * as ContigInterval from './ContigInterval';
+import type {Chunk} from './types';
 
 var jBinary = require('jbinary'),
     jDataView = require('jdataview'),
@@ -64,11 +65,6 @@ function readIntervals(blob: Uint8Array) {
     intervals[pos >> 3] = VirtualOffset.fromBlob(blob, pos);
   }
   return intervals;
-}
-
-type Chunk = {
-  chunk_beg: VirtualOffset;
-  chunk_end: VirtualOffset;
 }
 
 function doChunksOverlap(a: Chunk, b: Chunk) {
