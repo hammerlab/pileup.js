@@ -5,6 +5,8 @@
 'use strict';
 
 import type {InflatedBlock} from './types';
+import type * as Q from 'q';
+
 var pako = require('pako');
 
 // Compare two tuples of equal length. Is t1 <= t2?
@@ -150,6 +152,15 @@ function altContigName(contig: string): string {
   }
 }
 
+/**
+ * Pipe all promise events through a deferred object.
+ * This is similar to deferred.resolve(promise), except that it allows progress
+ * notifications from the promise to bubble through.
+ */
+function pipePromise<T>(deferred: Q.Deferred<T>, promise: Q.Promise<T>) {
+  promise.then(deferred.resolve, deferred.reject, deferred.notify);
+}
+
 module.exports = {
   tupleLessOrEqual,
   tupleRangeOverlaps,
@@ -157,5 +168,6 @@ module.exports = {
   inflateConcatenatedGzip,
   inflateGzip,
   basePairClass,
-  altContigName
+  altContigName,
+  pipePromise
 };

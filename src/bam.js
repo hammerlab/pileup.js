@@ -207,11 +207,17 @@ class Bam {
 
     var sizePromise = this.index ? this.index.getHeaderSize() : Q.when(2 * 65535);
     this.header = sizePromise.then(size => {
-      return this.remoteFile.getBytes(0, size).then(buf => {
-        var decomp = utils.inflateGzip(buf);
-        var jb = new jBinary(decomp, bamTypes.TYPE_SET);
-        return jb.read('BamHeader');
-      });
+      var def = Q.defer();
+      // This happens in the next event loop to give listeners a chance to register.
+      Q.when().then(() => { def.notify({status: 'Fetching BAM header'}); });
+      utils.pipePromise(
+          def,
+          this.remoteFile.getBytes(0, size).then(buf => {
+            var decomp = utils.inflateGzip(buf);
+            var jb = new jBinary(decomp, bamTypes.TYPE_SET);
+            return jb.read('BamHeader');
+          }));
+      return def.promise;
     });
     this.header.done();
   }
@@ -294,10 +300,18 @@ class Bam {
     var index = this.index;
 
     return this.getContigIndex(range.contig).then(({idx, name}) => {
+      var def = Q.defer();
+      // This happens in the next event loop to give listeners a chance to register.
+      Q.when().then(() => { def.notify({status: 'Fetching BAM index'}); });
+
       var idxRange = new ContigInterval(idx, range.start(), range.stop());
-      return index.getChunksForInterval(idxRange).then(chunks => {
-        return fetchAlignments(this.remoteFile, name, idxRange, contained, chunks);
-      });
+
+      utils.pipePromise(
+        def,
+        index.getChunksForInterval(idxRange).then(chunks => {
+          return fetchAlignments(this.remoteFile, name, idxRange, contained, chunks);
+        }));
+      return def.promise;
     });
   }
 

@@ -230,6 +230,8 @@ describe('BAM', function() {
       progressEvents.push(event);
     }).then(reads => {
       expect(progressEvents).to.deep.equal([
+        {status: 'Fetching BAM header'},
+        {status: 'Fetching BAM index'},
         {numRequests: 1},
         {numRequests: 2},
         {numRequests: 3},
