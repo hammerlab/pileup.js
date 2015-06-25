@@ -1,9 +1,6 @@
 'use strict';
 
 module.exports = function(grunt) {
-  // We read package.json to access shared settings
-  var packageSettings = grunt.file.readJSON('package.json');
-
   grunt.initConfig({
     flow: {
       app: {
@@ -16,12 +13,12 @@ module.exports = function(grunt) {
     browserify: {
       dist: {
         files: {
-          'build/pileup.js': ['src/main/**/*.js']
+          'build/pileup.browser.js': ['build/main/**/*.js']
         },
       },
       test: {
         files: {
-          'build/tests.js': ['src/main/**/*.js', 'src/test/**/*-test.js']
+          'build/tests.browser.js': ['build/main/**/*.js', 'build/test/**/*-test.js']
         }
       },
       watchDist: {
@@ -39,8 +36,6 @@ module.exports = function(grunt) {
         }
       },
       options: {
-        // read shared transformation options from package.json
-        transform: packageSettings.browserify.transform,
         browserifyOptions: {
           debug: true  // generate a source map
         }
@@ -49,7 +44,7 @@ module.exports = function(grunt) {
     uglify: {
       dist: {
         files: {
-          'build/pileup.min.js': ['build/pileup.js']
+          'build/pileup.browser.min.js': ['build/pileup.browser.js']
         }
       }
     },
@@ -57,7 +52,7 @@ module.exports = function(grunt) {
       src: {
         expand: true,
         cwd: 'build/',
-        src: ['tests.js'],
+        src: ['tests.browser.js'],
         dest: 'build/cov/',
         ext: '.js'
       }
@@ -66,7 +61,7 @@ module.exports = function(grunt) {
       bundle: {
         options: {},
         files: {
-          'build/tests.map': ['build/tests.js'],  // externalize source map
+          'build/tests.browser.map': ['build/tests.browser.js'],  // externalize source map
         }
       }
     },

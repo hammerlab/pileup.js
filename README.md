@@ -11,6 +11,8 @@ Interactive in-browser track viewer. [**Try a demo**][demo]!
     cd pileup.js
     npm install
     npm install -g grunt-cli
+    npm install -g jstransform
+    npm run jstransform
     grunt prod
 
 To play with the demo, you'll need to install the node.js [http-server][hs]:

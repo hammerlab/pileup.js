@@ -14,21 +14,8 @@
     "interactive",
     "biojs"
   ],
-  "main": "src/main/pileup.js",
-  "browser": "src/main/pileup.js",
-  "browserify": {
-    "transform": [
-      [
-        "jstransformify",
-        {
-          "react": true,
-          "harmony": true,
-          "stripTypes": true,
-          "nonStrictEs6module": true
-        }
-      ]
-    ]
-  },
+  "main": "build/main/pileup.js",
+  "browser": "build/main/pileup.js",
   "files": [
     "build",
     "src",
@@ -39,6 +26,7 @@
     "url": "https://github.com/hammerlab/pileup.js.git"
   },
   "scripts": {
+    "jstransform": "./scripts/jstransform.sh",
     "lint": "./scripts/lint.sh",
     "test": "grunt test",
     "sniper": "biojs-sniper"
@@ -101,7 +89,7 @@
   },
   "sniper": {
     "js": [
-      "/build/pileup.js"
+      "/build/pileup.browser.js"
     ],
     "css": [
       "style/pileup.css"
