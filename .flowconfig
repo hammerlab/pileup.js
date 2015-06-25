@@ -12,3 +12,5 @@ lib
 types
 
 [options]
+suppress_comment=.*FlowFixMe.*
+

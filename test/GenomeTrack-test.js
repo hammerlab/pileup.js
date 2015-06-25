@@ -11,6 +11,7 @@ var expect = require('chai').expect;
 
 var React = require('../src/react-shim');
 
+/* FlowFixMe */
 var pileup = require('pileup'),
     TwoBit = require('../src/TwoBit'),
     TwoBitDataSource = require('../src/TwoBitDataSource'),

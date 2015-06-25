@@ -13,6 +13,7 @@ var Q = require('q'),
 
 import type * as SamRead from '../src/SamRead';
 
+/* FlowFixMe */
 var pileup = require('pileup'),
     TwoBit = require('../src/TwoBit'),
     TwoBitDataSource = require('../src/TwoBitDataSource'),
