@@ -3,8 +3,7 @@
 
 var expect = require('chai').expect;
 
-/* FlowFixMe */
-var pileup = require('pileup'),
+var pileup = require('../main/pileup'),
     {waitFor} = require('./async');
 
 

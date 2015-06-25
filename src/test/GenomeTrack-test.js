@@ -11,8 +11,7 @@ var expect = require('chai').expect;
 
 var React = require('../main/react-shim');
 
-/* FlowFixMe */
-var pileup = require('pileup'),
+var pileup = require('../main/pileup'),
     TwoBit = require('../main/TwoBit'),
     TwoBitDataSource = require('../main/TwoBitDataSource'),
     MappedRemoteFile = require('./MappedRemoteFile'),
