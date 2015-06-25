@@ -74,7 +74,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
     }
   };
 }
- 
+
 var pileup = {
   create: create,
   formats: {
