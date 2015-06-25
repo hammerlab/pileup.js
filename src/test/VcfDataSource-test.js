@@ -10,7 +10,7 @@ var VcfFile = require('../main/vcf'),
 
 describe('VcfDataSource', function() {
   function getTestSource() {
-    var vcf = new VcfFile(new RemoteFile('/test/data/snv.vcf'));
+    var vcf = new VcfFile(new RemoteFile('/test-data/snv.vcf'));
     return VcfDataSource.createFromVcfFile(vcf);
   }
 

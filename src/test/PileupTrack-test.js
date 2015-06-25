@@ -82,10 +82,10 @@ describe('PileupTrack', function() {
   });
 
   // Test data files
-  var twoBitFile = new MappedRemoteFile('/test/data/hg19.chr17.7500000-7501000.2bit.mapped',
+  var twoBitFile = new MappedRemoteFile('/test-data/hg19.chr17.7500000-7501000.2bit.mapped',
                             [[0, 16383], [691179834, 691183928], [694008946, 694009197]]),
-      bamFile = new RemoteFile('/test/data/synth3.normal.17.7500000-7515000.bam'),
-      bamIndexFile = new RemoteFile('/test/data/synth3.normal.17.7500000-7515000.bam.bai');
+      bamFile = new RemoteFile('/test-data/synth3.normal.17.7500000-7515000.bam'),
+      bamIndexFile = new RemoteFile('/test-data/synth3.normal.17.7500000-7515000.bam.bai');
 
   // It simplifies the tests to have these variables available synchronously.
   var reference = '',

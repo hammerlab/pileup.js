@@ -13,7 +13,7 @@ describe('RemoteFile', () => {
   }
 
   it('should fetch a subset of a file', function() {
-    var f = new RemoteFile('/test/data/0to9.txt');
+    var f = new RemoteFile('/test-data/0to9.txt');
     var promisedData = f.getBytes(4, 5);
 
     expect(f.numNetworkRequests).to.equal(1);
@@ -24,7 +24,7 @@ describe('RemoteFile', () => {
   });
 
   it('should fetch subsets from cache', function() {
-    var f = new RemoteFile('/test/data/0to9.txt');
+    var f = new RemoteFile('/test-data/0to9.txt');
     return f.getBytes(0, 10).then(buf => {
       expect(buf.byteLength).to.equal(10);
       expect(bufferToText(buf)).to.equal('0123456789');
@@ -38,7 +38,7 @@ describe('RemoteFile', () => {
   });
 
   it('should fetch entire files', function() {
-    var f = new RemoteFile('/test/data/0to9.txt');
+    var f = new RemoteFile('/test-data/0to9.txt');
     return f.getAll().then(buf => {
       expect(buf.byteLength).to.equal(11);
       expect(bufferToText(buf)).to.equal('0123456789\n');
@@ -47,7 +47,7 @@ describe('RemoteFile', () => {
   });
 
   it('should determine file lengths', function() {
-    var f = new RemoteFile('/test/data/0to9.txt');
+    var f = new RemoteFile('/test-data/0to9.txt');
     return f.getSize().then(size => {
       expect(size).to.equal(11);
       // TODO: make sure this was a HEAD request
@@ -56,7 +56,7 @@ describe('RemoteFile', () => {
   });
 
   it('should get file lengths from full requests', function() {
-    var f = new RemoteFile('/test/data/0to9.txt');
+    var f = new RemoteFile('/test-data/0to9.txt');
     return f.getAll().then(buf => {
       expect(f.numNetworkRequests).to.equal(1);
       return f.getSize().then(size => {
@@ -67,7 +67,7 @@ describe('RemoteFile', () => {
   });
 
   it('should get file lengths from range requests', function() {
-    var f = new RemoteFile('/test/data/0to9.txt');
+    var f = new RemoteFile('/test-data/0to9.txt');
     return f.getBytes(4, 5).then(buf => {
       expect(f.numNetworkRequests).to.equal(1);
       return f.getSize().then(size => {
@@ -78,7 +78,7 @@ describe('RemoteFile', () => {
   });
 
   it('should cache requests for full files', function() {
-    var f = new RemoteFile('/test/data/0to9.txt');
+    var f = new RemoteFile('/test-data/0to9.txt');
     f.getAll().then(buf => {
       expect(buf.byteLength).to.equal(11);
       expect(bufferToText(buf)).to.equal('0123456789\n');
@@ -92,7 +92,7 @@ describe('RemoteFile', () => {
   });
 
   it('should serve range requests from cache after getAll', function() {
-    var f = new RemoteFile('/test/data/0to9.txt');
+    var f = new RemoteFile('/test-data/0to9.txt');
     return f.getAll().then(buf => {
       expect(buf.byteLength).to.equal(11);
       expect(bufferToText(buf)).to.equal('0123456789\n');
@@ -106,7 +106,7 @@ describe('RemoteFile', () => {
   });
 
   it('should reject requests to a non-existent file', function() {
-    var f = new RemoteFile('/test/data/nonexistent-file.txt');
+    var f = new RemoteFile('/test-data/nonexistent-file.txt');
     return f.getAll().then(buf => {
       throw 'Requests for non-existent files should not succeed';
     }, err => {
@@ -115,7 +115,7 @@ describe('RemoteFile', () => {
   });
 
   it('should truncate requests past EOF', function() {
-    var f = new RemoteFile('/test/data/0to9.txt');
+    var f = new RemoteFile('/test-data/0to9.txt');
     var promisedData = f.getBytes(4, 100);
 
     return promisedData.then(buf => {
@@ -131,7 +131,7 @@ describe('RemoteFile', () => {
   });
 
   it('should fetch entire files as strings', function() {
-    var f = new RemoteFile('/test/data/0to9.txt');
+    var f = new RemoteFile('/test-data/0to9.txt');
     return f.getAllString().then(txt => {
       expect(txt).to.equal('0123456789\n');
     });

@@ -102,8 +102,8 @@ describe('pileuputils', function() {
     "TCAGCTATTCAGGGTGGCTGAGATATGAGAATCACTTGAAGCCAGGAGGCAGAGGCTGCAGGGTCGTCTGG" +
     "ATTT";
   it('should split reads into ops', function() {
-    var bamFile = new RemoteFile('/test/data/synth3.normal.17.7500000-7515000.bam'),
-        bamIndexFile = new RemoteFile('/test/data/synth3.normal.17.7500000-7515000.bam.bai'),
+    var bamFile = new RemoteFile('/test-data/synth3.normal.17.7500000-7515000.bam'),
+        bamIndexFile = new RemoteFile('/test-data/synth3.normal.17.7500000-7515000.bam.bai'),
         bam = new Bam(bamFile, bamIndexFile);
 
     var range = new ContigInterval('chr17', 7513106, 7513400);

@@ -14,14 +14,14 @@ describe('pileup', function() {
       viz: pileup.viz.genome(),
       isReference: true,
       data: pileup.formats.twoBit({
-        url: '/test/data/test.2bit'
+        url: '/test-data/test.2bit'
       }),
       cssClass: 'a'
     },
     {
       viz: pileup.viz.variants(),
       data: pileup.formats.vcf({
-        url: '/test/data/snv.chr17.vcf'
+        url: '/test-data/snv.chr17.vcf'
       }),
       cssClass: 'b'
     },
@@ -30,15 +30,15 @@ describe('pileup', function() {
       data: pileup.formats.bigBed({
         // This file contains just TP53, shifted so that it starts at the
         // beginning of chr17 (to match test.2bit). See test/data/README.md.
-        url: '/test/data/tp53.shifted.bb'
+        url: '/test-data/tp53.shifted.bb'
       }),
       cssClass: 'c'
     },
     {
       viz: pileup.viz.pileup(),
       data: pileup.formats.bam({
-        url: '/test/data/chr17.1-250.bam',
-        indexUrl: '/test/data/chr17.1-250.bam.bai'
+        url: '/test-data/chr17.1-250.bam',
+        indexUrl: '/test-data/chr17.1-250.bam.bai'
       }),
       cssClass: 'd'
     }

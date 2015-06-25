@@ -11,7 +11,7 @@ var TwoBit = require('../main/TwoBit'),
 describe('TwoBit', function() {
   function getTestTwoBit() {
     // See test/data/README.md for provenance
-    return new TwoBit(new RemoteFile('/test/data/test.2bit'));
+    return new TwoBit(new RemoteFile('/test-data/test.2bit'));
   }
 
   it('should have the right contigs', function() {

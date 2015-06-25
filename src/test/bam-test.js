@@ -11,7 +11,7 @@ var Bam = require('../main/bam'),
 
 describe('BAM', function() {
   it('should parse BAM files', function() {
-    var bamFile = new Bam(new RemoteFile('/test/data/test_input_1_a.bam'));
+    var bamFile = new Bam(new RemoteFile('/test-data/test_input_1_a.bam'));
     return bamFile.readAll().then(bamData => {
       var refs = bamData.header.references;
       expect(refs).to.have.length(4);
@@ -63,8 +63,8 @@ describe('BAM', function() {
 
   // This matches htsjdk's BamFileIndexTest.testSpecificQueries
   it('should find sequences using an index', function() {
-    var bam = new Bam(new RemoteFile('/test/data/index_test.bam'),
-                      new RemoteFile('/test/data/index_test.bam.bai'));
+    var bam = new Bam(new RemoteFile('/test-data/index_test.bam'),
+                      new RemoteFile('/test-data/index_test.bam.bai'));
 
     // TODO: run these in parallel
     var range = new ContigInterval('chrM', 10400, 10600);
@@ -84,8 +84,8 @@ describe('BAM', function() {
   });
 
   it('should fetch alignments from chr18', function() {
-    var bam = new Bam(new RemoteFile('/test/data/index_test.bam'),
-                      new RemoteFile('/test/data/index_test.bam.bai'));
+    var bam = new Bam(new RemoteFile('/test-data/index_test.bam'),
+                      new RemoteFile('/test-data/index_test.bam.bai'));
     var range = new ContigInterval('chr18', 3627238, 6992285);
 
     /* Grabbed from IntelliJ & htsjdk using this code fragment:
@@ -120,8 +120,8 @@ describe('BAM', function() {
   });
 
   it('should fetch alignments across a chunk boundary', function() {
-    var bam = new Bam(new RemoteFile('/test/data/index_test.bam'),
-                      new RemoteFile('/test/data/index_test.bam.bai'));
+    var bam = new Bam(new RemoteFile('/test-data/index_test.bam'),
+                      new RemoteFile('/test-data/index_test.bam.bai'));
     var range = new ContigInterval('chr1', 90002285, 116992285);
     return bam.getAlignmentsInRange(range).then(reads => {
       expect(reads).to.have.length(92);
@@ -149,15 +149,15 @@ describe('BAM', function() {
   it('should fetch an alignment at a specific offset', function() {
     // This virtual offset matches the one above.
     // This verifies that alignments are tagged with the correct offset.
-    var bam = new Bam(new RemoteFile('/test/data/index_test.bam'));
+    var bam = new Bam(new RemoteFile('/test-data/index_test.bam'));
     return bam.readAtOffset(new VirtualOffset(28269, 2247)).then(read => {
       expect(read.toString()).to.equal('chr1:116563944-116563994');
     });
   });
 
   it('should fetch alignments in a wide interval', function() {
-    var bam = new Bam(new RemoteFile('/test/data/index_test.bam'),
-                      new RemoteFile('/test/data/index_test.bam.bai'));
+    var bam = new Bam(new RemoteFile('/test-data/index_test.bam'),
+                      new RemoteFile('/test-data/index_test.bam.bai'));
     var range = new ContigInterval('chr20', 1, 412345678);
     return bam.getAlignmentsInRange(range).then(reads => {
       // This count matches what you get if you run:
@@ -170,9 +170,9 @@ describe('BAM', function() {
     this.timeout(5000);
 
     // See test/data/README.md for details on where these files came from.
-    var remoteBAI = new MappedRemoteFile('/test/data/dream.synth3.bam.bai.mapped',
+    var remoteBAI = new MappedRemoteFile('/test-data/dream.synth3.bam.bai.mapped',
                                          [[8054040, 8242920]]),
-        remoteBAM = new MappedRemoteFile('/test/data/dream.synth3.bam.mapped',
+        remoteBAM = new MappedRemoteFile('/test-data/dream.synth3.bam.mapped',
                                          [[0, 69453], [163622109888, 163622739903]]);
 
     var bam = new Bam(remoteBAM, remoteBAI, {
@@ -193,8 +193,8 @@ describe('BAM', function() {
 
   // Regression test for https://github.com/hammerlab/pileup.js/issues/88
   it('should fetch reads at EOF', function() {
-    var bamFile = new RemoteFile('/test/data/synth3.normal.17.7500000-7515000.bam'),
-        baiFile = new RemoteFile('/test/data/synth3.normal.17.7500000-7515000.bam.bai'),
+    var bamFile = new RemoteFile('/test-data/synth3.normal.17.7500000-7515000.bam'),
+        baiFile = new RemoteFile('/test-data/synth3.normal.17.7500000-7515000.bam.bai'),
         bam = new Bam(bamFile, baiFile);
 
     var range = new ContigInterval('chr17', 7514800, 7515100);
@@ -207,8 +207,8 @@ describe('BAM', function() {
   // Regression test for https://github.com/hammerlab/pileup.js/issues/172
   // TODO: find a simpler BAM which exercises this code path.
   it('should progress through the chunk list', function() {
-    var bamFile = new MappedRemoteFile('/test/data/small-chunks.bam.mapped', [[0, 65535], [6536374255, 6536458689], [6536533365, 6536613506], [6536709837, 6536795141]]),
-        baiFile = new MappedRemoteFile('/test/data/small-chunks.bam.bai.mapped', [[6942576, 7102568]]),
+    var bamFile = new MappedRemoteFile('/test-data/small-chunks.bam.mapped', [[0, 65535], [6536374255, 6536458689], [6536533365, 6536613506], [6536709837, 6536795141]]),
+        baiFile = new MappedRemoteFile('/test-data/small-chunks.bam.bai.mapped', [[6942576, 7102568]]),
         chunks = {'chunks': {'19': [6942576, 7102568]}, 'minBlockIndex': 65536},
         bam = new Bam(bamFile, baiFile, chunks);
 
@@ -219,8 +219,8 @@ describe('BAM', function() {
   });
 
   it('should fire progress events', function() {
-    var bamFile = new MappedRemoteFile('/test/data/small-chunks.bam.mapped', [[0, 65535], [6536374255, 6536458689], [6536533365, 6536613506], [6536709837, 6536795141]]),
-        baiFile = new MappedRemoteFile('/test/data/small-chunks.bam.bai.mapped', [[6942576, 7102568]]),
+    var bamFile = new MappedRemoteFile('/test-data/small-chunks.bam.mapped', [[0, 65535], [6536374255, 6536458689], [6536533365, 6536613506], [6536709837, 6536795141]]),
+        baiFile = new MappedRemoteFile('/test-data/small-chunks.bam.bai.mapped', [[6942576, 7102568]]),
         chunks = {'chunks': {'19': [6942576, 7102568]}, 'minBlockIndex': 65536},
         bam = new Bam(bamFile, baiFile, chunks);
 

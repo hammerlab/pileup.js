@@ -11,7 +11,7 @@ var TwoBit = require('../main/TwoBit'),
 describe('TwoBitDataSource', function() {
   function getTestSource() {
     // See description of this file in TwoBit-test.js
-    var tb = new TwoBit(new RemoteFile('/test/data/test.2bit'));
+    var tb = new TwoBit(new RemoteFile('/test-data/test.2bit'));
     return TwoBitDataSource.createFromTwoBitFile(tb);
   }
 
@@ -77,7 +77,7 @@ describe('TwoBitDataSource', function() {
   });
 
   it('should not fetch data twice', function(done) {
-    var file = new RemoteFile('/test/data/test.2bit'),
+    var file = new RemoteFile('/test-data/test.2bit'),
         tb = new TwoBit(file),
         source = TwoBitDataSource.createFromTwoBitFile(tb);
 
