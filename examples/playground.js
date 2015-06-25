@@ -1,3 +1,5 @@
+var pileup = require('pileup');
+
 var sources = [
   {
     viz: pileup.viz.genome(),

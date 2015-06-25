@@ -27,9 +27,14 @@
   },
   "scripts": {
     "jstransform": "./scripts/jstransform.sh",
+    "jstransform-watch": "JSTRANSFORM_OPTS='--watch' ./scripts/jstransform.sh",
+    "browserify": "browserify -r .:pileup -v --debug -o build/pileup.browser.js",
+    "watch": "watchify -r .:pileup -v --debug -o build/pileup.browser.js",
     "lint": "./scripts/lint.sh",
     "test": "grunt test",
-    "sniper": "biojs-sniper"
+    "sniper": "biojs-sniper",
+    "build": "npm run jstransform && npm run browserify && grunt uglify",
+    "install": "npm run build"
   },
   "author": "Dan Vanderkam",
   "contributors": [
@@ -51,7 +56,6 @@
     "d3": "^3.5.5",
     "jbinary": "^2.1.3",
     "jdataview": "^2.5.0",
-    "jstransformify": "^1.0.0",
     "pako": "^0.2.5",
     "q": "^1.1.2",
     "react": "^0.13.2",
@@ -60,6 +64,7 @@
   },
   "devDependencies": {
     "arraybuffer-slice": "^0.1.2",
+    "browserify": "^10.2.4",
     "chai": "^2.0.0",
     "coveralls": "2.10.x",
     "es5-shim": "^4.1.0",
@@ -74,6 +79,8 @@
     "grunt-jscoverage": "^0.1.3",
     "grunt-mocha-phantomjs": ">=0.6.1",
     "grunt-mocha-test": "^0.12.7",
+    "jstransform": "^11.0.2",
+    "jstransformify": "^1.0.0",
     "jsxhint": "git://github.com/strml/JSXHint.git",
     "lcov-parse": "0.0.9",
     "mocha": "^2.1.0",

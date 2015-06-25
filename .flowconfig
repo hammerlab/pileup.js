@@ -6,6 +6,7 @@
 .*build.*
 
 [include]
+src
 
 [libs]
 lib

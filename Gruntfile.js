@@ -11,21 +11,19 @@ module.exports = function(grunt) {
       }
     },
     browserify: {
-      dist: {
-        files: {
-          'build/pileup.browser.js': ['build/main/**/*.js']
-        },
-      },
       test: {
         files: {
           'build/tests.browser.js': ['build/main/**/*.js', 'build/test/**/*-test.js']
         }
       },
       watchDist: {
-        files: '<%= browserify.dist.files %>',
+        files: {
+          'build/pileup.browser.js': ['build/main/**/*.js']
+        },
         options: {
           watch: true,
           keepAlive: true,
+          require: ['./build/main/pileup.js:pileup']
         }
       },
       watchTest: {
@@ -97,7 +95,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks("grunt-exorcise");
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
-  grunt.registerTask('prod', ['browserify:dist', 'uglify:dist']);
+  grunt.registerTask('prod', ['uglify:dist']);
   grunt.registerTask('test', ['browserify:test', 'connect', 'mocha_phantomjs:run']);
   grunt.registerTask('travis', ['flow', 'test']);
   grunt.registerTask('coverage',
