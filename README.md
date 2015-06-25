@@ -104,7 +104,7 @@ To continuously regenerate the combined JS, run:
 
 To typecheck the code, run
 
-    flow status .
+    npm run flow
 
 For best results, use one of the flowtype editor integrations.
 
