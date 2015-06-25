@@ -39,7 +39,6 @@ module.exports = function(grunt) {
         }
       },
       options: {
-        require: ['./src/main/pileup.js:pileup'],
         // read shared transformation options from package.json
         transform: packageSettings.browserify.transform,
         browserifyOptions: {
