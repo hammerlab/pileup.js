@@ -16,12 +16,12 @@ module.exports = function(grunt) {
     browserify: {
       dist: {
         files: {
-          'build/pileup.js': ['src/**/*.js']
+          'build/pileup.js': ['src/main/**/*.js']
         },
       },
       test: {
         files: {
-          'build/tests.js': ['src/**/*.js', 'test/**/*-test.js']
+          'build/tests.js': ['src/main/**/*.js', 'src/test/**/*-test.js']
         }
       },
       watchDist: {
@@ -39,7 +39,7 @@ module.exports = function(grunt) {
         }
       },
       options: {
-        require: ['./src/pileup.js:pileup'],
+        require: ['./src/main/pileup.js:pileup'],
         // read shared transformation options from package.json
         transform: packageSettings.browserify.transform,
         browserifyOptions: {
