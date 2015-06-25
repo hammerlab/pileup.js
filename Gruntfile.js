@@ -95,7 +95,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks("grunt-exorcise");
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
-  grunt.registerTask('prod', ['uglify:dist']);
   grunt.registerTask('test', ['browserify:test', 'connect', 'mocha_phantomjs:run']);
   grunt.registerTask('travis', ['flow', 'test']);
   grunt.registerTask('coverage',
