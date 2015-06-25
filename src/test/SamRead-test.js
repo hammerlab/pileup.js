@@ -16,7 +16,7 @@ describe('SamRead', function() {
     return new Bam(new RemoteFile(url)).readAll().then(d => d.alignments);
   }
 
-  var testReads = getSamArray('/test/data/test_input_1_a.bam');
+  var testReads = getSamArray('/test-data/test_input_1_a.bam');
 
   // This is more of a test for the test than for SamRead.
   it('should pull records from a BAM file', function() {

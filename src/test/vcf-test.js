@@ -9,7 +9,7 @@ var VcfFile = require('../main/vcf'),
 
 describe('VCF', function() {
   it('should respond to queries', function() {
-    var vcf = new VcfFile(new RemoteFile('/test/data/snv.vcf'));
+    var vcf = new VcfFile(new RemoteFile('/test-data/snv.vcf'));
     var range = new ContigInterval('20', 63799, 69094);
     return vcf.getFeaturesInRange(range).then(features => {
       expect(features).to.have.length(6);
@@ -30,7 +30,7 @@ describe('VCF', function() {
   });
 
   it('should add chr', function() {
-    var vcf = new VcfFile(new RemoteFile('/test/data/snv.vcf'));
+    var vcf = new VcfFile(new RemoteFile('/test-data/snv.vcf'));
     var range = new ContigInterval('chr20', 63799, 69094);
     return vcf.getFeaturesInRange(range).then(features => {
       expect(features).to.have.length(6);
@@ -40,7 +40,7 @@ describe('VCF', function() {
   });
 
   it('should handle unsorted VCFs', function() {
-    var vcf = new VcfFile(new RemoteFile('/test/data/sort-bug.vcf'));
+    var vcf = new VcfFile(new RemoteFile('/test-data/sort-bug.vcf'));
     var chr1 = new ContigInterval('chr1', 1, 1234567890),  // all of chr1
         chr5 = new ContigInterval('chr5', 1, 1234567890);
     return vcf.getFeaturesInRange(chr1).then(features => {

@@ -14,7 +14,7 @@ describe('MappedRemoteFile', function() {
   }
 
   it('should serve requests through the map', function() {
-    var remoteFile = new MappedRemoteFile('/test/data/0to9.txt', [
+    var remoteFile = new MappedRemoteFile('/test-data/0to9.txt', [
       [0, 2],  // 0,1,2
       [12345678, 12345680],  // 3,4,5
       [9876543210, 9876543214]  // 6,7,8,9,\n
@@ -50,7 +50,7 @@ describe('MappedRemoteFile', function() {
   });
 
   it('should forget file length', function() {
-    var remoteFile = new MappedRemoteFile('/test/data/0to9.txt', [
+    var remoteFile = new MappedRemoteFile('/test-data/0to9.txt', [
       [0, 2],  // 0,1,2
       [12345673, 12345690]  // 3456789\n
     ]);

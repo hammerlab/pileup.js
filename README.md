@@ -47,8 +47,8 @@ var p = pileup.create(div, {
     {
       viz: pileup.viz.pileup(),
       data: pileup.formats.bam({
-        url: '/test/data/synth3.normal.17.7500000-7515000.bam',
-        indexUrl: '/test/data/synth3.normal.17.7500000-7515000.bam.bai'
+        url: '/test-data/synth3.normal.17.7500000-7515000.bam',
+        indexUrl: '/test-data/synth3.normal.17.7500000-7515000.bam.bai'
       }),
       cssClass: 'normal',
       name: 'Alignments'
@@ -77,7 +77,7 @@ To style multiple tracks of the same type, you can use the `cssClass` property.
 ## BioJS
 
 Alternatively you can use [BioJS sniper][sniper] for the demo:
-    
+
     npm install -g sniper # installs sniper globally
 
 Once installed, start sniper in the `pileup.js` folder:

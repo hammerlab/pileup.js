@@ -11,7 +11,7 @@ describe('BigBedDataSource', function() {
   function getTestSource() {
     // See test/data/README.md
     return BigBedDataSource.createFromBigBedFile(
-        new BigBed('/test/data/ensembl.chr17.bb'));
+        new BigBed('/test-data/ensembl.chr17.bb'));
   }
 
   it('should extract features in a range', function(done) {

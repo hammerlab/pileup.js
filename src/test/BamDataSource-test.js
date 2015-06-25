@@ -11,9 +11,9 @@ var Bam = require('../main/bam'),
 describe('BamDataSource', function() {
   function getTestSource() {
     // See test/data/README.md for provenance of these files.
-    var remoteBAI = new MappedRemoteFile('/test/data/dream.synth3.bam.bai.mapped',
+    var remoteBAI = new MappedRemoteFile('/test-data/dream.synth3.bam.bai.mapped',
                                          [[8054040, 8242920]]),
-        remoteBAM = new MappedRemoteFile('/test/data/dream.synth3.bam.mapped',
+        remoteBAM = new MappedRemoteFile('/test-data/dream.synth3.bam.mapped',
                                          [[0, 69453], [163622109888, 163622739903]]);
 
     var bam = new Bam(remoteBAM, remoteBAI, {

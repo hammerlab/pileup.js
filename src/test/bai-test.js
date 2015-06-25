@@ -38,7 +38,7 @@ describe('BAI', function() {
 
   // This matches htsjdk's BamFileIndexTest.testSpecificQueries
   it('should parse large BAI files', function() {
-    var bai = new BaiFile(new RemoteFile('/test/data/index_test.bam.bai'));
+    var bai = new BaiFile(new RemoteFile('/test-data/index_test.bam.bai'));
 
     // contig 0 = chrM
     var range = new ContigInterval(0, 10400, 10600);
@@ -49,7 +49,7 @@ describe('BAI', function() {
   });
 
   it('should use index chunks', function() {
-    var remoteFile = new RecordedRemoteFile('/test/data/index_test.bam.bai');
+    var remoteFile = new RecordedRemoteFile('/test-data/index_test.bam.bai');
     var bai = new BaiFile(remoteFile,
                           {
                             'chunks': [[8, 144], [144, 13776]],
@@ -69,7 +69,7 @@ describe('BAI', function() {
   });
 
   it('should compute index chunks', function() {
-    var bai = new BaiFile(new RemoteFile('/test/data/index_test.bam.bai'));
+    var bai = new BaiFile(new RemoteFile('/test-data/index_test.bam.bai'));
     return bai.immediate.then(imm => {
       var chunks = imm.indexChunks;
 
@@ -128,7 +128,7 @@ describe('BAI', function() {
   });
 
   it('should index a small BAI file', function() {
-    var bai = new BaiFile(new RemoteFile('/test/data/test_input_1_b.bam.bai'));
+    var bai = new BaiFile(new RemoteFile('/test-data/test_input_1_b.bam.bai'));
     return bai.immediate.then(imm => {
       var chunks = imm.indexChunks;
 
