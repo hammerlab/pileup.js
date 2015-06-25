@@ -1,8 +1,10 @@
 sudo: false  # Use container-based infrastructure
 language: node_js
-node_js: 
+node_js:
   - "0.12"
 
-before_install: npm install -g grunt-cli
+before_install:
+  - npm install -g grunt-cli
+  - npm install -g jstransform
 
-script: grunt travis && ./scripts/lint.sh && ./scripts/post-coverage.sh
+script: ./scripts/jstransform.sh && grunt travis && ./scripts/lint.sh && ./scripts/post-coverage.sh
