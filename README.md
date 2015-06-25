@@ -24,7 +24,7 @@ To use pileup.js in a project, install it via NPM:
 
     npm install --save pileup
 
-And then source either `node_modules/pileup/build/pileup.min.js` or `pileup.js`.
+And then source either `node_modules/pileup/build/pileup.browser.min.js` or `pileup.browser.js`.
 
 To create a pileup, use `pileup.create()`. You specify a container DOM element,
 an initial range and a list of tracks:
@@ -92,12 +92,14 @@ Run the tests from the command line:
 
 Run the tests in a real browser:
 
+    npm run jstransform-watch
     grunt browserify:watchTest
     http-server
     open "http://localhost:8080/src/test/runner.html"
 
 To continuously regenerate the combined JS, run:
 
+    npm run jstransform-watch
     grunt browserify:watchDist
 
 To typecheck the code, run
