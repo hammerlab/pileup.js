@@ -3,8 +3,8 @@
 
 var expect = require('chai').expect;
 
-var bedtools = require('../src/bedtools'),
-    Interval = require('../src/Interval');
+var bedtools = require('../main/bedtools'),
+    Interval = require('../main/Interval');
 
 describe('bedtools', function() {
   describe('splitCodingExons', function() {

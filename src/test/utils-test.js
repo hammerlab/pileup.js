@@ -6,7 +6,7 @@ var expect = require('chai').expect;
 var pako = require('pako'),
     jBinary = require('jbinary');
 
-var utils = require('../src/utils');
+var utils = require('../main/utils');
 
 describe('utils', function() {
   describe('tupleLessOrEqual', function() {

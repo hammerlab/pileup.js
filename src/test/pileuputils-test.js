@@ -7,13 +7,13 @@ require('chai').config.truncateThreshold = 0; // disable truncating
 
 var _ = require('underscore');
 
-var {pileup, addToPileup,  getOpInfo} = require('../src/pileuputils'),
-    Interval = require('../src/Interval'),
-    ContigInterval = require('../src/ContigInterval'),
-    Bam = require('../src/bam'),
-    RemoteFile = require('../src/RemoteFile');
+var {pileup, addToPileup,  getOpInfo} = require('../main/pileuputils'),
+    Interval = require('../main/Interval'),
+    ContigInterval = require('../main/ContigInterval'),
+    Bam = require('../main/bam'),
+    RemoteFile = require('../main/RemoteFile');
 
-import type * as SamRead from '../src/SamRead';
+import type * as SamRead from '../main/SamRead';
 
 describe('pileuputils', function() {
   // This checks that pileup's guarantee is met.

@@ -1,7 +1,7 @@
 /**
  * This class allows testing with extremely large files, without the need to
  * store large files in the git repo.
- * 
+ *
  * It stores subsets of a file on disk, then maps these back to the original
  * portions of the file.
  *
@@ -18,8 +18,8 @@
 
 var Q = require('q');
 
-var RemoteFile = require('../src/RemoteFile'),
-    Interval = require('../src/Interval');
+var RemoteFile = require('../main/RemoteFile'),
+    Interval = require('../main/Interval');
 
 class MappedRemoteFile extends RemoteFile {
   maps: Array<Interval>;

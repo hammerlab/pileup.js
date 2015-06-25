@@ -5,7 +5,7 @@ var expect = require('chai').expect;
 
 var jBinary = require('jbinary');
 
-var RemoteFile = require('../src/RemoteFile');
+var RemoteFile = require('../main/RemoteFile');
 
 describe('RemoteFile', () => {
   function bufferToText(buf) {

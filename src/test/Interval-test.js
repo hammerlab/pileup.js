@@ -3,7 +3,7 @@
 
 var expect = require('chai').expect;
 
-var Interval = require('../src/Interval');
+var Interval = require('../main/Interval');
 
 describe('Interval', function() {
   it('should have start/stop/length', function() {

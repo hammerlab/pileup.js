@@ -3,10 +3,10 @@
 
 var expect = require('chai').expect;
 
-var VcfFile = require('../src/vcf'),
-    VcfDataSource = require('../src/VcfDataSource'),
-    ContigInterval = require('../src/ContigInterval'),
-    RemoteFile = require('../src/RemoteFile');
+var VcfFile = require('../main/vcf'),
+    VcfDataSource = require('../main/VcfDataSource'),
+    ContigInterval = require('../main/ContigInterval'),
+    RemoteFile = require('../main/RemoteFile');
 
 describe('VcfDataSource', function() {
   function getTestSource() {

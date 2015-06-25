@@ -4,8 +4,8 @@
 var expect = require('chai').expect;
 
 var Q = require('q');
-var BigBed = require('../src/BigBed');
-var ContigInterval = require('../src/ContigInterval');
+var BigBed = require('../main/BigBed');
+var ContigInterval = require('../main/ContigInterval');
 
 describe('BigBed', function() {
   function getTestBigBed() {
@@ -125,4 +125,3 @@ describe('BigBed', function() {
   // - getFeatures which crosses a block boundary
   // - uncompressed bigBed file.
 });
-

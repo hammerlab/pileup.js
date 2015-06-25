@@ -2,13 +2,13 @@
 'use strict';
 
 import type * as Q from 'q';
-import type * as SamRead from '../src/SamRead';
+import type * as SamRead from '../main/SamRead';
 
 var expect = require('chai').expect;
 
-var RemoteFile = require('../src/RemoteFile'),
-    Bam = require('../src/bam'),
-    ContigInterval = require('../src/ContigInterval');
+var RemoteFile = require('../main/RemoteFile'),
+    Bam = require('../main/bam'),
+    ContigInterval = require('../main/ContigInterval');
 
 describe('SamRead', function() {
 
