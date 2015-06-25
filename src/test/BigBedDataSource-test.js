@@ -3,9 +3,9 @@
 
 var expect = require('chai').expect;
 
-var BigBed = require('../src/BigBed'),
-    BigBedDataSource = require('../src/BigBedDataSource'),
-    ContigInterval = require('../src/ContigInterval');
+var BigBed = require('../main/BigBed'),
+    BigBedDataSource = require('../main/BigBedDataSource'),
+    ContigInterval = require('../main/ContigInterval');
 
 describe('BigBedDataSource', function() {
   function getTestSource() {

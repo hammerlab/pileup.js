@@ -5,10 +5,10 @@ var expect = require('chai').expect;
 
 var jBinary = require('jbinary');
 
-var BaiFile = require('../src/bai'),
-    bamTypes = require('../src/formats/bamTypes'),
-    ContigInterval = require('../src/ContigInterval'),
-    RemoteFile = require('../src/RemoteFile'),
+var BaiFile = require('../main/bai'),
+    bamTypes = require('../main/formats/bamTypes'),
+    ContigInterval = require('../main/ContigInterval'),
+    RemoteFile = require('../main/RemoteFile'),
     RecordedRemoteFile = require('./RecordedRemoteFile');
 
 function chunkToString(chunk) {

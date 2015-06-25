@@ -5,8 +5,8 @@ var chai = require('chai');
 var expect = chai.expect;
 var assert = chai.assert;
 
-var TwoBit = require('../src/TwoBit'),
-    RemoteFile = require('../src/RemoteFile');
+var TwoBit = require('../main/TwoBit'),
+    RemoteFile = require('../main/RemoteFile');
 
 describe('TwoBit', function() {
   function getTestTwoBit() {

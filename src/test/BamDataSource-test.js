@@ -3,9 +3,9 @@
 
 var expect = require('chai').expect;
 
-var Bam = require('../src/bam'),
-    BamDataSource = require('../src/BamDataSource'),
-    ContigInterval = require('../src/ContigInterval'),
+var Bam = require('../main/bam'),
+    BamDataSource = require('../main/BamDataSource'),
+    ContigInterval = require('../main/ContigInterval'),
     MappedRemoteFile = require('./MappedRemoteFile');
 
 describe('BamDataSource', function() {

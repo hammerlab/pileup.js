@@ -11,17 +11,17 @@ var Q = require('q'),
     _ = require('underscore'),
     d3 = require('d3');
 
-import type * as SamRead from '../src/SamRead';
+import type * as SamRead from '../main/SamRead';
 
 /* FlowFixMe */
 var pileup = require('pileup'),
-    TwoBit = require('../src/TwoBit'),
-    TwoBitDataSource = require('../src/TwoBitDataSource'),
-    Bam = require('../src/bam'),
-    BamDataSource = require('../src/BamDataSource'),
-    RemoteFile = require('../src/RemoteFile'),
+    TwoBit = require('../main/TwoBit'),
+    TwoBitDataSource = require('../main/TwoBitDataSource'),
+    Bam = require('../main/bam'),
+    BamDataSource = require('../main/BamDataSource'),
+    RemoteFile = require('../main/RemoteFile'),
     MappedRemoteFile = require('./MappedRemoteFile'),
-    ContigInterval = require('../src/ContigInterval'),
+    ContigInterval = require('../main/ContigInterval'),
     {waitFor} = require('./async');
 
 
@@ -90,7 +90,7 @@ describe('PileupTrack', function() {
   // It simplifies the tests to have these variables available synchronously.
   var reference = '',
       alignments = [];
-      
+
   before(function() {
     var twoBit = new TwoBit(twoBitFile),
         bam = new Bam(bamFile, bamIndexFile);

@@ -4,7 +4,7 @@
 var expect = require('chai').expect;
 
 var jBinary = require('jbinary');
-var helpers = require('../src/formats/helpers');
+var helpers = require('../main/formats/helpers');
 
 describe('jBinary Helpers', function() {
   it('should read sized blocks', function() {
@@ -87,7 +87,7 @@ describe('jBinary Helpers', function() {
         u8small = new jBinary([0x00, 0x00, 0x43, 0xF3, 0x04, 0x00, 0x00, 0x00], TYPE_SET);
     // TODO: test a few numbers right on the edge
     // TODO: test number that wraps around to negative as a float
-    
+
     expect(() => u8big.read('uint64native')).to.throw(RangeError);
     expect(u8small.read('uint64native')).to.equal(21261123584);
   });

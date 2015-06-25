@@ -3,11 +3,11 @@
 
 var expect = require('chai').expect;
 
-var Bam = require('../src/bam'),
-    ContigInterval = require('../src/ContigInterval'),
-    RemoteFile = require('../src/RemoteFile'),
+var Bam = require('../main/bam'),
+    ContigInterval = require('../main/ContigInterval'),
+    RemoteFile = require('../main/RemoteFile'),
     MappedRemoteFile = require('./MappedRemoteFile'),
-    VirtualOffset = require('../src/VirtualOffset');
+    VirtualOffset = require('../main/VirtualOffset');
 
 describe('BAM', function() {
   it('should parse BAM files', function() {
@@ -60,7 +60,7 @@ describe('BAM', function() {
       // - one with a more interesting Phred string
     });
   });
-  
+
   // This matches htsjdk's BamFileIndexTest.testSpecificQueries
   it('should find sequences using an index', function() {
     var bam = new Bam(new RemoteFile('/test/data/index_test.bam'),

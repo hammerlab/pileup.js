@@ -3,7 +3,7 @@
 
 var expect = require('chai').expect;
 
-var ContigInterval = require('../src/ContigInterval');
+var ContigInterval = require('../main/ContigInterval');
 
 describe('ContigInterval', function() {
   it('should have basic accessors', function() {

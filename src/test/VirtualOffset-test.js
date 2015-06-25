@@ -4,8 +4,8 @@
 var expect = require('chai').expect;
 
 var jBinary = require('jbinary'),
-    bamTypes = require('../src/formats/bamTypes'),
-    VirtualOffset = require('../src/VirtualOffset');
+    bamTypes = require('../main/formats/bamTypes'),
+    VirtualOffset = require('../main/VirtualOffset');
 
 describe('VirtualOffset', function() {
   // These test that .fromBlob() is equivalent to jBinary.read('VirtualOffset').

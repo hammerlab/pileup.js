@@ -62,7 +62,7 @@ describe('pileup', function() {
       tracks: tracks
     });
 
-    var ready = (() => 
+    var ready = (() =>
       div.querySelectorAll('.basepair').length > 0 &&
       div.querySelectorAll('.gene').length > 0 &&
       div.querySelectorAll('.alignment').length > 0

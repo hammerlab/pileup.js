@@ -3,9 +3,9 @@
 
 var expect = require('chai').expect;
 
-var VcfFile = require('../src/vcf'),
-    ContigInterval = require('../src/ContigInterval'),
-    RemoteFile = require('../src/RemoteFile');
+var VcfFile = require('../main/vcf'),
+    ContigInterval = require('../main/ContigInterval'),
+    RemoteFile = require('../main/RemoteFile');
 
 describe('VCF', function() {
   it('should respond to queries', function() {

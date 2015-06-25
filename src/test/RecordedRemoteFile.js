@@ -9,8 +9,8 @@ import type * as Q from 'q';
 
 var _ = require('underscore');
 
-var RemoteFile = require('../src/RemoteFile'),
-    Interval = require('../src/Interval');
+var RemoteFile = require('../main/RemoteFile'),
+    Interval = require('../main/Interval');
 
 class RecordedRemoteFile extends RemoteFile {
   requests: Array<Interval>;

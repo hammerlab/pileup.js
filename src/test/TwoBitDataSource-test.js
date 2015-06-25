@@ -4,9 +4,9 @@
 var expect = require('chai').expect;
 var Q = require('q');
 
-var TwoBit = require('../src/TwoBit'),
-    TwoBitDataSource = require('../src/TwoBitDataSource'),
-    RemoteFile = require('../src/RemoteFile');
+var TwoBit = require('../main/TwoBit'),
+    TwoBitDataSource = require('../main/TwoBitDataSource'),
+    RemoteFile = require('../main/RemoteFile');
 
 describe('TwoBitDataSource', function() {
   function getTestSource() {
