@@ -14,8 +14,8 @@
     "interactive",
     "biojs"
   ],
-  "main": "build/pileup.js",
-  "browser": "src/pileup.js",
+  "main": "src/main/pileup.js",
+  "browser": "src/main/pileup.js",
   "browserify": {
     "transform": [
       [
