@@ -74,12 +74,12 @@ module.exports = function(grunt) {
     mocha_phantomjs: {
       run: {
         options: {
-          urls: ['http://localhost:9501/test/runner.html']
+          urls: ['http://localhost:9501/src/test/runner.html']
         }
       },
       cov: {
         options: {
-          urls: ['http://localhost:9501/test/coverage.html'],
+          urls: ['http://localhost:9501/src/test/coverage.html'],
           reporter: 'node_modules/mocha-lcov-reporter/lib/lcov.js',
           output: 'build/bundled.lcov',
           silent: true
