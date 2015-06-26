@@ -88,6 +88,8 @@ describe('GenomeTrack', function() {
       return ((els: any): HTMLInputElement[]);
     };
 
+    expect(testDiv.querySelectorAll('.zoom-controls')).to.have.length(1);
+
     var buttons = testDiv.querySelectorAll('.controls button');
     var [goBtn, minusBtn, plusBtn] = buttons;
     var [startTxt, stopTxt] = getInputs('.controls input[type="text"]');
