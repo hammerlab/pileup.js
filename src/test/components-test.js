@@ -4,10 +4,13 @@
 var expect = require('chai').expect;
 
 var pileup = require('../main/pileup'),
-    {waitFor} = require('./async');
+    {waitFor} = require('./async'),
+    {throwOnWarningsAndErrors} = require('./helpers');
 
 
 describe('pileup', function() {
+  throwOnWarningsAndErrors();
+
   var tracks = [
     {
       viz: pileup.viz.genome(),
@@ -45,7 +48,7 @@ describe('pileup', function() {
 
   var testDiv = document.getElementById('testdiv');
 
-  afterEach(function() {
+  afterEach(() => {
     testDiv.innerHTML = '';  // avoid pollution between tests.
   });
 

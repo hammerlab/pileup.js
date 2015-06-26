@@ -15,9 +15,12 @@ var pileup = require('../main/pileup'),
     TwoBit = require('../main/TwoBit'),
     TwoBitDataSource = require('../main/TwoBitDataSource'),
     MappedRemoteFile = require('./MappedRemoteFile'),
-    {waitFor} = require('./async');
+    {waitFor} = require('./async'),
+    {throwOnWarningsAndErrors} = require('./helpers');
 
 describe('GenomeTrack', function() {
+  throwOnWarningsAndErrors();
+
   var testDiv = document.getElementById('testdiv');
 
   beforeEach(() => {

@@ -21,7 +21,8 @@ var pileup = require('../main/pileup'),
     RemoteFile = require('../main/RemoteFile'),
     MappedRemoteFile = require('./MappedRemoteFile'),
     ContigInterval = require('../main/ContigInterval'),
-    {waitFor} = require('./async');
+    {waitFor} = require('./async'),
+    {throwOnWarningsAndErrors} = require('./helpers');
 
 
 // This is like TwoBit, but allows a controlled release of sequence data.
@@ -67,6 +68,7 @@ class FakeBam extends Bam {
 
 
 describe('PileupTrack', function() {
+  throwOnWarningsAndErrors();
   var testDiv = document.getElementById('testdiv');
 
   beforeEach(() => {
