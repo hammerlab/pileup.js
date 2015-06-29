@@ -88,7 +88,7 @@ And browse to [http://localhost:9090/examples/playground](http://localhost:9090/
 
 Run the tests from the command line:
 
-    grunt test
+    npm run test
 
 Run the tests in a real browser:
 

@@ -70,7 +70,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks("grunt-jscoverage");
 
   grunt.registerTask('test', ['browserify:test', 'connect', 'mocha_phantomjs:run']);
-  grunt.registerTask('travis', ['test']);
   grunt.registerTask('coverage',
                      ['browserify:test', 'jscoverage', 'connect', 'mocha_phantomjs:cov']);
 };

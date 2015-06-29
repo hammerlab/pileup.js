@@ -3,6 +3,4 @@ language: node_js
 node_js:
   - "0.12"
 
-before_install: npm install -g grunt-cli
-
-script: grunt travis && ./scripts/lint.sh && ./scripts/post-coverage.sh
+script: npm run test && npm run flow && ./scripts/lint.sh && ./scripts/post-coverage.sh
