@@ -31,7 +31,7 @@
     "watch": "watchify -r .:pileup -v --debug -o dist/pileup.browser.js",
     "lint": "./scripts/lint.sh",
     "test": "grunt test",
-    "flow": "grunt flow",
+    "flow": "flow status",
     "sniper": "biojs-sniper",
     "build": "npm run jstransform && npm run browserify && grunt uglify",
     "install": "npm run build"
