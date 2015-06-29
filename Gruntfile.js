@@ -55,14 +55,6 @@ module.exports = function(grunt) {
         ext: '.js'
       }
     },
-    exorcise: {
-      bundle: {
-        options: {},
-        files: {
-          'dist/tests.map': ['dist/tests.js'],  // externalize source map
-        }
-      }
-    },
     mocha_phantomjs: {
       run: {
         options: {
@@ -92,11 +84,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-flow-type-check');
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
   grunt.loadNpmTasks("grunt-jscoverage");
-  grunt.loadNpmTasks("grunt-exorcise");
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
   grunt.registerTask('test', ['browserify:test', 'connect', 'mocha_phantomjs:run']);
   grunt.registerTask('travis', ['flow', 'test']);
   grunt.registerTask('coverage',
-                     ['browserify:test', 'exorcise:bundle', 'jscoverage', 'connect', 'mocha_phantomjs:cov']);
+                     ['browserify:test', 'jscoverage', 'connect', 'mocha_phantomjs:cov']);
 };
