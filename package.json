@@ -26,7 +26,7 @@
   },
   "scripts": {
     "jstransform": "./scripts/jstransform.sh",
-    "jstransform-watch": "JSTRANSFORM_OPTS='--watch' ./scripts/jstransform.sh",
+    "jstransform-watch": "./scripts/jstransform.sh --watch",
     "browserify": "browserify -r .:pileup -v --debug -o dist/pileup.js",
     "watch": "watchify -r .:pileup -v --debug -o dist/pileup.js",
     "uglify": "uglifyjs --compress --mangle -o dist/pileup.min.js dist/pileup.js",
