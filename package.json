@@ -29,6 +29,8 @@
     "jstransform-watch": "./scripts/jstransform.sh --watch",
     "browserify": "browserify -r .:pileup -v --debug -o dist/pileup.js",
     "watch": "watchify -r .:pileup -v --debug -o dist/pileup.js",
+    "browserify-test": "browserify dist/test/*.js -v --debug -o dist/tests.js",
+    "watch-test": "watchify dist/test/*.js -v --debug -o dist/tests.js",
     "uglify": "uglifyjs --compress --mangle -o dist/pileup.min.js dist/pileup.js",
     "lint": "./scripts/lint.sh",
     "test": "grunt test",

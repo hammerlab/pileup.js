@@ -92,15 +92,13 @@ Run the tests from the command line:
 
 Run the tests in a real browser:
 
-    npm run jstransform-watch
-    grunt browserify:watchTest
+    npm run browserify-test
     http-server
     open "http://localhost:8080/src/test/runner.html"
 
 To continuously regenerate the combined JS, run:
 
-    npm run jstransform-watch
-    grunt browserify:watchDist
+    ./scripts/watch.sh
 
 To typecheck the code, run
 
