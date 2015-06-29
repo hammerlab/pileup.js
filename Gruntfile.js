@@ -39,13 +39,6 @@ module.exports = function(grunt) {
         }
       }
     },
-    uglify: {
-      dist: {
-        files: {
-          'dist/pileup.min.js': ['dist/pileup.js']
-        }
-      }
-    },
     jscoverage: {
       src: {
         expand: true,
@@ -84,7 +77,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-flow-type-check');
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
   grunt.loadNpmTasks("grunt-jscoverage");
-  grunt.loadNpmTasks('grunt-contrib-uglify');
 
   grunt.registerTask('test', ['browserify:test', 'connect', 'mocha_phantomjs:run']);
   grunt.registerTask('travis', ['flow', 'test']);
