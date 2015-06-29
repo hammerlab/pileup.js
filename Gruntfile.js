@@ -13,12 +13,12 @@ module.exports = function(grunt) {
     browserify: {
       test: {
         files: {
-          'dist/tests.browser.js': ['dist/main/**/*.js', 'dist/test/**/*-test.js']
+          'dist/tests.js': ['dist/main/**/*.js', 'dist/test/**/*-test.js']
         }
       },
       watchDist: {
         files: {
-          'dist/pileup.browser.js': ['dist/main/**/*.js']
+          'dist/pileup.js': ['dist/main/**/*.js']
         },
         options: {
           watch: true,
@@ -42,7 +42,7 @@ module.exports = function(grunt) {
     uglify: {
       dist: {
         files: {
-          'dist/pileup.browser.min.js': ['dist/pileup.browser.js']
+          'dist/pileup.min.js': ['dist/pileup.js']
         }
       }
     },
@@ -50,7 +50,7 @@ module.exports = function(grunt) {
       src: {
         expand: true,
         cwd: 'dist/',
-        src: ['tests.browser.js'],
+        src: ['tests.js'],
         dest: 'dist/cov/',
         ext: '.js'
       }
@@ -59,7 +59,7 @@ module.exports = function(grunt) {
       bundle: {
         options: {},
         files: {
-          'dist/tests.browser.map': ['dist/tests.browser.js'],  // externalize source map
+          'dist/tests.map': ['dist/tests.js'],  // externalize source map
         }
       }
     },

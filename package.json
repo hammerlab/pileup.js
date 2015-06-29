@@ -27,9 +27,9 @@
   "scripts": {
     "jstransform": "./scripts/jstransform.sh",
     "jstransform-watch": "JSTRANSFORM_OPTS='--watch' ./scripts/jstransform.sh",
-    "browserify": "browserify -r .:pileup -v --debug -o dist/pileup.browser.js",
-    "watch": "watchify -r .:pileup -v --debug -o dist/pileup.browser.js",
-    "uglify": "uglifyjs --compress --mangle -o dist/pileup.browser.min.js dist/pileup.browser.js",
+    "browserify": "browserify -r .:pileup -v --debug -o dist/pileup.js",
+    "watch": "watchify -r .:pileup -v --debug -o dist/pileup.js",
+    "uglify": "uglifyjs --compress --mangle -o dist/pileup.min.js dist/pileup.js",
     "lint": "./scripts/lint.sh",
     "test": "grunt test",
     "flow": "flow status",
@@ -99,7 +99,7 @@
   },
   "sniper": {
     "js": [
-      "/dist/pileup.browser.js"
+      "/dist/pileup.js"
     ],
     "css": [
       "style/pileup.css"
