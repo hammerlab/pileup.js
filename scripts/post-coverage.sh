@@ -8,13 +8,13 @@ grunt coverage
 
 # dump it out temporarily for debugging
 ./scripts/transform-coverage.js \
-  build/tests.map \
-  build/bundled.lcov
+  dist/tests.map \
+  dist/bundled.lcov
 
 # Convert code coverage data on the bundled test file back to the originals.
 ./scripts/transform-coverage.js \
-  build/tests.map \
-  build/bundled.lcov \
+  dist/tests.map \
+  dist/bundled.lcov \
   | ./node_modules/.bin/coveralls
 
 echo ''  # reset last exit code

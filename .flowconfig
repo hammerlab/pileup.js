@@ -3,7 +3,7 @@
 .*node_modules/jsxhint.*
 .*node_modules/.*mocha.*
 .*node_modules/reactify.*
-.*build.*
+.*pileup.js/dist.*
 
 [include]
 

@@ -13,17 +13,17 @@ module.exports = function(grunt) {
     browserify: {
       test: {
         files: {
-          'build/tests.browser.js': ['build/main/**/*.js', 'build/test/**/*-test.js']
+          'dist/tests.browser.js': ['dist/main/**/*.js', 'dist/test/**/*-test.js']
         }
       },
       watchDist: {
         files: {
-          'build/pileup.browser.js': ['build/main/**/*.js']
+          'dist/pileup.browser.js': ['dist/main/**/*.js']
         },
         options: {
           watch: true,
           keepAlive: true,
-          require: ['./build/main/pileup.js:pileup']
+          require: ['./dist/main/pileup.js:pileup']
         }
       },
       watchTest: {
@@ -42,16 +42,16 @@ module.exports = function(grunt) {
     uglify: {
       dist: {
         files: {
-          'build/pileup.browser.min.js': ['build/pileup.browser.js']
+          'dist/pileup.browser.min.js': ['dist/pileup.browser.js']
         }
       }
     },
     jscoverage: {
       src: {
         expand: true,
-        cwd: 'build/',
+        cwd: 'dist/',
         src: ['tests.browser.js'],
-        dest: 'build/cov/',
+        dest: 'dist/cov/',
         ext: '.js'
       }
     },
@@ -59,7 +59,7 @@ module.exports = function(grunt) {
       bundle: {
         options: {},
         files: {
-          'build/tests.browser.map': ['build/tests.browser.js'],  // externalize source map
+          'dist/tests.browser.map': ['dist/tests.browser.js'],  // externalize source map
         }
       }
     },
@@ -73,7 +73,7 @@ module.exports = function(grunt) {
         options: {
           urls: ['http://localhost:9501/src/test/coverage.html'],
           reporter: 'node_modules/mocha-lcov-reporter/lib/lcov.js',
-          output: 'build/bundled.lcov',
+          output: 'dist/bundled.lcov',
           silent: true
         }
       }

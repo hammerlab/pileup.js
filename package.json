@@ -14,10 +14,10 @@
     "interactive",
     "biojs"
   ],
-  "main": "build/main/pileup.js",
-  "browser": "build/main/pileup.js",
+  "main": "dist/main/pileup.js",
+  "browser": "dist/main/pileup.js",
   "files": [
-    "build",
+    "dist",
     "src",
     "style"
   ],
@@ -28,8 +28,8 @@
   "scripts": {
     "jstransform": "./scripts/jstransform.sh",
     "jstransform-watch": "JSTRANSFORM_OPTS='--watch' ./scripts/jstransform.sh",
-    "browserify": "browserify -r .:pileup -v --debug -o build/pileup.browser.js",
-    "watch": "watchify -r .:pileup -v --debug -o build/pileup.browser.js",
+    "browserify": "browserify -r .:pileup -v --debug -o dist/pileup.browser.js",
+    "watch": "watchify -r .:pileup -v --debug -o dist/pileup.browser.js",
     "lint": "./scripts/lint.sh",
     "test": "grunt test",
     "flow": "grunt flow",
@@ -98,7 +98,7 @@
   },
   "sniper": {
     "js": [
-      "/build/pileup.browser.js"
+      "/dist/pileup.browser.js"
     ],
     "css": [
       "style/pileup.css"

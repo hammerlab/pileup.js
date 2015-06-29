@@ -24,7 +24,7 @@ To use pileup.js in a project, install it via NPM:
 
     npm install --save pileup
 
-And then source either `node_modules/pileup/build/pileup.browser.min.js` or `pileup.browser.js`.
+And then source either `node_modules/pileup/dist/pileup.browser.min.js` or `pileup.browser.js`.
 
 To create a pileup, use `pileup.create()`. You specify a container DOM element,
 an initial range and a list of tracks:
