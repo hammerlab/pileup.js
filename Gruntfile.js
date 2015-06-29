@@ -2,14 +2,6 @@
 
 module.exports = function(grunt) {
   grunt.initConfig({
-    flow: {
-      app: {
-        src: '.',
-        options: {
-          background: true
-        }
-      }
-    },
     browserify: {
       test: {
         files: {
@@ -74,12 +66,11 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-connect');
-  grunt.loadNpmTasks('grunt-flow-type-check');
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
   grunt.loadNpmTasks("grunt-jscoverage");
 
   grunt.registerTask('test', ['browserify:test', 'connect', 'mocha_phantomjs:run']);
-  grunt.registerTask('travis', ['flow', 'test']);
+  grunt.registerTask('travis', ['test']);
   grunt.registerTask('coverage',
                      ['browserify:test', 'jscoverage', 'connect', 'mocha_phantomjs:cov']);
 };
