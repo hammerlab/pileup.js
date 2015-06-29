@@ -94,7 +94,7 @@ Run the tests in a real browser:
 
     npm run browserify-test
     http-server
-    open "http://localhost:8080/src/test/runner.html"
+    open http://localhost:8080/src/test/runner.html
 
 To continuously regenerate the combined JS, run:
 
