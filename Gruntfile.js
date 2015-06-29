@@ -2,35 +2,6 @@
 
 module.exports = function(grunt) {
   grunt.initConfig({
-    browserify: {
-      test: {
-        files: {
-          'dist/tests.js': ['dist/main/**/*.js', 'dist/test/**/*-test.js']
-        }
-      },
-      watchDist: {
-        files: {
-          'dist/pileup.js': ['dist/main/**/*.js']
-        },
-        options: {
-          watch: true,
-          keepAlive: true,
-          require: ['./dist/main/pileup.js:pileup']
-        }
-      },
-      watchTest: {
-        files: '<%= browserify.test.files %>',
-        options: {
-          watch: true,
-          keepAlive: true,
-        }
-      },
-      options: {
-        browserifyOptions: {
-          debug: true  // generate a source map
-        }
-      }
-    },
     jscoverage: {
       src: {
         expand: true,
@@ -64,12 +35,11 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
   grunt.loadNpmTasks("grunt-jscoverage");
 
-  grunt.registerTask('test', ['browserify:test', 'connect', 'mocha_phantomjs:run']);
+  grunt.registerTask('test', ['connect', 'mocha_phantomjs:run']);
   grunt.registerTask('coverage',
-                     ['browserify:test', 'jscoverage', 'connect', 'mocha_phantomjs:cov']);
+                     ['jscoverage', 'connect', 'mocha_phantomjs:cov']);
 };
