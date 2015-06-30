@@ -1,5 +1,5 @@
 #!/bin/bash
-# Watches untransformed files for changes that effect the distribution/test
+# Watches untransformed files for changes that affect the distribution/test
 
 # Clean background processes after quit
 trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
