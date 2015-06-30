@@ -99,7 +99,7 @@ Run the tests in a real browser:
 
 To continuously regenerate the combined JS, run:
 
-    ./scripts/watch.sh
+    npm run watch
 
 To typecheck the code, run
 
