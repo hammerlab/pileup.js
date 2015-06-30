@@ -5,12 +5,6 @@
 npm run http-server > /dev/null &
 SERVER_PID=$!
 
-# the following sleep step is not really necessary
-# as http-server starts almost instantenously;
-# but letting the server settle might help prevent
-# possible racing conditions
-sleep 1
-
 # Start the tests
 npm run mocha-phantomjs
 TEST_STATUS=$?
