@@ -7,7 +7,6 @@
 .*pileup.js/dist.*
 
 [include]
-src/
 
 [libs]
 lib
