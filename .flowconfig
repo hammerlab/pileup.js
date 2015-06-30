@@ -3,7 +3,8 @@
 .*node_modules/jsxhint.*
 .*node_modules/.*mocha.*
 .*node_modules/reactify.*
-.*build.*
+.*node_modules/phantomjs.*
+.*pileup.js/dist.*
 
 [include]
 
@@ -12,5 +13,3 @@ lib
 types
 
 [options]
-suppress_comment=.*FlowFixMe.*
-

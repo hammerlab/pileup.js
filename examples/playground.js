@@ -1,4 +1,4 @@
-var pileup = require("pileup");
+var pileup = require('pileup');
 
 var sources = [
   {
@@ -12,7 +12,7 @@ var sources = [
   {
     viz: pileup.viz.variants(),
     data: pileup.formats.vcf({
-      url: '/test/data/snv.chr17.vcf'
+      url: '/test-data/snv.chr17.vcf'
     }),
     name: 'Variants'
   },
@@ -26,8 +26,8 @@ var sources = [
   {
     viz: pileup.viz.pileup(),
     data: pileup.formats.bam({
-      url: '/test/data/synth3.normal.17.7500000-7515000.bam',
-      indexUrl: '/test/data/synth3.normal.17.7500000-7515000.bam.bai'
+      url: '/test-data/synth3.normal.17.7500000-7515000.bam',
+      indexUrl: '/test-data/synth3.normal.17.7500000-7515000.bam.bai'
     }),
     cssClass: 'normal',
     name: 'Alignments'

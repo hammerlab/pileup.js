@@ -14,24 +14,10 @@
     "interactive",
     "biojs"
   ],
-  "main": "build/pileup.js",
-  "browser": "src/pileup.js",
-  "browserify": {
-    "transform": [
-      [
-        "jstransformify",
-        {
-          "react": true,
-          "harmony": true,
-          "stripTypes": true,
-          "nonStrictEs6module": true
-        }
-      ]
-    ]
-  },
+  "main": "dist/main/pileup.js",
+  "browser": "dist/main/pileup.js",
   "files": [
-    "build",
-    "src",
+    "dist",
     "style"
   ],
   "repository": {
@@ -39,9 +25,24 @@
     "url": "https://github.com/hammerlab/pileup.js.git"
   },
   "scripts": {
+    "jstransform": "./scripts/jstransform.sh",
+    "jstransform-watch": "./scripts/jstransform.sh --watch",
+    "browserify-all": "npm run browserify && npm run browserify-test",
+    "browserify": "browserify -r .:pileup -v --debug -o dist/pileup.js",
+    "watch-dist": "watchify -r .:pileup -v --debug -o dist/pileup.js",
+    "browserify-test": "browserify dist/test/*.js -v --debug -o dist/tests.js",
+    "watch": "./scripts/watch.sh",
+    "watch-test": "watchify dist/test/*.js -v --debug -o dist/tests.js",
+    "uglify": "uglifyjs --compress --mangle -o dist/pileup.min.js dist/pileup.js",
     "lint": "./scripts/lint.sh",
-    "test": "grunt test",
-    "sniper": "biojs-sniper"
+    "http-server": "http-server .",
+    "mocha-phantomjs": "mocha-phantomjs http://localhost:8080/src/test/runner.html",
+    "test": "./scripts/test.sh",
+    "flow": "flow status",
+    "flow-check": "flow check",
+    "sniper": "biojs-sniper",
+    "build": "npm run jstransform && npm run browserify-all && npm run uglify",
+    "install": "npm run build"
   },
   "author": "Dan Vanderkam",
   "contributors": [
@@ -63,7 +64,6 @@
     "d3": "^3.5.5",
     "jbinary": "^2.1.3",
     "jdataview": "^2.5.0",
-    "jstransformify": "^1.0.0",
     "pako": "^0.2.5",
     "q": "^1.1.2",
     "react": "^0.13.2",
@@ -72,36 +72,34 @@
   },
   "devDependencies": {
     "arraybuffer-slice": "^0.1.2",
+    "browserify": "^10.2.4",
     "chai": "^2.0.0",
     "coveralls": "2.10.x",
     "es5-shim": "^4.1.0",
     "flow-bin": "^0.12.0",
-    "grunt": "^0.4.5",
-    "grunt-browserify": "3.8.0",
-    "grunt-contrib-connect": "^0.9.0",
-    "grunt-contrib-uglify": "^0.8.0",
-    "grunt-env": "^0.4.2",
-    "grunt-exorcise": "^1.0.0",
-    "grunt-flow-type-check": "^0.4.2",
-    "grunt-jscoverage": "^0.1.3",
-    "grunt-mocha-phantomjs": ">=0.6.1",
-    "grunt-mocha-test": "^0.12.7",
+    "http-server": "^0.8.0",
+    "jscoverage": "^0.5.9",
+    "jstransform": "^11.0.2",
+    "jstransformify": "^1.0.0",
     "jsxhint": "git://github.com/strml/JSXHint.git",
     "lcov-parse": "0.0.9",
     "mocha": "^2.1.0",
     "mocha-lcov-reporter": ">=0.0.2",
+    "mocha-phantomjs": "^3.5.3",
     "parse-data-uri": "^0.2.0",
+    "phantomjs": "^1.9.17",
     "prepush-hook": "^0.1.0",
     "react-tools": "^0.13.1",
     "reactify": "danvk/reactify",
     "sinon": "^1.12.2",
     "sniper": "^0.2.16",
     "source-map": "^0.3.0",
+    "uglify-js": "^2.4.23",
     "watchify": "^3.2.1"
   },
   "sniper": {
     "js": [
-      "/build/pileup.js"
+      "/dist/pileup.js"
     ],
     "css": [
       "style/pileup.css"

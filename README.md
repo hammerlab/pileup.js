@@ -5,33 +5,19 @@ Interactive in-browser track viewer. [**Try a demo**][demo]!
 
 ![pileup.js screenshot](./pileup-screenshot.png)
 
-## Quickstart
-
-    git clone https://github.com/hammerlab/pileup.js.git
-    cd pileup.js
-    npm install
-    npm install -g grunt-cli
-    grunt prod
-
-To play with the demo, you'll need to install the node.js [http-server][hs]:
-
-    npm install -g http-server
-    http-server
-
-Then open [http://localhost:8080/examples/playground-complete.html](http://localhost:8080/examples/playground-complete.html) in your browser of choice.
-
 ## Usage
 
 To use pileup.js in a project, install it via NPM:
 
     npm install --save pileup
 
-And then source either `node_modules/pileup/build/pileup.min.js` or `pileup.js`.
+And then source either `node_modules/pileup/dist/pileup.browser.min.js` or `pileup.browser.js`.
 
 To create a pileup, use `pileup.create()`. You specify a container DOM element,
 an initial range and a list of tracks:
 
 ```javascript
+var pileup = require('pileup');
 var div = document.getElementById('your-id');
 var p = pileup.create(div, {
   range: {contig: 'chr17', start: 7512384, stop: 7512544},
@@ -47,8 +33,8 @@ var p = pileup.create(div, {
     {
       viz: pileup.viz.pileup(),
       data: pileup.formats.bam({
-        url: '/test/data/synth3.normal.17.7500000-7515000.bam',
-        indexUrl: '/test/data/synth3.normal.17.7500000-7515000.bam.bai'
+        url: '/test-data/synth3.normal.17.7500000-7515000.bam',
+        indexUrl: '/test-data/synth3.normal.17.7500000-7515000.bam.bai'
       }),
       cssClass: 'normal',
       name: 'Alignments'
@@ -74,10 +60,24 @@ pileup track, you could use this CSS:
 
 To style multiple tracks of the same type, you can use the `cssClass` property.
 
-## BioJS
+## Development
+
+## Basic Setup
+
+    git clone https://github.com/hammerlab/pileup.js.git
+    cd pileup.js
+    npm install
+
+To play with the demo, start an [http-server][hs]:
+
+    npm run http-server
+
+Then open [http://localhost:8080/examples/playground-complete.html](http://localhost:8080/examples/playground-complete.html) in your browser of choice.
+
+### BioJS
 
 Alternatively you can use [BioJS sniper][sniper] for the demo:
-    
+
     npm install -g sniper # installs sniper globally
 
 Once installed, start sniper in the `pileup.js` folder:
@@ -86,24 +86,24 @@ Once installed, start sniper in the `pileup.js` folder:
 
 And browse to [http://localhost:9090/examples/playground](http://localhost:9090/examples/playground).
 
-## Development
+## Testing
 
 Run the tests from the command line:
 
-    grunt test
+    npm run test
 
 Run the tests in a real browser:
 
-    grunt browserify:watchTest
-    open tests/runner.html
+    npm run http-server
+    open http://localhost:8080/src/test/runner.html
 
 To continuously regenerate the combined JS, run:
 
-    grunt browserify:watchDist
+    npm run watch
 
 To typecheck the code, run
 
-    flow status .
+    npm run flow
 
 For best results, use one of the flowtype editor integrations.
 
