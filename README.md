@@ -11,10 +11,9 @@ Interactive in-browser track viewer. [**Try a demo**][demo]!
     cd pileup.js
     npm install
 
-To play with the demo, you'll need to install the node.js [http-server][hs]:
+To play with the demo, start an [http-server][hs]:
 
-    npm install -g http-server
-    http-server
+    npm run http-server
 
 Then open [http://localhost:8080/examples/playground-complete.html](http://localhost:8080/examples/playground-complete.html) in your browser of choice.
 
@@ -92,8 +91,7 @@ Run the tests from the command line:
 
 Run the tests in a real browser:
 
-    npm run browserify-test
-    http-server
+    npm run http-server
     open http://localhost:8080/src/test/runner.html
 
 To continuously regenerate the combined JS, run:
