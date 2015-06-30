@@ -38,6 +38,7 @@
     "mocha-phantomjs": "mocha-phantomjs http://localhost:8080/src/test/runner.html",
     "test": "./scripts/test.sh",
     "flow": "flow status",
+    "flow-check": "flow check",
     "sniper": "biojs-sniper",
     "build": "npm run jstransform && npm run browserify-all && npm run uglify",
     "install": "npm run build"
