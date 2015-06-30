@@ -90,7 +90,6 @@
     "phantomjs": "^1.9.17",
     "prepush-hook": "^0.1.0",
     "react-tools": "^0.13.1",
-    "reactify": "danvk/reactify",
     "sinon": "^1.12.2",
     "sniper": "^0.2.16",
     "source-map": "^0.3.0",
