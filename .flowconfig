@@ -3,9 +3,11 @@
 .*node_modules/jsxhint.*
 .*node_modules/.*mocha.*
 .*node_modules/reactify.*
+.*node_modules/phantomjs.*
 .*pileup.js/dist.*
 
 [include]
+src/
 
 [libs]
 lib
