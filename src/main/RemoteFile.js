@@ -155,7 +155,7 @@ class RemoteFile {
       }
     });
     xhr.addEventListener('error', function(e) {
-      deferred.reject(e);
+      deferred.reject("Request failed with status: " + this.status);
     });
     this.numNetworkRequests++;
     xhr.send();

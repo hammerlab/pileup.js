@@ -110,7 +110,10 @@ describe('RemoteFile', () => {
     return f.getAll().then(buf => {
       throw 'Requests for non-existent files should not succeed';
     }, err => {
-      expect(err).to.match(/404/);
+      // The majority of the browsers will return 404
+      // and a minority (like PhantomJS) will fail fast
+      // (more information: https://github.com/ariya/phantomjs/issues/11195)
+      expect(err).to.match(/404|^Request failed/);
     });
   });
 
