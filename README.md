@@ -67,7 +67,7 @@ To style multiple tracks of the same type, you can use the `cssClass` property.
     git clone https://github.com/hammerlab/pileup.js.git
     cd pileup.js
     npm install
-    npm run prod
+    npm run build
 
 To play with the demo, start an [http-server][hs]:
 
