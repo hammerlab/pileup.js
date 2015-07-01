@@ -41,8 +41,7 @@
     "flow": "flow status",
     "flow-check": "flow check",
     "sniper": "biojs-sniper",
-    "build": "npm run jstransform && npm run browserify-all && npm run uglify",
-    "install": "npm run build"
+    "build": "npm run jstransform && npm run browserify-all && npm run uglify"
   },
   "author": "Dan Vanderkam",
   "contributors": [
