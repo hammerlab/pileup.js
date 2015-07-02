@@ -34,6 +34,11 @@
 }
 .track-content {
   flex: 1;  /* stretch to fill remaining space */
+  overflow-y: auto;
+  position: relative;
+}
+.track-content > div > div {
+  position: absolute; /* Gets the child of the flex-item to fill height 100% */
 }
 
 /* controls */
@@ -119,7 +124,7 @@
 /* pileup track */
 .pileup-root > .pileup {
   flex: 1;  /* stretch to fill remaining space */
-  overflow-y: auto;
+  border-top: 1px solid #666;
 }
 .pileup .alignment .match {
   fill: #c8c8c8;  /* matches IGV */

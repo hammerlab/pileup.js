@@ -31,6 +31,15 @@ var sources = [
     }),
     cssClass: 'normal',
     name: 'Alignments'
+  },
+  {
+    viz: pileup.viz.pileup(),
+    data: pileup.formats.bam({
+      url: '/test-data/synth3.normal.17.7500000-7515000.bam',
+      indexUrl: '/test-data/synth3.normal.17.7500000-7515000.bam.bai'
+    }),
+    cssClass: 'tumor',
+    name: 'Alignments'
   }
 ];
 
