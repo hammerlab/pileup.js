@@ -143,11 +143,20 @@
   stroke-width: 2;
 }
 .pileup .network-status {
-  position: absolute;
-  font-size: small;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pileup .network-status-message {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  padding: 4px 8px;
+  width: auto;
   background: #eee;
-  border: 1px solid #777;
-  padding: 2px;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+  font-size: small;
 }
 
 /* variants */
