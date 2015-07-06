@@ -12,6 +12,7 @@ var _ = require('underscore'),
     VcfDataSource = require('./VcfDataSource'),
     BamDataSource = require('./BamDataSource'),
     // Visualizations
+    CoverageTrack = require('./CoverageTrack'),
     GenomeTrack = require('./GenomeTrack'),
     GeneTrack = require('./GeneTrack'),
     PileupTrack = require('./PileupTrack'),
@@ -84,6 +85,7 @@ var pileup = {
     bigBed: BigBedDataSource.create
   },
   viz: {
+    coverage: () => CoverageTrack,
     genome: () => GenomeTrack,
     genes: () => GeneTrack,
     variants: () => VariantTrack,
