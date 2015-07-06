@@ -24,6 +24,15 @@ var sources = [
     name: 'Genes'
   },
   {
+    viz: pileup.viz.coverage(),
+    data: pileup.formats.bam({
+      url: '/test-data/synth3.normal.17.7500000-7515000.bam',
+      indexUrl: '/test-data/synth3.normal.17.7500000-7515000.bam.bai'
+    }),
+    cssClass: 'normal-coverage',
+    name: 'Coverage'
+  },
+  {
     viz: pileup.viz.pileup(),
     data: pileup.formats.bam({
       url: '/test-data/synth3.normal.17.7500000-7515000.bam',
@@ -31,6 +40,15 @@ var sources = [
     }),
     cssClass: 'normal',
     name: 'Alignments'
+  },
+  {
+    viz: pileup.viz.coverage(),
+    data: pileup.formats.bam({
+      url: '/test-data/synth3.normal.17.7500000-7515000.bam',
+      indexUrl: '/test-data/synth3.normal.17.7500000-7515000.bam.bai'
+    }),
+    cssClass: 'tumor-coverage',
+    name: 'Coverage'
   },
   {
     viz: pileup.viz.pileup(),
