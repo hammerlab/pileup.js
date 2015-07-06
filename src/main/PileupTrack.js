@@ -195,7 +195,9 @@ class NonEmptyPileupTrack extends React.Component {
       var message = this.formatStatus(networkStatus);
       statusEl = (
         <div ref='status' className='network-status'>
-          Loading alignments… ({message})
+          <div className='network-status-message'>
+            Loading alignments… ({message})
+          </div>
         </div>
       );
     }

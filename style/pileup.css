@@ -34,11 +34,19 @@
 }
 .track-content {
   flex: 1;  /* stretch to fill remaining space */
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+}
+.track-content > div > div {
+  position: absolute; /* Gets the child of the flex-item to fill height 100% */
 }
 
 /* controls */
 .pileup-root > .controls {
   flex: 0 0 30px;  /* fixed height */
+}
+.pileup-root > .controls form.controls {
   margin-bottom: 0;  /* overrides browser default */
 }
 .pileup-root > .controls .zoom-controls {
@@ -119,7 +127,6 @@
 /* pileup track */
 .pileup-root > .pileup {
   flex: 1;  /* stretch to fill remaining space */
-  overflow-y: auto;
 }
 .pileup .alignment .match {
   fill: #c8c8c8;  /* matches IGV */
@@ -138,11 +145,20 @@
   stroke-width: 2;
 }
 .pileup .network-status {
-  position: absolute;
-  font-size: small;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pileup .network-status-message {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  padding: 4px 8px;
+  width: auto;
   background: #eee;
-  border: 1px solid #777;
-  padding: 2px;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+  font-size: small;
 }
 
 /* variants */
