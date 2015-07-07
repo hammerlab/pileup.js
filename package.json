@@ -96,6 +96,7 @@
     "sinon": "^1.12.2",
     "sniper": "^0.2.16",
     "source-map": "^0.3.0",
+    "stats.js": "^1.0.0",
     "uglify-js": "^2.4.23",
     "watchify": "^3.2.1"
   },

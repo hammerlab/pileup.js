@@ -6,8 +6,13 @@
   position: absolute;
   left: 10px;
   right: 10px;
-  top: 10px;
+  top: 20px;
   bottom: 10px;
+}
+#stats {
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 </style>
 </head>
@@ -22,3 +27,22 @@
   window.yourDiv = document.getElementById("yourDiv");
 </script>
 <script src="./playground.js"></script>
+
+<!--
+Measure the frame rate. Chrome devtools can do this, but having the devtools
+open has a dramatic effect on frame rates.
+-->
+<script src="../node_modules/stats.js/build/stats.min.js"></script>
+<script>
+var stats = new Stats();
+stats.setMode(0); // 0: fps, 1: ms
+document.body.appendChild(stats.domElement);
+
+var update = function() {
+  stats.end();
+  stats.begin();
+  requestAnimationFrame(update);
+};
+stats.begin();
+requestAnimationFrame(update);
+</script>
