@@ -3,4 +3,8 @@ language: node_js
 node_js:
   - "0.12"
 
-script: npm run test && npm run flow-check && npm run lint
+script: >
+    npm run build &&
+    npm run test &&
+    npm run flow-check &&
+    npm run lint
