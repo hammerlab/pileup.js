@@ -7,4 +7,6 @@ script: >
     npm run build &&
     npm run test &&
     npm run flow-check &&
-    npm run lint
+    npm run lint &&
+    npm run coverage &&
+    cat coverage/lcov.info | ./node_modules/.bin/coveralls
