@@ -7,10 +7,9 @@ set -o errexit
 set -x
 
 # Instrument the source code with Istanbul's __coverage__ variable.
-# We clear out everything to ensure a hermetic run.
-rm -rf coverage/*
+rm -rf coverage/*  # Clear out everything to ensure a hermetic run.
 istanbul instrument --output coverage/main dist/main
-istanbul instrument --output coverage/test dist/test
+cp -r dist/test coverage/test  # test code needn't be covered
 
 # Build a combined file for running the tests in-browser
 browserify coverage/**/*.js -o coverage/tests.js
@@ -32,3 +31,6 @@ phantomjs \
 
 # Convert the JSON coverage to LCOV for coveralls.
 istanbul report --include coverage/*.json lcovonly
+
+# Monkey patch in the untransformed source paths.
+perl -i -pe 's,dist/main,src/main,' coverage/lcov.info
