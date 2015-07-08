@@ -9,7 +9,8 @@ var React = require('./react-shim'),
     d3 = require('d3'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
-    utils = require('./utils');
+    utils = require('./utils'),
+    DisplayMode = require('./DisplayMode');
 
 
 var GenomeTrack = React.createClass({
@@ -28,14 +29,6 @@ var GenomeTrack = React.createClass({
     return <NonEmptyGenomeTrack {...this.props} />;
   }
 });
-
-// Individual base pairs are rendered differently depending on the scale.
-var DisplayMode = {
-  LOOSE: 1,   // Lots of space -- a big font is OK.
-  TIGHT: 2,   // Letters need to be shrunk to fit.
-  BLOCKS: 3,  // Change from letters to blocks of color
-  HIDDEN: 4
-};
 
 var NonEmptyGenomeTrack = React.createClass({
   // This prevents updates if state & props have not changed.
@@ -150,7 +143,7 @@ var NonEmptyGenomeTrack = React.createClass({
 
     var scale = this.getScale();
     var pxPerLetter = scale(1) - scale(0);
-    var mode = this.getDisplayMode(pxPerLetter);
+    var mode = DisplayMode.getDisplayMode(pxPerLetter);
 
     var basePairs = this.props.source.getRange({
       contig: range.contig,
@@ -176,11 +169,10 @@ var NonEmptyGenomeTrack = React.createClass({
 
     var g = svg.select('g.wrapper');
 
-    var baseClass = (mode == DisplayMode.LOOSE ? 'loose' :
-                     mode == DisplayMode.TIGHT ? 'tight' : 'blocks');
-    var showText = (mode == DisplayMode.LOOSE || mode == DisplayMode.TIGHT);
-    var modeData = [mode];
-    var modeWrapper = g.selectAll('.mode-wrapper').data(modeData, x => x);
+    var baseClass = DisplayMode.toString(mode),
+        showText = DisplayMode.isText(mode),
+        modeData = [mode],
+        modeWrapper = g.selectAll('.mode-wrapper').data(modeData, x => x);
     modeWrapper.enter().append('g').attr('class', 'mode-wrapper ' + baseClass);
     modeWrapper.exit().remove();
 
@@ -210,18 +202,6 @@ var NonEmptyGenomeTrack = React.createClass({
 
     // Exit
     letter.exit().remove();
-  },
-
-  getDisplayMode(pxPerLetter): number {
-    if (pxPerLetter >= 25) {
-      return DisplayMode.LOOSE;
-    } else if (pxPerLetter >= 10) {
-      return DisplayMode.TIGHT;
-    } else if (pxPerLetter >= 1) {
-      return DisplayMode.BLOCKS;
-    } else {
-      return DisplayMode.HIDDEN;
-    }
   }
 });
 
