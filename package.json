@@ -36,7 +36,6 @@
     "uglify": "uglifyjs --compress --mangle -o dist/pileup.min.js dist/pileup.js",
     "lint": "./scripts/lint.sh",
     "http-server": "http-server .",
-    "mocha-phantomjs": "mocha-phantomjs http://localhost:8080/src/test/runner.html",
     "test": "./scripts/test.sh",
     "flow": "flow status",
     "flow-check": "flow check",
