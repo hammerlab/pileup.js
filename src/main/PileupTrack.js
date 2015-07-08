@@ -166,6 +166,22 @@ function yForRow(row) {
   return row * (READ_HEIGHT + READ_SPACING);
 }
 
+// This is adapted from IGV.
+var MIN_Q = 5,  // these are Phred-scaled scores
+    MAX_Q = 20;
+function opacityForQuality(quality: number): number {
+  var alpha = 0;
+
+  if (quality < MIN_Q) {
+    alpha = 0.1;
+  } else {
+    alpha = Math.max(0.1, Math.min(1.0, 0.1 + 0.9 * (quality - MIN_Q) / (MAX_Q - MIN_Q)));
+  }
+  // Round alpha to nearest 0.1
+  alpha = Math.round(alpha * 10 + 0.5) / 10.0;
+  return Math.min(1.0, alpha);
+}
+
 class NonEmptyPileupTrack extends React.Component {
   pileup: Array<Interval[]>;
   keyToVisualAlignment: {[key:string]: VisualAlignment};
@@ -369,7 +385,8 @@ class NonEmptyPileupTrack extends React.Component {
         .enter()
         .append('text')
           .attr('class', mismatch => utils.basePairClass(mismatch.basePair))
-          .text(mismatch => mismatch.basePair);
+          .text(mismatch => mismatch.basePair)
+          .attr('fill-opacity', mismatch => opacityForQuality(mismatch.quality));
 
     // Update
     segments.each(function(d, i) {

@@ -144,7 +144,7 @@ describe('pileuputils', function() {
         ops: [
           { op: 'M', length: 101, pos: 7513222, arrow: 'R' }
         ],
-        mismatches: [{pos: 7513272, basePair: 'G'}]
+        mismatches: [{pos: 7513272, basePair: 'G', quality: 1}]
       });
 
       expect(getOpInfo(deleteRead, fakeReferenceSource)).to.deep.equal({
@@ -171,8 +171,8 @@ describe('pileuputils', function() {
             { op: 'M', length: 35, pos: 7513108 + 0, arrow: 'L' }
           ],
           mismatches: [
-            { pos: 7513109, basePair: 'G' },
-            { pos: 7513112, basePair: 'C' }
+            { pos: 7513109, basePair: 'G', quality: 2 },
+            { pos: 7513112, basePair: 'C', quality: 2 }
           ]
         });
     });
