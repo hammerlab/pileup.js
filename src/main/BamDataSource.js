@@ -50,22 +50,31 @@ function createFromBamFile(remoteSource: BamFile): BamDataSource {
     }
   }
 
+  function saveContigMapping(header: Object) {
+    header.references.forEach(ref => {
+      var name = ref.name;
+      contigNames[name] = name;
+      contigNames['chr' + name] = name;
+      if (name.slice(0, 3) == 'chr') {
+        contigNames[name.slice(3)] = name;
+      }
+    });
+  }
+
   function fetch(range: GenomeRange) {
-    var refsPromise;
-    if (!_.isEmpty(contigNames)) {
-      refsPromise = Q.when();
-    } else {
-      refsPromise = remoteSource.header.then(header => {
-        header.references.forEach(ref => {
-          var name = ref.name;
-          contigNames[name] = name;
-          contigNames['chr' + name] = name;
-          if (name.slice(0, 3) == 'chr') {
-            contigNames[name.slice(3)] = name;
-          }
+    var refsPromise = !_.isEmpty(contigNames) ? Q.when() : 
+        remoteSource.header.then(saveContigMapping);
+
+    // For BAMs without index chunks, we need to fetch the entire BAI file
+    // before we can know how large the BAM header is. If the header is
+    // pending, it's almost certainly because the BAI file is in flight.
+    Q.when().then(() => {
+      if (refsPromise.isPending() && !remoteSource.hasIndexChunks) {
+        o.trigger('networkprogress', {
+          status: 'Fetching BAM index -- use index chunks to speed this up'
         });
-      });
-    }
+      }
+    }).done();
 
     return refsPromise.then(() => {
       var contigName = contigNames[range.contig];

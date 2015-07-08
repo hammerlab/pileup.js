@@ -47,7 +47,7 @@ var Root = React.createClass({
       this.props.tracks.forEach(track => {
         track.source.rangeChanged(range);
       });
-    });
+    }).done();
   },
   makeDivForTrack(key: string, track: VisualizedTrack): React.Element {
     var trackEl = React.createElement(track.visualization, {
