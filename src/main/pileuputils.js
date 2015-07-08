@@ -77,7 +77,7 @@ function findMismatches(reference: string, seq: string, refPos: number, scores: 
     var pos = refPos + i,
         ref = reference.charAt(i),
         basePair = seq.charAt(i);
-    if (ref != basePair) {
+    if (ref != basePair && ref != '.') {
       out.push({
         pos,
         basePair,

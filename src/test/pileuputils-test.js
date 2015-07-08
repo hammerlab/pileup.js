@@ -117,6 +117,12 @@ describe('pileuputils', function() {
       }
     };
 
+    var unknownReferenceSource = {
+      getRangeAsString: function({contig, start, stop}) {
+        return _.range(start, stop + 1).map(x => '.').join('');
+      }
+    };
+
     return bam.getAlignmentsInRange(range).then(reads => {
       var findRead = function(startPos): SamRead {
         var r = null;
@@ -175,6 +181,13 @@ describe('pileuputils', function() {
             { pos: 7513112, basePair: 'C', quality: 2 }
           ]
         });
+
+      expect(getOpInfo(simpleMismatch, unknownReferenceSource)).to.deep.equal({
+        ops: [
+          { op: 'M', length: 101, pos: 7513222, arrow: 'R' }
+        ],
+        mismatches: []  // no mismatches against unknown reference data
+      });
     });
   });
 });
