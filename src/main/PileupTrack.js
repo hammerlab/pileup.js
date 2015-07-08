@@ -376,8 +376,6 @@ class NonEmptyPileupTrack extends React.Component {
       });
     });
 
-    readsG.append('path');  // the alignment arrow
-
     // Mismatched base pairs
     var pxPerLetter = scale(1) - scale(0),
         mode = DisplayMode.getDisplayMode(pxPerLetter),
