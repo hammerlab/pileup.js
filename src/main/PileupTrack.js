@@ -143,6 +143,7 @@ function readClass(vread: VisualAlignment) {
 type BasePair = {
   pos: number;
   basePair: string;
+  quality: number;
 }
 
 // This bundles everything intrinsic to the alignment that we need to display
