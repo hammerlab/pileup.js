@@ -176,34 +176,37 @@ var NonEmptyGenomeTrack = React.createClass({
 
     var g = svg.select('g.wrapper');
 
-    var letter = g.selectAll('.pair')
+    var baseClass = (mode == DisplayMode.LOOSE ? 'loose' :
+                     mode == DisplayMode.TIGHT ? 'tight' : 'blocks');
+    var showText = (mode == DisplayMode.LOOSE || mode == DisplayMode.TIGHT);
+    var modeData = [mode];
+    var modeWrapper = g.selectAll('.mode-wrapper').data(modeData, x => x);
+    modeWrapper.enter().append('g').attr('class', 'mode-wrapper ' + baseClass);
+    modeWrapper.exit().remove();
+
+    var letter = modeWrapper.selectAll('.basepair')
        .data(absBasePairs, bp => bp.pos);
 
     // Enter
     var basePairGs = letter.enter()
-      .append('g');
-    // TODO: look into only creating one or the other of these -- only one is ever visible.
-    basePairGs.append('text');
-    basePairGs.append('rect');
-    
-    var baseClass = (mode == DisplayMode.LOOSE ? 'loose' :
-                     mode == DisplayMode.TIGHT ? 'tight' : 'blocks');
+      .append(showText ? 'text' : 'rect');
 
     // Enter & update
-    letter.attr('class', 'pair ' + baseClass);
 
-    letter.select('text')
-        .attr('x', bp => scale(1 + 0.5 + bp.pos))  // 0.5 = centered
-        .attr('y', height)
-        .attr('class', bp => utils.basePairClass(bp.letter))
-        .text(bp => bp.letter);
-
-    letter.select('rect')
-        .attr('x', bp => scale(1 + bp.pos))
-        .attr('y', height - 14)
-        .attr('height', 14)
-        .attr('width', pxPerLetter - 1)
-        .attr('class', bp => utils.basePairClass(bp.letter));
+    if (showText) {
+      letter
+          .attr('x', bp => scale(1 + 0.5 + bp.pos))  // 0.5 = centered
+          .attr('y', height)
+          .attr('class', bp => utils.basePairClass(bp.letter))
+          .text(bp => bp.letter);
+    } else {
+      letter
+          .attr('x', bp => scale(1 + bp.pos))
+          .attr('y', height - 14)
+          .attr('height', 14)
+          .attr('width', pxPerLetter - 1)
+          .attr('class', bp => utils.basePairClass(bp.letter));
+    }
 
     // Exit
     letter.exit().remove();
