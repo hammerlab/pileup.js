@@ -41,7 +41,6 @@
     "flow-check": "flow check",
     "coverage": "./scripts/generate-coverage.sh",
     "sniper": "biojs-sniper",
-    "publish": "./scripts/publish.sh",
     "build": "npm run jstransform && npm run browserify-all && npm run uglify"
   },
   "author": "Dan Vanderkam",
