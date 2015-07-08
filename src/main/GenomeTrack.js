@@ -169,11 +169,10 @@ var NonEmptyGenomeTrack = React.createClass({
 
     var g = svg.select('g.wrapper');
 
-    var baseClass = (mode == DisplayMode.LOOSE ? 'loose' :
-                     mode == DisplayMode.TIGHT ? 'tight' : 'blocks');
-    var showText = (mode == DisplayMode.LOOSE || mode == DisplayMode.TIGHT);
-    var modeData = [mode];
-    var modeWrapper = g.selectAll('.mode-wrapper').data(modeData, x => x);
+    var baseClass = DisplayMode.toString(mode),
+        showText = DisplayMode.isText(mode),
+        modeData = [mode],
+        modeWrapper = g.selectAll('.mode-wrapper').data(modeData, x => x);
     modeWrapper.enter().append('g').attr('class', 'mode-wrapper ' + baseClass);
     modeWrapper.exit().remove();
 

@@ -13,7 +13,8 @@ var React = require('./react-shim'),
     types = require('./react-types'),
     utils = require('./utils'),
     {addToPileup, getOpInfo, CigarOp} = require('./pileuputils'),
-    ContigInterval = require('./ContigInterval');
+    ContigInterval = require('./ContigInterval'),
+    DisplayMode = require('./DisplayMode');
 
 var PileupTrack = React.createClass({
   displayName: 'pileup',
@@ -377,26 +378,44 @@ class NonEmptyPileupTrack extends React.Component {
 
     readsG.append('path');  // the alignment arrow
 
-    var mismatchTexts = reads.selectAll('text.basepair')
-        .data(vRead => vRead.mismatches, m => m.pos + m.basePair);
+    // Mismatched base pairs
+    var pxPerLetter = scale(1) - scale(0),
+        mode = DisplayMode.getDisplayMode(pxPerLetter),
+        showText = DisplayMode.isText(mode),
+        modeData = [mode],
+        modeWrapper = reads.selectAll('.mode-wrapper')
+                           .data(vRead => vRead.mismatches.length ? [{vRead,mode}] : [],
+                                 x => x.mode);
+    modeWrapper.enter().append('g').attr('class', 'mode-wrapper');
+    modeWrapper.exit().remove();
+
+    var letter = modeWrapper.selectAll('.basepair')
+        .data(d => d.vRead.mismatches, m => m.pos + m.basePair);
     
-    mismatchTexts
-        .enter()
-        .append('text')
-          .attr('class', mismatch => utils.basePairClass(mismatch.basePair))
-          .text(mismatch => mismatch.basePair)
+    letter.enter().append(showText ? 'text' : 'rect')
+    if (showText) {
+      letter.text(mismatch => mismatch.basePair)
+    } else {
+      letter
+          .attr('y', 0)
+          .attr('height', READ_HEIGHT)
+    }
+    letter.attr('class', mismatch => utils.basePairClass(mismatch.basePair))
           .attr('fill-opacity', mismatch => opacityForQuality(mismatch.quality));
 
     // Update
     segments.each(function(d, i) {
       updateSegment(this, d, scale);
     });
-    reads.selectAll('text')
+    reads.selectAll('text.basepair')
          .attr('x', mismatch => scale(1 + 0.5 + mismatch.pos));  // 0.5 = centered
+    reads.selectAll('rect.basepair')
+          .attr('x', mismatch => scale(1 + mismatch.pos))
+          .attr('width', pxPerLetter - 1)
 
     // Exit
     reads.exit().remove();
-    mismatchTexts.exit().remove();
+    letter.exit().remove();
     segments.exit().remove();
   }
 
