@@ -131,12 +131,24 @@ class SamRead {
     return ops;
   }
 
+  /**
+   * Returns per-base quality scores from 0-255.
+   */
+  getQualityScores(): number[] {
+    var jv = this._getJDataView(),
+        l_read_name = jv.getUint8(8),
+        n_cigar_op = jv.getUint16(12),
+        l_seq = jv.getInt32(16),
+        pos = 32 + l_read_name + 4 * n_cigar_op + Math.ceil(l_seq / 2);
+    return jv.getBytes(l_seq, pos, true /* little endian */, true /* toArray */);
+  }
+
   getCigarString(): string {
     return makeCigarString(this.getFull().cigar);
   }
 
   getQualPhred(): string {
-    return makeAsciiPhred(this.getFull().qual);
+    return makeAsciiPhred(this.getQualityScores());
   }
 
   getSequence(): string {

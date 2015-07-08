@@ -68,9 +68,10 @@ function addToPileup(read: Interval, pileup: Array<Interval[]>): number {
 type BasePair = {
   pos: number;
   basePair: string;
+  quality: number;
 }
 
-function findMismatches(reference: string, seq: string, refPos: number): BasePair[] {
+function findMismatches(reference: string, seq: string, refPos: number, scores: number[]): BasePair[] {
   var out = [];
   for (var i = 0; i < seq.length; i++) {
     var pos = refPos + i,
@@ -79,7 +80,8 @@ function findMismatches(reference: string, seq: string, refPos: number): BasePai
     if (ref != basePair) {
       out.push({
         pos,
-        basePair
+        basePair,
+        quality: scores[i]
       });
     }
   }
@@ -133,6 +135,7 @@ function getOpInfo(read: SamRead, referenceSource: Object): OpInfo {
   var range = read.getInterval(),
       start = range.start(),
       seq = read.getSequence(),
+      scores = read.getQualityScores(),
       seqPos = 0,
       refPos = start,
       arrowIndex = getArrowIndex(read);
@@ -148,7 +151,7 @@ function getOpInfo(read: SamRead, referenceSource: Object): OpInfo {
         stop: refPos + op.length - 1
       });
       var mSeq = seq.slice(seqPos, seqPos + op.length);
-      mismatches = mismatches.concat(findMismatches(ref, mSeq, refPos));
+      mismatches = mismatches.concat(findMismatches(ref, mSeq, refPos, scores));
     }
 
     result.push({

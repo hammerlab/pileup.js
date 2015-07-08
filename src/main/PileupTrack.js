@@ -143,6 +143,7 @@ function readClass(vread: VisualAlignment) {
 type BasePair = {
   pos: number;
   basePair: string;
+  quality: number;
 }
 
 // This bundles everything intrinsic to the alignment that we need to display
@@ -163,6 +164,21 @@ var Strand = {
 
 function yForRow(row) {
   return row * (READ_HEIGHT + READ_SPACING);
+}
+
+// This is adapted from IGV.
+var MIN_Q = 5,  // these are Phred-scaled scores
+    MAX_Q = 20,
+    Q_SCALE = d3.scale.linear()
+                .domain([MIN_Q, MAX_Q])
+                .range([0.1, 0.9])
+                .clamp(true);  // clamp output to [0.1, 0.9]
+function opacityForQuality(quality: number): number {
+  var alpha = Q_SCALE(quality);
+
+  // Round alpha to nearest 0.1
+  alpha = Math.round(alpha * 10 + 0.5) / 10.0;
+  return Math.min(1.0, alpha);
 }
 
 class NonEmptyPileupTrack extends React.Component {
@@ -368,7 +384,8 @@ class NonEmptyPileupTrack extends React.Component {
         .enter()
         .append('text')
           .attr('class', mismatch => utils.basePairClass(mismatch.basePair))
-          .text(mismatch => mismatch.basePair);
+          .text(mismatch => mismatch.basePair)
+          .attr('fill-opacity', mismatch => opacityForQuality(mismatch.quality));
 
     // Update
     segments.each(function(d, i) {
