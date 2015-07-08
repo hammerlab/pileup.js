@@ -168,15 +168,14 @@ function yForRow(row) {
 
 // This is adapted from IGV.
 var MIN_Q = 5,  // these are Phred-scaled scores
-    MAX_Q = 20;
+    MAX_Q = 20,
+    Q_SCALE = d3.scale.linear()
+                .domain([MIN_Q, MAX_Q])
+                .range([0.1, 0.9])
+                .clamp(true);  // clamp output to [0.1, 0.9]
 function opacityForQuality(quality: number): number {
-  var alpha = 0;
+  var alpha = Q_SCALE(quality);
 
-  if (quality < MIN_Q) {
-    alpha = 0.1;
-  } else {
-    alpha = Math.max(0.1, Math.min(1.0, 0.1 + 0.9 * (quality - MIN_Q) / (MAX_Q - MIN_Q)));
-  }
   // Round alpha to nearest 0.1
   alpha = Math.round(alpha * 10 + 0.5) / 10.0;
   return Math.min(1.0, alpha);
