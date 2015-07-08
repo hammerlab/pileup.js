@@ -15,12 +15,15 @@ cp -r dist/test coverage/test  # test code needn't be covered
 browserify coverage/**/*.js -o coverage/tests.js
 
 # Run http-server and save its PID for cleanup
-npm run http-server > /dev/null &
+http-server > /dev/null &
 SERVER_PID=$!
 function finish() {
-  pkill -TERM -P $SERVER_PID
+  kill -TERM $SERVER_PID
 }
 trap finish EXIT
+
+# Give the server a chance to start up
+sleep 1
 
 # Run the tests using mocha-phantomjs & mocha-phantomjs-istanbul
 # This produces coverage/coverage.json

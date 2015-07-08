@@ -1,9 +1,15 @@
 #!/bin/bash
 # Starts the http-server and runs mocha-phantomjs-based tests
+# Note that you must run `npm build` or `npm watch` before running this.
+set -o errexit
 
 # Run http-server and save its PID
-npm run http-server > /dev/null &
+http-server -p 8081 > /dev/null &
 SERVER_PID=$!
+function finish() {
+  kill -TERM $SERVER_PID
+}
+trap finish EXIT
 
 # the following sleep step is not really necessary
 # as http-server starts almost instantenously;
@@ -12,11 +18,4 @@ SERVER_PID=$!
 sleep 1
 
 # Start the tests
-npm run mocha-phantomjs
-TEST_STATUS=$?
-
-# Kill the http server
-pkill -TERM -P $SERVER_PID
-
-# Exit with test status
-exit $TEST_STATUS
+mocha-phantomjs http://localhost:8081/src/test/runner.html
