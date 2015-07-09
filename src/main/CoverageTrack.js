@@ -12,6 +12,7 @@ var React = require('./react-shim'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     utils = require('./utils'),
+    _ = require("underscore"),
     {addToPileup, getOpInfo, CigarOp} = require('./pileuputils'),
     ContigInterval = require('./ContigInterval');
 
@@ -34,141 +35,7 @@ var CoverageTrack = React.createClass({
 });
 
 
-var READ_HEIGHT = 13;
-var READ_SPACING = 2;  // vertical pixels between reads
-
-var READ_STRAND_ARROW_WIDTH = 6;
-
-// Returns an SVG path string for the read, with an arrow indicating strand.
-function makeArrow(scale, pos, refLength, direction) {
-  var left = scale(pos + 1),
-      top = 0,
-      right = scale(pos + refLength + 1),
-      bottom = READ_HEIGHT,
-      path = direction == 'R' ? [
-        [left, top],
-        [right - READ_STRAND_ARROW_WIDTH, top],
-        [right, (top + bottom) / 2],
-        [right - READ_STRAND_ARROW_WIDTH, bottom],
-        [left, bottom]
-      ] : [
-        [right, top],
-        [left + READ_STRAND_ARROW_WIDTH, top],
-        [left, (top + bottom) / 2],
-        [left + READ_STRAND_ARROW_WIDTH, bottom],
-        [right, bottom]
-      ];
-  return d3.svg.line()(path);
-}
-
-// Create the SVG element for a single Cigar op in an alignment.
-function enterSegment(parentNode, op, scale) {
-  var parent = d3.select(parentNode);
-  switch (op.op) {
-    case CigarOp.MATCH:
-      return parent.append(op.arrow ? 'path' : 'rect')
-                   .attr('class', 'segment match');
-
-    case CigarOp.DELETE:
-      return parent.append('line')
-                   .attr('class', 'segment delete');
-
-    case CigarOp.INSERT:
-      return parent.append('line')
-                   .attr('class', 'segment insert');
-
-    default:
-      throw `Invalid op! ${op.op}`;
-  }
-}
-
-// Update the selection for a single Cigar op, e.g. in response to a pan or zoom.
-function updateSegment(node, op, scale) {
-  switch (op.op) {
-    case CigarOp.MATCH:
-      if (op.arrow) {
-        // an arrow pointing in the direction of the alignment
-        d3.select(node).attr('d', makeArrow(scale, op.pos, op.length, op.arrow));
-      } else {
-        // a rectangle (interior part of an alignment)
-        d3.select(node)
-          .attr({
-            'x': scale(op.pos + 1),
-            'height': READ_HEIGHT,
-            'width': scale(op.length) - scale(0)
-          });
-      }
-      break;
-
-    case CigarOp.DELETE:
-      // A thin line in the middle of the alignments indicating the deletion.
-      d3.select(node)
-        .attr({
-          'x1': scale(op.pos + 1),
-          'x2': scale(op.pos + 1 + op.length),
-          'y1': READ_HEIGHT / 2 - 0.5,
-          'y2': READ_HEIGHT / 2 - 0.5
-        });
-      break;
-
-    case CigarOp.INSERT:
-      // A thin vertical line. This is shifted to the left so that it's not
-      // hidden by the segment following it.
-      d3.select(node)
-        .attr({
-          'x1': scale(op.pos + 1) - 2,  // to cover a bit of the previous segment
-          'x2': scale(op.pos + 1) - 2,
-          'y1': -1,
-          'y2': READ_HEIGHT + 2
-        });
-      break;
-
-    default:
-      throw `Invalid op! ${op.op}`;
-  }
-}
-
-// Should the Cigar op be rendered to the screen?
-function isRendered(op) {
-  return (op.op == CigarOp.MATCH ||
-          op.op == CigarOp.DELETE ||
-          op.op == CigarOp.INSERT);
-}
-
-function readClass(vread: VisualAlignment) {
-  return 'alignment ' + (vread.strand == Strand.NEGATIVE ? 'negative' : 'positive');
-}
-
-// Copied from pileuputils.js
-type BasePair = {
-  pos: number;
-  basePair: string;
-}
-
-// This bundles everything intrinsic to the alignment that we need to display
-// it, i.e. everything not dependend on scale/viewport.
-type VisualAlignment = {
-  key: string;
-  read: SamRead;
-  strand: number;  // see Strand below
-  row: number;  // pileup row.
-  refLength: number;  // span on the reference (accounting for indels)
-  mismatches: Array<BasePair>;
-};
-var Strand = {
-  POSITIVE: 0,
-  NEGATIVE: 1
-};
-
-
-function yForRow(row) {
-  return row * (READ_HEIGHT + READ_SPACING);
-}
-
 class NonEmptyCoverageTrack extends React.Component {
-  pileup: Array<Interval[]>;
-  keyToVisualAlignment: {[key:string]: VisualAlignment};
-
   constructor(props) {
     super(props);
     this.state = {
@@ -176,84 +43,18 @@ class NonEmptyCoverageTrack extends React.Component {
       height: 0,
       reads: []
     };
-    this.pileup = [];
-    this.keyToVisualAlignment = {};
   }
 
   render(): any {
-    // These styles allow vertical scrolling to see the full pileup.
-    // Adding a vertical scrollbar shrinks the visible area, but we have to act
-    // as though it doesn't, since adjusting the scale would put it out of sync
-    // with other tracks.
     var containerStyles = {
       'height': '100%'
     };
 
-    var statusEl = null,
-        networkStatus = this.state.networkStatus;
-    if (networkStatus) {
-      var message = this.formatStatus(networkStatus);
-      statusEl = (
-        <div ref='status' className='network-status'>
-          <div className='network-status-message'>
-            Loading alignments… ({message})
-          </div>
-        </div>
-      );
-    }
-
     return (
       <div>
-        {statusEl}
         <div ref='container' style={containerStyles}></div>
       </div>
     );
-  }
-
-  formatStatus(state): string {
-    if (state.numRequests) {
-      var pluralS = state.numRequests > 1 ? 's' : '';
-      return `issued ${state.numRequests} request${pluralS}`;
-    } else if (state.status) {
-      return state.status;
-    }
-    throw 'invalid';
-  }
-
-  updateSize() {
-    var parentDiv = this.refs.container.getDOMNode().parentNode;
-    this.setState({
-      width: parentDiv.offsetWidth,
-      height: parentDiv.offsetHeight
-    });
-  }
-
-  componentDidMount() {
-    window.addEventListener('resize', () => this.updateSize());
-    this.updateSize();
-
-    var div = this.refs.container.getDOMNode();
-    d3.select(div)
-      .append('svg');
-
-    this.props.source.on('newdata', () => {
-      var range = this.props.range,
-          ci = new ContigInterval(range.contig, range.start, range.stop);
-      this.setState({
-        reads: this.props.source.getAlignmentsInRange(ci)
-      });
-    });
-    this.props.referenceSource.on('newdata', () => {
-      this.updateMismatches();
-      this.updateVisualization();
-    });
-    this.props.source.on('networkprogress', e => {
-      this.setState({networkStatus: e});
-    }).on('networkdone', e => {
-      this.setState({networkStatus: null});
-    });
-
-    this.updateVisualization();
   }
 
   getScale() {
@@ -266,123 +67,85 @@ class NonEmptyCoverageTrack extends React.Component {
     return scale;
   }
 
+  updateSize() {
+    var parentDiv = this.refs.container.getDOMNode();
+    this.setState({
+      width: parentDiv.parentNode.offsetWidth,
+      height: parentDiv.offsetHeight
+    });
+  }
+
+  componentDidMount() {
+    window.addEventListener('resize', () => this.updateSize());
+    this.updateSize();
+
+    var div = this.refs.container.getDOMNode();
+    d3.select(div).append('svg');
+
+    this.props.source.on('newdata', () => {
+      var range = this.props.range,
+          ci = new ContigInterval(range.contig, range.start, range.stop);
+      this.setState({
+        reads: this.props.source.getAlignmentsInRange(ci)
+      });
+    });
+  }
+
   componentDidUpdate(prevProps: any, prevState: any) {
     if (!shallowEquals(this.props, prevProps) ||
         !shallowEquals(this.state, prevState)) {
-      this.updateVisualization();
+      this.visualizeCoverage();
     }
   }
 
-  // Attach visualization info to the read and cache it.
-  addRead(read: SamRead, referenceSource): VisualAlignment {
-    var k = read.offset.toString();
-    if (k in this.keyToVisualAlignment) {
-      return this.keyToVisualAlignment[k];
-    }
-
-    var refLength = read.getReferenceLength();
-    var range = read.getInterval();
-    var key = read.offset.toString();
-
-    var opInfo = getOpInfo(read, referenceSource);
-
-    var visualAlignment = {
-      key,
-      read,
-      strand: read.getStrand() == '+' ? Strand.POSITIVE : Strand.NEGATIVE,
-      row: addToPileup(range.interval, this.pileup),
-      refLength,
-      ops: opInfo.ops,
-      mismatches: opInfo.mismatches
-    };
-
-    this.keyToVisualAlignment[k] = visualAlignment;
-    return visualAlignment;
-  }
-
-  updateMismatches() {
-    // TODO: dedupe with addRead()
-    var referenceSource = this.props.referenceSource;
-    for (var k in this.keyToVisualAlignment) {
-      var vRead = this.keyToVisualAlignment[k],
-          read = vRead.read,
-          opInfo = getOpInfo(read, referenceSource);
-
-      vRead.mismatches = opInfo.mismatches;
-    }
-  }
-
-  updateVisualization() {
+  visualizeCoverage() {
     var div = this.refs.container.getDOMNode(),
         width = this.state.width,
+        height = this.state.height,
+        range = this.props.range,
+        xScale = this.getScale(),
         svg = d3.select(div).select('svg');
 
     // Hold off until height & width are known.
     if (width === 0) return;
 
-    var referenceSource = this.props.referenceSource;
-    var vReads = this.state.reads.map(
-            read => this.addRead(read, referenceSource))
-        .filter(read => read.refLength);  // drop alignments w/o CIGARs
+    svg
+      .attr('width', width)
+      .attr('height', height);
 
-    // Height can only be computed after the pileup has been updated.
-    var height = yForRow(this.pileup.length);
-    var scale = this.getScale();
+    var binCounts = _.chain(this.state.reads)
+      .map(read => read.getInterval().interval)
+      .map(interval => _.range(interval.start, interval.stop+1))
+      .flatten()
+      .countBy()
+      .pairs()
+      .map(c => ({key: c[0], count: c[1]}))
+      .value();
 
-    svg.attr('width', width)
-       .attr('height', height);
+    var maxVal = _.chain(binCounts).map(b => b.count).max().value();
+    var yScale = d3.scale.linear()
+      .domain([0, maxVal])
+      .range([0, height]);
 
-    var reads = svg.selectAll('.alignment')
-       .data(vReads, vRead => vRead.key);
+    var histBars = svg.selectAll("rect.covbin").data(binCounts, d => d.key);
 
-    // Enter
-    var readsG = reads.enter()
-        .append('g')
-        .attr('class', readClass)
-        .attr('transform', vRead => `translate(0, ${yForRow(vRead.row)})`)
-        .on('click', vRead => {
-          window.alert(vRead.read.debugString());
-        });
+    histBars
+      .enter()
+      .append('rect')
+      .attr('x', d => xScale(d.key))
+      .attr('y', d => yScale(maxVal-d.count))
+      .attr('width', d => xScale(d.key) - xScale(d.key-1))
+      .attr('height', d => yScale(d.count))
+      .attr('class', 'covbin');
 
-    var segments = reads.selectAll('.segment')
-        .data(read => read.ops.filter(isRendered));
+    histBars
+      .attr('x', d => xScale(d.key))
+      .attr('y', d => yScale(maxVal-d.count))
+      .attr('width', d => xScale(d.key) - xScale(d.key-1))
+      .attr('height', d => yScale(d.count))
 
-    // This is like segments.append(), but allows for different types of
-    // elements depending on the datum.
-    segments.enter().call(function(sel) {
-      sel.forEach(function(el) {
-        el.forEach(function(op) {
-          var d = d3.select(op).datum();
-          var element = enterSegment(el.parentNode, d, scale);
-          updateSegment(element[0][0], d, scale);
-        });
-      });
-    });
-
-    readsG.append('path');  // the alignment arrow
-
-    var mismatchTexts = reads.selectAll('text.basepair')
-        .data(vRead => vRead.mismatches, m => m.pos + m.basePair);
-
-    mismatchTexts
-        .enter()
-        .append('text')
-          .attr('class', mismatch => utils.basePairClass(mismatch.basePair))
-          .text(mismatch => mismatch.basePair);
-
-    // Update
-    segments.each(function(d, i) {
-      updateSegment(this, d, scale);
-    });
-    reads.selectAll('text')
-         .attr('x', mismatch => scale(1 + 0.5 + mismatch.pos));  // 0.5 = centered
-
-    // Exit
-    reads.exit().remove();
-    mismatchTexts.exit().remove();
-    segments.exit().remove();
+    histBars.exit().remove();
   }
-
 }
 
 NonEmptyCoverageTrack.propTypes = {
