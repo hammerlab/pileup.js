@@ -159,3 +159,13 @@
   fill: #ddd;
   stroke: blue;
 }
+
+/* coverage track */
+.pileup-root > .coverage {
+  flex: 0 0 50px;  /* fixed height */
+}
+.coverage rect.covbin {
+  stroke-width: 0.1;
+  stroke: white;
+  fill: gray;
+}

@@ -389,7 +389,7 @@ class NonEmptyPileupTrack extends React.Component {
 
     var letter = modeWrapper.selectAll('.basepair')
         .data(d => d.vRead.mismatches, m => m.pos + m.basePair);
-    
+
     letter.enter().append(showText ? 'text' : 'rect')
     if (showText) {
       letter.text(mismatch => mismatch.basePair)
