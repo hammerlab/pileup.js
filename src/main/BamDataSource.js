@@ -9,11 +9,11 @@ var ContigInterval = require('./ContigInterval'),
     BamFile = require('./bam'),
     RemoteFile = require('./RemoteFile');
 
-import type * as SamRead from './SamRead';
+import type {Alignment} from './Alignment';
 
 type BamDataSource = {
   rangeChanged: (newRange: GenomeRange) => void;
-  getAlignmentsInRange: (range: ContigInterval<string>) => SamRead[];
+  getAlignmentsInRange: (range: ContigInterval<string>) => Alignment[];
   on: (event: string, handler: Function) => void;
   off: (event: string) => void;
   trigger: (event: string, ...args:any) => void;
@@ -35,7 +35,7 @@ function expandRange(range: ContigInterval<string>) {
 
 function createFromBamFile(remoteSource: BamFile): BamDataSource {
   // Keys are virtualOffset.toString()
-  var reads: {[key:string]: SamRead} = {};
+  var reads: {[key:string]: Alignment} = {};
 
   // Mapping from contig name to canonical contig name.
   var contigNames: {[key:string]: string} = {};
@@ -43,8 +43,8 @@ function createFromBamFile(remoteSource: BamFile): BamDataSource {
   // Ranges for which we have complete information -- no need to hit network.
   var coveredRanges: ContigInterval<string>[] = [];
 
-  function addRead(read: SamRead) {
-    var key = read.offset.toString();
+  function addRead(read: Alignment) {
+    var key = read.getKey();
     if (!reads[key]) {
       reads[key] = read;
     }
@@ -99,7 +99,7 @@ function createFromBamFile(remoteSource: BamFile): BamDataSource {
     });
   }
 
-  function getAlignmentsInRange(range: ContigInterval<string>): SamRead[] {
+  function getAlignmentsInRange(range: ContigInterval<string>): Alignment[] {
     if (!range) return [];
     if (_.isEmpty(contigNames)) return [];
 

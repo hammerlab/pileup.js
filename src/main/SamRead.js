@@ -13,6 +13,7 @@
 'use strict';
 
 import type * as VirtualOffset from './VirtualOffset';
+import type {CigarOp} from './Alignment';
 
 var jDataView = require('jdataview'),
     jBinary = require('jbinary'),
@@ -25,16 +26,12 @@ var jDataView = require('jdataview'),
 
 
 var CIGAR_OPS = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X'];
-type CigarOp = {
-  op: string;  // M, I, D, N, S, H, P, =, X
-  length: number
-}
 
 var SEQUENCE_VALUES = ['=', 'A', 'C', 'M', 'G', 'R', 'S', 'V',
                        'T', 'W', 'Y', 'H', 'K', 'D', 'B', 'N'];
 
 
-class SamRead {
+class SamRead /* implements Alignment */ {
   buffer: ArrayBuffer;
   offset: VirtualOffset;
 
@@ -45,8 +42,8 @@ class SamRead {
 
   // cached values
   _full: ?Object;
-  _refLength: ?number;
   _seq: ?string;
+  _interval: ?ContigInterval<string>;
 
   /**
    * @param buffer contains the raw bytes of the serialized BAM read. It must
@@ -78,6 +75,13 @@ class SamRead {
     return new jDataView(b, 0, b.byteLength, true /* little endian */);
   }
 
+  /**
+   * Returns an identifier which is unique within the BAM file.
+   */
+  getKey(): string {
+    return this.offset.toString();
+  }
+
   getName(): string {
     var l_read_name = this._getJDataView().getUint8(8);
     var jb = new jBinary(this.buffer, {
@@ -106,9 +110,12 @@ class SamRead {
   }
 
   getInterval(): ContigInterval<string> {
-    return new ContigInterval(this.ref,
-                              this.pos,
-                              this.pos + this.getReferenceLength() - 1);
+    if (this._interval) return this._interval;
+    var interval = new ContigInterval(this.ref,
+                                      this.pos,
+                                      this.pos + this.getReferenceLength() - 1);
+    this._interval;
+    return interval;
   }
 
   intersects(interval: ContigInterval<string>): boolean {
@@ -176,20 +183,7 @@ class SamRead {
 
   // Returns the length of the alignment from first aligned read to last aligned read.
   getReferenceLength(): number {
-    if (this._refLength) return this._refLength;
-    var refLength = 0;
-    this.getCigarOps().forEach(({op, length}) => {
-      switch (op) {
-        case 'M':
-        case 'D':
-        case 'N':
-        case '=':
-        case 'X':
-          refLength += length;
-      }
-    });
-    this._refLength = refLength;
-    return refLength;
+    return SamRead.referenceLengthFromOps(this.getCigarOps());
   }
 
   debugString(): string {
@@ -203,6 +197,21 @@ Sequence: ${f.seq}
 Quality:  ${this.getQualPhred()}
 Tags: ${JSON.stringify(f.auxiliary, null, '  ')}
     `;
+  }
+
+  static referenceLengthFromOps(ops: CigarOp[]): number {
+    var refLength = 0;
+    ops.forEach(({op, length}) => {
+      switch (op) {
+        case 'M':
+        case 'D':
+        case 'N':
+        case '=':
+        case 'X':
+          refLength += length;
+      }
+    });
+    return refLength;
   }
 }
 

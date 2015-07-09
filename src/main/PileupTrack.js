@@ -292,16 +292,14 @@ class NonEmptyPileupTrack extends React.Component {
 
   // Attach visualization info to the read and cache it.
   addRead(read: SamRead, referenceSource): VisualAlignment {
-    var k = read.offset.toString();
-    if (k in this.keyToVisualAlignment) {
-      return this.keyToVisualAlignment[k];
+    var key = read.getKey();
+    if (key in this.keyToVisualAlignment) {
+      return this.keyToVisualAlignment[key];
     }
 
-    var refLength = read.getReferenceLength();
-    var range = read.getInterval();
-    var key = read.offset.toString();
-
-    var opInfo = getOpInfo(read, referenceSource);
+    var range = read.getInterval(),
+        refLength = range.length(),
+        opInfo = getOpInfo(read, referenceSource);
 
     var visualAlignment = {
       key,
@@ -313,7 +311,7 @@ class NonEmptyPileupTrack extends React.Component {
       mismatches: opInfo.mismatches
     };
 
-    this.keyToVisualAlignment[k] = visualAlignment;
+    this.keyToVisualAlignment[key] = visualAlignment;
     return visualAlignment;
   }
 
