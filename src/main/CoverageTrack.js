@@ -217,7 +217,7 @@ NonEmptyCoverageTrack.propTypes = {
 
 var EmptyTrack = React.createClass({
   render: function() {
-    return <div className='coverage empty'>Zoom in to see alignments</div>;
+    return <div className='coverage empty'>Zoom in to see the coverage</div>;
   }
 });
 
