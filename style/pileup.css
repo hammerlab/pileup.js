@@ -171,13 +171,18 @@
   opacity: 0.7;
 }
 .coverage .y-axis {
-  fill: white;
   stroke: black;
   stroke-width: 1;
-  shapre-rendering: crispEdges;
 }
 .coverage .y-axis g.tick text {
   color: black;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: x-small;
+}
+.coverage .y-axis path {
+  stroke-width: 0;
+}
+.coverage rect.y-axis-background {
+  fill: white;
+  opacity: 0.5;
 }

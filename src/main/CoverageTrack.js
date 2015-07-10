@@ -161,7 +161,7 @@ class NonEmptyCoverageTrack extends React.Component {
       .range([0, axisHeight]);
 
     // Select the group we created first
-    var histBars = svg.select('g.bin-group').selectAll("rect.covbin")
+    var histBars = svg.select('g.bin-group').selectAll('rect.covbin')
       .data(binCounts, d => d.key);
 
     // D3 logic for our histogram bars
@@ -183,19 +183,27 @@ class NonEmptyCoverageTrack extends React.Component {
     // Logic for our axis
     var yAxis = d3.svg.axis()
       .scale(yScale)
-      .orient('left')  // this is gonna be at the far right
+      .orient('right')  // this is gonna be at the far left
       .tickSize(5)  // Make our ticks much more visible
       .outerTickSize(0)  // Remove the default range ticks (they are ugly)
       .tickFormat(t => t + 'X')  // X -> times in coverage terminology
       .tickValues([0, maxCoverage/2, maxCoverage]);  // show min, avg and max
     var yAxisEl = svg.selectAll('g.y-axis');
     if(yAxisEl.empty()) {  // no axis element yet
-      svg.append('g')
-        .attr('class', 'y-axis')
-        .attr('transform', 'translate(' + width + ', 0)');
-    }
-    yAxisEl.call(yAxis);  // update the axis
+      svg.append('rect').attr('class', 'y-axis-background');
+      // add this the second so it is on top of the background
+      svg.append('g').attr('class', 'y-axis');
+    } else {
+      yAxisEl.call(yAxis);  // update the axis
 
+      // Resize the background box according to the axis dimensions
+      var bbox = yAxisEl.node().getBBox();
+      svg.selectAll('rect.y-axis-background')
+        .attr('x', bbox.x)
+        .attr('y', bbox.y)
+        .attr('width', bbox.width * 1.2)  // %20 bigger box
+        .attr('height', bbox.height);
+    }
   }
 }
 
