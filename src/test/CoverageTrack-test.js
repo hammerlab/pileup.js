@@ -26,8 +26,6 @@ var pileup = require('../main/pileup'),
 describe('CoverageTrack', function() {
   var testDiv = document.getElementById('testdiv');
 
-  var testDiv = document.getElementById('testdiv');
-
   beforeEach(() => {
     // A fixed width container results in predictable x-positions for mismatches.
     testDiv.style.width = '800px';
@@ -42,10 +40,6 @@ describe('CoverageTrack', function() {
   var twoBitFile = new MappedRemoteFile('/test-data/hg19.chr17.7500000-7501000.2bit.mapped',
                             [[0, 16383], [691179834, 691183928], [694008946, 694009197]]),
       referenceSource = TwoBitDataSource.createFromTwoBitFile(new TwoBit(twoBitFile));
-
-  var findCoverageBins = () => {
-      return testDiv.querySelectorAll('.coverage .covbin');
-  };
 
   var findCoverageBins = () => {
       return testDiv.querySelectorAll('.coverage .covbin');
