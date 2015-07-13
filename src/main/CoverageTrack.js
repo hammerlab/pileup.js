@@ -1,5 +1,5 @@
 /**
- * Coverage visualization of BAM sources.
+ * Coverage visualization of Alignment sources.
  * @flow
  */
 'use strict';
