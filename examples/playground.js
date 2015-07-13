@@ -32,7 +32,7 @@ var sources = [
   {
     viz: pileup.viz.coverage(),
     data: bamSource,
-    cssClass: 'normal-coverage',
+    cssClass: 'normal',
     name: 'Coverage'
   },
   {
@@ -44,7 +44,7 @@ var sources = [
   {
     viz: pileup.viz.coverage(),
     data: bamSource,
-    cssClass: 'tumor-coverage',
+    cssClass: 'tumor',
     name: 'Coverage'
   },
   {
