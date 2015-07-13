@@ -11,6 +11,7 @@ var _ = require('underscore'),
     BigBedDataSource = require('./BigBedDataSource'),
     VcfDataSource = require('./VcfDataSource'),
     BamDataSource = require('./BamDataSource'),
+    GA4GHDataSource = require('./GA4GHDataSource'),
     // Visualizations
     GenomeTrack = require('./GenomeTrack'),
     GeneTrack = require('./GeneTrack'),
@@ -79,6 +80,7 @@ var pileup = {
   create: create,
   formats: {
     bam: BamDataSource.create,
+    ga4gh: GA4GHDataSource.create,
     vcf: VcfDataSource.create,
     twoBit: TwoBitDataSource.create,
     bigBed: BigBedDataSource.create

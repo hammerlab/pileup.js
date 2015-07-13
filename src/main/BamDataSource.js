@@ -9,15 +9,7 @@ var ContigInterval = require('./ContigInterval'),
     BamFile = require('./bam'),
     RemoteFile = require('./RemoteFile');
 
-import type {Alignment} from './Alignment';
-
-type BamDataSource = {
-  rangeChanged: (newRange: GenomeRange) => void;
-  getAlignmentsInRange: (range: ContigInterval<string>) => Alignment[];
-  on: (event: string, handler: Function) => void;
-  off: (event: string) => void;
-  trigger: (event: string, ...args:any) => void;
-};
+import type {Alignment, AlignmentDataSource} from './Alignment';
 
 // Genome ranges are rounded to multiples of this for fetching.
 // This reduces network activity while fetching.
@@ -33,8 +25,7 @@ function expandRange(range: ContigInterval<string>) {
 }
 
 
-function createFromBamFile(remoteSource: BamFile): BamDataSource {
-  // Keys are virtualOffset.toString()
+function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
   var reads: {[key:string]: Alignment} = {};
 
   // Mapping from contig name to canonical contig name.
@@ -133,7 +124,7 @@ type BamSpec = {
   indexChunks?: Object;
 }
 
-function create(spec: BamSpec): BamDataSource {
+function create(spec: BamSpec): AlignmentDataSource {
   var url = spec.url;
   if (!url) {
     throw new Error(`Missing URL from track data: ${JSON.stringify(spec)}`);

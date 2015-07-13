@@ -22,3 +22,10 @@ export type Alignment = {
   getSequence(): string;
   getInterval: ContigInterval<string>;
 };
+
+export type AlignmentDataSource = {
+  rangeChanged: (newRange: GenomeRange) => void;
+  getAlignmentsInRange: (range: ContigInterval<string>) => Alignment[];
+  on: (event: string, handler: Function) => void;
+  off: (event: string) => void;
+};
