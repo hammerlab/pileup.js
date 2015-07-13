@@ -167,8 +167,7 @@
 .coverage rect.covbin {
   stroke-width: 0.1;
   stroke: white;
-  fill: gray;
-  opacity: 0.7;
+  fill: #c8c8c8;
 }
 .coverage .y-axis {
   stroke: black;

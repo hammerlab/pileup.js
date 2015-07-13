@@ -119,27 +119,39 @@ class NonEmptyCoverageTrack extends React.Component {
 
     svg.attr('width', width).attr('height', height);
 
-    // Calculate summary statistics for coverage from the reads
-    var binCounts = _.chain(this.state.reads)
-      // Extract the interval a read covers
-      .map(read => read.getInterval().interval)
-      // Create arrays for nucleotides covered by a read
-      .map(interval => _.range(interval.start, interval.stop+1))
-      // Merge all covered reads into a single array
-      .flatten()
-      // Group observations by nucleotide position and count them
-      .countBy()
-      // Convert the pos=>count object into an array for easier parsing
-      .pairs()
-      // Convert the array into a custom object to be used for D3 plotting
-      .map(c => ({key: c[0], count: c[1]}))
-      // Extract the value from the underscore chain
-      .value();
+    /*
+      The following extacts the summary statistics from the read data.
+      It might look ugly and you might have the temptation to convert
+      this into a functional form; but, please don't. We need these hacky
+      optimizations not to chug the browser with histogram data generation.
+    */
+    // Keep track of the start/stop points of our view
+    var rstart = range.start,
+        rstop = range.stop;
+    // Create an array to keep track of all counts for each of the positions
+    var binCounts = new Array(rstop - rstart + 1);  // length = num of bases
+    binCounts = _.map(binCounts, () => 0);  // start w/ 0 counts for each base
+    _.chain(this.state.reads)  // Parse the read data
+        // Extract the interval a read covers
+        .map(read => read.getInterval().interval)
+        // Walk over the interval one base at a time and update the counts
+        .each(i => {  // i: interval, j: current base
+            for(var j = Math.max(i.start, rstart);  // don't go beyond start
+                j <= Math.min(i.stop, rstop);  // don't go beyond stop
+                j++) {
+              binCounts[j-rstart] += 1;
+            }
+        });
+    // binCounts is a simple array now, so let's find the max val right away
+    var maxCoverage = _.max(binCounts);
 
-    var maxCoverage = _.chain(binCounts)
-      .map(b => b.count)
-      .max()
-      .value();
+    // This will convert the array into an array of objects with keys
+    // where the key will be the nucleotide location
+    binCounts = _.map(binCounts,
+      (val, idx) => ({key: rstart + idx, count: val})
+    );
+    /* Here ends the summary stat extraction part */
+
     // Now that we know the max coverage,
     // we now want to create a visually appealing axis
     // to make it easy to comprehend for us, humans
@@ -196,6 +208,7 @@ class NonEmptyCoverageTrack extends React.Component {
     } else {
       yAxisEl.call(yAxis);  // update the axis
 
+      /* aa
       // Resize the background box according to the axis dimensions
       var bbox = yAxisEl.node().getBBox();
       svg.selectAll('rect.y-axis-background')
@@ -203,6 +216,7 @@ class NonEmptyCoverageTrack extends React.Component {
         .attr('y', bbox.y)
         .attr('width', bbox.width * 1.2)  // %20 bigger box
         .attr('height', bbox.height);
+      */
     }
   }
 }
