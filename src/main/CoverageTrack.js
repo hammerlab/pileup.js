@@ -105,25 +105,13 @@ class NonEmptyCoverageTrack extends React.Component {
     }
   }
 
-  visualizeCoverage() {
-    var div = this.refs.container.getDOMNode(),
-        width = this.state.width,
-        height = this.state.height,
-        range = this.props.range,
-        xScale = this.getScale(),
-        svg = d3.select(div).select('svg');
-
-    // Hold off until height & width are known.
-    if (width === 0) return;
-
-    svg.attr('width', width).attr('height', height);
-
-    /*
-      The following extacts the summary statistics from the read data.
-      It might look ugly and you might have the temptation to convert
-      this into a functional form; but, please don't. We need these hacky
-      optimizations not to chug the browser with histogram data generation.
-    */
+  /*
+    The following extacts the summary statistics from the read data.
+    It might look ugly and you might have the temptation to convert
+    this into a functional form; but, please don't. We need these hacky
+    optimizations not to chug the browser with histogram data generation.
+  */
+  extractSummaryStatistics(reads: Array<SamRead>, range: GenomeRange) {
     // Keep track of the start/stop points of our view
     var rstart = range.start,
         rstop = range.stop;
@@ -149,8 +137,25 @@ class NonEmptyCoverageTrack extends React.Component {
     binCounts = _.map(binCounts,
       (val, idx) => ({key: rstart + idx, count: val})
     );
-    /* Here ends the summary stat extraction part */
 
+    return {binCounts, maxCoverage};
+  }
+
+  visualizeCoverage() {
+    var div = this.refs.container.getDOMNode(),
+        width = this.state.width,
+        height = this.state.height,
+        range = this.props.range,
+        reads = this.state.reads,
+        xScale = this.getScale(),
+        svg = d3.select(div).select('svg');
+
+    // Hold off until height & width are known.
+    if (width === 0) return;
+
+    svg.attr('width', width).attr('height', height);
+
+    var {binCounts, maxCoverage} = this.extractSummaryStatistics(reads, range);
     // Now that we know the max coverage, we now want to create a visually
     // appealing axis to make it easy to comprehend for us, humans
     // Rule: if maxCoverage is smaller than 10X,
