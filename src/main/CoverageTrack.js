@@ -84,10 +84,9 @@ class NonEmptyCoverageTrack extends React.Component {
     var div = this.refs.container.getDOMNode();
     var svg = d3.select(div).append('svg');
 
-    // Below, we create the container group for our bars upfront
-    // as we want to overlay the axis on top of them
-    // therefore we have to make sure their container
-    // is defined first in the SVG
+    // Below, we create the container group for our bars upfront as we want
+    // to overlay the axis on top of them; therefore, we have to make sure
+    // their container is defined first in the SVG
     svg.append('g').attr('class', 'bin-group');
 
     this.props.source.on('newdata', () => {
@@ -152,13 +151,11 @@ class NonEmptyCoverageTrack extends React.Component {
     );
     /* Here ends the summary stat extraction part */
 
-    // Now that we know the max coverage,
-    // we now want to create a visually appealing axis
-    // to make it easy to comprehend for us, humans
+    // Now that we know the max coverage, we now want to create a visually
+    // appealing axis to make it easy to comprehend for us, humans
     // Rule: if maxCoverage is smaller than 10X,
     //  then show it as it is (we like small numbers);
-    //  otherwise, round the number to the nearest tenth
-    //  (we hate numbers like 61)
+    //  otherwise, round the number to the nearest tenth.
     maxCoverage = maxCoverage < 10
       ? maxCoverage
       : Math.round(maxCoverage/10)*10;
