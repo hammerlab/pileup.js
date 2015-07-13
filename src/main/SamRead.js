@@ -110,11 +110,10 @@ class SamRead /* implements Alignment */ {
   }
 
   getInterval(): ContigInterval<string> {
-    if (this._interval) return this._interval;
+    if (this._interval) return this._interval;  // use the cache
     var interval = new ContigInterval(this.ref,
                                       this.pos,
                                       this.pos + this.getReferenceLength() - 1);
-    this._interval;
     return interval;
   }
 
