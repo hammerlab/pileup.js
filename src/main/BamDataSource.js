@@ -9,15 +9,7 @@ var ContigInterval = require('./ContigInterval'),
     BamFile = require('./bam'),
     RemoteFile = require('./RemoteFile');
 
-import type * as SamRead from './SamRead';
-
-type BamDataSource = {
-  rangeChanged: (newRange: GenomeRange) => void;
-  getAlignmentsInRange: (range: ContigInterval<string>) => SamRead[];
-  on: (event: string, handler: Function) => void;
-  off: (event: string) => void;
-  trigger: (event: string, ...args:any) => void;
-};
+import type {Alignment, AlignmentDataSource} from './Alignment';
 
 // Genome ranges are rounded to multiples of this for fetching.
 // This reduces network activity while fetching.
@@ -33,9 +25,8 @@ function expandRange(range: ContigInterval<string>) {
 }
 
 
-function createFromBamFile(remoteSource: BamFile): BamDataSource {
-  // Keys are virtualOffset.toString()
-  var reads: {[key:string]: SamRead} = {};
+function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
+  var reads: {[key:string]: Alignment} = {};
 
   // Mapping from contig name to canonical contig name.
   var contigNames: {[key:string]: string} = {};
@@ -43,8 +34,8 @@ function createFromBamFile(remoteSource: BamFile): BamDataSource {
   // Ranges for which we have complete information -- no need to hit network.
   var coveredRanges: ContigInterval<string>[] = [];
 
-  function addRead(read: SamRead) {
-    var key = read.offset.toString();
+  function addRead(read: Alignment) {
+    var key = read.getKey();
     if (!reads[key]) {
       reads[key] = read;
     }
@@ -99,7 +90,7 @@ function createFromBamFile(remoteSource: BamFile): BamDataSource {
     });
   }
 
-  function getAlignmentsInRange(range: ContigInterval<string>): SamRead[] {
+  function getAlignmentsInRange(range: ContigInterval<string>): Alignment[] {
     if (!range) return [];
     if (_.isEmpty(contigNames)) return [];
 
@@ -133,7 +124,7 @@ type BamSpec = {
   indexChunks?: Object;
 }
 
-function create(spec: BamSpec): BamDataSource {
+function create(spec: BamSpec): AlignmentDataSource {
   var url = spec.url;
   if (!url) {
     throw new Error(`Missing URL from track data: ${JSON.stringify(spec)}`);
