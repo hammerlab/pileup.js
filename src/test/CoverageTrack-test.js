@@ -31,7 +31,25 @@ describe('CoverageTrack', function() {
   beforeEach(() => {
     // A fixed width container results in predictable x-positions for mismatches.
     testDiv.style.width = '800px';
-    testSetup();
+    var p = pileup.create(testDiv, {
+      range: range,
+      tracks: [
+        {
+          data: referenceSource,
+          viz: pileup.viz.genome(),
+          isReference: true
+        },
+        {
+          viz: pileup.viz.coverage(),
+          data: pileup.formats.bam({
+            url: '/test-data/synth3.normal.17.7500000-7515000.bam',
+            indexUrl: '/test-data/synth3.normal.17.7500000-7515000.bam.bai'
+          }),
+          cssClass: 'tumor-coverage',
+          name: 'Coverage'
+        }
+      ]
+    });
   });
 
   afterEach(() => {
@@ -55,28 +73,6 @@ describe('CoverageTrack', function() {
   var hasCoverage = () => {
     // Check whether the coverage bins are loaded yet
     return findCoverageBins().length > 1 && findCoverageLabels().length > 1;
-  };
-
-  var testSetup = () => {
-    var p = pileup.create(testDiv, {
-      range: range,
-      tracks: [
-        {
-          data: referenceSource,
-          viz: pileup.viz.genome(),
-          isReference: true
-        },
-        {
-          viz: pileup.viz.coverage(),
-          data: pileup.formats.bam({
-            url: '/test-data/synth3.normal.17.7500000-7515000.bam',
-            indexUrl: '/test-data/synth3.normal.17.7500000-7515000.bam.bai'
-          }),
-          cssClass: 'tumor-coverage',
-          name: 'Coverage'
-        }
-      ]
-    });
   };
 
   it('should create coverage information for all bases shown in the view', function() {
