@@ -7,11 +7,9 @@
 import type {Alignment, AlignmentDataSource} from './Alignment';
 
 var Events = require('backbone').Events,
-    _ = require('underscore'),
-    Q = require('q');
+    _ = require('underscore');
 
 var ContigInterval = require('./ContigInterval'),
-    SamRead = require('./SamRead'),
     GA4GHAlignment = require('./GA4GHAlignment');
 
 var ALIGNMENTS_PER_REQUEST = 200;  // TODO: explain this choice.

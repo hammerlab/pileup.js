@@ -11,7 +11,6 @@ var React = require('./react-shim'),
     d3 = require('d3'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
-    utils = require('./utils'),
     d3utils = require('./d3utils'),
     _ = require("underscore"),
     ContigInterval = require('./ContigInterval');

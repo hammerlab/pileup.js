@@ -346,7 +346,7 @@ class NonEmptyPileupTrack extends React.Component {
        .data(vReads, vRead => vRead.key);
 
     // Enter
-    var readsG = reads.enter()
+    reads.enter()
         .append('g')
         .attr('class', readClass)
         .attr('transform', vRead => `translate(0, ${yForRow(vRead.row)})`)
@@ -373,7 +373,6 @@ class NonEmptyPileupTrack extends React.Component {
     var pxPerLetter = scale(1) - scale(0),
         mode = DisplayMode.getDisplayMode(pxPerLetter),
         showText = DisplayMode.isText(mode),
-        modeData = [mode],
         modeWrapper = reads.selectAll('.mode-wrapper')
                            .data(vRead => vRead.mismatches.length ? [{vRead,mode}] : [],
                                  x => x.mode);

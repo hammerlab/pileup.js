@@ -4,14 +4,14 @@
  */
 'use strict';
 
-var d3 = require('d3'),
-    types = require('./react-types'),
-    ContigInterval = require('./ContigInterval');
+import type {GenomeRange} from './react-types';
+
+var d3 = require('d3');
 
 /**
  * Shared x-axis scaling logic for tracks
  */
-function getTrackScale(range: types.GenomeRange, width: number) {
+function getTrackScale(range: GenomeRange, width: number) {
   if (!range) return d3.scale.linear();
   var offsetPx = range.offsetPx || 0;
   var scale = d3.scale.linear()

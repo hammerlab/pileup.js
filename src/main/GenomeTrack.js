@@ -174,7 +174,7 @@ var NonEmptyGenomeTrack = React.createClass({
        .data(absBasePairs, bp => bp.pos);
 
     // Enter
-    var basePairGs = letter.enter()
+    letter.enter()
       .append(showText ? 'text' : 'rect');
 
     // Enter & update

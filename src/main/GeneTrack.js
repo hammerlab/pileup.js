@@ -11,7 +11,6 @@ var React = require('./react-shim'),
     types = require('./react-types'),
     bedtools = require('./bedtools'),
     Interval = require('./Interval'),
-    utils = require('./utils'),
     d3utils = require('./d3utils'),
     ContigInterval = require('./ContigInterval');
 
