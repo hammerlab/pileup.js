@@ -216,7 +216,7 @@ class NonEmptyCoverageTrack extends React.Component {
       .tickSize(5)  // Make our ticks much more visible
       .outerTickSize(0)  // Remove the default range ticks (they are ugly)
       .tickFormat(t => t + 'X')  // X -> times in coverage terminology
-      .tickValues([0, Math.round(axisMax/2), axisMax]);  // show min, avg, max
+      .tickValues([0, Math.round(axisMax / 2), axisMax]);  // show min, avg, max
     var yAxisEl = svg.selectAll('g.y-axis');
     if(yAxisEl.empty()) {  // no axis element yet
       svg.append('rect').attr('class', 'y-axis-background');
