@@ -274,13 +274,7 @@ class NonEmptyPileupTrack extends React.Component {
   }
 
   getScale() {
-    var range = this.props.range,
-        width = this.state.width,
-        offsetPx = range.offsetPx || 0;
-    var scale = d3.scale.linear()
-            .domain([range.start, range.stop + 1])  // 1 bp wide
-            .range([-offsetPx, width - offsetPx]);
-    return scale;
+    return utils.getTrackScale(this.props.range, this.state.width);
   }
 
   componentDidUpdate(prevProps: any, prevState: any) {

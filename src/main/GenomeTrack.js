@@ -116,14 +116,8 @@ var NonEmptyGenomeTrack = React.createClass({
     this.updateVisualization();
   },
   getScale: function() {
-    var div = this.getDOMNode(),
-        range = this.props.range,
-        width = div.offsetWidth,
-        offsetPx = range.offsetPx || 0;
-    var scale = d3.scale.linear()
-            .domain([range.start, range.stop + 1])  // 1 bp wide
-            .range([-offsetPx, width - offsetPx]);
-    return scale;
+    var width = this.getDOMNode().offsetWidth;
+    return utils.getTrackScale(this.props.range, this.state.width);
   },
   componentDidUpdate: function(prevProps: any, prevState: any) {
     if (!shallowEquals(prevProps, this.props) ||

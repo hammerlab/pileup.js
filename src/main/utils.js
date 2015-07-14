@@ -7,7 +7,9 @@
 import type {InflatedBlock} from './types';
 import type * as Q from 'q';
 
-var pako = require('pako');
+var pako = require('pako'),
+    d3 = require('d3'),
+    types = require('./react-types');
 
 // Compare two tuples of equal length. Is t1 <= t2?
 // TODO: make this tupleLessOrEqual<T> -- it works with strings or booleans, too.
@@ -161,6 +163,18 @@ function pipePromise<T>(deferred: Q.Deferred<T>, promise: Q.Promise<T>) {
   promise.then(deferred.resolve, deferred.reject, deferred.notify);
 }
 
+/**
+ * Shared x-axis scaling logic for tracks
+ */
+function getTrackScale(range: types.GenomeRange, width: number) {
+  if(!range) return d3.scale.linear();
+  var offsetPx = range.offsetPx || 0;
+  var scale = d3.scale.linear()
+          .domain([range.start, range.stop + 1])  // 1 bp wide
+          .range([-offsetPx, width - offsetPx]);
+  return scale;
+}
+
 module.exports = {
   tupleLessOrEqual,
   tupleRangeOverlaps,
@@ -169,5 +183,6 @@ module.exports = {
   inflateGzip,
   basePairClass,
   altContigName,
-  pipePromise
+  pipePromise,
+  getTrackScale
 };
