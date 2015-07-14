@@ -117,7 +117,7 @@ var NonEmptyGenomeTrack = React.createClass({
   },
   getScale: function() {
     var width = this.getDOMNode().offsetWidth;
-    return utils.getTrackScale(this.props.range, this.state.width);
+    return utils.getTrackScale(this.props.range, width);
   },
   componentDidUpdate: function(prevProps: any, prevState: any) {
     if (!shallowEquals(prevProps, this.props) ||
