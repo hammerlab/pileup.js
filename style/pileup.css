@@ -167,7 +167,7 @@
 .coverage rect.bin {
   stroke-width: 0.1;
   stroke: white;
-  fill: #c8c8c8;
+  fill: #a0a0a0;
 }
 .coverage .y-axis {
   stroke: black;
