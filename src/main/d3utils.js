@@ -5,12 +5,13 @@
 'use strict';
 
 var d3 = require('d3'),
+    types = require('./react-types'),
     ContigInterval = require('./ContigInterval');
 
 /**
  * Shared x-axis scaling logic for tracks
  */
-function getTrackScale(range: ContigInterval<string>, width: number) {
+function getTrackScale(range: types.GenomeRange, width: number) {
   if (!range) return d3.scale.linear();
   var offsetPx = range.offsetPx || 0;
   var scale = d3.scale.linear()

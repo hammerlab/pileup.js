@@ -126,7 +126,7 @@ class NonEmptyCoverageTrack extends React.Component {
   /**
    * Extract summary statistics from the read data.
    */
-  extractSummaryStatistics(reads: Array<SamRead>, range: ContigInterval<string>) {
+  extractSummaryStatistics(reads: Array<SamRead>, range: types.GenomeRange) {
     // Keep track of the start/stop points of our view
     var rstart = range.start - 1,  // this is to account for 0 vs 1-based pos.
         rstop = range.stop;
