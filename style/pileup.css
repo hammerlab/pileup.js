@@ -164,7 +164,7 @@
 .pileup-root > .coverage {
   flex: 0 0 50px;  /* fixed height */
 }
-.coverage rect.covbin {
+.coverage rect.bin {
   stroke-width: 0.1;
   stroke: white;
   fill: #c8c8c8;

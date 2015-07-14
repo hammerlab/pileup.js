@@ -148,10 +148,10 @@ class NonEmptyCoverageTrack extends React.Component {
                 istart = interval.start,
                 istop = interval.stop;
 
-            for(var j = Math.max(istart, rstart);  // don't go beyond start
+            for (var j = Math.max(istart, rstart);  // don't go beyond start
                 j <= Math.min(istop, rstop);  // don't go beyond stop
                 j++) {
-              binCounts[j-rstart] += 1;
+              binCounts[j - rstart] += 1;
             }
         });
     // binCounts is a simple array now, so let's find the max val right away
@@ -190,7 +190,7 @@ class NonEmptyCoverageTrack extends React.Component {
     // Let's get our domain max back from the nicified scale
     var axisMax = yScale.domain()[0];
     // Select the group we created first
-    var histBars = svg.select('g.bin-group').selectAll('rect.covbin')
+    var histBars = svg.select('g.bin-group').selectAll('rect.bin')
       .data(binCounts, d => d.key);
 
     // D3 logic for our histogram bars
@@ -201,7 +201,7 @@ class NonEmptyCoverageTrack extends React.Component {
       .attr('y', d => yScale(d.count) - yScale(axisMax))
       .attr('width', d => xScale(d.key) - xScale(d.key - 1))
       .attr('height', d => yScale(axisMax - d.count))
-      .attr('class', 'covbin');
+      .attr('class', 'bin');
     histBars
       .attr('x', d => xScale(d.key))
       .attr('y', d => yScale(d.count) - yScale(axisMax))
@@ -213,12 +213,12 @@ class NonEmptyCoverageTrack extends React.Component {
     var yAxis = d3.svg.axis()
       .scale(yScale)
       .orient('right')  // this is gonna be at the far left
-      .tickSize(5)  // Make our ticks much more visible
+      .innerTickSize(5)  // Make our ticks much more visible
       .outerTickSize(0)  // Remove the default range ticks (they are ugly)
       .tickFormat(t => t + 'X')  // X -> times in coverage terminology
       .tickValues([0, Math.round(axisMax / 2), axisMax]);  // show min, avg, max
     var yAxisEl = svg.selectAll('g.y-axis');
-    if(yAxisEl.empty()) {  // no axis element yet
+    if (yAxisEl.empty()) {  // no axis element yet
       svg.append('rect').attr('class', 'y-axis-background');
       // add this the second so it is on top of the background
       svg.append('g').attr('class', 'y-axis');
