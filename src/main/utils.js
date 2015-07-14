@@ -9,7 +9,7 @@ import type * as Q from 'q';
 
 var pako = require('pako'),
     d3 = require('d3'),
-    types = require('./react-types');
+    ContigInterval = require('./ContigInterval');
 
 // Compare two tuples of equal length. Is t1 <= t2?
 // TODO: make this tupleLessOrEqual<T> -- it works with strings or booleans, too.
@@ -166,7 +166,7 @@ function pipePromise<T>(deferred: Q.Deferred<T>, promise: Q.Promise<T>) {
 /**
  * Shared x-axis scaling logic for tracks
  */
-function getTrackScale(range: types.GenomeRange, width: number) {
+function getTrackScale(range: ContigInterval<string>, width: number) {
   if(!range) return d3.scale.linear();
   var offsetPx = range.offsetPx || 0;
   var scale = d3.scale.linear()
