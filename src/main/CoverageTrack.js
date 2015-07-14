@@ -41,6 +41,7 @@ class NonEmptyCoverageTrack extends React.Component {
     this.state = {
       width: 0,
       height: 0,
+      labelSize: {weight: 0, height: 0},  // for precise padding calculations
       reads: []
     };
   }
@@ -84,6 +85,28 @@ class NonEmptyCoverageTrack extends React.Component {
     var div = this.refs.container.getDOMNode();
     var svg = d3.select(div).append('svg');
 
+    /*
+      We are going to create a dummy label to see how big is our label
+      text will be. Once we get this information, we will save it in our state
+      and use it in plot padding calculations.
+    */
+    // Create a dummy element that matches with the style:
+    //        ".coverage .y-axis g.tick text {...}"
+    var dummyAxis = svg.append('g').attr('class', 'y-axis');
+    // Measure its size
+    var dummySize = dummyAxis.append('g').attr('class', 'tick')
+      .append('text')
+      .text("100X")
+      .node()
+      .getBBox();
+    // Save the size information
+    this.setState({
+          labelSize: {height: dummySize.height, width: dummySize.width}
+    });
+    // Remove the dummy element
+    dummyAxis.remove();
+    /* end of dummy label calculations */
+
     // Below, we create the container group for our bars upfront as we want
     // to overlay the axis on top of them; therefore, we have to make sure
     // their container is defined first in the SVG
@@ -113,18 +136,20 @@ class NonEmptyCoverageTrack extends React.Component {
   */
   extractSummaryStatistics(reads: Array<SamRead>, range: GenomeRange) {
     // Keep track of the start/stop points of our view
-    var rstart = range.start,
+    var rstart = range.start - 1,  // this is to account for 0 vs 1-based pos.
         rstop = range.stop;
     // Create an array to keep track of all counts for each of the positions
     var binCounts = new Array(rstop - rstart + 1);  // length = num of bases
     binCounts = _.map(binCounts, () => 0);  // start w/ 0 counts for each base
     _.chain(this.state.reads)  // Parse the read data
-        // Extract the interval a read covers
-        .map(read => read.getInterval().interval)
         // Walk over the interval one base at a time and update the counts
-        .each(i => {  // i: interval, j: current base
-            for(var j = Math.max(i.start, rstart);  // don't go beyond start
-                j <= Math.min(i.stop, rstop);  // don't go beyond stop
+        .each(read => {
+            var interval = read.getInterval().interval,
+                istart = interval.start,
+                istop = interval.stop;
+
+            for(var j = Math.max(istart, rstart);  // don't go beyond start
+                j <= Math.min(istop, rstop);  // don't go beyond stop
                 j++) {
               binCounts[j-rstart] += 1;
             }
@@ -135,7 +160,7 @@ class NonEmptyCoverageTrack extends React.Component {
     // This will convert the array into an array of objects with keys
     // where the key will be the nucleotide location
     binCounts = _.map(binCounts,
-      (val, idx) => ({key: rstart + idx, count: val})
+      (val, idx) => ({key: rstart + idx + 1, count: val})
     );
 
     return {binCounts, maxCoverage};
@@ -147,6 +172,7 @@ class NonEmptyCoverageTrack extends React.Component {
         height = this.state.height,
         range = this.props.range,
         reads = this.state.reads,
+        padding = this.state.labelSize.height / 2,  // half the text height
         xScale = this.getScale(),
         svg = d3.select(div).select('svg');
 
@@ -156,22 +182,13 @@ class NonEmptyCoverageTrack extends React.Component {
     svg.attr('width', width).attr('height', height);
 
     var {binCounts, maxCoverage} = this.extractSummaryStatistics(reads, range);
-    // Rule: if maxCoverage is smaller than 10X,
-    //  then show it as it is (we like small numbers);
-    //  otherwise, round the number to the nearest tenth.
-    maxCoverage = maxCoverage < 10
-      ? maxCoverage
-      : Math.round(maxCoverage/10)*10;
-
-    // We are also going to add some padding in two ways:
-    //   1. leave some padding at the bottom for axis origin text (axisHeight)
-    //   2. do not create an axis with the range = maxCoverage (axisMax)
-    var axisMax = maxCoverage * 1.2;  // +20% of the original value
-    var axisHeight = height * .9;  // use 90% of the available space
     var yScale = d3.scale.linear()
-      .domain([axisMax, 0])  // mind the inverted axis
-      .range([0, axisHeight]);
-
+      .domain([maxCoverage, 0])  // mind the inverted axis
+      .range([padding, height - padding])
+      .nice();
+    // The nice() call on the axis will give us a new domain to work with
+    // Let's get our domain max back from the nicified scale
+    var axisMax = yScale.domain()[0];
     // Select the group we created first
     var histBars = svg.select('g.bin-group').selectAll('rect.covbin')
       .data(binCounts, d => d.key);
@@ -181,15 +198,15 @@ class NonEmptyCoverageTrack extends React.Component {
       .enter()
       .append('rect')
       .attr('x', d => xScale(d.key))
-      .attr('y', d => yScale(d.count))
-      .attr('width', d => xScale(d.key) - xScale(d.key-1))
-      .attr('height', d => yScale(axisMax-d.count))
+      .attr('y', d => yScale(d.count) - yScale(axisMax))
+      .attr('width', d => xScale(d.key) - xScale(d.key - 1))
+      .attr('height', d => yScale(axisMax - d.count))
       .attr('class', 'covbin');
     histBars
       .attr('x', d => xScale(d.key))
-      .attr('y', d => yScale(d.count))
-      .attr('width', d => xScale(d.key) - xScale(d.key-1))
-      .attr('height', d => yScale(axisMax-d.count))
+      .attr('y', d => yScale(d.count) - yScale(axisMax))
+      .attr('width', d => xScale(d.key) - xScale(d.key - 1))
+      .attr('height', d => yScale(axisMax - d.count))
     histBars.exit().remove();
 
     // Logic for our axis
@@ -199,7 +216,7 @@ class NonEmptyCoverageTrack extends React.Component {
       .tickSize(5)  // Make our ticks much more visible
       .outerTickSize(0)  // Remove the default range ticks (they are ugly)
       .tickFormat(t => t + 'X')  // X -> times in coverage terminology
-      .tickValues([0, maxCoverage/2, maxCoverage]);  // show min, avg and max
+      .tickValues([0, Math.round(axisMax/2), axisMax]);  // show min, avg, max
     var yAxisEl = svg.selectAll('g.y-axis');
     if(yAxisEl.empty()) {  // no axis element yet
       svg.append('rect').attr('class', 'y-axis-background');
