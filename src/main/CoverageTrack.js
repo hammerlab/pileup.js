@@ -156,8 +156,6 @@ class NonEmptyCoverageTrack extends React.Component {
     svg.attr('width', width).attr('height', height);
 
     var {binCounts, maxCoverage} = this.extractSummaryStatistics(reads, range);
-    // Now that we know the max coverage, we now want to create a visually
-    // appealing axis to make it easy to comprehend for us, humans
     // Rule: if maxCoverage is smaller than 10X,
     //  then show it as it is (we like small numbers);
     //  otherwise, round the number to the nearest tenth.
