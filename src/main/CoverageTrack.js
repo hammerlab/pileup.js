@@ -224,16 +224,6 @@ class NonEmptyCoverageTrack extends React.Component {
       svg.append('g').attr('class', 'y-axis');
     } else {
       yAxisEl.call(yAxis);  // update the axis
-
-      /* aa
-      // Resize the background box according to the axis dimensions
-      var bbox = yAxisEl.node().getBBox();
-      svg.selectAll('rect.y-axis-background')
-        .attr('x', bbox.x)
-        .attr('y', bbox.y)
-        .attr('width', bbox.width * 1.2)  // %20 bigger box
-        .attr('height', bbox.height);
-      */
     }
   }
 }

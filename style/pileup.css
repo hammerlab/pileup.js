@@ -177,6 +177,9 @@
   color: black;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: x-small;
+  stroke: whitesmoke;
+  stroke-width: 2;
+  paint-order: stroke;
 }
 .coverage .y-axis path {
   stroke-width: 0;
