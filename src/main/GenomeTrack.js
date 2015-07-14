@@ -10,6 +10,7 @@ var React = require('./react-shim'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     utils = require('./utils'),
+    d3utils = require('./d3utils'),
     DisplayMode = require('./DisplayMode');
 
 
@@ -117,7 +118,7 @@ var NonEmptyGenomeTrack = React.createClass({
   },
   getScale: function() {
     var width = this.getDOMNode().offsetWidth;
-    return utils.getTrackScale(this.props.range, width);
+    return d3utils.getTrackScale(this.props.range, width);
   },
   componentDidUpdate: function(prevProps: any, prevState: any) {
     if (!shallowEquals(prevProps, this.props) ||

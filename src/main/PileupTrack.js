@@ -12,6 +12,7 @@ var React = require('./react-shim'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     utils = require('./utils'),
+    d3utils = require('./d3utils'),
     {addToPileup, getOpInfo, CigarOp} = require('./pileuputils'),
     ContigInterval = require('./ContigInterval'),
     DisplayMode = require('./DisplayMode');
@@ -274,7 +275,7 @@ class NonEmptyPileupTrack extends React.Component {
   }
 
   getScale() {
-    return utils.getTrackScale(this.props.range, this.state.width);
+    return d3utils.getTrackScale(this.props.range, this.state.width);
   }
 
   componentDidUpdate(prevProps: any, prevState: any) {
