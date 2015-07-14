@@ -193,20 +193,24 @@ class NonEmptyCoverageTrack extends React.Component {
     var histBars = svg.select('g.bin-group').selectAll('rect.bin')
       .data(binCounts, d => d.key);
 
+    var calcBarHeight = (d) => Math.max(0, yScale(axisMax - d.count)),
+        calcBarPos = (d) => yScale(d.count) - yScale(axisMax),
+        calcBarWidth = (d) => xScale(d.key) - xScale(d.key - 1);
+
     // D3 logic for our histogram bars
     histBars
       .enter()
       .append('rect')
       .attr('x', d => xScale(d.key))
-      .attr('y', d => yScale(d.count) - yScale(axisMax))
-      .attr('width', d => xScale(d.key) - xScale(d.key - 1))
-      .attr('height', d => yScale(axisMax - d.count))
+      .attr('y', calcBarPos)
+      .attr('width', calcBarWidth)
+      .attr('height', calcBarHeight)
       .attr('class', 'bin');
     histBars
       .attr('x', d => xScale(d.key))
-      .attr('y', d => yScale(d.count) - yScale(axisMax))
-      .attr('width', d => xScale(d.key) - xScale(d.key - 1))
-      .attr('height', d => yScale(axisMax - d.count))
+      .attr('y', calcBarPos)
+      .attr('width', calcBarWidth)
+      .attr('height', calcBarHeight)
     histBars.exit().remove();
 
     // Logic for our axis

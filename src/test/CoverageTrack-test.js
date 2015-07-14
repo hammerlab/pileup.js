@@ -1,6 +1,7 @@
 /**
- * This tests that pileup mismatches are rendered correctly, regardless of the
- * order in which the alignment and reference data come off the network.
+ * This tests whether coverage information is being shown/drawn correctly
+ * in the track. The alignment information comes from the test BAM files.
+ *
  * @flow
  */
 'use strict';
@@ -25,10 +26,12 @@ var pileup = require('../main/pileup'),
 
 describe('CoverageTrack', function() {
   var testDiv = document.getElementById('testdiv');
+  var range = {contig: '17', start: 7500730, stop: 7500790};
 
   beforeEach(() => {
     // A fixed width container results in predictable x-positions for mismatches.
     testDiv.style.width = '800px';
+    testSetup();
   });
 
   afterEach(() => {
@@ -42,16 +45,19 @@ describe('CoverageTrack', function() {
       referenceSource = TwoBitDataSource.createFromTwoBitFile(new TwoBit(twoBitFile));
 
   var findCoverageBins = () => {
-      return testDiv.querySelectorAll('.coverage .covbin');
+    return testDiv.querySelectorAll('.coverage .bin');
+  };
+
+  var findCoverageLabels = () => {
+    return testDiv.querySelectorAll('.coverage .y-axis text');
   };
 
   var hasCoverage = () => {
     // Check whether the coverage bins are loaded yet
-    return findCoverageBins().length > 0;
+    return findCoverageBins().length > 1 && findCoverageLabels().length > 1;
   };
 
   var testSetup = () => {
-    var range = {contig: '17', start: 7500730, stop: 7500790};
     var p = pileup.create(testDiv, {
       range: range,
       tracks: [
@@ -71,11 +77,9 @@ describe('CoverageTrack', function() {
         }
       ]
     });
-    return range;
   };
 
   it('should create coverage information for all bases shown in the view', function() {
-    var range = testSetup();
     return waitFor(hasCoverage, 2000).then(() => {
       var bins = findCoverageBins();
       expect(bins).to.have.length.above(range.stop - range.start + 1);
@@ -83,13 +87,10 @@ describe('CoverageTrack', function() {
   });
 
   it('should create correct labels for coverage', function() {
-    testSetup();
     return waitFor(hasCoverage, 2000).then(() => {
-      var labelTexts = testDiv.querySelectorAll('.coverage .y-axis text');
+      var labelTexts = findCoverageLabels();
       expect(labelTexts[0].textContent).to.equal('0X');
-      if(labelTexts.length > 1) {  // headless mode only draws a single label
-        expect(labelTexts[labelTexts.length-1].textContent).to.equal('50X');
-      }
+      expect(labelTexts[labelTexts.length-1].textContent).to.equal('50X');
     });
   });
 
