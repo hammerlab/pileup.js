@@ -78,7 +78,7 @@ describe('CoverageTrack', function() {
   it('should create coverage information for all bases shown in the view', function() {
     return waitFor(hasCoverage, 2000).then(() => {
       var bins = findCoverageBins();
-      expect(bins).to.have.length.above(range.stop - range.start + 1);
+      expect(bins).to.have.length.at.least(range.stop - range.start + 1);
     });
   });
 
