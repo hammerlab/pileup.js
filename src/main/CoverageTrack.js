@@ -41,7 +41,9 @@ class NonEmptyCoverageTrack extends React.Component {
       width: 0,
       height: 0,
       labelSize: {weight: 0, height: 0},  // for precise padding calculations
-      reads: []
+      reads: [],
+      binCounts: [],
+      maxCoverage: 0
     };
   }
 
@@ -107,10 +109,14 @@ class NonEmptyCoverageTrack extends React.Component {
     svg.append('g').attr('class', 'bin-group');
 
     this.props.source.on('newdata', () => {
-      var range = this.props.range,
-          ci = new ContigInterval(range.contig, range.start, range.stop);
+      var ci = new ContigInterval(this.props.range.contig, 0, Number.MAX_VALUE),
+          reads = this.props.source.getAlignmentsInRange(ci),
+          {binCounts, maxCoverage} = this.extractSummaryStatistics(reads, this.props.range.contig);
+
       this.setState({
-        reads: this.props.source.getAlignmentsInRange(ci)
+        reads,
+        binCounts,
+        maxCoverage
       });
     });
   }
@@ -125,35 +131,32 @@ class NonEmptyCoverageTrack extends React.Component {
   /**
    * Extract summary statistics from the read data.
    */
-  extractSummaryStatistics(reads: Array<SamRead>, range: types.GenomeRange) {
-    // Keep track of the start/stop points of our view
-    var rstart = range.start - 1,  // this is to account for 0 vs 1-based pos.
-        rstop = range.stop;
-    // Create an array to keep track of all counts for each of the positions
-    var binCounts = _.range(rstart, rstop + 1).map(() => 0);
+  extractSummaryStatistics(reads: Array<SamRead>, contig: string) {
+    var binCounts = {};
 
     // This is written in an imperative style (instead of with _.groupBy)
     // as an optimization.
-    _.each(this.state.reads, read => {
-      var interval = read.getInterval().interval,
-          istart = interval.start,
-          istop = interval.stop;
+    _.each(reads, read => {
+      var interval = read.getInterval();
 
-      for (var j = Math.max(istart, rstart);  // don't go beyond start
-          j <= Math.min(istop, rstop);  // don't go beyond stop
-          j++) {
-        binCounts[j - rstart] += 1;
+      var start = interval.start(),
+          stop = interval.stop();
+      for (var j = start; j <= stop; j++) {
+        binCounts[j] = (binCounts[j] || 0) + 1;
       }
     });
     var maxCoverage = _.max(binCounts);
 
-    // This will convert the array into an array of objects with positions
-    // where the position will be used a unique key
-    binCounts = _.map(binCounts,
-      (val, idx) => ({position: rstart + idx + 1, count: val})
-    );
+    binCounts = _.map(binCounts, (count, position) => ({position: Number(position), count}));
+    binCounts = _.sortBy(binCounts, ({position, count}) => position);
 
     return {binCounts, maxCoverage};
+  }
+
+  binsInRange() {
+    var {start, stop} = this.props.range;
+    return this.state.binCounts.filter(
+        ({position}) => (position >= start && position <= stop));
   }
 
   visualizeCoverage() {
@@ -161,7 +164,6 @@ class NonEmptyCoverageTrack extends React.Component {
         width = this.state.width,
         height = this.state.height,
         range = this.props.range,
-        reads = this.state.reads,
         padding = this.state.labelSize.height / 2,  // half the text height
         xScale = this.getScale(),
         svg = d3.select(div).select('svg');
@@ -171,9 +173,8 @@ class NonEmptyCoverageTrack extends React.Component {
 
     svg.attr('width', width).attr('height', height);
 
-    var {binCounts, maxCoverage} = this.extractSummaryStatistics(reads, range);
     var yScale = d3.scale.linear()
-      .domain([maxCoverage, 0])  // mind the inverted axis
+      .domain([this.state.maxCoverage, 0])  // mind the inverted axis
       .range([padding, height - padding])
       .nice();
     // The nice() call on the axis will give us a new domain to work with
@@ -181,7 +182,7 @@ class NonEmptyCoverageTrack extends React.Component {
     var axisMax = yScale.domain()[0];
     // Select the group we created first
     var histBars = svg.select('g.bin-group').selectAll('rect.bin')
-      .data(binCounts, d => d.position);
+      .data(this.binsInRange(), d => d.position);
 
     var calcBarHeight = d => Math.max(0, yScale(axisMax - d.count)),
         calcBarPosY = d => yScale(d.count) - yScale(axisMax),
