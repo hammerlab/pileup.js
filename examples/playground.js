@@ -1,5 +1,11 @@
 var pileup = require('pileup');
 
+// We are going to use the same data source for multiple tracks
+var bamSource = pileup.formats.bam({
+  url: '/test-data/synth3.normal.17.7500000-7515000.bam',
+  indexUrl: '/test-data/synth3.normal.17.7500000-7515000.bam.bai'
+});
+
 var sources = [
   {
     viz: pileup.viz.genome(),
@@ -24,20 +30,26 @@ var sources = [
     name: 'Genes'
   },
   {
+    viz: pileup.viz.coverage(),
+    data: bamSource,
+    cssClass: 'normal',
+    name: 'Coverage'
+  },
+  {
     viz: pileup.viz.pileup(),
-    data: pileup.formats.bam({
-      url: '/test-data/synth3.normal.17.7500000-7515000.bam',
-      indexUrl: '/test-data/synth3.normal.17.7500000-7515000.bam.bai'
-    }),
+    data: bamSource,
     cssClass: 'normal',
     name: 'Alignments'
   },
   {
+    viz: pileup.viz.coverage(),
+    data: bamSource,
+    cssClass: 'tumor',
+    name: 'Coverage'
+  },
+  {
     viz: pileup.viz.pileup(),
-    data: pileup.formats.bam({
-      url: '/test-data/synth3.normal.17.7500000-7515000.bam',
-      indexUrl: '/test-data/synth3.normal.17.7500000-7515000.bam.bai'
-    }),
+    data: bamSource,
     cssClass: 'tumor',
     name: 'Alignments'
   }

@@ -10,6 +10,7 @@ var React = require('./react-shim'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     utils = require('./utils'),
+    d3utils = require('./d3utils'),
     DisplayMode = require('./DisplayMode');
 
 
@@ -116,14 +117,7 @@ var NonEmptyGenomeTrack = React.createClass({
     this.updateVisualization();
   },
   getScale: function() {
-    var div = this.getDOMNode(),
-        range = this.props.range,
-        width = div.offsetWidth,
-        offsetPx = range.offsetPx || 0;
-    var scale = d3.scale.linear()
-            .domain([range.start, range.stop + 1])  // 1 bp wide
-            .range([-offsetPx, width - offsetPx]);
-    return scale;
+    return d3utils.getTrackScale(this.props.range, this.state.width);
   },
   componentDidUpdate: function(prevProps: any, prevState: any) {
     if (!shallowEquals(prevProps, this.props) ||
@@ -180,7 +174,7 @@ var NonEmptyGenomeTrack = React.createClass({
        .data(absBasePairs, bp => bp.pos);
 
     // Enter
-    var basePairGs = letter.enter()
+    letter.enter()
       .append(showText ? 'text' : 'rect');
 
     // Enter & update

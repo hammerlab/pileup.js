@@ -12,6 +12,7 @@ var React = require('./react-shim'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     utils = require('./utils'),
+    d3utils = require('./d3utils'),
     {addToPileup, getOpInfo, CigarOp} = require('./pileuputils'),
     ContigInterval = require('./ContigInterval'),
     DisplayMode = require('./DisplayMode');
@@ -274,13 +275,7 @@ class NonEmptyPileupTrack extends React.Component {
   }
 
   getScale() {
-    var range = this.props.range,
-        width = this.state.width,
-        offsetPx = range.offsetPx || 0;
-    var scale = d3.scale.linear()
-            .domain([range.start, range.stop + 1])  // 1 bp wide
-            .range([-offsetPx, width - offsetPx]);
-    return scale;
+    return d3utils.getTrackScale(this.props.range, this.state.width);
   }
 
   componentDidUpdate(prevProps: any, prevState: any) {
@@ -351,7 +346,7 @@ class NonEmptyPileupTrack extends React.Component {
        .data(vReads, vRead => vRead.key);
 
     // Enter
-    var readsG = reads.enter()
+    reads.enter()
         .append('g')
         .attr('class', readClass)
         .attr('transform', vRead => `translate(0, ${yForRow(vRead.row)})`)
@@ -378,7 +373,6 @@ class NonEmptyPileupTrack extends React.Component {
     var pxPerLetter = scale(1) - scale(0),
         mode = DisplayMode.getDisplayMode(pxPerLetter),
         showText = DisplayMode.isText(mode),
-        modeData = [mode],
         modeWrapper = reads.selectAll('.mode-wrapper')
                            .data(vRead => vRead.mismatches.length ? [{vRead,mode}] : [],
                                  x => x.mode);
@@ -387,7 +381,7 @@ class NonEmptyPileupTrack extends React.Component {
 
     var letter = modeWrapper.selectAll('.basepair')
         .data(d => d.vRead.mismatches, m => m.pos + m.basePair);
-    
+
     letter.enter().append(showText ? 'text' : 'rect')
     if (showText) {
       letter.text(mismatch => mismatch.basePair)

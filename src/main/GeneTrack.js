@@ -11,6 +11,7 @@ var React = require('./react-shim'),
     types = require('./react-types'),
     bedtools = require('./bedtools'),
     Interval = require('./Interval'),
+    d3utils = require('./d3utils'),
     ContigInterval = require('./ContigInterval');
 
 var GeneTrack = React.createClass({
@@ -109,12 +110,7 @@ var NonEmptyGeneTrack = React.createClass({
     this.updateVisualization();
   },
   getScale: function() {
-    var range = this.props.range,
-        offsetPx = range.offsetPx || 0;
-    var scale = d3.scale.linear()
-            .domain([range.start, range.stop + 1])  // 1 bp wide
-            .range([-offsetPx, this.state.width - offsetPx]);
-    return scale;
+    return d3utils.getTrackScale(this.props.range, this.state.width);
   },
   componentDidUpdate: function(prevProps: any, prevState: any) {
     if (!shallowEquals(prevProps, this.props) ||

@@ -159,3 +159,32 @@
   fill: #ddd;
   stroke: blue;
 }
+
+/* coverage track */
+.pileup-root > .coverage {
+  flex: 0 0 50px;  /* fixed height */
+}
+.coverage rect.bin {
+  stroke-width: 0.1;
+  stroke: white;
+  fill: #a0a0a0;
+}
+.coverage .y-axis {
+  stroke: black;
+  stroke-width: 1;
+}
+.coverage .y-axis g.tick text {
+  color: black;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: x-small;
+  stroke: whitesmoke;
+  stroke-width: 2;
+  paint-order: stroke;
+}
+.coverage .y-axis path {
+  stroke-width: 0;
+}
+.coverage rect.y-axis-background {
+  fill: white;
+  opacity: 0.5;
+}
