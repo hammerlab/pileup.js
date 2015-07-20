@@ -18,24 +18,6 @@ var React = require('./react-shim'),
     ContigInterval = require('./ContigInterval'),
     DisplayMode = require('./DisplayMode');
 
-var PileupTrack = React.createClass({
-  displayName: 'pileup',
-  propTypes: {
-    range: types.GenomeRange,
-    onRangeChange: React.PropTypes.func.isRequired,
-    source: React.PropTypes.object.isRequired,
-    referenceSource: React.PropTypes.object.isRequired
-  },
-  render: function(): any {
-    var range = this.props.range;
-    if (!range) {
-      return <EmptyTrack />;
-    }
-
-    return <NonEmptyPileupTrack {...this.props} />;
-  }
-});
-
 
 var READ_HEIGHT = 13;
 var READ_SPACING = 2;  // vertical pixels between reads
@@ -184,11 +166,11 @@ function opacityForQuality(quality: number): number {
   return Math.min(1.0, alpha);
 }
 
-class NonEmptyPileupTrack extends React.Component {
+class PileupTrack extends React.Component {
   pileup: Array<Interval[]>;
   keyToVisualAlignment: {[key:string]: VisualAlignment};
 
-  constructor(props) {
+  constructor(props: Object) {
     super(props);
     this.state = {
       width: 0,
@@ -229,7 +211,7 @@ class NonEmptyPileupTrack extends React.Component {
     );
   }
 
-  formatStatus(state): string {
+  formatStatus(state: Object): string {
     if (state.numRequests) {
       var pluralS = state.numRequests > 1 ? 's' : '';
       return `issued ${state.numRequests} request${pluralS}`;
@@ -284,7 +266,7 @@ class NonEmptyPileupTrack extends React.Component {
   }
 
   // Attach visualization info to the read and cache it.
-  addRead(read: SamRead, referenceSource): VisualAlignment {
+  addRead(read: SamRead, referenceSource: any): VisualAlignment {
     var key = read.getKey();
     if (key in this.keyToVisualAlignment) {
       return this.keyToVisualAlignment[key];
@@ -422,18 +404,13 @@ class NonEmptyPileupTrack extends React.Component {
 
 }
 
-NonEmptyPileupTrack.propTypes = {
+PileupTrack.propTypes = {
   range: types.GenomeRange.isRequired,
   source: React.PropTypes.object.isRequired,
   referenceSource: React.PropTypes.object.isRequired,
   onRangeChange: React.PropTypes.func.isRequired
 };
+PileupTrack.displayName = 'pileup';
 
-
-var EmptyTrack = React.createClass({
-  render: function() {
-    return <div className='pileup empty'>Zoom in to see alignments</div>;
-  }
-});
 
 module.exports = PileupTrack;

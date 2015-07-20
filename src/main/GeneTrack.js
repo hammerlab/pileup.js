@@ -14,23 +14,6 @@ var React = require('./react-shim'),
     d3utils = require('./d3utils'),
     ContigInterval = require('./ContigInterval');
 
-var GeneTrack = React.createClass({
-  displayName: 'genes',
-  propTypes: {
-    range: types.GenomeRange,
-    source: React.PropTypes.object.isRequired,
-    onRangeChange: React.PropTypes.func.isRequired,
-  },
-  render: function(): any {
-    var range = this.props.range;
-    if (!range) {
-      return <EmptyTrack />;
-    }
-
-    return <NonEmptyGeneTrack {...this.props} />;
-  }
-});
-
 
 // D3 function to hide overlapping elements in a selection.
 // nb: this is O(n^2) in the number of transcripts on-screen.
@@ -51,7 +34,8 @@ function removeOverlapping(selection) {
   });
 }
 
-var NonEmptyGeneTrack = React.createClass({
+var GeneTrack = React.createClass({
+  displayName: 'genes',
   propTypes: {
     range: types.GenomeRange.isRequired,
     source: React.PropTypes.object.isRequired,
@@ -61,10 +45,10 @@ var NonEmptyGeneTrack = React.createClass({
     return {
       width: 0,
       height: 0,
-      genes: []
+      genes: ([]: Object[])  // TODO: import Gene type from BigBedDataSource
     };
   },
-  render: function() {
+  render: function(): any {
     return <div></div>;
   },
   updateSize: function() {
@@ -211,12 +195,6 @@ var NonEmptyGeneTrack = React.createClass({
 
     // Exit
     genes.exit().remove();
-  }
-});
-
-var EmptyTrack = React.createClass({
-  render: function() {
-    return <div className="genes empty">Zoom in to see genes</div>;
   }
 });
 

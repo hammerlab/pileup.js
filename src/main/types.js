@@ -14,7 +14,7 @@
 import type * as React from 'react';
 
 export type Track = {
-  viz: Object;  // for now, a React class
+  viz: any;  // for now, a React class
   data: Object;  // This is a DataSource object
   name?: string;
   cssClass?: string;

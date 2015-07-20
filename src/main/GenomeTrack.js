@@ -15,25 +15,9 @@ var React = require('./react-shim'),
 
 
 var GenomeTrack = React.createClass({
-  displayName: 'reference',
-  propTypes: {
-    range: types.GenomeRange,
-    source: React.PropTypes.object.isRequired,
-    onRangeChange: React.PropTypes.func.isRequired,
-  },
-  render: function(): any {
-    var range = this.props.range;
-    if (!range) {
-      return <EmptyTrack />;
-    }
-
-    return <NonEmptyGenomeTrack {...this.props} />;
-  }
-});
-
-var NonEmptyGenomeTrack = React.createClass({
   // This prevents updates if state & props have not changed.
   mixins: [React.addons.PureRenderMixin],
+  displayName: 'reference',
 
   propTypes: {
     range: types.GenomeRange.isRequired,
@@ -44,7 +28,7 @@ var NonEmptyGenomeTrack = React.createClass({
     return {
       width: 0,
       height: 0,
-      basePairs: []
+      basePairs: {}
     };
   },
   render: function(): any {
@@ -196,12 +180,6 @@ var NonEmptyGenomeTrack = React.createClass({
 
     // Exit
     letter.exit().remove();
-  }
-});
-
-var EmptyTrack = React.createClass({
-  render: function() {
-    return <div className="reference empty">Zoom in to see bases</div>;
   }
 });
 

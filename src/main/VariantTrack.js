@@ -30,28 +30,12 @@ type VcfDataSource = {
   trigger: (event: string, ...args:any) => void;
 };
 
-var VariantTrack = React.createClass({
-  displayName: 'variants',
-  propTypes: {
-    range: types.GenomeRange,
-    onRangeChange: React.PropTypes.func.isRequired,
-    source: React.PropTypes.object.isRequired
-  },
-  render: function(): any {
-    var range = this.props.range;
-    if (!range) {
-      return <EmptyTrack />;
-    }
-
-    return <NonEmptyVariantTrack {...this.props} />;
-  }
-});
-
 function variantKey(v: Variant): string {
   return `${v.contig}:${v.position}`;
 }
 
-var NonEmptyVariantTrack = React.createClass({
+var VariantTrack = React.createClass({
+  displayName: 'variants',
   propTypes: {
     range: types.GenomeRange.isRequired,
     source: React.PropTypes.object.isRequired,
@@ -146,12 +130,6 @@ var NonEmptyVariantTrack = React.createClass({
 
     // Exit
     variantRects.exit().remove();
-  }
-});
-
-var EmptyTrack = React.createClass({
-  render: function() {
-    return <div className='variants empty'>Zoom in to see variants</div>;
   }
 });
 

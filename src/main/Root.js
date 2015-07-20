@@ -8,7 +8,8 @@ import type * as SamRead from './SamRead';
 import type {VisualizedTrack} from './types';
 
 var React = require('./react-shim'),
-    Controls = require('./Controls');
+    Controls = require('./Controls'),
+    VisualizationWrapper = require('./VisualizationWrapper');
 
 
 var Root = React.createClass({
@@ -50,12 +51,13 @@ var Root = React.createClass({
     }).done();
   },
   makeDivForTrack(key: string, track: VisualizedTrack): React.Element {
-    var trackEl = React.createElement(track.visualization, {
-      range: this.state.range,
-      onRangeChange: this.handleRangeChange,
-      source: track.source,
-      referenceSource: this.props.referenceSource
-    });
+    var trackEl = (
+        <VisualizationWrapper visualization={track.visualization}
+            range={this.state.range}
+            onRangeChange={this.handleRangeChange}
+            source={track.source}
+            referenceSource={this.props.referenceSource}
+          />);
 
     var className = ['track', track.visualization.displayName || '', track.track.cssClass || ''].join(' ');
 
