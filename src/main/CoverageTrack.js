@@ -70,15 +70,7 @@ class CoverageTrack extends React.Component {
   }
 
   getScale() {
-    return d3utils.getTrackScale(this.props.range, this.state.width);
-  }
-
-  updateSize() {
-    var parentDiv = this.refs.container.getDOMNode();
-    this.setState({
-      width: parentDiv.parentNode.offsetWidth,
-      height: parentDiv.offsetHeight
-    });
+    return d3utils.getTrackScale(this.props.range, this.props.width);
   }
 
   /**
@@ -104,9 +96,6 @@ class CoverageTrack extends React.Component {
   }
 
   componentDidMount() {
-    window.addEventListener('resize', () => this.updateSize());
-    this.updateSize();
-
     var div = this.refs.container.getDOMNode();
     var svg = d3.select(div).append('svg');
     this.calculateLabelSize(svg);
@@ -144,8 +133,8 @@ class CoverageTrack extends React.Component {
 
   visualizeCoverage() {
     var div = this.refs.container.getDOMNode(),
-        width = this.state.width,
-        height = this.state.height,
+        width = this.props.width,
+        height = this.props.height,
         range = this.props.range,
         padding = this.state.labelSize.height / 2,  // half the text height
         xScale = this.getScale(),

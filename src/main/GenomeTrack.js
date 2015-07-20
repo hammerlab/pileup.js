@@ -26,25 +26,13 @@ var GenomeTrack = React.createClass({
   },
   getInitialState: function() {
     return {
-      width: 0,
-      height: 0,
       basePairs: {}
     };
   },
   render: function(): any {
     return <div></div>;
   },
-  updateSize: function() {
-    var parentDiv = this.getDOMNode().parentNode;
-    this.setState({
-      width: parentDiv.offsetWidth,
-      height: parentDiv.offsetHeight
-    });
-  },
   componentDidMount: function() {
-    window.addEventListener('resize', () => this.updateSize());
-    this.updateSize();
-
     var div = this.getDOMNode(),
         svg = d3.select(div)
                 .append('svg');
@@ -101,7 +89,7 @@ var GenomeTrack = React.createClass({
     this.updateVisualization();
   },
   getScale: function() {
-    return d3utils.getTrackScale(this.props.range, this.state.width);
+    return d3utils.getTrackScale(this.props.range, this.props.width);
   },
   componentDidUpdate: function(prevProps: any, prevState: any) {
     if (!shallowEquals(prevProps, this.props) ||
@@ -112,8 +100,8 @@ var GenomeTrack = React.createClass({
   updateVisualization: function() {
     var div = this.getDOMNode(),
         range = this.props.range,
-        width = this.state.width,
-        height = this.state.height,
+        width = this.props.width,
+        height = this.props.height,
         svg = d3.select(div).select('svg');
 
     // Hold off until height & width are known.

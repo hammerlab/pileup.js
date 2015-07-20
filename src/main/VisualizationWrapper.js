@@ -13,6 +13,27 @@ var VisualizationWrapper = React.createClass({
     referenceSource: React.PropTypes.object.isRequired,
     visualization: React.PropTypes.func.isRequired
   },
+
+  getInitialState: function() {
+    return {
+      width: 0,
+      height: 0
+    }
+  },
+
+  updateSize() {
+    var parentDiv = this.getDOMNode().parentNode;
+    this.setState({
+      width: parentDiv.offsetWidth,
+      height: parentDiv.offsetHeight
+    });
+  },
+
+  componentDidMount() {
+    window.addEventListener('resize', () => this.updateSize());
+    this.updateSize();
+  },
+
   render: function(): any {
     var range = this.props.range;
     if (!range) {
@@ -23,7 +44,9 @@ var VisualizationWrapper = React.createClass({
       range: this.props.range,
       onRangeChange: this.props.onRangeChange,
       source: this.props.source,
-      referenceSource: this.props.referenceSource
+      referenceSource: this.props.referenceSource,
+      width: this.state.width,
+      height: this.state.height
     });
   }
 });

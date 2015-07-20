@@ -173,8 +173,6 @@ class PileupTrack extends React.Component {
   constructor(props: Object) {
     super(props);
     this.state = {
-      width: 0,
-      height: 0,
       reads: []
     };
     this.pileup = [];
@@ -221,18 +219,7 @@ class PileupTrack extends React.Component {
     throw 'invalid';
   }
 
-  updateSize() {
-    var parentDiv = this.refs.container.getDOMNode().parentNode;
-    this.setState({
-      width: parentDiv.offsetWidth,
-      height: parentDiv.offsetHeight
-    });
-  }
-
   componentDidMount() {
-    window.addEventListener('resize', () => this.updateSize());
-    this.updateSize();
-
     var div = this.refs.container.getDOMNode();
     d3.select(div)
       .append('svg');
@@ -255,7 +242,7 @@ class PileupTrack extends React.Component {
   }
 
   getScale() {
-    return d3utils.getTrackScale(this.props.range, this.state.width);
+    return d3utils.getTrackScale(this.props.range, this.props.width);
   }
 
   componentDidUpdate(prevProps: any, prevState: any) {
@@ -315,7 +302,7 @@ class PileupTrack extends React.Component {
   // currently-visible range.
   updateVisualization() {
     var div = this.refs.container.getDOMNode(),
-        width = this.state.width,
+        width = this.props.width,
         svg = d3.select(div).select('svg');
 
     // Hold off until height & width are known.

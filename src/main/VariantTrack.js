@@ -41,29 +41,13 @@ var VariantTrack = React.createClass({
     source: React.PropTypes.object.isRequired,
     onRangeChange: React.PropTypes.func.isRequired
   },
-  getInitialState: function() {
-    return {
-      width: 0,
-      height: 0
-    };
-  },
   render: function(): any {
     return <div></div>;
   },
   getVariantSource(): VcfDataSource {
     return this.props.source;
   },
-  updateSize: function() {
-    var parentDiv = this.getDOMNode().parentNode;
-    this.setState({
-      width: parentDiv.offsetWidth,
-      height: parentDiv.offsetHeight
-    });
-  },
   componentDidMount: function() {
-    window.addEventListener('resize', () => this.updateSize());
-    this.updateSize();
-
     var div = this.getDOMNode();
     d3.select(div)
       .append('svg');
@@ -75,7 +59,7 @@ var VariantTrack = React.createClass({
   },
   getScale: function() {
     var range = this.props.range,
-        width = this.state.width,
+        width = this.props.width,
         offsetPx = range.offsetPx || 0;
     var scale = d3.scale.linear()
             .domain([range.start, range.stop + 1])  // 1 bp wide
@@ -93,8 +77,8 @@ var VariantTrack = React.createClass({
   },
   updateVisualization: function() {
     var div = this.getDOMNode(),
-        width = this.state.width,
-        height = this.state.height,
+        width = this.props.width,
+        height = this.props.height,
         svg = d3.select(div).select('svg');
 
     // Hold off until height & width are known.
