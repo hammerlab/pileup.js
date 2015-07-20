@@ -82,26 +82,27 @@ function createFromBigBedFile(remoteSource: BigBed): BigBedSource {
     var interval = new ContigInterval(range.contig, range.start, range.stop);
 
     // Check if this interval is already in the cache.
-    // XXX is this broken? should be r.contains(interval), no?
-    if (_.any(coveredRanges, r => r.intersects(interval))) {
+    if (interval.isCoveredBy(coveredRanges)) {
       return Q.when();
     }
+
+    coveredRanges.push(interval);
+    coveredRanges = ContigInterval.coalesce(coveredRanges);
 
     return remoteSource.getFeatureBlocksOverlapping(interval).then(featureBlocks => {
       featureBlocks.forEach(fb => {
         coveredRanges.push(fb.range);
+        coveredRanges = ContigInterval.coalesce(coveredRanges);
         var genes = fb.rows.map(parseBedFeature);
         genes.forEach(gene => addGene(gene));
+        o.trigger('newdata', interval);
       });
     });
   }
 
   var o = {
-    // TODO: only fire newdata when new data arrives
     rangeChanged: function(newRange: GenomeRange) {
-      fetch(newRange)
-          .then(() => o.trigger('newdata', newRange))
-          .done();
+      fetch(newRange).done();
     },
     getGenesInRange,
 

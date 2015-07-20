@@ -67,10 +67,13 @@ function createFromVcfFile(remoteSource: VcfFile): VcfDataSource {
     }
 
     interval = expandRange(interval);
+
+    // "Cover" the range immediately to prevent duplicate fetches.
+    coveredRanges.push(interval);
+    coveredRanges = ContigInterval.coalesce(coveredRanges);
     return remoteSource.getFeaturesInRange(interval).then(variants => {
-      coveredRanges.push(interval);
-      coveredRanges = ContigInterval.coalesce(coveredRanges);
       variants.forEach(variant => addVariant(variant));
+      o.trigger('newdata', interval);
     });
   }
 
@@ -81,9 +84,7 @@ function createFromVcfFile(remoteSource: VcfFile): VcfDataSource {
 
   var o = {
     rangeChanged: function(newRange: GenomeRange) {
-      fetch(newRange)
-          .then(() => o.trigger('newdata', newRange))
-          .done();
+      fetch(newRange).done();
     },
     getFeaturesInRange,
 
