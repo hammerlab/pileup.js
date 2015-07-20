@@ -34,6 +34,12 @@ class ContigInterval<T: (number|string)> {
             this.interval.intersects(other.interval));
   }
 
+  // Like intersects(), but allows 'chr17' vs. '17'-style mismatches.
+  chrIntersects(other: ContigInterval<T>): boolean {
+    return (this.chrOnContig(other.contig) &&
+            this.interval.intersects(other.interval));
+  }
+
   containsInterval(other: ContigInterval<T>): boolean {
     return (this.contig === other.contig &&
             this.interval.containsInterval(other.interval));
@@ -58,10 +64,15 @@ class ContigInterval<T: (number|string)> {
 
   // Like containsLocus, but allows 'chr17' vs '17'-style mismatches
   chrContainsLocus(contig: T, position: number): boolean {
+    return this.chrOnContig(contig) &&
+           this.interval.contains(position);
+  }
+
+  // Is this read on the given contig? (allowing for chr17 vs 17-style mismatches)
+  chrOnContig(contig: T): boolean {
     return (this.contig === contig ||
             this.contig === 'chr' + contig ||
-            'chr' + this.contig === contig) &&
-           this.interval.contains(position);
+            'chr' + this.contig === contig);
   }
 
   /*

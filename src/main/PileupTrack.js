@@ -9,6 +9,7 @@ import type * as Interval from './Interval';
 
 var React = require('./react-shim'),
     d3 = require('d3'),
+    _ = require('underscore'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     utils = require('./utils'),
@@ -254,12 +255,9 @@ class NonEmptyPileupTrack extends React.Component {
     d3.select(div)
       .append('svg');
 
-    this.props.source.on('newdata', () => {
-      var range = this.props.range,
-          ci = new ContigInterval(range.contig, range.start, range.stop);
-      this.setState({
-        reads: this.props.source.getAlignmentsInRange(ci)
-      });
+    this.props.source.on('newdata', range => {
+      this.updateReads(range);
+      this.updateVisualization();
     });
     this.props.referenceSource.on('newdata', () => {
       this.updateMismatches();
@@ -310,6 +308,7 @@ class NonEmptyPileupTrack extends React.Component {
     return visualAlignment;
   }
 
+  // Updates reference mismatch information for previously-loaded reads.
   updateMismatches() {
     // TODO: dedupe with addRead()
     var referenceSource = this.props.referenceSource;
@@ -322,6 +321,16 @@ class NonEmptyPileupTrack extends React.Component {
     }
   }
 
+  // Load new reads into the visualization cache.
+  updateReads(range: ContigInterval<string>) {
+    var newReads = this.props.source.getAlignmentsInRange(range);
+
+    var referenceSource = this.props.referenceSource;
+    newReads.forEach(read => this.addRead(read, referenceSource));
+  }
+
+  // Update the D3 visualization to reflect the cached reads &
+  // currently-visible range.
   updateVisualization() {
     var div = this.refs.container.getDOMNode(),
         width = this.state.width,
@@ -330,17 +339,19 @@ class NonEmptyPileupTrack extends React.Component {
     // Hold off until height & width are known.
     if (width === 0) return;
 
-    var referenceSource = this.props.referenceSource;
-    var vReads = this.state.reads.map(
-            read => this.addRead(read, referenceSource))
-        .filter(read => read.refLength);  // drop alignments w/o CIGARs
-
     // Height can only be computed after the pileup has been updated.
     var height = yForRow(this.pileup.length);
     var scale = this.getScale();
 
     svg.attr('width', width)
        .attr('height', height);
+
+    // TODO: speed this up using an interval tree
+    var genomeRange = this.props.range,
+        range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop);
+    var vReads = _.filter(this.keyToVisualAlignment,
+                          vRead => vRead.refLength &&  // drop alignments w/o CIGARs
+                                   vRead.read.getInterval().chrIntersects(range))
 
     var reads = svg.selectAll('.alignment')
        .data(vReads, vRead => vRead.key);
