@@ -72,18 +72,20 @@ function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
       var interval = new ContigInterval(contigName, range.start, range.stop);
 
       // Check if this interval is already in the cache.
+      // If not, immediately "cover" it to prevent duplicate requests.
       if (interval.isCoveredBy(coveredRanges)) {
         return Q.when();
       }
 
       interval = expandRange(interval);
+      coveredRanges.push(interval);
+      coveredRanges = ContigInterval.coalesce(coveredRanges);
+
       return remoteSource.getAlignmentsInRange(interval)
         .progress(progressEvent => {
           o.trigger('networkprogress', progressEvent);
         })
         .then(reads => {
-          coveredRanges.push(interval);
-          coveredRanges = ContigInterval.coalesce(coveredRanges);
           reads.forEach(read => addRead(read));
           o.trigger('networkdone');
           o.trigger('newdata', interval);
