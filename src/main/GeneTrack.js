@@ -14,23 +14,6 @@ var React = require('./react-shim'),
     d3utils = require('./d3utils'),
     ContigInterval = require('./ContigInterval');
 
-var GeneTrack = React.createClass({
-  displayName: 'genes',
-  propTypes: {
-    range: types.GenomeRange,
-    source: React.PropTypes.object.isRequired,
-    onRangeChange: React.PropTypes.func.isRequired,
-  },
-  render: function(): any {
-    var range = this.props.range;
-    if (!range) {
-      return <EmptyTrack />;
-    }
-
-    return <NonEmptyGeneTrack {...this.props} />;
-  }
-});
-
 
 // D3 function to hide overlapping elements in a selection.
 // nb: this is O(n^2) in the number of transcripts on-screen.
@@ -51,7 +34,8 @@ function removeOverlapping(selection) {
   });
 }
 
-var NonEmptyGeneTrack = React.createClass({
+var GeneTrack = React.createClass({
+  displayName: 'genes',
   propTypes: {
     range: types.GenomeRange.isRequired,
     source: React.PropTypes.object.isRequired,
@@ -59,28 +43,16 @@ var NonEmptyGeneTrack = React.createClass({
   },
   getInitialState: function() {
     return {
-      width: 0,
-      height: 0,
-      genes: []
+      genes: ([]: Object[])  // TODO: import Gene type from BigBedDataSource
     };
   },
-  render: function() {
+  render: function(): any {
     return <div></div>;
-  },
-  updateSize: function() {
-    var parentDiv = this.getDOMNode().parentNode;
-    this.setState({
-      width: parentDiv.offsetWidth,
-      height: parentDiv.offsetHeight
-    });
   },
   componentDidMount: function() {
     var div = this.getDOMNode(),
         svg = d3.select(div)
                 .append('svg');
-
-    window.addEventListener('resize', () => this.updateSize());
-    this.updateSize();
 
     // Visualize new reference data as it comes in from the network.
     this.props.source.on('newdata', () => {
@@ -110,7 +82,7 @@ var NonEmptyGeneTrack = React.createClass({
     this.updateVisualization();
   },
   getScale: function() {
-    return d3utils.getTrackScale(this.props.range, this.state.width);
+    return d3utils.getTrackScale(this.props.range, this.props.width);
   },
   componentDidUpdate: function(prevProps: any, prevState: any) {
     if (!shallowEquals(prevProps, this.props) ||
@@ -120,8 +92,8 @@ var NonEmptyGeneTrack = React.createClass({
   },
   updateVisualization: function() {
     var div = this.getDOMNode(),
-        width = this.state.width,
-        height = this.state.height,
+        width = this.props.width,
+        height = this.props.height,
         svg = d3.select(div).select('svg');
 
     // Hold off until height & width are known.
@@ -211,12 +183,6 @@ var NonEmptyGeneTrack = React.createClass({
 
     // Exit
     genes.exit().remove();
-  }
-});
-
-var EmptyTrack = React.createClass({
-  render: function() {
-    return <div className="genes empty">Zoom in to see genes</div>;
   }
 });
 

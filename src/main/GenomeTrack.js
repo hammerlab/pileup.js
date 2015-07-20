@@ -15,25 +15,9 @@ var React = require('./react-shim'),
 
 
 var GenomeTrack = React.createClass({
-  displayName: 'reference',
-  propTypes: {
-    range: types.GenomeRange,
-    source: React.PropTypes.object.isRequired,
-    onRangeChange: React.PropTypes.func.isRequired,
-  },
-  render: function(): any {
-    var range = this.props.range;
-    if (!range) {
-      return <EmptyTrack />;
-    }
-
-    return <NonEmptyGenomeTrack {...this.props} />;
-  }
-});
-
-var NonEmptyGenomeTrack = React.createClass({
   // This prevents updates if state & props have not changed.
   mixins: [React.addons.PureRenderMixin],
+  displayName: 'reference',
 
   propTypes: {
     range: types.GenomeRange.isRequired,
@@ -42,25 +26,13 @@ var NonEmptyGenomeTrack = React.createClass({
   },
   getInitialState: function() {
     return {
-      width: 0,
-      height: 0,
-      basePairs: []
+      basePairs: {}
     };
   },
   render: function(): any {
     return <div></div>;
   },
-  updateSize: function() {
-    var parentDiv = this.getDOMNode().parentNode;
-    this.setState({
-      width: parentDiv.offsetWidth,
-      height: parentDiv.offsetHeight
-    });
-  },
   componentDidMount: function() {
-    window.addEventListener('resize', () => this.updateSize());
-    this.updateSize();
-
     var div = this.getDOMNode(),
         svg = d3.select(div)
                 .append('svg');
@@ -117,7 +89,7 @@ var NonEmptyGenomeTrack = React.createClass({
     this.updateVisualization();
   },
   getScale: function() {
-    return d3utils.getTrackScale(this.props.range, this.state.width);
+    return d3utils.getTrackScale(this.props.range, this.props.width);
   },
   componentDidUpdate: function(prevProps: any, prevState: any) {
     if (!shallowEquals(prevProps, this.props) ||
@@ -128,8 +100,8 @@ var NonEmptyGenomeTrack = React.createClass({
   updateVisualization: function() {
     var div = this.getDOMNode(),
         range = this.props.range,
-        width = this.state.width,
-        height = this.state.height,
+        width = this.props.width,
+        height = this.props.height,
         svg = d3.select(div).select('svg');
 
     // Hold off until height & width are known.
@@ -196,12 +168,6 @@ var NonEmptyGenomeTrack = React.createClass({
 
     // Exit
     letter.exit().remove();
-  }
-});
-
-var EmptyTrack = React.createClass({
-  render: function() {
-    return <div className="reference empty">Zoom in to see bases</div>;
   }
 });
 

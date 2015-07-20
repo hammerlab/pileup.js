@@ -30,38 +30,16 @@ type VcfDataSource = {
   trigger: (event: string, ...args:any) => void;
 };
 
-var VariantTrack = React.createClass({
-  displayName: 'variants',
-  propTypes: {
-    range: types.GenomeRange,
-    onRangeChange: React.PropTypes.func.isRequired,
-    source: React.PropTypes.object.isRequired
-  },
-  render: function(): any {
-    var range = this.props.range;
-    if (!range) {
-      return <EmptyTrack />;
-    }
-
-    return <NonEmptyVariantTrack {...this.props} />;
-  }
-});
-
 function variantKey(v: Variant): string {
   return `${v.contig}:${v.position}`;
 }
 
-var NonEmptyVariantTrack = React.createClass({
+var VariantTrack = React.createClass({
+  displayName: 'variants',
   propTypes: {
     range: types.GenomeRange.isRequired,
     source: React.PropTypes.object.isRequired,
     onRangeChange: React.PropTypes.func.isRequired
-  },
-  getInitialState: function() {
-    return {
-      width: 0,
-      height: 0
-    };
   },
   render: function(): any {
     return <div></div>;
@@ -69,17 +47,7 @@ var NonEmptyVariantTrack = React.createClass({
   getVariantSource(): VcfDataSource {
     return this.props.source;
   },
-  updateSize: function() {
-    var parentDiv = this.getDOMNode().parentNode;
-    this.setState({
-      width: parentDiv.offsetWidth,
-      height: parentDiv.offsetHeight
-    });
-  },
   componentDidMount: function() {
-    window.addEventListener('resize', () => this.updateSize());
-    this.updateSize();
-
     var div = this.getDOMNode();
     d3.select(div)
       .append('svg');
@@ -91,7 +59,7 @@ var NonEmptyVariantTrack = React.createClass({
   },
   getScale: function() {
     var range = this.props.range,
-        width = this.state.width,
+        width = this.props.width,
         offsetPx = range.offsetPx || 0;
     var scale = d3.scale.linear()
             .domain([range.start, range.stop + 1])  // 1 bp wide
@@ -109,8 +77,8 @@ var NonEmptyVariantTrack = React.createClass({
   },
   updateVisualization: function() {
     var div = this.getDOMNode(),
-        width = this.state.width,
-        height = this.state.height,
+        width = this.props.width,
+        height = this.props.height,
         svg = d3.select(div).select('svg');
 
     // Hold off until height & width are known.
@@ -146,12 +114,6 @@ var NonEmptyVariantTrack = React.createClass({
 
     // Exit
     variantRects.exit().remove();
-  }
-});
-
-var EmptyTrack = React.createClass({
-  render: function() {
-    return <div className='variants empty'>Zoom in to see variants</div>;
   }
 });
 

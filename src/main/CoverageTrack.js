@@ -15,27 +15,35 @@ var React = require('./react-shim'),
     _ = require("underscore"),
     ContigInterval = require('./ContigInterval');
 
-var CoverageTrack = React.createClass({
-  displayName: 'coverage',
-  propTypes: {
-    range: types.GenomeRange,
-    onRangeChange: React.PropTypes.func.isRequired,
-    source: React.PropTypes.object.isRequired,
-    referenceSource: React.PropTypes.object.isRequired
-  },
-  render: function(): any {
-    var range = this.props.range;
-    if (!range) {
-      return <EmptyTrack />;
+
+/**
+ * Extract summary statistics from the read data.
+ */
+function extractSummaryStatistics(reads: Array<SamRead>, contig: string) {
+  var binCounts = {};
+
+  // This is written in an imperative style (instead of with _.groupBy)
+  // as an optimization.
+  _.each(reads, read => {
+    var interval = read.getInterval();
+
+    var start = interval.start(),
+        stop = interval.stop();
+    for (var j = start; j <= stop; j++) {
+      binCounts[j] = (binCounts[j] || 0) + 1;
     }
+  });
+  var maxCoverage = _.max(binCounts);
 
-    return <NonEmptyCoverageTrack {...this.props} />;
-  }
-});
+  binCounts = _.map(binCounts, (count, position) => ({position: Number(position), count}));
+  binCounts = _.sortBy(binCounts, ({position, count}) => position);
+
+  return {binCounts, maxCoverage};
+}
 
 
-class NonEmptyCoverageTrack extends React.Component {
-  constructor(props) {
+class CoverageTrack extends React.Component {
+  constructor(props: Object) {
     super(props);
     this.state = {
       width: 0,
@@ -62,15 +70,7 @@ class NonEmptyCoverageTrack extends React.Component {
   }
 
   getScale() {
-    return d3utils.getTrackScale(this.props.range, this.state.width);
-  }
-
-  updateSize() {
-    var parentDiv = this.refs.container.getDOMNode();
-    this.setState({
-      width: parentDiv.parentNode.offsetWidth,
-      height: parentDiv.offsetHeight
-    });
+    return d3utils.getTrackScale(this.props.range, this.props.width);
   }
 
   /**
@@ -96,9 +96,6 @@ class NonEmptyCoverageTrack extends React.Component {
   }
 
   componentDidMount() {
-    window.addEventListener('resize', () => this.updateSize());
-    this.updateSize();
-
     var div = this.refs.container.getDOMNode();
     var svg = d3.select(div).append('svg');
     this.calculateLabelSize(svg);
@@ -111,7 +108,7 @@ class NonEmptyCoverageTrack extends React.Component {
     this.props.source.on('newdata', () => {
       var ci = new ContigInterval(this.props.range.contig, 0, Number.MAX_VALUE),
           reads = this.props.source.getAlignmentsInRange(ci),
-          {binCounts, maxCoverage} = this.extractSummaryStatistics(reads, this.props.range.contig);
+          {binCounts, maxCoverage} = extractSummaryStatistics(reads, this.props.range.contig);
 
       this.setState({
         reads,
@@ -128,32 +125,7 @@ class NonEmptyCoverageTrack extends React.Component {
     }
   }
 
-  /**
-   * Extract summary statistics from the read data.
-   */
-  extractSummaryStatistics(reads: Array<SamRead>, contig: string) {
-    var binCounts = {};
-
-    // This is written in an imperative style (instead of with _.groupBy)
-    // as an optimization.
-    _.each(reads, read => {
-      var interval = read.getInterval();
-
-      var start = interval.start(),
-          stop = interval.stop();
-      for (var j = start; j <= stop; j++) {
-        binCounts[j] = (binCounts[j] || 0) + 1;
-      }
-    });
-    var maxCoverage = _.max(binCounts);
-
-    binCounts = _.map(binCounts, (count, position) => ({position: Number(position), count}));
-    binCounts = _.sortBy(binCounts, ({position, count}) => position);
-
-    return {binCounts, maxCoverage};
-  }
-
-  binsInRange() {
+  binsInRange(): Array<{position:string,count:number}> {
     var {start, stop} = this.props.range;
     return this.state.binCounts.filter(
         ({position}) => (position >= start && position <= stop));
@@ -161,8 +133,8 @@ class NonEmptyCoverageTrack extends React.Component {
 
   visualizeCoverage() {
     var div = this.refs.container.getDOMNode(),
-        width = this.state.width,
-        height = this.state.height,
+        width = this.props.width,
+        height = this.props.height,
         range = this.props.range,
         padding = this.state.labelSize.height / 2,  // half the text height
         xScale = this.getScale(),
@@ -219,18 +191,13 @@ class NonEmptyCoverageTrack extends React.Component {
   }
 }
 
-NonEmptyCoverageTrack.propTypes = {
+CoverageTrack.propTypes = {
   range: types.GenomeRange.isRequired,
   source: React.PropTypes.object.isRequired,
   referenceSource: React.PropTypes.object.isRequired,
   onRangeChange: React.PropTypes.func.isRequired
 };
+CoverageTrack.displayName = 'coverage';
 
-
-var EmptyTrack = React.createClass({
-  render: function() {
-    return <div className='coverage empty'>Zoom in to see the coverage</div>;
-  }
-});
 
 module.exports = CoverageTrack;
