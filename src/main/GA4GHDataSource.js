@@ -99,7 +99,7 @@ function create(spec: GA4GHSpec): AlignmentDataSource {
           notifyFailure('Error from GA4GH endpoint: ' + JSON.stringify(response));
         } else {
           addReadsFromResponse(response);
-          o.trigger('newdata');  // display data as it comes in.
+          o.trigger('newdata', range);  // display data as it comes in.
           if (response.nextPageToken) {
             fetchAlignmentsForInterval(range, response.nextPageToken, numRequests + 1);
           } else {
