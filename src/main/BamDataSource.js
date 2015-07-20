@@ -86,7 +86,7 @@ function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
           coveredRanges = ContigInterval.coalesce(coveredRanges);
           reads.forEach(read => addRead(read));
           o.trigger('networkdone');
-          o.trigger('newdata', range);
+          o.trigger('newdata', interval);
         });
     });
   }
