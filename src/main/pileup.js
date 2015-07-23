@@ -12,10 +12,12 @@ var _ = require('underscore'),
     VcfDataSource = require('./VcfDataSource'),
     BamDataSource = require('./BamDataSource'),
     GA4GHDataSource = require('./GA4GHDataSource'),
+    EmptySource = require('./EmptySource'),
     // Visualizations
     CoverageTrack = require('./CoverageTrack'),
     GenomeTrack = require('./GenomeTrack'),
     GeneTrack = require('./GeneTrack'),
+    LocationTrack = require('./LocationTrack'),
     PileupTrack = require('./PileupTrack'),
     VariantTrack = require('./VariantTrack'),
     Root = require('./Root');
@@ -54,7 +56,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
 
   var vizTracks = params.tracks.map(track => ({
     visualization: track.viz,
-    source: track.data,
+    source: track.data ? track.data : EmptySource.create(),
     track
   }));
 
@@ -84,12 +86,14 @@ var pileup = {
     ga4gh: GA4GHDataSource.create,
     vcf: VcfDataSource.create,
     twoBit: TwoBitDataSource.create,
-    bigBed: BigBedDataSource.create
+    bigBed: BigBedDataSource.create,
+    empty: EmptySource.create
   },
   viz: {
     coverage: () => CoverageTrack,
     genome: () => GenomeTrack,
     genes: () => GeneTrack,
+    location: () => LocationTrack,
     variants: () => VariantTrack,
     pileup: () => PileupTrack
   }

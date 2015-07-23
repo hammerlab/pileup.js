@@ -16,6 +16,10 @@ var sources = [
     name: 'Reference'
   },
   {
+    viz: pileup.viz.location(),
+    name: 'Location'
+  },
+  {
     viz: pileup.viz.variants(),
     data: pileup.formats.vcf({
       url: '/test-data/snv.chr17.vcf'

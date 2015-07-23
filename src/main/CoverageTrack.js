@@ -41,7 +41,6 @@ function extractSummaryStatistics(reads: Array<SamRead>, contig: string) {
   return {binCounts, maxCoverage};
 }
 
-
 class CoverageTrack extends React.Component {
   constructor(props: Object) {
     super(props);

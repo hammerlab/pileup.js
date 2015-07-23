@@ -9,6 +9,7 @@ import type {VisualizedTrack} from './types';
 
 var React = require('./react-shim'),
     Controls = require('./Controls'),
+    EmptySource = require('./EmptySource'),
     VisualizationWrapper = require('./VisualizationWrapper');
 
 
