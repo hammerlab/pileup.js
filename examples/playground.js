@@ -16,6 +16,10 @@ var sources = [
     name: 'Reference'
   },
   {
+    viz: pileup.viz.scale(),
+    name: 'Scale'
+  },
+  {
     viz: pileup.viz.location(),
     name: 'Location'
   },

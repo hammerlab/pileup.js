@@ -202,3 +202,18 @@
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: smaller;
 }
+
+/* scale track */
+.pileup-root > .scale {
+  flex: 0 0 20px;  /* fixed height */
+}
+.scale .scale-lline, .scale .scale-rline {
+  stroke: gray;
+  stroke-width: 1.5;
+}
+.scale .scale-label {
+  color: black;
+  font-weight: bold;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: smaller;
+}

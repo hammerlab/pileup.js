@@ -19,6 +19,7 @@ var _ = require('underscore'),
     GeneTrack = require('./GeneTrack'),
     LocationTrack = require('./LocationTrack'),
     PileupTrack = require('./PileupTrack'),
+    ScaleTrack = require('./ScaleTrack'),
     VariantTrack = require('./VariantTrack'),
     Root = require('./Root');
 
@@ -94,6 +95,7 @@ var pileup = {
     genome: () => GenomeTrack,
     genes: () => GeneTrack,
     location: () => LocationTrack,
+    scale: () => ScaleTrack,
     variants: () => VariantTrack,
     pileup: () => PileupTrack
   }
