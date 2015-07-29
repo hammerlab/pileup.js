@@ -36,7 +36,7 @@ function extractSummaryStatistics(reads: Array<SamRead>, contig: string) {
   var maxCoverage = _.max(binCounts);
 
   binCounts = _.map(binCounts, (count, position) => ({position: Number(position), count}));
-  binCounts = _.sortBy(binCounts, ({position, count}) => position);
+  binCounts = _.sortBy(binCounts, bin => bin.position);
 
   return {binCounts, maxCoverage};
 }
@@ -134,7 +134,6 @@ class CoverageTrack extends React.Component {
     var div = this.refs.container.getDOMNode(),
         width = this.props.width,
         height = this.props.height,
-        range = this.props.range,
         padding = this.state.labelSize.height / 2,  // half the text height
         xScale = this.getScale(),
         svg = d3.select(div).select('svg');

@@ -11,7 +11,6 @@
 'use strict';
 
 var React = require('./react-shim'),
-    _ = require('underscore'),
     d3 = require('d3'),
     EmptySource = require('./EmptySource'),
     types = require('./react-types'),
@@ -77,18 +76,15 @@ class ScaleTrack extends React.Component {
         svg = d3.select(div).select('svg');
 
     svg.attr('width', width).attr('height', height);
-    var scale = this.getScale();
-    var midPoint = (range.stop + range.start + 1) / 2,
-        viewSize = range.stop - range.start + 1,
+    var viewSize = range.stop - range.start + 1,
         midX = width / 2,
         midY = height / 2;
 
     var {prefix, unit} = this.formatRange(viewSize);
 
     var midLabel = svg.select('.scale-label');
-    var labelHeight = labelSize.height,
-        labelWidth = labelSize.width;
-    var labelPadding = labelWidth;
+    var labelWidth = labelSize.width,
+        labelPadding = labelWidth;
     midLabel
       .attr({
         x: midX,

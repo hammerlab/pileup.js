@@ -5,7 +5,6 @@
 'use strict';
 
 var React = require('./react-shim'),
-    _ = require('underscore'),
     d3 = require('d3'),
     EmptySource = require('./EmptySource'),
     types = require('./react-types'),
