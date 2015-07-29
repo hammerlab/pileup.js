@@ -61,8 +61,8 @@ class ScaleTrack extends React.Component {
   // This formatting follows IGV's conventions regarding range display:
   //  "1 bp", "101 bp", "1,001 bp", "1,001 kbp", ...
   formatRange(viewSize: number): any {
-    var tmpViewSize = (viewSize / 1000).toFixed() * 1,  // convert to integer
-        fprefix = d3.formatPrefix(tmpViewSize),
+    var tmpViewSize = viewSize / 1000,
+        fprefix = d3.formatPrefix(tmpViewSize < 1 ? 1 : tmpViewSize),
         unit = fprefix.symbol + "bp",  // bp, kbp, Mbp, Gbp
         prefix = d3.format(',f.0')(fprefix.scale(viewSize));
     return {prefix, unit};
