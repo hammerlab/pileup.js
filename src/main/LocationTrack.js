@@ -11,12 +11,15 @@ var React = require('./react-shim'),
     types = require('./react-types'),
     d3utils = require('./d3utils');
 
+// This sets the width of the horizontal line (--) that connects the center
+//  marker to the label:
+//     | |-- 42 bp
+var labelPadding = 5,
+    connectorWidth = 10;
+
 class LocationTrack extends React.Component {
   constructor(props: Object) {
     super(props);
-    this.state = {
-      labelSize: {height: 0, width: 0}
-    };
   }
 
   getScale() {
@@ -32,14 +35,9 @@ class LocationTrack extends React.Component {
         svg = d3.select(div).append('svg');
 
     svg.append('line').attr('class', 'location-hline');
-    svg.append('line').attr('class', 'location-vline');
-
-    var label = svg.append('text').attr('class', 'location-label');
-    var {height, width} = label.text("0").node().getBBox();
-    // Save the size information for precise calculation
-    this.setState({
-        labelSize: {height, width}
-    });
+    svg.append('line').attr('class', 'location-vline-left');
+    svg.append('line').attr('class', 'location-vline-right');
+    svg.append('text').attr('class', 'location-label');
 
     this.updateVisualization();
   }
@@ -54,40 +52,59 @@ class LocationTrack extends React.Component {
 
   updateVisualization() {
     var div = this.getDOMNode(),
-        range = this.props.range,
-        width = this.props.width,
-        height = this.props.height,
-        labelSize = this.state.labelSize,
+        {range, width, height} = this.props,
+        scale = this.getScale(),
         svg = d3.select(div).select('svg');
 
     svg.attr('width', width).attr('height', height);
-    var scale = this.getScale();
-    var midPoint = (range.stop + range.start) / 2;
-    var midX = width / 2,
-        midY = height / 2;
 
-    var midLabelFormat = d3.format(',d');
-    var midLabel = svg.select('.location-label');
-    var labelHeight = labelSize.height;
-    var labelPadding = 10;
+    var midPoint = Math.floor((range.stop + range.start) / 2),
+        rightLineX = scale(midPoint + 1),
+        leftLineX = scale(midPoint);
+
+    // We are going to add transition, because the left and right borders
+    //  of the middle base tend to change when the ref track is dragged.
+    //  Transition will reduce the amount of wiggling for the labels.
+    var rightLine = svg.select('.location-vline-right');
+    rightLine
+      .transition()
+      .attr({
+        x1: rightLineX,
+        y1: 0,
+        x2: rightLineX,
+        y2: height
+      });
+
+    var leftLine = svg.select('.location-vline-left');
+    leftLine
+      .transition()
+      .attr({
+        x1: leftLineX,
+        y1: 0,
+        x2: leftLineX,
+        y2: height
+      });
+
+    var midLabelFormat = d3.format(',d'),
+        midY = height / 2,
+        midLabel = svg.select('.location-label');
     midLabel
-      .attr('x', midX + labelPadding + (labelSize.width / 2))
-      .attr('y', midY + (labelHeight / 3))
-      .text(midLabelFormat(Math.floor(midPoint)) + ' bp');
-
-    var midLine = svg.select('.location-vline');
-    midLine
-      .attr('x1', midX)
-      .attr('y1', 0)
-      .attr('x2', midX)
-      .attr('y2', height);
+      .text(midLabelFormat(midPoint) + ' bp')
+      .transition()
+      .attr({
+        x: rightLineX + connectorWidth + labelPadding,
+        y: midY
+      });
 
     var hLine = svg.select('.location-hline');
     hLine
-      .attr('x1', midX)
-      .attr('y1', midY)
-      .attr('x2', midX + labelPadding)
-      .attr('y2', midY);
+      .transition()
+      .attr({
+        x1: rightLineX,
+        y1: midY,
+        x2: rightLineX + connectorWidth,
+        y2: midY
+      });
   }
 }
 
