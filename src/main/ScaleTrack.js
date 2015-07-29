@@ -1,5 +1,11 @@
 /**
- * A track which shows an approximate
+ * A track which shows a scale proportional to slice of the genome being
+ * shown by the reference track. This track tries to show a scale in kbp,
+ * mbp or gbp depending on the size of the view and also tries to round the
+ * scale size (e.g. prefers 10bp, 100bp, 200bp over 13bp, 104bp, 232bp)
+ *
+ *           ---------- 30 chars ----------
+ *
  * @flow
  */
 'use strict';
@@ -52,14 +58,12 @@ class ScaleTrack extends React.Component {
     return this.refs.container.getDOMNode();
   }
 
-  niceifyRange(viewSize: number): any {
-    var shorts = ["bp", "kb", "mb", "gb"],
-        power = Math.floor(Math.log10(viewSize)),
-        thousandth = Math.floor(power / 3),  // 10^3 = 1000
-        unit = shorts[thousandth],
-        nearestThousandth = Math.pow(1000, thousandth),
-        prefix = Math.floor(viewSize / nearestThousandth),
-        scaleSize = nearestThousandth;
+  formatRange(viewSize: number): any {
+    var prefix = d3.formatPrefix(viewSize),
+        unit = prefix.symbol + "bp",  // bp, kbp, Mbp, Gbp
+        power = Math.floor(Math.log10(viewSize)),  // x as in nearest 10^x
+        scaleSize = Math.pow(10, power),  // nearest 10^x
+        prefix = prefix.scale(scaleSize).toFixed();
 
     // If the whole region is smaller than 1kb,
     //  then round it to the nearest tenth/hundredth instead of thousandth
@@ -87,16 +91,17 @@ class ScaleTrack extends React.Component {
         midX = width / 2,
         midY = height / 2;
 
-    var {prefix, unit, scaleSize} = this.niceifyRange(viewSize);
+    var {prefix, unit, scaleSize} = this.formatRange(viewSize);
 
     var midLabel = svg.select('.scale-label');
     var labelHeight = labelSize.height,
         labelWidth = labelSize.width;
     var labelPadding = labelWidth;
     midLabel
-      .attr('x', midX)
-      .attr('y', midY + (labelHeight / 3))
-      .attr('text-anchor', 'middle')
+      .attr({
+        x: midX,
+        y: midY
+      })
       .text(prefix + " " + unit);
 
     var lineStart = scale(midPoint - (scaleSize / 2));
@@ -104,17 +109,23 @@ class ScaleTrack extends React.Component {
 
     var leftLine = svg.select('.scale-lline');
     leftLine
-      .attr('x1', lineStart)
-      .attr('y1', midY)
-      .attr('x2', midX - labelPadding)
-      .attr('y2', midY);
+      .transition()
+      .attr({
+        x1: lineStart,
+        y1: midY,
+        x2: midX - labelPadding,
+        y2: midY
+      });
 
     var rightLine = svg.select('.scale-rline');
     rightLine
-      .attr('x1', midX + labelPadding)
-      .attr('y1', midY)
-      .attr('x2', lineEnd)
-      .attr('y2', midY);
+      .transition()
+      .attr({
+        x1: midX + labelPadding,
+        y1: midY,
+        x2: lineEnd,
+        y2: midY
+      });
   }
 }
 

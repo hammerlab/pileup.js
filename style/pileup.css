@@ -218,4 +218,6 @@
   font-weight: bold;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: smaller;
+  dominant-baseline: central;
+  text-anchor: middle;
 }
