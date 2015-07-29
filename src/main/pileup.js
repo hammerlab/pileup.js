@@ -57,9 +57,10 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
 
   var vizTracks = params.tracks.map(track => ({
     visualization: track.viz,
-    source: track.data ? track.data : EmptySource.create(),
+    source: track.data ? track.data : track.viz.defaultSource,
     track
   }));
+  console.dir(vizTracks);
 
   var referenceTrack = findReference(vizTracks);
   if (!referenceTrack) {

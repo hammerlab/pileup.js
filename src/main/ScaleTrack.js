@@ -13,7 +13,7 @@
 var React = require('./react-shim'),
     _ = require('underscore'),
     d3 = require('d3'),
-    shallowEquals = require('shallow-equals'),
+    EmptySource = require('./EmptySource'),
     types = require('./react-types'),
     d3utils = require('./d3utils');
 
@@ -126,5 +126,7 @@ ScaleTrack.propTypes = {
   onRangeChange: React.PropTypes.func.isRequired,
 };
 ScaleTrack.displayName = 'scale';
+ScaleTrack.defaultSource = EmptySource.create();
+
 
 module.exports = ScaleTrack;

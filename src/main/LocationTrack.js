@@ -7,7 +7,7 @@
 var React = require('./react-shim'),
     _ = require('underscore'),
     d3 = require('d3'),
-    shallowEquals = require('shallow-equals'),
+    EmptySource = require('./EmptySource'),
     types = require('./react-types'),
     d3utils = require('./d3utils');
 
@@ -112,6 +112,7 @@ LocationTrack.propTypes = {
   range: types.GenomeRange.isRequired,
   onRangeChange: React.PropTypes.func.isRequired,
 };
-LocationTrack.displayName = 'location';
+LocationTrack.displayName = 'location'
+LocationTrack.defaultSource = EmptySource.create();
 
 module.exports = LocationTrack;
