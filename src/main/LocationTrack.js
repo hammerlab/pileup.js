@@ -38,7 +38,7 @@ class LocationTrack extends React.Component {
     var {height, width} = label.text("0").node().getBBox();
     // Save the size information for precise calculation
     this.setState({
-          labelSize: {height: height, width: width}
+        labelSize: {height, width}
     });
 
     this.updateVisualization();
