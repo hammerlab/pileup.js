@@ -12,10 +12,10 @@ type EmptySource = {
 }
 
 var create = (): EmptySource => ({
-    rangeChanged: () => {},
-    on: () => {},
-    off: () => {},
-    trigger: () => {}
+  rangeChanged: () => {},
+  on: () => {},
+  off: () => {},
+  trigger: () => {}
 });
 
 module.exports = {
