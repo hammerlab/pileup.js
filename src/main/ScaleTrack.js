@@ -58,22 +58,14 @@ class ScaleTrack extends React.Component {
     return this.refs.container.getDOMNode();
   }
 
+  // This formatting follows IGV's conventions regarding range display:
+  //  "1 bp", "101 bp", "1,001 bp", "1,001 kbp", ...
   formatRange(viewSize: number): any {
-    var prefix = d3.formatPrefix(viewSize),
-        unit = prefix.symbol + "bp",  // bp, kbp, Mbp, Gbp
-        power = Math.floor(Math.log10(viewSize)),  // x as in nearest 10^x
-        scaleSize = Math.pow(10, power),  // nearest 10^x
-        prefix = prefix.scale(scaleSize).toFixed();
-
-    // If the whole region is smaller than 1kb,
-    //  then round it to the nearest tenth/hundredth instead of thousandth
-    if(power < 3) {
-      scaleSize = Math.pow(10, Math.floor(Math.log10(viewSize)));
-      scaleSize = Math.floor(viewSize / scaleSize) * scaleSize;
-      prefix = scaleSize;
-    }
-
-    return {prefix, unit, scaleSize};
+    var tmpViewSize = (viewSize / 1000).toFixed() * 1,  // convert to integer
+        fprefix = d3.formatPrefix(tmpViewSize),
+        unit = fprefix.symbol + "bp",  // bp, kbp, Mbp, Gbp
+        prefix = d3.format(',f.0')(fprefix.scale(viewSize));
+    return {prefix, unit};
   }
 
   updateVisualization() {
@@ -91,7 +83,7 @@ class ScaleTrack extends React.Component {
         midX = width / 2,
         midY = height / 2;
 
-    var {prefix, unit, scaleSize} = this.formatRange(viewSize);
+    var {prefix, unit} = this.formatRange(viewSize);
 
     var midLabel = svg.select('.scale-label');
     var labelHeight = labelSize.height,
@@ -104,8 +96,8 @@ class ScaleTrack extends React.Component {
       })
       .text(prefix + " " + unit);
 
-    var lineStart = scale(midPoint - (scaleSize / 2));
-    var lineEnd = scale(midPoint + (scaleSize / 2));
+    var lineStart = 0,
+        lineEnd = width;
 
     var leftLine = svg.select('.scale-lline');
     leftLine
