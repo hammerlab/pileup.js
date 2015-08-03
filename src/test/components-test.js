@@ -34,6 +34,14 @@ describe('pileup', function() {
       cssClass: 'c'
     },
     {
+      viz: pileup.viz.scale(),
+      name: 'Scale'
+    },
+    {
+      viz: pileup.viz.location(),
+      name: 'Location'
+    },
+    {
       viz: pileup.viz.pileup(),
       data: pileup.formats.bam({
         url: '/test-data/chr17.1-250.bam',
