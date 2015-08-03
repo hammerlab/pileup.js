@@ -55,11 +55,17 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
     throw new Error(`Attempted to create pileup with non-existent element ${elOrId}`);
   }
 
-  var vizTracks = params.tracks.map(track => ({
-    visualization: track.viz,
-    source: track.data ? track.data : track.viz.defaultSource,
-    track
-  }));
+  var vizTracks = params.tracks.map(function(track) {
+    var source = track.data ? track.data : track.viz.defaultSource;
+    if(!source) {
+      throw new Error(
+        `Track '${track.viz.displayName}' doesn't have a default ` +
+        `data source; you must specify one when initializing it.`
+      );
+    }
+
+    return {visualization: track.viz, source, track};
+  });
 
   var referenceTrack = findReference(vizTracks);
   if (!referenceTrack) {
