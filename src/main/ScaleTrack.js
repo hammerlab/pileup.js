@@ -54,7 +54,7 @@ class ScaleTrack extends React.Component {
   }
 
   getDOMNode(): any {
-    return this.refs.container.getDOMNode();
+    return React.findDOMNode(this);
   }
 
   // This formatting follows IGV's conventions regarding range display:

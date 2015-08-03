@@ -46,7 +46,7 @@ class LocationTrack extends React.Component {
   }
 
   getDOMNode(): any {
-    return this.refs.container.getDOMNode();
+    return React.findDOMNode(this);
   }
 
   updateVisualization() {
