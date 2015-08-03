@@ -60,7 +60,6 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
     source: track.data ? track.data : track.viz.defaultSource,
     track
   }));
-  console.dir(vizTracks);
 
   var referenceTrack = findReference(vizTracks);
   if (!referenceTrack) {
