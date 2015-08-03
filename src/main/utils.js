@@ -161,6 +161,19 @@ function pipePromise<T>(deferred: Q.Deferred<T>, promise: Q.Promise<T>) {
   promise.then(deferred.resolve, deferred.reject, deferred.notify);
 }
 
+/**
+ * Formats the size of a view and infers what prefix/unit to show.
+ * This formatting follows IGV's conventions regarding range display:
+ *  "1 bp", "101 bp", "1,001 bp", "1,001 kbp", ...
+ */
+function formatRange(viewSize: number): any {
+  var tmpViewSize = viewSize / 1000,
+      fprefix = d3.formatPrefix(Math.max(1, tmpViewSize)),
+      unit = fprefix.symbol + "bp",  // bp, kbp, Mbp, Gbp
+      prefix = d3.format(',f.0')(fprefix.scale(viewSize));
+  return {prefix, unit};
+}
+
 module.exports = {
   tupleLessOrEqual,
   tupleRangeOverlaps,
@@ -170,4 +183,5 @@ module.exports = {
   basePairClass,
   altContigName,
   pipePromise,
+  formatRange
 };

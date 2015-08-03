@@ -2,7 +2,7 @@
  * A track which shows a scale proportional to slice of the genome being
  * shown by the reference track. This track tries to show a scale in kbp,
  * mbp or gbp depending on the size of the view and also tries to round the
- * scale size (e.g. prefers 10bp, 100bp, 200bp over 13bp, 104bp, 232bp)
+ * scale size (e.g. prefers "1,000 bp", "1,000 kbp" over "1 kbp" and "1 mbp")
  *
  *           ---------- 30 chars ----------
  *
@@ -14,6 +14,7 @@ var React = require('./react-shim'),
     d3 = require('d3'),
     EmptySource = require('./EmptySource'),
     types = require('./react-types'),
+    utils = require('./utils'),
     d3utils = require('./d3utils');
 
 class ScaleTrack extends React.Component {
@@ -57,16 +58,6 @@ class ScaleTrack extends React.Component {
     return React.findDOMNode(this);
   }
 
-  // This formatting follows IGV's conventions regarding range display:
-  //  "1 bp", "101 bp", "1,001 bp", "1,001 kbp", ...
-  formatRange(viewSize: number): any {
-    var tmpViewSize = viewSize / 1000,
-        fprefix = d3.formatPrefix(tmpViewSize < 1 ? 1 : tmpViewSize),
-        unit = fprefix.symbol + "bp",  // bp, kbp, Mbp, Gbp
-        prefix = d3.format(',f.0')(fprefix.scale(viewSize));
-    return {prefix, unit};
-  }
-
   updateVisualization() {
     var div = this.getDOMNode(),
         range = this.props.range,
@@ -80,7 +71,7 @@ class ScaleTrack extends React.Component {
         midX = width / 2,
         midY = height / 2;
 
-    var {prefix, unit} = this.formatRange(viewSize);
+    var {prefix, unit} = utils.formatRange(viewSize);
 
     var midLabel = svg.select('.scale-label');
     var labelWidth = labelSize.width,
