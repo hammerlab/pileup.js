@@ -13,8 +13,8 @@ var React = require('./react-shim'),
 // This sets the width of the horizontal line (--) that connects the center
 //  marker to the label:
 //     | |-- 42 bp
-var labelPadding = 5,
-    connectorWidth = 10;
+var LABEL_PADDING = 5,
+    CONNECTOR_WIDTH = 10;
 
 class LocationTrack extends React.Component {
   constructor(props: Object) {
@@ -91,7 +91,7 @@ class LocationTrack extends React.Component {
       .text(midLabelFormat(midPoint) + ' bp')
       .transition()
       .attr({
-        x: rightLineX + connectorWidth + labelPadding,
+        x: rightLineX + CONNECTOR_WIDTH + LABEL_PADDING,
         y: midY
       });
 
@@ -101,7 +101,7 @@ class LocationTrack extends React.Component {
       .attr({
         x1: rightLineX,
         y1: midY,
-        x2: rightLineX + connectorWidth,
+        x2: rightLineX + CONNECTOR_WIDTH,
         y2: midY
       });
   }
