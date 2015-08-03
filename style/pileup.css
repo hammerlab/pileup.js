@@ -15,7 +15,7 @@
   flex-direction: row;
 }
 .pileup-root text, .track-label {
-   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 .track-label {
   flex: 0 0 100px;  /* fixed-width track labels */

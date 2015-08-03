@@ -71,7 +71,7 @@ class ScaleTrack extends React.Component {
         midX = width / 2,
         midY = height / 2;
 
-    var {prefix, unit} = utils.formatRange(viewSize);
+    var {prefix, unit} = d3utils.formatRange(viewSize);
 
     var midLabel = svg.select('.scale-label');
     var labelWidth = labelSize.width,

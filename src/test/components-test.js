@@ -35,10 +35,12 @@ describe('pileup', function() {
     },
     {
       viz: pileup.viz.scale(),
+      data: pileup.formats.empty(),
       name: 'Scale'
     },
     {
       viz: pileup.viz.location(),
+      data: pileup.formats.empty(),
       name: 'Location'
     },
     {

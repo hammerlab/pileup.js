@@ -120,27 +120,4 @@ describe('utils', function() {
     expect(utils.altContigName('chrM')).to.equal('M');
   });
 
-  describe('formatRange', function() {
-    var formatRange = utils.formatRange;
-
-    it('should format view sizes correctly', function() {
-      var r = formatRange(101);
-      expect(r.prefix).to.be.equal("101");
-      expect(r.unit).to.be.equal("bp");
-
-      r = formatRange(10001);
-      expect(r.prefix).to.be.equal("10,001");
-      expect(r.unit).to.be.equal("bp");
-
-      r = formatRange(10001001);
-      expect(r.prefix).to.be.equal("10,001");
-      expect(r.unit).to.be.equal("kbp");
-
-      r = formatRange(10001000001);
-      expect(r.prefix).to.be.equal("10,001");
-      expect(r.unit).to.be.equal("Mbp");
-    });
-    
-  });
-
 });
