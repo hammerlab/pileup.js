@@ -119,4 +119,5 @@ describe('utils', function() {
     expect(utils.altContigName('M')).to.equal('chrM');
     expect(utils.altContigName('chrM')).to.equal('M');
   });
+
 });

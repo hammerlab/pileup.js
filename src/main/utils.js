@@ -169,5 +169,5 @@ module.exports = {
   inflateGzip,
   basePairClass,
   altContigName,
-  pipePromise,
+  pipePromise
 };

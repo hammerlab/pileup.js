@@ -14,10 +14,12 @@
   display: flex;
   flex-direction: row;
 }
+.pileup-root text, .track-label {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
 .track-label {
   flex: 0 0 100px;  /* fixed-width track labels */
   text-align: right;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.9em;
   position: relative;  /* make this an offset parent for positioning the label. */
 }
@@ -73,7 +75,6 @@
 .basepair.T { fill: #F70016; }
 .basepair.U { fill: #F70016; }
 .basepair text, text.basepair {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   text-anchor: middle;
 }
 .loose text {
@@ -93,7 +94,6 @@
   stroke: blue;
 }
 .gene text {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 16px;
   text-anchor: middle;
   stroke: black;
@@ -142,7 +142,6 @@
   justify-content: center;
 }
 .pileup .network-status-message {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   padding: 4px 8px;
   width: auto;
   background: #eee;
@@ -175,7 +174,6 @@
 }
 .coverage .y-axis g.tick text {
   color: black;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: x-small;
   stroke: whitesmoke;
   stroke-width: 2;
@@ -187,4 +185,35 @@
 .coverage rect.y-axis-background {
   fill: white;
   opacity: 0.5;
+}
+
+/* location track */
+.pileup-root > .location {
+  flex: 0 0 20px;  /* fixed height */
+}
+.location .location-hline, .location .location-vline-left, .location .location-vline-right {
+  stroke: gray;
+  stroke-width: 1.5;
+}
+.location .location-label {
+  color: black;
+  font-size: smaller;
+  text-anchor: start;
+  dominant-baseline: central;
+}
+
+/* scale track */
+.pileup-root > .scale {
+  flex: 0 0 20px;  /* fixed height */
+}
+.scale .scale-lline, .scale .scale-rline {
+  stroke: gray;
+  stroke-width: 1.5;
+}
+.scale .scale-label {
+  color: black;
+  font-weight: bold;
+  font-size: smaller;
+  dominant-baseline: central;
+  text-anchor: middle;
 }
