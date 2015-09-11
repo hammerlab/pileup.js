@@ -319,7 +319,7 @@ class PileupTrack extends React.Component {
     var genomeRange = this.props.range,
         range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop);
     var vReads = _.filter(this.keyToVisualAlignment,
-                          vRead => vRead.refLength &&  // drop alignments w/o CIGARs
+                          vRead => vRead.refLength > 0 &&  // drop alignments w/o CIGARs
                                    vRead.read.getInterval().chrIntersects(range))
 
     var reads = svg.selectAll('.alignment')
