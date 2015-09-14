@@ -12,10 +12,12 @@ export type CigarOp = {
   length: number
 }
 
+export type Strand = '-' | '+';
+
 export type MateProperties = {
   ref: ?string;
   pos: number;
-  strand: string;
+  strand: Strand;
 }
 
 export type Alignment = {
@@ -24,7 +26,7 @@ export type Alignment = {
 
   getKey(): string;
   getName(): string;
-  getStrand(): string;  // either '-' or '+'
+  getStrand(): Strand;
   getCigarOps(): CigarOp[];
   getQualityScores(): number[];
   getSequence(): string;

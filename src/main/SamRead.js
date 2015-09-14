@@ -13,7 +13,7 @@
 'use strict';
 
 import type * as VirtualOffset from './VirtualOffset';
-import type {CigarOp, MateProperties} from './Alignment';
+import type {Strand, CigarOp, MateProperties} from './Alignment';
 
 var jDataView = require('jdataview'),
     jBinary = require('jbinary'),
@@ -31,7 +31,7 @@ var SEQUENCE_VALUES = ['=', 'A', 'C', 'M', 'G', 'R', 'S', 'V',
                        'T', 'W', 'Y', 'H', 'K', 'D', 'B', 'N'];
 
 
-function strandFlagToString(reverseStrand: number): string {
+function strandFlagToString(reverseStrand: number): Strand {
   return reverseStrand ? '-' : '+';
 }
 
@@ -100,7 +100,6 @@ class SamRead /* implements Alignment */ {
     return this._getJDataView().getUint16(14);
   }
 
-  // TODO: enum for strand?
   getStrand(): string {
     return strandFlagToString(this.getFlag() & bamTypes.Flags.READ_STRAND);
   }

@@ -4,7 +4,7 @@
  * @flow
  */
 
-import type {CigarOp, MateProperties} from './Alignment';
+import type {CigarOp, MateProperties, Strand} from './Alignment';
 
 var ContigInterval = require('./ContigInterval'),
     SamRead = require('./SamRead');
@@ -55,7 +55,7 @@ class GA4GHAlignment /* implements Alignment */ {
     return this.alignment.fragmentName;
   }
 
-  getStrand(): string {
+  getStrand(): Strand {
     return this.alignment.alignment.position.reverseStrand ? '-' : '+';
   }
 
