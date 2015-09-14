@@ -30,6 +30,11 @@ describe('GA4GHAlignment', function() {
     expect(a.getCigarOps()).to.deep.equal([
       {op: 'M', length: 10}
     ]);
+    expect(a.getMateProperties()).to.deep.equal({
+      ref: 'chr17',
+      pos: 79,
+      strand: '+'
+    });
   });
 
   it('should match SamRead', function() {
@@ -51,6 +56,14 @@ describe('GA4GHAlignment', function() {
           expect(quality).to.deep.equal(bam.getQualityScores());
         }
         expect(ga4gh.getCigarOps()).to.deep.equal(bam.getCigarOps());
+        // After ga4gh#491, change this to a .deep.equal on getMateProperties()
+        var ga4ghMate = ga4gh.getMateProperties(),
+            bamMate = bam.getMateProperties();
+        expect(!!ga4ghMate).to.equal(!!bamMate);
+        if (ga4ghMate && bamMate) {
+          expect(ga4ghMate.ref).to.equal(bamMate.ref);
+          expect(ga4ghMate.pos).to.equal(bamMate.pos);
+        }
       }
     });
   });

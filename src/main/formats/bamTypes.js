@@ -33,6 +33,21 @@ var ThinAlignment = {
   // length of fixed-size header = 32 bytes
 };
 
+var Flags = {
+  READ_PAIRED: 0x1,
+  PROPER_PAIR: 0x2,
+  READ_UNMAPPED: 0x4,
+  MATE_UNMAPPED: 0x8,
+  READ_STRAND: 0x10,
+  MATE_STRAND: 0x20,
+  FIRST_OF_PAIR: 0x40,
+  SECOND_OF_PAIR: 0x80,
+  NOT_PRIMARY_ALIGNMENT: 0x100,
+  READ_FAILS_VENDOR_QUALITY_CHECK: 0x200,
+  DUPLICATE_READ: 0x400,
+  SUPPLEMENTARY_ALIGNMENT: 0x800
+};
+
 var ThickAlignment = _.extend({}, ThinAlignment, {
   read_name: [nullString, 'l_read_name'],
   cigar: ['array', 'CigarOp', 'n_cigar_op'],
@@ -170,4 +185,4 @@ var TYPE_SET: any = {
 };
 
 
-module.exports = {TYPE_SET, ThinAlignment, ThickAlignment};
+module.exports = {TYPE_SET, ThinAlignment, ThickAlignment, Flags};
