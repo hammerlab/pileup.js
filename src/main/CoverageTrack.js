@@ -24,7 +24,7 @@ function extractSummaryStatistics(reads: Array<SamRead>, contig: string) {
 
   // This is written in an imperative style (instead of with _.groupBy)
   // as an optimization.
-  reads.forEach(read => {
+  _.each(reads, read => {
     var interval = read.getInterval();
 
     var start = interval.start(),
