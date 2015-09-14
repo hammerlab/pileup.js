@@ -37,6 +37,13 @@ describe('SamRead', function() {
       expect(read.l_seq).to.equal(10);
       expect(read.toString()).to.equal('insert:50-59');
       expect(read.getCigarOps()).to.deep.equal([{op: 'M', length: 10}]);
+      expect(read.getStrand()).to.equal('+');
+
+      expect(read.getMateProperties()).to.deep.equal({
+        ref: 'insert',  // same as read.ref
+        pos: 79,
+        strand: '-'
+      });
 
       // This one has a more interesting Cigar string
       expect(reads[3].getCigarOps()).to.deep.equal([
@@ -63,8 +70,9 @@ describe('SamRead', function() {
       // .. POS
       expect(r000.MAPQ).to.equal(30);
       expect(reads[0].getCigarString()).to.equal('10M');
-      // next ref
-      // next pos
+      expect(r000.next_pos).to.equal(79);
+      expect(r000.next_refID).to.equal(0);
+
       expect(r000.tlen).to.equal(30);
       expect(r000.seq).to.equal('ATTTAGCTAC');
       expect(reads[0].getSequence()).to.equal('ATTTAGCTAC');

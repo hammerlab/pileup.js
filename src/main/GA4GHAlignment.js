@@ -4,7 +4,7 @@
  * @flow
  */
 
-import type {CigarOp} from './Alignment';
+import type {CigarOp, MateProperties} from './Alignment';
 
 var ContigInterval = require('./ContigInterval'),
     SamRead = require('./SamRead');
@@ -81,6 +81,15 @@ class GA4GHAlignment /* implements Alignment */ {
 
   getReferenceLength(): number {
     return SamRead.referenceLengthFromOps(this.getCigarOps());
+  }
+
+  getMateProperties(): ?MateProperties {
+    var next = this.alignment.nextMatePosition;
+    return next && {
+      ref: next.referenceName,
+      pos: next.position,
+      strand: next.reverseStrand ? '-' : '+'
+    };
   }
 
   // This is exposed as a static method to facilitate an optimization in GA4GHDataSource.

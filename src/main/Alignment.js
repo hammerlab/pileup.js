@@ -12,19 +12,26 @@ export type CigarOp = {
   length: number
 }
 
+export type MateProperties = {
+  ref: ?string;
+  pos: number;
+  strand: string;
+}
+
 export type Alignment = {
   pos: number;
   ref: string;
 
   getKey(): string;
   getName(): string;
-  getStrand(): string;
+  getStrand(): string;  // either '-' or '+'
   getCigarOps(): CigarOp[];
   getQualityScores(): number[];
   getSequence(): string;
   getInterval(): ContigInterval<string>;
   intersects(interval: ContigInterval<string>): boolean;
   getReferenceLength(): number;
+  getMateProperties(): ?MateProperties;
 };
 
 export type AlignmentDataSource = {

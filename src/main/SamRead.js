@@ -13,7 +13,7 @@
 'use strict';
 
 import type * as VirtualOffset from './VirtualOffset';
-import type {CigarOp} from './Alignment';
+import type {CigarOp, MateProperties} from './Alignment';
 
 var jDataView = require('jdataview'),
     jBinary = require('jbinary'),
@@ -29,6 +29,11 @@ var CIGAR_OPS = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X'];
 
 var SEQUENCE_VALUES = ['=', 'A', 'C', 'M', 'G', 'R', 'S', 'V',
                        'T', 'W', 'Y', 'H', 'K', 'D', 'B', 'N'];
+
+
+function strandFlagToString(reverseStrand: number): string {
+  return reverseStrand ? '-' : '+';
+}
 
 
 class SamRead /* implements Alignment */ {
@@ -82,6 +87,7 @@ class SamRead /* implements Alignment */ {
     return this.offset.toString();
   }
 
+  // TODO: optimize
   getName(): string {
     var l_read_name = this._getJDataView().getUint8(8);
     var jb = new jBinary(this.buffer, {
@@ -96,8 +102,7 @@ class SamRead /* implements Alignment */ {
 
   // TODO: enum for strand?
   getStrand(): string {
-    var reverse = this.getFlag() & 0x10;
-    return reverse ? '-' : '+';
+    return strandFlagToString(this.getFlag() & bamTypes.Flags.READ_STRAND);
   }
 
   // TODO: get rid of this; move all methods into SamRead.
@@ -183,6 +188,23 @@ class SamRead /* implements Alignment */ {
   // Returns the length of the alignment from first aligned read to last aligned read.
   getReferenceLength(): number {
     return SamRead.referenceLengthFromOps(this.getCigarOps());
+  }
+
+  getMateProperties(): ?MateProperties {
+    var jv = this._getJDataView(),
+        flag = jv.getUint16(14);
+    if (!(flag & bamTypes.Flags.READ_PAIRED)) return null;
+
+    var nextRefId = jv.getInt32(20),
+        nextPos = jv.getInt32(24),
+        nextStrand = strandFlagToString(flag & bamTypes.Flags.MATE_STRAND);
+
+    return {
+      // If the mate is on another contig, there's no easy way to get its string name.
+      ref: nextRefId == this.refID ? this.ref : null,
+      pos: nextPos,
+      strand: nextStrand
+    };
   }
 
   debugString(): string {
