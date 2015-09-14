@@ -45,7 +45,7 @@ function create(spec: GA4GHSpec): AlignmentDataSource {
 
   var url = spec.endpoint + '/reads/search';
 
-  var reads: {[key:string]: GA4GHAlignment} = {};
+  var reads: {[key:string]: Alignment} = {};
 
   // Ranges for which we have complete information -- no need to hit network.
   var coveredRanges: ContigInterval<string>[] = [];

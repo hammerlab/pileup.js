@@ -22,7 +22,9 @@ export type Alignment = {
   getCigarOps(): CigarOp[];
   getQualityScores(): number[];
   getSequence(): string;
-  getInterval: ContigInterval<string>;
+  getInterval(): ContigInterval<string>;
+  intersects(interval: ContigInterval<string>): boolean;
+  getReferenceLength(): number;
 };
 
 export type AlignmentDataSource = {

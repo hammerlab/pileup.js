@@ -4,6 +4,7 @@
 .*node_modules/.*mocha.*
 .*node_modules/phantomjs.*
 .*pileup.js/dist.*
+.*node_modules/underscore.*
 
 [include]
 

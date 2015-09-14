@@ -20,7 +20,7 @@ var React = require('./react-shim'),
  * Extract summary statistics from the read data.
  */
 function extractSummaryStatistics(reads: Array<SamRead>, contig: string) {
-  var binCounts = {};
+  var binCounts = ({}: {[key: number]: number});
 
   // This is written in an imperative style (instead of with _.groupBy)
   // as an optimization.
@@ -35,10 +35,10 @@ function extractSummaryStatistics(reads: Array<SamRead>, contig: string) {
   });
   var maxCoverage = _.max(binCounts);
 
-  binCounts = _.map(binCounts, (count, position) => ({position: Number(position), count}));
-  binCounts = _.sortBy(binCounts, bin => bin.position);
+  var posCounts = _.map(binCounts, (count, position) => ({position: Number(position), count}));
+  var sortedPosCounts = _.sortBy(posCounts, bin => bin.position);
 
-  return {binCounts, maxCoverage};
+  return {binCounts: sortedPosCounts, maxCoverage};
 }
 
 class CoverageTrack extends React.Component {
