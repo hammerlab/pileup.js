@@ -4,7 +4,6 @@
  */
 'use strict';
 
-import type * as SamRead from './SamRead';
 import type {VisualizedTrack} from './types';
 
 var React = require('./react-shim'),
