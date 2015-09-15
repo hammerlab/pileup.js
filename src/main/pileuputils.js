@@ -2,6 +2,7 @@
 'use strict';
 
 import type * as SamRead from './SamRead';
+import type {Alignment} from './Alignment';
 import type * as Interval from './Interval';
 
 /**
@@ -65,7 +66,7 @@ function addToPileup(read: Interval, pileup: Array<Interval[]>): number {
   return chosenRow;
 }
 
-type BasePair = {
+export type BasePair = {
   pos: number;
   basePair: string;
   quality: number;
@@ -95,7 +96,7 @@ type OpInfo = {
 
 // Determine which alignment segment to render as an arrow.
 // This is either the first or last 'M' section, excluding soft clipping.
-function getArrowIndex(read: SamRead): number {
+function getArrowIndex(read: Alignment): number {
   var i, op, ops = read.getCigarOps();
   if (read.getStrand() == '-') {
     for (i = 0; i < ops.length; i++) {
@@ -129,7 +130,7 @@ var CigarOp = {
 };
 
 // Breaks the read down into Cigar Ops suitable for display
-function getOpInfo(read: SamRead, referenceSource: Object): OpInfo {
+function getOpInfo(read: Alignment, referenceSource: Object): OpInfo {
   var ops = read.getCigarOps();
 
   var range = read.getInterval(),

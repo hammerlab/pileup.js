@@ -5,6 +5,7 @@
  */
 
 import type {CigarOp, MateProperties, Strand} from './Alignment';
+import type {CigarOp, MateProperties} from './Alignment';
 
 var ContigInterval = require('./ContigInterval'),
     SamRead = require('./SamRead');

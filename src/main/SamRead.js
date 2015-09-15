@@ -100,7 +100,7 @@ class SamRead /* implements Alignment */ {
     return this._getJDataView().getUint16(14);
   }
 
-  getStrand(): string {
+  getStrand(): Strand {
     return strandFlagToString(this.getFlag() & bamTypes.Flags.READ_STRAND);
   }
 

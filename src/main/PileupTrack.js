@@ -4,8 +4,10 @@
  */
 'use strict';
 
-import type * as SamRead from './SamRead';
-import type * as Interval from './Interval';
+import type {Strand, Alignment, AlignmentDataSource} from './Alignment';
+import type {TwoBitSource} from './TwoBitDataSource';
+import type {BasePair} from './pileuputils';
+import type {VisualAlignment} from './PileupCache';
 
 var React = require('./react-shim'),
     d3 = require('d3'),
@@ -16,7 +18,9 @@ var React = require('./react-shim'),
     d3utils = require('./d3utils'),
     {addToPileup, getOpInfo, CigarOp} = require('./pileuputils'),
     ContigInterval = require('./ContigInterval'),
-    DisplayMode = require('./DisplayMode');
+    Interval = require('./Interval'),
+    DisplayMode = require('./DisplayMode'),
+    PileupCache = require('./PileupCache');
 
 
 var READ_HEIGHT = 13;
@@ -121,30 +125,8 @@ function isRendered(op) {
 }
 
 function readClass(vread: VisualAlignment) {
-  return 'alignment ' + (vread.strand == Strand.NEGATIVE ? 'negative' : 'positive');
+  return 'alignment ' + (vread.strand == '-' ? 'negative' : 'positive');
 }
-
-// Copied from pileuputils.js
-type BasePair = {
-  pos: number;
-  basePair: string;
-  quality: number;
-}
-
-// This bundles everything intrinsic to the alignment that we need to display
-// it, i.e. everything not dependend on scale/viewport.
-type VisualAlignment = {
-  key: string;
-  read: SamRead;
-  strand: number;  // see Strand below
-  row: number;  // pileup row.
-  refLength: number;  // span on the reference (accounting for indels)
-  mismatches: Array<BasePair>;
-};
-var Strand = {
-  POSITIVE: 0,
-  NEGATIVE: 1
-};
 
 
 function yForRow(row) {
@@ -167,16 +149,13 @@ function opacityForQuality(quality: number): number {
 }
 
 class PileupTrack extends React.Component {
-  pileup: Array<Interval[]>;
-  keyToVisualAlignment: {[key:string]: VisualAlignment};
+  cache: PileupCache;
 
   constructor(props: Object) {
     super(props);
     this.state = {
       reads: []
     };
-    this.pileup = [];
-    this.keyToVisualAlignment = {};
   }
 
   render(): any {
@@ -224,12 +203,13 @@ class PileupTrack extends React.Component {
     d3.select(div)
       .append('svg');
 
+    this.cache = new PileupCache(this.props.referenceSource);
     this.props.source.on('newdata', range => {
       this.updateReads(range);
       this.updateVisualization();
     });
-    this.props.referenceSource.on('newdata', () => {
-      this.updateMismatches();
+    this.props.referenceSource.on('newdata', range => {
+      this.cache.updateMismatches(range);
       this.updateVisualization();
     });
     this.props.source.on('networkprogress', e => {
@@ -252,50 +232,11 @@ class PileupTrack extends React.Component {
     }
   }
 
-  // Attach visualization info to the read and cache it.
-  addRead(read: SamRead, referenceSource: any): VisualAlignment {
-    var key = read.getKey();
-    if (key in this.keyToVisualAlignment) {
-      return this.keyToVisualAlignment[key];
-    }
-
-    var range = read.getInterval(),
-        refLength = range.length(),
-        opInfo = getOpInfo(read, referenceSource);
-
-    var visualAlignment = {
-      key,
-      read,
-      strand: read.getStrand() == '+' ? Strand.POSITIVE : Strand.NEGATIVE,
-      row: addToPileup(range.interval, this.pileup),
-      refLength,
-      ops: opInfo.ops,
-      mismatches: opInfo.mismatches
-    };
-
-    this.keyToVisualAlignment[key] = visualAlignment;
-    return visualAlignment;
-  }
-
-  // Updates reference mismatch information for previously-loaded reads.
-  updateMismatches() {
-    // TODO: dedupe with addRead()
-    var referenceSource = this.props.referenceSource;
-    for (var k in this.keyToVisualAlignment) {
-      var vRead = this.keyToVisualAlignment[k],
-          read = vRead.read,
-          opInfo = getOpInfo(read, referenceSource);
-
-      vRead.mismatches = opInfo.mismatches;
-    }
-  }
-
   // Load new reads into the visualization cache.
   updateReads(range: ContigInterval<string>) {
-    var newReads = this.props.source.getAlignmentsInRange(range);
-
-    var referenceSource = this.props.referenceSource;
-    newReads.forEach(read => this.addRead(read, referenceSource));
+    var source = (this.props.source : AlignmentDataSource);
+    source.getAlignmentsInRange(range)
+          .forEach(read => this.cache.addAlignment(read));
   }
 
   // Update the D3 visualization to reflect the cached reads &
@@ -309,27 +250,35 @@ class PileupTrack extends React.Component {
     if (width === 0) return;
 
     // Height can only be computed after the pileup has been updated.
-    var height = yForRow(this.pileup.length);
+    var height = yForRow(this.cache.pileupHeightForRef(this.props.range.contig));
     var scale = this.getScale();
 
     svg.attr('width', width)
        .attr('height', height);
 
-    // TODO: speed this up using an interval tree
     var genomeRange = this.props.range,
         range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop);
-    var vReads = _.filter(this.keyToVisualAlignment,
-                          vRead => vRead.refLength > 0 &&  // drop alignments w/o CIGARs
-                                   vRead.read.getInterval().chrIntersects(range))
-
-    var reads = svg.selectAll('.alignment')
-       .data(vReads, vRead => vRead.key);
+    var vGroups = this.cache.getGroupsOverlapping(range);
 
     // Enter
+    var groups = svg.selectAll('.read-group').data(vGroups, vGroup => vGroup.key);
+
+    groups.enter()
+        .append('g')
+        .attr('class', 'read-group')
+        .attr('transform', vGroup => `translate(0, ${yForRow(vGroup.row)})`);
+
+    var connectors = groups.selectAll('.mate-connector')
+        .data(vGroup => vGroup.insert ? [vGroup.insert] : []);
+    connectors.enter().append('line').attr('class', 'mate-connector');
+
+    var reads = groups.selectAll('.alignment')
+        // drop alignments w/o CIGARs
+        .data(vGroup => vGroup.alignments.filter(vRead => vRead.refLength > 0));
+
     reads.enter()
         .append('g')
         .attr('class', readClass)
-        .attr('transform', vRead => `translate(0, ${yForRow(vRead.row)})`)
         .on('click', vRead => {
           window.alert(vRead.read.debugString());
         });
@@ -357,7 +306,6 @@ class PileupTrack extends React.Component {
                            .data(vRead => vRead.mismatches.length ? [{vRead,mode}] : [],
                                  x => x.mode);
     modeWrapper.enter().append('g').attr('class', 'mode-wrapper');
-    modeWrapper.exit().remove();
 
     var letter = modeWrapper.selectAll('.basepair')
         .data(d => d.vRead.mismatches, m => m.pos + m.basePair);
@@ -374,6 +322,12 @@ class PileupTrack extends React.Component {
           .attr('fill-opacity', mismatch => opacityForQuality(mismatch.quality));
 
     // Update
+    connectors.attr(interval => ({
+      x1: scale(interval.start),
+      x2: scale(interval.stop + 1),
+      y1: READ_HEIGHT / 2,
+      y2: READ_HEIGHT / 2
+    }));
     segments.each(function(d, i) {
       updateSegment(this, d, scale);
     });
@@ -381,12 +335,15 @@ class PileupTrack extends React.Component {
          .attr('x', mismatch => scale(1 + 0.5 + mismatch.pos));  // 0.5 = centered
     reads.selectAll('rect.basepair')
           .attr('x', mismatch => scale(1 + mismatch.pos))
-          .attr('width', pxPerLetter - 1)
+          .attr('width', pxPerLetter - 1);
 
     // Exit
+    groups.exit().remove();
+    connectors.exit().remove();
     reads.exit().remove();
     letter.exit().remove();
     segments.exit().remove();
+    modeWrapper.exit().remove();
   }
 
 }
