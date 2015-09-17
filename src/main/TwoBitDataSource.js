@@ -34,7 +34,7 @@ var MAX_BASE_PAIRS_TO_FETCH = 2000;
 
 
 // Flow type for export.
-type TwoBitSource = {
+export type TwoBitSource = {
   rangeChanged: (newRange: GenomeRange) => void;
   getRange: (range: GenomeRange) => ?{[key:string]: string};
   getRangeAsString: (range: GenomeRange) => string;
