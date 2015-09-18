@@ -24,6 +24,7 @@ export type VisualAlignment = {
   strand: Strand;
   refLength: number;  // span on the reference (accounting for indels)
   mismatches: Array<BasePair>;
+  ops: Object[];
 };
 
 // This is typically a read pair, but may be a single read in some situations.

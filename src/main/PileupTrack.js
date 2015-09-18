@@ -28,92 +28,59 @@ var READ_SPACING = 2;  // vertical pixels between reads
 
 var READ_STRAND_ARROW_WIDTH = 6;
 
-// Returns an SVG path string for the read, with an arrow indicating strand.
-function makeArrow(scale, pos, refLength, direction) {
+
+function drawArrow(ctx: CanvasRenderingContext2D, scale: (x:number)=>number, pos: number, refLength: number, top: number, direction: 'L' | 'R') {
   var left = scale(pos + 1),
-      top = 0,
       right = scale(pos + refLength + 1),
-      bottom = READ_HEIGHT,
-      path = direction == 'R' ? [
-        [left, top],
-        [right - READ_STRAND_ARROW_WIDTH, top],
-        [right, (top + bottom) / 2],
-        [right - READ_STRAND_ARROW_WIDTH, bottom],
-        [left, bottom]
-      ] : [
-        [right, top],
-        [left + READ_STRAND_ARROW_WIDTH, top],
-        [left, (top + bottom) / 2],
-        [left + READ_STRAND_ARROW_WIDTH, bottom],
-        [right, bottom]
-      ];
-  return d3.svg.line()(path);
-}
+      bottom = top + READ_HEIGHT;
 
-// Create the SVG element for a single Cigar op in an alignment.
-function enterSegment(parentNode, op, scale) {
-  var parent = d3.select(parentNode);
-  switch (op.op) {
-    case CigarOp.MATCH:
-      return parent.append(op.arrow ? 'path' : 'rect')
-                   .attr('class', 'segment match');
-
-    case CigarOp.DELETE:
-      return parent.append('line')
-                   .attr('class', 'segment delete');
-
-    case CigarOp.INSERT:
-      return parent.append('line')
-                   .attr('class', 'segment insert');
-
-    default:
-      throw `Invalid op! ${op.op}`;
+  ctx.beginPath();
+  if (direction == 'R') {
+    ctx.moveTo(left, top);
+    ctx.lineTo(right - READ_STRAND_ARROW_WIDTH, top);
+    ctx.lineTo(right, (top + bottom) / 2);
+    ctx.lineTo(right - READ_STRAND_ARROW_WIDTH, bottom);
+    ctx.lineTo(left, bottom);
+  } else {
+    ctx.moveTo(right, top);
+    ctx.lineTo(left + READ_STRAND_ARROW_WIDTH, top);
+    ctx.lineTo(left, (top + bottom) / 2);
+    ctx.lineTo(left + READ_STRAND_ARROW_WIDTH, bottom);
+    ctx.lineTo(right, bottom);
   }
+  ctx.fill();
 }
 
-// Update the selection for a single Cigar op, e.g. in response to a pan or zoom.
-function updateSegment(node, op, scale) {
+function drawSegment(ctx: CanvasRenderingContext2D, op, y, scale) {
   switch (op.op) {
     case CigarOp.MATCH:
       if (op.arrow) {
-        // an arrow pointing in the direction of the alignment
-        d3.select(node).attr('d', makeArrow(scale, op.pos, op.length, op.arrow));
+        drawArrow(ctx, scale, op.pos, op.length, y, op.arrow);
       } else {
-        // a rectangle (interior part of an alignment)
-        d3.select(node)
-          .attr({
-            'x': scale(op.pos + 1),
-            'height': READ_HEIGHT,
-            'width': scale(op.length) - scale(0)
-          });
+        var x = scale(op.pos + 1);
+        ctx.fillRect(x, y, scale(op.pos + op.length + 1) - x, READ_HEIGHT);
       }
       break;
 
     case CigarOp.DELETE:
-      // A thin line in the middle of the alignments indicating the deletion.
-      d3.select(node)
-        .attr({
-          'x1': scale(op.pos + 1),
-          'x2': scale(op.pos + 1 + op.length),
-          'y1': READ_HEIGHT / 2 - 0.5,
-          'y2': READ_HEIGHT / 2 - 0.5
-        });
+      var x1 = scale(op.pos + 1),
+          x2 = scale(op.pos + 1 + op.length),
+          yp = y + READ_HEIGHT / 2 - 0.5;
+      ctx.save();
+      ctx.fillStyle = 'black';
+      ctx.fillRect(x1, yp, x2 - x1, 1);
+      ctx.restore();
       break;
 
     case CigarOp.INSERT:
-      // A thin vertical line. This is shifted to the left so that it's not
-      // hidden by the segment following it.
-      d3.select(node)
-        .attr({
-          'x1': scale(op.pos + 1) - 2,  // to cover a bit of the previous segment
-          'x2': scale(op.pos + 1) - 2,
-          'y1': -1,
-          'y2': READ_HEIGHT + 2
-        });
+      ctx.save();
+      ctx.fillStyle = 'rgb(97, 0, 216)';
+      var x = scale(op.pos + 1) - 2,  // to cover a bit of the previous segment
+          y1 = y - 1,
+          y2 = y + READ_HEIGHT + 2;
+      ctx.fillRect(x, y1, 1, y2 - y1);
+      ctx.restore();
       break;
-
-    default:
-      throw `Invalid op! ${op.op}`;
   }
 }
 
@@ -122,10 +89,6 @@ function isRendered(op) {
   return (op.op == CigarOp.MATCH ||
           op.op == CigarOp.DELETE ||
           op.op == CigarOp.INSERT);
-}
-
-function readClass(vread: VisualAlignment) {
-  return 'alignment ' + (vread.strand == '-' ? 'negative' : 'positive');
 }
 
 
@@ -147,6 +110,15 @@ function opacityForQuality(quality: number): number {
   alpha = Math.round(alpha * 10 + 0.5) / 10.0;
   return Math.min(1.0, alpha);
 }
+
+var BASE_COLORS = {
+  'A': '#188712',
+  'G': '#C45C16',
+  'C': '#0600F9',
+  'T': '#F70016',
+  'U': '#F70016',
+  'N': 'black'
+};
 
 class PileupTrack extends React.Component {
   cache: PileupCache;
@@ -183,7 +155,9 @@ class PileupTrack extends React.Component {
     return (
       <div>
         {statusEl}
-        <div ref='container' style={containerStyles}></div>
+        <div ref='container' style={containerStyles}>
+          <canvas ref='canvas' />
+        </div>
       </div>
     );
   }
@@ -199,10 +173,6 @@ class PileupTrack extends React.Component {
   }
 
   componentDidMount() {
-    var div = this.refs.container.getDOMNode();
-    d3.select(div)
-      .append('svg');
-
     this.cache = new PileupCache(this.props.referenceSource);
     this.props.source.on('newdata', range => {
       this.updateReads(range);
@@ -242,9 +212,8 @@ class PileupTrack extends React.Component {
   // Update the D3 visualization to reflect the cached reads &
   // currently-visible range.
   updateVisualization() {
-    var div = this.refs.container.getDOMNode(),
-        width = this.props.width,
-        svg = d3.select(div).select('svg');
+    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement),
+        width = this.props.width;
 
     // Hold off until height & width are known.
     if (width === 0) return;
@@ -253,99 +222,41 @@ class PileupTrack extends React.Component {
     var height = yForRow(this.cache.pileupHeightForRef(this.props.range.contig));
     var scale = this.getScale();
 
-    svg.attr('width', width)
-       .attr('height', height);
+    d3.select(canvas).attr({width, height});
 
     var genomeRange = this.props.range,
         range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop);
     var vGroups = this.cache.getGroupsOverlapping(range);
 
-    // Enter
-    var groups = svg.selectAll('.read-group').data(vGroups, vGroup => vGroup.key);
+    // The typecast through `any` is because getContext could return a WebGL context.
+    var ctx = ((canvas.getContext('2d') : any) : CanvasRenderingContext2D);
+    ctx.clearRect(0, 0, width, height);
 
-    groups.enter()
-        .append('g')
-        .attr('class', 'read-group')
-        .attr('transform', vGroup => `translate(0, ${yForRow(vGroup.row)})`);
-
-    var connectors = groups.selectAll('.mate-connector')
-        .data(vGroup => vGroup.insert ? [vGroup.insert] : []);
-    connectors.enter().append('line').attr('class', 'mate-connector');
-
-    var reads = groups.selectAll('.alignment')
-        // drop alignments w/o CIGARs
-        .data(vGroup => vGroup.alignments.filter(vRead => vRead.refLength > 0));
-
-    reads.enter()
-        .append('g')
-        .attr('class', readClass)
-        .on('click', vRead => {
-          window.alert(vRead.read.debugString());
+    ctx.fillStyle = '#c8c8c8';
+    vGroups.forEach(vGroup => {
+      var y = yForRow(vGroup.row);
+      vGroup.alignments.forEach(vRead => {
+        vRead.ops.forEach(op => {
+          if (isRendered(op)) {
+            drawSegment(ctx, op, y, scale);
+          }
         });
-
-    var segments = reads.selectAll('.segment')
-        .data(read => read.ops.filter(isRendered));
-
-    // This is like segments.append(), but allows for different types of
-    // elements depending on the datum.
-    segments.enter().call(function(sel) {
-      sel.forEach(function(el) {
-        el.forEach(function(op) {
-          var d = d3.select(op).datum();
-          var element = enterSegment(el.parentNode, d, scale);
-          updateSegment(element[0][0], d, scale);
+        // drawArrow(ctx, scale, vRead.read.pos, vRead.refLength, y, vRead.strand == '+' ? 'R' : 'L');
+        vRead.mismatches.forEach(bp => {
+          ctx.save();
+          ctx.fillStyle = BASE_COLORS[bp.basePair];
+          ctx.globalAlpha = opacityForQuality(bp.quality);
+          ctx.fillText(bp.basePair, scale(bp.pos), y + READ_HEIGHT - 2);
+          ctx.restore();
         });
       });
+      if (vGroup.insert) {
+        var span = vGroup.insert,
+            x1 = scale(span.start + 1),
+            x2 = scale(span.stop + 1);
+        ctx.fillRect(x1, y + READ_HEIGHT / 2 - 0.5, x2 - x1, 1);
+      }
     });
-
-    // Mismatched base pairs
-    var pxPerLetter = scale(1) - scale(0),
-        mode = DisplayMode.getDisplayMode(pxPerLetter),
-        showText = DisplayMode.isText(mode),
-        modeWrapper = reads.selectAll('.mode-wrapper')
-                           .data(vRead => vRead.mismatches.length ? [{vRead,mode}] : [],
-                                 x => x.mode);
-    modeWrapper.enter().append('g').attr('class', 'mode-wrapper');
-
-    var letter = modeWrapper.selectAll('.basepair')
-        .data(d => d.vRead.mismatches, m => m.pos + m.basePair);
-
-    letter.enter().append(showText ? 'text' : 'rect')
-    if (showText) {
-      letter.text(mismatch => mismatch.basePair)
-    } else {
-      letter
-          .attr('y', 0)
-          .attr('height', READ_HEIGHT)
-    }
-    letter.attr('class', mismatch => utils.basePairClass(mismatch.basePair))
-          .attr('fill-opacity', mismatch => opacityForQuality(mismatch.quality));
-
-    // Update
-    connectors.each(function(interval, i) {
-      d3.select(this).attr({
-        x1: scale(interval.start),
-        x2: scale(interval.stop + 1),
-        y1: READ_HEIGHT / 2,
-        y2: READ_HEIGHT / 2
-      })
-    });
-    segments.each(function(d, i) {
-      updateSegment(this, d, scale);
-    });
-    reads.selectAll('text.basepair')
-         .attr('x', mismatch => scale(1 + 0.5 + mismatch.pos));  // 0.5 = centered
-    reads.selectAll('rect.basepair')
-          .attr('x', mismatch => scale(1 + mismatch.pos))
-          .attr('width', pxPerLetter - 1);
-
-    // Exit
-    groups.exit().remove();
-    connectors.exit().remove();
-    reads.exit().remove();
-    letter.exit().remove();
-    segments.exit().remove();
-    modeWrapper.exit().remove();
   }
 
 }

@@ -7,10 +7,12 @@ import type * as ContigInterval from './ContigInterval';
 
 // "CIGAR" operations express how a sequence aligns to the reference: does it
 // have insertions? deletions? For more background, see the SAM/BAM paper.
+export type CigarSymbol = 'M'|'I'|'D'|'N'|'S'|'H'|'P'|'='|'X';
 export type CigarOp = {
-  op: string;  // M, I, D, N, S, H, P, =, X
+  op: CigarSymbol;
   length: number
 }
+
 
 export type Strand = '-' | '+';
 
