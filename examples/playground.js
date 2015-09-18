@@ -15,7 +15,6 @@ var sources = [
     }),
     name: 'Reference'
   },
-  /*
   {
     viz: pileup.viz.scale(),
     name: 'Scale'
@@ -56,7 +55,6 @@ var sources = [
     cssClass: 'tumor',
     name: 'Coverage'
   },
-  */
   {
     viz: pileup.viz.pileup(),
     data: bamSource,
