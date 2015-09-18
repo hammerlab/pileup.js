@@ -139,6 +139,39 @@ function updateSegment(node, op, scale) {
   }
 }
 
+function drawSegment(ctx: CanvasRenderingContext2D, op, y, scale) {
+  switch (op.op) {
+    case CigarOp.MATCH:
+      if (op.arrow) {
+        drawArrow(ctx, scale, op.pos, op.length, y, op.arrow);
+      } else {
+        var x = scale(op.pos + 1);
+        ctx.fillRect(x, y, scale(op.pos + op.length + 1) - x, READ_HEIGHT);
+      }
+      break;
+
+    case CigarOp.DELETE:
+      var x1 = scale(op.pos + 1),
+          x2 = scale(op.pos + 1 + op.length),
+          yp = y + READ_HEIGHT / 2 - 0.5;
+      ctx.save();
+      ctx.fillStyle = 'black';
+      ctx.fillRect(x1, yp, x2 - x1, 1);
+      ctx.restore();
+      break;
+
+    case CigarOp.INSERT:
+      ctx.save();
+      ctx.fillStyle = 'rgb(97, 0, 216)';
+      var x = scale(op.pos + 1) - 2,  // to cover a bit of the previous segment
+          y1 = y - 1,
+          y2 = y + READ_HEIGHT + 2;
+      ctx.fillRect(x, y1, 1, y2 - y1);
+      ctx.restore();
+      break;
+  }
+}
+
 // Should the Cigar op be rendered to the screen?
 function isRendered(op) {
   return (op.op == CigarOp.MATCH ||
@@ -295,7 +328,12 @@ class PileupTrack extends React.Component {
     vGroups.forEach(vGroup => {
       var y = yForRow(vGroup.row);
       vGroup.alignments.forEach(vRead => {
-        drawArrow(ctx, scale, vRead.read.pos, vRead.refLength, y, vRead.strand == '+' ? 'R' : 'L');
+        vRead.ops.forEach(op => {
+          if (isRendered(op)) {
+            drawSegment(ctx, op, y, scale);
+          }
+        });
+        // drawArrow(ctx, scale, vRead.read.pos, vRead.refLength, y, vRead.strand == '+' ? 'R' : 'L');
         vRead.mismatches.forEach(bp => {
           ctx.save();
           ctx.fillStyle = BASE_COLORS[bp.basePair];

@@ -2,7 +2,7 @@
 'use strict';
 
 import type * as SamRead from './SamRead';
-import type {Alignment} from './Alignment';
+import type {Alignment, CigarSymbol} from './Alignment';
 import type * as Interval from './Interval';
 
 /**
@@ -89,11 +89,6 @@ function findMismatches(reference: string, seq: string, refPos: number, scores: 
   return out;
 }
 
-type OpInfo = {
-  ops: Object[],
-  mismatches: BasePair[]
-}
-
 // Determine which alignment segment to render as an arrow.
 // This is either the first or last 'M' section, excluding soft clipping.
 function getArrowIndex(read: Alignment): number {
@@ -129,6 +124,18 @@ var CigarOp = {
   SEQMISMATCH: 'X'  // sequence mismatch
 };
 
+type Op = {
+  op: CigarSymbol;
+  length: number;
+  pos: number;
+  arrow: ?('L'|'R');
+}
+
+type OpInfo = {
+  ops: Op[],
+  mismatches: BasePair[]
+}
+
 // Breaks the read down into Cigar Ops suitable for display
 function getOpInfo(read: Alignment, referenceSource: Object): OpInfo {
   var ops = read.getCigarOps();
@@ -158,7 +165,8 @@ function getOpInfo(read: Alignment, referenceSource: Object): OpInfo {
     result.push({
       op: op.op,
       length: op.length,
-      pos: refPos
+      pos: refPos,
+      arrow: null
     });
 
     // These are the cigar operations which advance position in the reference
