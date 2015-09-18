@@ -50,6 +50,28 @@ function makeArrow(scale, pos, refLength, direction) {
   return d3.svg.line()(path);
 }
 
+function drawArrow(ctx: CanvasRenderingContext2D, scale: (x:number)=>number, pos: number, refLength: number, top: number, direction: 'L' | 'R') {
+  var left = scale(pos + 1),
+      right = scale(pos + refLength + 1),
+      bottom = top + READ_HEIGHT;
+
+  ctx.beginPath();
+  if (direction == 'R') {
+    ctx.moveTo(left, top);
+    ctx.lineTo(right - READ_STRAND_ARROW_WIDTH, top);
+    ctx.lineTo(right, (top + bottom) / 2);
+    ctx.lineTo(right - READ_STRAND_ARROW_WIDTH, bottom);
+    ctx.lineTo(left, bottom);
+  } else {
+    ctx.moveTo(right, top);
+    ctx.lineTo(left + READ_STRAND_ARROW_WIDTH, top);
+    ctx.lineTo(left, (top + bottom) / 2);
+    ctx.lineTo(left + READ_STRAND_ARROW_WIDTH, bottom);
+    ctx.lineTo(right, bottom);
+  }
+  ctx.fill();
+}
+
 // Create the SVG element for a single Cigar op in an alignment.
 function enterSegment(parentNode, op, scale) {
   var parent = d3.select(parentNode);
@@ -183,7 +205,9 @@ class PileupTrack extends React.Component {
     return (
       <div>
         {statusEl}
-        <div ref='container' style={containerStyles}></div>
+        <div ref='container' style={containerStyles}>
+          <canvas ref='canvas' />
+        </div>
       </div>
     );
   }
@@ -199,10 +223,6 @@ class PileupTrack extends React.Component {
   }
 
   componentDidMount() {
-    var div = this.refs.container.getDOMNode();
-    d3.select(div)
-      .append('svg');
-
     this.cache = new PileupCache(this.props.referenceSource);
     this.props.source.on('newdata', range => {
       this.updateReads(range);
@@ -242,9 +262,8 @@ class PileupTrack extends React.Component {
   // Update the D3 visualization to reflect the cached reads &
   // currently-visible range.
   updateVisualization() {
-    var div = this.refs.container.getDOMNode(),
-        width = this.props.width,
-        svg = d3.select(div).select('svg');
+    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement),
+        width = this.props.width;
 
     // Hold off until height & width are known.
     if (width === 0) return;
@@ -253,6 +272,33 @@ class PileupTrack extends React.Component {
     var height = yForRow(this.cache.pileupHeightForRef(this.props.range.contig));
     var scale = this.getScale();
 
+    d3.select(canvas).attr({width, height});
+
+    var genomeRange = this.props.range,
+        range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop);
+    var vGroups = this.cache.getGroupsOverlapping(range);
+
+    // The typecast through `any` is because getContext could return a WebGL context.
+    var ctx = ((canvas.getContext('2d') : any) : CanvasRenderingContext2D);
+    ctx.clearRect(0, 0, width, height);
+
+    ctx.fillStyle = '#c8c8c8';
+    vGroups.forEach(vGroup => {
+      var y = yForRow(vGroup.row);
+      vGroup.alignments.forEach(vRead => {
+        drawArrow(ctx, scale, vRead.read.pos, vRead.refLength, y, vRead.strand == '+' ? 'R' : 'L');
+      });
+      if (vGroup.insert) {
+        var span = vGroup.insert,
+            x1 = scale(span.start + 1),
+            x2 = scale(span.stop + 1);
+        ctx.fillRect(x1, y + READ_HEIGHT / 2 - 0.5, x2 - x1, 1);
+      }
+    });
+
+    return;
+
+    /*
     svg.attr('width', width)
        .attr('height', height);
 
@@ -346,6 +392,7 @@ class PileupTrack extends React.Component {
     letter.exit().remove();
     segments.exit().remove();
     modeWrapper.exit().remove();
+    */
   }
 
 }
