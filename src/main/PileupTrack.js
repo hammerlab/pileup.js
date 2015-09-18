@@ -170,6 +170,15 @@ function opacityForQuality(quality: number): number {
   return Math.min(1.0, alpha);
 }
 
+var BASE_COLORS = {
+  'A': '#188712',
+  'G': '#C45C16',
+  'C': '#0600F9',
+  'T': '#F70016',
+  'U': '#F70016',
+  'N': 'black'
+};
+
 class PileupTrack extends React.Component {
   cache: PileupCache;
 
@@ -287,6 +296,13 @@ class PileupTrack extends React.Component {
       var y = yForRow(vGroup.row);
       vGroup.alignments.forEach(vRead => {
         drawArrow(ctx, scale, vRead.read.pos, vRead.refLength, y, vRead.strand == '+' ? 'R' : 'L');
+        vRead.mismatches.forEach(bp => {
+          ctx.save();
+          ctx.fillStyle = BASE_COLORS[bp.basePair];
+          ctx.globalAlpha = opacityForQuality(bp.quality);
+          ctx.fillText(bp.basePair, scale(bp.pos), y + READ_HEIGHT - 2);
+          ctx.restore();
+        });
       });
       if (vGroup.insert) {
         var span = vGroup.insert,
