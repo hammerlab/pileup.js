@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/hammerlab/pileup.js.svg?branch=travis-flow)](https://travis-ci.org/hammerlab/pileup.js) [![Coverage Status](https://coveralls.io/repos/hammerlab/pileup.js/badge.svg?branch=master)](https://coveralls.io/r/hammerlab/pileup.js?branch=master) [![NPM version](http://img.shields.io/npm/v/pileup.svg)](https://www.npmjs.org/package/pileup)
+[![Build Status](https://travis-ci.org/hammerlab/pileup.js.svg?branch=travis-flow)](https://travis-ci.org/hammerlab/pileup.js) [![Coverage Status](https://coveralls.io/repos/hammerlab/pileup.js/badge.svg?branch=master)](https://coveralls.io/r/hammerlab/pileup.js?branch=master) [![NPM version](http://img.shields.io/npm/v/pileup.svg)](https://www.npmjs.org/package/pileup) [![Dependency Status](https://david-dm.org/hammerlab/pileup.js.svg?theme=shields.io)](https://david-dm.org/hammerlab/pileup.js) [![devDependency Status](https://david-dm.org/hammerlab/pileup.js/dev-status.svg?theme=shields.io)](https://david-dm.org/hammerlab/pileup.js#info=devDependencies)
 
 # pileup.js
 Interactive in-browser track viewer. [**Try a demo**][demo]!
