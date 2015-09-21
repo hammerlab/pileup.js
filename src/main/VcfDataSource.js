@@ -13,16 +13,9 @@ var ContigInterval = require('./ContigInterval'),
     RemoteFile = require('./RemoteFile'),
     VcfFile = require('./vcf');
 
-// Copy from vcf.js
-type Variant = {
-  contig: string;
-  position: number;
-  ref: string;
-  alt: string;
-  vcfLine: string;
-}
+import type {Variant} from './vcf';
 
-type VcfDataSource = {
+export type VcfDataSource = {
   rangeChanged: (newRange: GenomeRange) => void;
   getFeaturesInRange: (range: ContigInterval<string>) => Variant[];
   on: (event: string, handler: Function) => void;

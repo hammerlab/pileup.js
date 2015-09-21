@@ -11,7 +11,7 @@ import type * as ContigInterval from './ContigInterval';
 import type * as RemoteFile from './RemoteFile';
 import type * as Q from 'q';
 
-type Variant = {
+export type Variant = {
   contig: string;
   position: number;
   ref: string;
