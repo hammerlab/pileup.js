@@ -1,5 +1,5 @@
 #!/bin/bash
-noflow=$(git ls-files | egrep '^(src|test).*\.js$' | grep -v '/canvas.js' | xargs grep --files-without-match '@flow')
+noflow=$(git ls-files | egrep '^(src|test).*\.js$' | grep -v '/data-canvas.js' | xargs grep --files-without-match '@flow')
 if [ -n "$noflow" ]; then
   echo 'These files are missing @flow annotations:'
   echo "$noflow"
