@@ -4,8 +4,8 @@
 var expect = require('chai').expect;
 
 var pileup = require('../main/pileup'),
-    {waitFor} = require('./async');
-
+    {waitFor} = require('./async'),
+    dataCanvas = require('../main/data-canvas');
 
 describe('pileup', function() {
   var tracks = [
@@ -54,9 +54,22 @@ describe('pileup', function() {
   ];
 
   var testDiv = document.getElementById('testdiv');
+  var origGetDataContext = dataCanvas.getDataContext,
+      recorder = null;
+
+  beforeEach(() => {
+    recorder = (null : ?RecordingContext);
+    dataCanvas.getDataContext = function(ctx) {
+      if (!recorder) {
+        recorder = new dataCanvas.RecordingContext(ctx);
+      }
+      return recorder;
+    };
+  });
 
   afterEach(function() {
     testDiv.innerHTML = '';  // avoid pollution between tests.
+    dataCanvas.getDataContext = origGetDataContext;
   });
 
   it('should render reference genome and genes', function() {
@@ -74,7 +87,8 @@ describe('pileup', function() {
     var ready = (() =>
       div.querySelectorAll('.basepair').length > 0 &&
       div.querySelectorAll('.gene').length > 0 &&
-      div.querySelectorAll('.alignment').length > 0
+      recorder != null &&
+      recorder.drawnObjectsWith(x => x.span).length > 0
     );
 
     return waitFor(ready, 5000)
@@ -92,6 +106,10 @@ describe('pileup', function() {
         expect(div.querySelector('div > .b').className).to.equal('track variants b');
         expect(div.querySelector('div > .c').className).to.equal('track genes c');
         expect(div.querySelector('div > .d').className).to.equal('track pileup d');
+
+        // Four read groups are visible
+        if (!recorder) throw 'impossible';  // here for flow
+        expect(recorder.drawnObjectsWith(x => x.span)).to.have.length(4);
 
         expect(p.getRange()).to.deep.equal({
           contig: 'chr17',

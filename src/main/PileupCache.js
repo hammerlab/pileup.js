@@ -28,7 +28,7 @@ export type VisualAlignment = {
 };
 
 // This is typically a read pair, but may be a single read in some situations.
-type VisualGroup = {
+export type VisualGroup = {
   key: string;
   row: number;  // pileup row.
   span: ContigInterval<string>;  // tip-to-tip span for the read group
