@@ -12,26 +12,26 @@ var React = require('./react-shim'),
     bedtools = require('./bedtools'),
     Interval = require('./Interval'),
     d3utils = require('./d3utils'),
-    ContigInterval = require('./ContigInterval');
+    ContigInterval = require('./ContigInterval'),
+    dataCanvas = require('./data-canvas');
 
 
 // D3 function to hide overlapping elements in a selection.
 // nb: this is O(n^2) in the number of transcripts on-screen.
 // TODO: move into a d3utils module
 var PADDING = 10;  // empty pixels to require around each element.
-function removeOverlapping(selection) {
-  var rects = [];
 
-  selection.each(function() {
-    var bbox = this.getBoundingClientRect();
-    var myInterval = new Interval(bbox.left - PADDING, bbox.right + PADDING);
-    if (_.any(rects, r => myInterval.intersects(r))) {
-      d3.select(this).attr('visibility', 'hidden');
-    } else {
-      rects.push(myInterval);
-      d3.select(this).attr('visibility', 'visible');
-    }
-  });
+function drawArrow(ctx: CanvasRenderingContext2D, clampedScale: (x: number)=>number, range: Interval, tipY: number) {
+  var x1 = clampedScale(range.start),
+      x2 = clampedScale(range.stop);
+  if (x1 != x2) {
+    var cx = (x1 + x2) / 2;
+    ctx.beginPath();
+    ctx.moveTo(cx + 4, tipY - 4);
+    ctx.lineTo(cx, tipY);
+    ctx.lineTo(cx + 4, tipY + 4);
+    ctx.stroke();
+  }
 }
 
 var GeneTrack = React.createClass({
@@ -47,12 +47,10 @@ var GeneTrack = React.createClass({
     };
   },
   render: function(): any {
-    return <div></div>;
+    return <div><canvas ref='canvas' /></div>;
   },
   componentDidMount: function() {
-    var div = this.getDOMNode(),
-        svg = d3.select(div)
-                .append('svg');
+    var div = this.getDOMNode();
 
     // Visualize new reference data as it comes in from the network.
     this.props.source.on('newdata', () => {
@@ -63,23 +61,14 @@ var GeneTrack = React.createClass({
       });
     });
 
-    // These define the left/right arrow patterns for sense/antisense genes.
-    // The second <path> allows the arrow to be seen on top of an exon.
-    var defs = svg.append('defs');
-    defs[0][0].innerHTML = `
-      <pattern id="antisense" patternUnits="userSpaceOnUse"
-            width="30" height="9" x="0" y="-4">
-        <path d="M5,0 L1,4 L5,8" class="main"></path>
-        <path d="M4,0 L1,3 M1,5 L4,8" class="offset"></path>
-      </pattern>
-      <pattern id="sense" patternUnits="userSpaceOnUse"
-            width="30" height="9" x="0" y="-4">
-        <path d="M0,0 L4,4 L0,8" class="main"></path>
-        <path d="M1,0 L4,3 M4,5 L1,8" class="offset"></path>
-      </pattern>
-    `;
-
     this.updateVisualization();
+  },
+
+  getContext(): CanvasRenderingContext2D {
+    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement);
+    // The typecast through `any` is because getContext could return a WebGL context.
+    var ctx = ((canvas.getContext('2d') : any) : CanvasRenderingContext2D);
+    return ctx;
   },
   getScale: function() {
     return d3utils.getTrackScale(this.props.range, this.props.width);
@@ -91,10 +80,9 @@ var GeneTrack = React.createClass({
     }
   },
   updateVisualization: function() {
-    var div = this.getDOMNode(),
+    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement),
         width = this.props.width,
-        height = this.props.height,
-        svg = d3.select(div).select('svg');
+        height = this.props.height;
 
     // Hold off until height & width are known.
     if (width === 0) return;
@@ -106,83 +94,47 @@ var GeneTrack = React.createClass({
             .range([0, width])
             .clamp(true);
 
-    svg.attr('width', width)
-       .attr('height', height);
+    d3.select(canvas).attr({width, height});
 
-    var genes = svg.selectAll('g.gene')
-       .data(this.state.genes, gene => gene.id);
-
-    // By default, the left of the arrow pattern goes to x=0 in SVG space.
-    // We'd prefer it start at genome coordinate 0.
-    // The "% 30" matches the pattern widths. It's there to fight roundoff.
-    svg.selectAll('pattern').attr('patternTransform',
-                                  `translate(${scale(0) % 30} 0)`);
-
-    // Enter
-    var geneGs = genes.enter()
-        .append('g')
-        .attr('class', 'gene');
-    geneGs.append('text');
-    var geneLineG = geneGs.append('g').attr('class', 'track');
-
-    geneLineG.selectAll('rect.exon')
-      .data(g => bedtools.splitCodingExons(g.exons, g.codingRegion))
-      .enter()
-      .append('rect')
-        .attr('class', 'exon');
-
-    geneLineG.append('line');
-    geneLineG.append('rect').attr('class', 'strand');
-
-    // The gene name goes in the center of the gene, modulo boundary effects.
-    var textCenterX = g => {
-      var p = g.position;
-      return 0.5 * (clampedScale(p.start()) + clampedScale(p.stop()));
-    };
-    var scaledWidth = g => scale(g.position.stop()) - scale(g.position.start());
+    var ctx = dataCanvas.getDataContext(this.getContext());
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     var geneLineY = height / 4;
+    this.state.genes.forEach(gene => {
+      ctx.pushObject(gene);
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'blue';
+      ctx.fillStyle = 'blue';
+      ctx.beginPath();
+      ctx.moveTo(clampedScale(gene.position.start()), geneLineY);
+      ctx.lineTo(clampedScale(gene.position.stop()), geneLineY);
+      ctx.stroke();
 
-    // Enter & update
-    var track = genes.selectAll('g.track')
-        .attr('transform',
-              g => `translate(0 ${geneLineY})`);
+      // TODO: only compute all these intervals when data becomes available.
+      var exons = bedtools.splitCodingExons(gene.exons, gene.codingRegion);
+      exons.forEach(exon => {
+        ctx.fillRect(scale(exon.start),
+                     geneLineY - 3 * (exon.isCoding ? 2 : 1),
+                     scale(exon.stop + 1) - scale(exon.start),
+                     6 * (exon.isCoding ? 2 : 1));
+      });
 
-    genes.selectAll('text')
-        .attr({
-          'x': textCenterX,
-          'y': geneLineY + 15
-        })
-        .text(g => g.name || g.id)
-        .call(removeOverlapping);
+      ctx.strokeStyle = 'blue';
+      var introns = gene.position.interval.complementIntervals(gene.exons);
+      introns.forEach(range => {
+        drawArrow(ctx, clampedScale, range, geneLineY);
+      });
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 2;
+      gene.exons.forEach(range => {
+        drawArrow(ctx, clampedScale, range, geneLineY);
+      });
 
-    track.selectAll('line').attr({
-      'x1': g => scale(g.position.start()),
-      'x2': g => scale(g.position.stop()),
-      'y1': 0,
-      'y2': 0
+      var p = gene.position,
+          centerX = 0.5 * (clampedScale(p.start()) + clampedScale(p.stop()));
+      ctx.fillText(gene.name || gene.id, centerX, geneLineY + 15);
+      ctx.popObject();
     });
-
-    track.selectAll('rect.strand')
-        .attr({
-          'y': -4,
-          'height': 9,
-          'x': g => scale(g.position.start()),
-          'width': scaledWidth,
-          'fill': g => `url(#${g.strand == '+' ? '' : 'anti'}sense)`,
-          'stroke': 'none'
-        });
-
-    track.selectAll('rect.exon')
-        .attr({
-          'x':      exon => scale(exon.start),
-          'width':  exon => scale(exon.stop) - scale(exon.start),
-          'y':      exon => -3 * (exon.isCoding ? 2 : 1),
-          'height': exon =>  6 * (exon.isCoding ? 2 : 1)
-        });
-
-    // Exit
-    genes.exit().remove();
   }
 });
 
