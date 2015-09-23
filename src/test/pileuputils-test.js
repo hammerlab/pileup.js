@@ -155,8 +155,8 @@ describe('pileuputils', function() {
 
       expect(getOpInfo(deleteRead, fakeReferenceSource)).to.deep.equal({
         ops: [
-          { op: 'M', length: 37, pos: 7513328 + 0 },
-          { op: 'D', length:  4, pos: 7513328 + 37 },
+          { op: 'M', length: 37, pos: 7513328 + 0,  arrow: null },
+          { op: 'D', length:  4, pos: 7513328 + 37, arrow: null },
           { op: 'M', length: 64, pos: 7513328 + 41, arrow: 'R' }
         ],
         mismatches: []
@@ -164,16 +164,16 @@ describe('pileuputils', function() {
 
       expect(getOpInfo(insertRead, fakeReferenceSource)).to.deep.equal({
         ops: [
-          { op: 'M', length: 73, pos: 7513204 + 0, arrow: 'L' },
-          { op: 'I', length: 20, pos: 7513204 + 73 },
-          { op: 'M', length:  8, pos: 7513204 + 73 }
+          { op: 'M', length: 73, pos: 7513204 + 0,  arrow: 'L' },
+          { op: 'I', length: 20, pos: 7513204 + 73, arrow: null },
+          { op: 'M', length:  8, pos: 7513204 + 73, arrow: null }
         ],
         mismatches: []
       });
 
       expect(getOpInfo(softClipRead, fakeReferenceSource)).to.deep.equal({
           ops: [
-            { op: 'S', length: 66, pos: 7513108 + 0 },
+            { op: 'S', length: 66, pos: 7513108 + 0, arrow: null },
             { op: 'M', length: 35, pos: 7513108 + 0, arrow: 'L' }
           ],
           mismatches: [

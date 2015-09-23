@@ -21,7 +21,8 @@ var pileup = require('../main/pileup'),
     RemoteFile = require('../main/RemoteFile'),
     MappedRemoteFile = require('./MappedRemoteFile'),
     ContigInterval = require('../main/ContigInterval'),
-    {waitFor} = require('./async');
+    {waitFor} = require('./async'),
+    dataCanvas = require('../main/data-canvas');
 
 
 // This is like TwoBit, but allows a controlled release of sequence data.
@@ -68,16 +69,27 @@ class FakeBam extends Bam {
 
 describe('PileupTrack', function() {
   var testDiv = document.getElementById('testdiv');
+  var origGetDataContext = dataCanvas.getDataContext,
+      recorder = null;
 
   beforeEach(() => {
     // A fixed width container results in predictable x-positions for mismatches.
     testDiv.style.width = '800px';
+    // Stub in a RecordingContext in place of DataContext
+    recorder = (null : ?RecordingContext);
+    dataCanvas.getDataContext = function(ctx) {
+      if (!recorder) {
+        recorder = new dataCanvas.RecordingContext(ctx);
+      }
+      return recorder;
+    };
   });
 
   afterEach(() => {
     // avoid pollution between tests.
     testDiv.innerHTML = '';
     testDiv.style.width = '';
+    dataCanvas.getDataContext = origGetDataContext;
   });
 
   // Test data files
@@ -133,7 +145,7 @@ describe('PileupTrack', function() {
       return testDiv.querySelectorAll('.reference text.C').length > 0;
     },
     hasAlignments = () => {
-      return testDiv.querySelectorAll('.pileup .alignment').length > 0;
+      return drawnObjectsWith(x => x.span).length > 0;
     },
 
     // Returns SVG elements at the given position by querying D3 data.
@@ -144,19 +156,24 @@ describe('PileupTrack', function() {
                .filter(function(d) { return (d.pos == pos) })[0];
     },
 
+    // Helpers for working with DataCanvas
+    drawnObjectsWith = predicate => recorder ? recorder.drawnObjectsWith(predicate) : [],
+    mismatchesAtPos = pos => drawnObjectsWith(x => x.basePair && x.pos == pos),
+
     // This checks that there are 22 C/T SNVs at chr17:7,500,765
     // XXX: IGV only shows 20
     assertHasColumnOfTs = () => {
       var ref = elementsAtPos('.reference text.basepair', 7500765 - 1);
       expect(ref).to.have.length(1);
       expect(ref[0].textContent).to.equal('C');
-      var mismatches = elementsAtPos('.pileup text.basepair', 7500765 - 1);
+      
+      var mismatches = mismatchesAtPos(7500765 - 1);
       expect(mismatches).to.have.length(22);
       _.each(mismatches, mm => {
-        expect(mm.textContent).to.equal('T');
+        expect(mm.basePair).to.equal('T');
       });
       // Make sure there are no variants in the previous column, just the reference.
-      expect(elementsAtPos('text', 7500764 - 1).length).to.equal(1);
+      expect(mismatchesAtPos(7500764 - 1).length).to.equal(0);
     };
 
   it('should indicate mismatches when the reference loads first', function() {
@@ -172,7 +189,7 @@ describe('PileupTrack', function() {
     }).then(() => {
       // Some number of mismatches are expected, but it should be dramatically
       // lower than the number of total base pairs in alignments.
-      var mismatches = testDiv.querySelectorAll('.pileup .alignment .basepair');
+      var mismatches = drawnObjectsWith(x => x.basePair);
       expect(mismatches).to.have.length.below(60);
       assertHasColumnOfTs();
     });
@@ -190,7 +207,7 @@ describe('PileupTrack', function() {
       fakeTwoBit.release(reference);
       return waitFor(hasReference, 2000);
     }).then(() => {
-      var mismatches = testDiv.querySelectorAll('.pileup .alignment .basepair');
+      var mismatches = drawnObjectsWith(x => x.basePair);
       expect(mismatches).to.have.length.below(60);
       assertHasColumnOfTs();
     });

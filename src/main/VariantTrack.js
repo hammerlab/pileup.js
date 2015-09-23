@@ -4,7 +4,8 @@
  */
 'use strict';
 
-import type * as VcfDataSource from './VcfDataSource';
+import type {VcfDataSource} from './VcfDataSource';
+import type {Variant} from './vcf';
 
 var React = require('./react-shim'),
     _ = require('underscore'),
@@ -12,23 +13,6 @@ var React = require('./react-shim'),
     types = require('./react-types'),
     ContigInterval = require('./ContigInterval');
 
-// Copy from vcf.js
-type Variant = {
-  contig: string;
-  position: number;
-  ref: string;
-  alt: string;
-  vcfLine: string;
-}
-
-// Copied from VcfDataSource
-type VcfDataSource = {
-  rangeChanged: (newRange: GenomeRange) => void;
-  getFeaturesInRange: (range: ContigInterval<string>) => Variant[];
-  on: (event: string, handler: Function) => void;
-  off: (event: string) => void;
-  trigger: (event: string, ...args:any) => void;
-};
 
 function variantKey(v: Variant): string {
   return `${v.contig}:${v.position}`;

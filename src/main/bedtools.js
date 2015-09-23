@@ -6,7 +6,7 @@ var Interval = require('./Interval');
 
 class CodingInterval extends Interval {
   isCoding: boolean;
-  constructor(start, stop, isCoding: boolean) {
+  constructor(start: number, stop: number, isCoding: boolean) {
     super(start, stop);
     this.isCoding = isCoding;
   }
