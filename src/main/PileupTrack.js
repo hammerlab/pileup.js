@@ -290,6 +290,7 @@ class PileupTrack extends React.Component {
         range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop);
     var vGroups = this.cache.getGroupsOverlapping(range);
 
+    ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.fillStyle = '#c8c8c8';
     ctx.font = 'bold 12px Helvetica Neue, Helvetica, Arial, sans-serif';

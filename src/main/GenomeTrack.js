@@ -117,6 +117,8 @@ var GenomeTrack = React.createClass({
     var showText = DisplayMode.isText(mode);
 
     var ctx = dataCanvas.getDataContext(this.getCanvasContext());
+    ctx.reset();
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     if (mode != DisplayMode.HIDDEN) {
       var basePairs = this.props.source.getRange({
@@ -137,13 +139,17 @@ var GenomeTrack = React.createClass({
         var letter = basePairs[contigColon + pos];
 
         ctx.save();
+        ctx.pushObject({pos, letter});
         ctx.fillStyle = BASE_COLORS[letter];
         if (showText) {
+          // We only push objects in the text case as it involves creating a
+          // new object & can become a performance issue.
           // 0.5 = centered
           ctx.fillText(letter, scale(1 + 0.5 + pos), height - 2);
         } else {
           ctx.fillRect(scale(1 + pos), 0,  pxPerLetter - 1, height);
         }
+        ctx.popObject();
         ctx.restore();
       }
     }

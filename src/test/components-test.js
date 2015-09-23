@@ -56,49 +56,13 @@ describe('pileup', function() {
 
   var testDiv = document.getElementById('testdiv');
 
-  // These are helpers for working with RecordingContext.
-  var origGetDataContext = dataCanvas.getDataContext,
-      recorders = [];
-
-  function recorderForCanvas(canvas) {
-    var pair = _.find(recorders, r => r[0] == canvas);
-    if (pair) return pair[1];
-    return null;
-  }
-
-  function recorderForSelector(div, selector) {
-    var canvas = div.querySelector(selector + ' canvas');
-    if (!canvas) return null;
-    return recorderForCanvas(canvas);
-  }
-
-  // Find objects drawn on a particular recorded canvas
-  function drawnObjectsWith(div, selector, predicate) {
-    var recorder = recorderForSelector(div, selector);
-    return recorder ? recorder.drawnObjectsWith(predicate) : [];
-  }
-
-  // Find calls of particular drawing functions (e.g. fillText)
-  function callsOf(div, selector, type) {
-    var recorder = recorderForSelector(div, selector);
-    return recorder ? recorder.callsOf(type) : [];
-  }
-
   beforeEach(() => {
-    recorders = [];
-    dataCanvas.getDataContext = function(ctx) {
-      var recorder = recorderForCanvas(ctx.canvas);
-      if (recorder) return recorder;
-
-      recorder = new dataCanvas.RecordingContext(ctx);
-      recorders.push([ctx.canvas, recorder]);
-      return recorder;
-    };
+    dataCanvas.RecordingContext.recordAll();  // record all data canvases
   });
 
   afterEach(function() {
+    dataCanvas.RecordingContext.reset();
     testDiv.innerHTML = '';  // avoid pollution between tests.
-    dataCanvas.getDataContext = origGetDataContext;
   });
 
   it('should render reference genome and genes', function() {
@@ -113,15 +77,17 @@ describe('pileup', function() {
       tracks: tracks
     });
 
+    var {drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
+
     var ready = (() =>
-      div.querySelectorAll('.basepair').length > 0 &&
+      drawnObjectsWith(div, '.reference', x => x.letter).length > 0 &&
       drawnObjectsWith(div, '.genes', x => x.name).length > 0 &&
       drawnObjectsWith(div, '.pileup', x => x.span).length > 0
     );
 
     return waitFor(ready, 5000)
       .then(() => {
-        var basepairs = div.querySelectorAll('.basepair');
+        var basepairs = drawnObjectsWith(div, '.reference', x => x.letter);
         expect(basepairs).to.have.length.at.least(10);
 
         var geneTexts = callsOf(div, '.genes', 'fillText');

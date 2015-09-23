@@ -69,27 +69,17 @@ class FakeBam extends Bam {
 
 describe('PileupTrack', function() {
   var testDiv = document.getElementById('testdiv');
-  var origGetDataContext = dataCanvas.getDataContext,
-      recorder = null;
 
   beforeEach(() => {
     // A fixed width container results in predictable x-positions for mismatches.
     testDiv.style.width = '800px';
-    // Stub in a RecordingContext in place of DataContext
-    recorder = (null : ?RecordingContext);
-    dataCanvas.getDataContext = function(ctx) {
-      if (!recorder) {
-        recorder = new dataCanvas.RecordingContext(ctx);
-      }
-      return recorder;
-    };
+    dataCanvas.RecordingContext.recordAll();
   });
 
   afterEach(() => {
+    dataCanvas.RecordingContext.reset();
     // avoid pollution between tests.
     testDiv.innerHTML = '';
-    testDiv.style.width = '';
-    dataCanvas.getDataContext = origGetDataContext;
   });
 
   // Test data files
@@ -139,33 +129,26 @@ describe('PileupTrack', function() {
     return {p, fakeTwoBit, fakeBam};
   }
 
+  var {drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
+
   var hasReference = () => {
       // The reference initially shows "unknown" base pairs, so we have to
       // check for a specific known one to ensure that it's really loaded.
-      return testDiv.querySelectorAll('.reference text.C').length > 0;
+      return drawnObjectsWith(testDiv, '.reference', x => x.letter).length > 0;
     },
     hasAlignments = () => {
-      return drawnObjectsWith(x => x.span).length > 0;
-    },
-
-    // Returns SVG elements at the given position by querying D3 data.
-    // This is more robust than checking pixel coordinates.
-    elementsAtPos = (selector, pos) => {
-      return d3.select(testDiv)
-               .selectAll(selector)
-               .filter(function(d) { return (d.pos == pos) })[0];
+      return drawnObjectsWith(testDiv, '.pileup', x => x.span).length > 0;
     },
 
     // Helpers for working with DataCanvas
-    drawnObjectsWith = predicate => recorder ? recorder.drawnObjectsWith(predicate) : [],
-    mismatchesAtPos = pos => drawnObjectsWith(x => x.basePair && x.pos == pos),
+    mismatchesAtPos = pos => drawnObjectsWith(testDiv, '.pileup', x => x.basePair && x.pos == pos),
 
     // This checks that there are 22 C/T SNVs at chr17:7,500,765
     // XXX: IGV only shows 20
     assertHasColumnOfTs = () => {
-      var ref = elementsAtPos('.reference text.basepair', 7500765 - 1);
+      var ref = drawnObjectsWith(testDiv, '.reference', x => x.pos == 7500765 - 1);
       expect(ref).to.have.length(1);
-      expect(ref[0].textContent).to.equal('C');
+      expect(ref[0].letter).to.equal('C');
       
       var mismatches = mismatchesAtPos(7500765 - 1);
       expect(mismatches).to.have.length(22);
@@ -189,7 +172,7 @@ describe('PileupTrack', function() {
     }).then(() => {
       // Some number of mismatches are expected, but it should be dramatically
       // lower than the number of total base pairs in alignments.
-      var mismatches = drawnObjectsWith(x => x.basePair);
+      var mismatches = drawnObjectsWith(testDiv, '.pileup', x => x.basePair);
       expect(mismatches).to.have.length.below(60);
       assertHasColumnOfTs();
     });
@@ -207,7 +190,7 @@ describe('PileupTrack', function() {
       fakeTwoBit.release(reference);
       return waitFor(hasReference, 2000);
     }).then(() => {
-      var mismatches = drawnObjectsWith(x => x.basePair);
+      var mismatches = drawnObjectsWith(testDiv, '.pileup', x => x.basePair);
       expect(mismatches).to.have.length.below(60);
       assertHasColumnOfTs();
     });

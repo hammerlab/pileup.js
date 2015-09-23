@@ -102,6 +102,7 @@ var GeneTrack = React.createClass({
     d3.select(canvas).attr({width, height});
 
     var ctx = dataCanvas.getDataContext(this.getContext());
+    ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     var geneLineY = height / 4;

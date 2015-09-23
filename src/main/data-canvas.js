@@ -35,12 +35,18 @@ function forward(obj: Object, target: Object, onlyAccessors: ?boolean) {
 // Use this for basic drawing
 function DataContext(ctx: CanvasRenderingContext2D) {
   forward(this, ctx);
-  this.pushObject = this.popObject = function() {};
+  this.pushObject = this.popObject = this.reset = function() {};
 }
+
+var stubGetDataContext = null;
 
 // This is exposed as a method for easier testing.
 function getDataContext(ctx: CanvasRenderingContext2D) {
-  return new DataContext(ctx);
+  if (stubGetDataContext) {
+    return stubGetDataContext(ctx);
+  } else {
+    return new DataContext(ctx);
+  }
 }
 
 
@@ -75,6 +81,10 @@ function RecordingContext(ctx: CanvasRenderingContext2D) {
   this.popObject = function() {
     calls.push(['popObject']);
   };
+
+  this.reset = function() {
+    this.calls = calls = [];
+  };
 }
 
 /**
@@ -91,9 +101,76 @@ RecordingContext.prototype.drawnObjectsWith = function(predicate: (o: Object)=>b
  * Returns an array of the calls and their parameters, e.g.
  * [ ['fillText', 'Hello!', 20, 10] ]
  */
-RecordingContext.prototype.callsOf = function(type: string): Array[] {
+RecordingContext.prototype.callsOf = function(type: string): Array<any>[] {
   return this.calls.filter(call => call[0] == type);
 };
+
+/**
+ * Static method to begin swapping in RecordingContext in place of DataContext.
+ * Don't forget to call RecordingContext.reset() after the test completes!
+ */
+RecordingContext.recordAll = function() {
+  if (stubGetDataContext != null) {
+    throw 'You forgot to call RecordingContext.reset()';
+  }
+  RecordingContext.recorders = [];
+  stubGetDataContext = function(ctx) {
+    var recorder = RecordingContext.recorderForCanvas(ctx.canvas);
+    if (recorder) return recorder;
+
+    recorder = new RecordingContext(ctx);
+    RecordingContext.recorders.push([ctx.canvas, recorder]);
+    return recorder;
+  };
+};
+
+/**
+ * Revert the stubbing performed by RecordingContext.recordAll.
+ */
+RecordingContext.reset = function() {
+  stubGetDataContext = null;
+  RecordingContext.recorders = null;
+};
+
+// Get the recording context for a canvas.
+RecordingContext.recorderForCanvas = function(canvas) {
+  var recorders = RecordingContext.recorders;
+  if (recorders == null) {
+    throw 'You can only call recorderForCanvas after RecordingContext.recordAll()';
+  }
+  for (var i = 0; i < recorders.length; i++) {
+    var r = recorders[i];
+    if (r[0] == canvas) return r[1];
+  }
+  return null;
+};
+
+/**
+ * Get the recording context for a canvas inside of div.querySelector(selector).
+ *
+ * This is useful when you have a test div and several canvases.
+ */
+RecordingContext.recorderForSelector = function(div, selector) {
+  if (RecordingContext.recorders == null) {
+    throw 'You can only call recorderForSelector after RecordingContext.recordAll()';
+  }
+  var canvas = div.querySelector(selector + ' canvas');
+  if (!canvas) return null;
+  return RecordingContext.recorderForCanvas(canvas);
+};
+
+// Find objects pushed onto a particular recorded canvas.
+RecordingContext.drawnObjectsWith = function(div, selector, predicate) {
+  var recorder = RecordingContext.recorderForSelector(div, selector);
+  return recorder ? recorder.drawnObjectsWith(predicate) : [];
+}
+
+// Find calls of particular drawing functions (e.g. fillText)
+RecordingContext.callsOf = function (div, selector, type) {
+  var recorder = RecordingContext.recorderForSelector(div, selector);
+  return recorder ? recorder.callsOf(type) : [];
+};
+
 
 /**
  * A context which determines the data at a particular location.
@@ -124,6 +201,11 @@ function ClickTrackingContext(ctx: CanvasRenderingContext2D, px: number, py: num
   
   this.popObject = function() {
     stack.shift();
+  };
+
+  this.reset = function() {
+    this.hits = [];
+    this.hit = null;
   };
 
   // These are (most of) the canvas methods which draw something.
