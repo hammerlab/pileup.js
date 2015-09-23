@@ -10,9 +10,19 @@ var React = require('./react-shim'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     utils = require('./utils'),
+    dataCanvas = require('./data-canvas'),
     d3utils = require('./d3utils'),
     DisplayMode = require('./DisplayMode');
 
+
+var BASE_COLORS = {
+  'A': '#188712',
+  'G': '#C45C16',
+  'C': '#0600F9',
+  'T': '#F70016',
+  'U': '#F70016',
+  'N': 'black'
+};
 
 var GenomeTrack = React.createClass({
   // This prevents updates if state & props have not changed.
@@ -24,18 +34,11 @@ var GenomeTrack = React.createClass({
     source: React.PropTypes.object.isRequired,
     onRangeChange: React.PropTypes.func.isRequired,
   },
-  getInitialState: function() {
-    return {
-      basePairs: {}
-    };
-  },
   render: function(): any {
-    return <div></div>;
+    return <div><canvas ref='canvas' /></div>;
   },
   componentDidMount: function() {
-    var div = this.getDOMNode(),
-        svg = d3.select(div)
-                .append('svg');
+    var div = this.getDOMNode();
 
     // Visualize new reference data as it comes in from the network.
     this.props.source.on('newdata', () => {
@@ -77,14 +80,7 @@ var GenomeTrack = React.createClass({
         .on('drag', dragmove)
         .on('dragend', dragended);
 
-    var g = svg.append('g')
-               .attr('class', 'wrapper')
-               .call(drag);
-
-    g.append('rect')
-        .attr('x', 0)
-        .attr('y', 0)
-        .attr('class', 'background');
+    d3.select(div).call(drag);
 
     this.updateVisualization();
   },
@@ -97,77 +93,60 @@ var GenomeTrack = React.createClass({
       this.updateVisualization();
     }
   },
+
+  getCanvasContext(): CanvasRenderingContext2D {
+    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement);
+    // The typecast through `any` is because getContext could return a WebGL context.
+    var ctx = ((canvas.getContext('2d') : any) : CanvasRenderingContext2D);
+    return ctx;
+  },
+
   updateVisualization: function() {
-    var div = this.getDOMNode(),
-        range = this.props.range,
+    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement),
         width = this.props.width,
         height = this.props.height,
-        svg = d3.select(div).select('svg');
+        range = this.props.range;
 
     // Hold off until height & width are known.
     if (width === 0) return;
+    d3.select(canvas).attr({width, height});
 
     var scale = this.getScale();
     var pxPerLetter = scale(1) - scale(0);
     var mode = DisplayMode.getDisplayMode(pxPerLetter);
+    var showText = DisplayMode.isText(mode);
 
-    var basePairs = this.props.source.getRange({
-      contig: range.contig,
-      start: Math.max(0, range.start - 1),
-      stop: range.stop
-    });
+    var ctx = dataCanvas.getDataContext(this.getCanvasContext());
 
-    var contigColon = this.props.range.contig + ':';
-    var absBasePairs;
     if (mode != DisplayMode.HIDDEN) {
-      absBasePairs = _.range(range.start - 1, range.stop + 1)
-          .map(locus => ({
-            pos: locus,
-            letter: basePairs[contigColon + locus]
-          }));
-    } else {
-      absBasePairs = [];  // TODO: show a "zoom out" message.
+      var basePairs = this.props.source.getRange({
+        contig: range.contig,
+        start: Math.max(0, range.start - 1),
+        stop: range.stop
+      });
+
+      ctx.textAlign = 'center';
+      if (mode == DisplayMode.LOOSE) {
+        ctx.font = '24px Helvetica Neue, Helvetica, Arial, sans-serif';
+      } else if (mode == DisplayMode.TIGHT) {
+        ctx.font = 'bold 12px Helvetica Neue, Helvetica, Arial, sans-serif';
+      }
+
+      var contigColon = this.props.range.contig + ':';
+      for (var pos = range.start - 1; pos <= range.stop; pos++) {
+        var letter = basePairs[contigColon + pos];
+
+        ctx.save();
+        ctx.fillStyle = BASE_COLORS[letter];
+        if (showText) {
+          // 0.5 = centered
+          ctx.fillText(letter, scale(1 + 0.5 + pos), height - 2);
+        } else {
+          ctx.fillRect(scale(1 + pos), 0,  pxPerLetter - 1, height);
+        }
+        ctx.restore();
+      }
     }
-
-    svg.attr('width', width)
-       .attr('height', height);
-    svg.select('rect').attr({width, height});
-
-    var g = svg.select('g.wrapper');
-
-    var baseClass = DisplayMode.toString(mode),
-        showText = DisplayMode.isText(mode),
-        modeData = [mode],
-        modeWrapper = g.selectAll('.mode-wrapper').data(modeData, x => x);
-    modeWrapper.enter().append('g').attr('class', 'mode-wrapper ' + baseClass);
-    modeWrapper.exit().remove();
-
-    var letter = modeWrapper.selectAll('.basepair')
-       .data(absBasePairs, bp => bp.pos);
-
-    // Enter
-    letter.enter()
-      .append(showText ? 'text' : 'rect');
-
-    // Enter & update
-
-    if (showText) {
-      letter
-          .attr('x', bp => scale(1 + 0.5 + bp.pos))  // 0.5 = centered
-          .attr('y', height)
-          .attr('class', bp => utils.basePairClass(bp.letter))
-          .text(bp => bp.letter);
-    } else {
-      letter
-          .attr('x', bp => scale(1 + bp.pos))
-          .attr('y', height - 14)
-          .attr('height', 14)
-          .attr('width', pxPerLetter - 1)
-          .attr('class', bp => utils.basePairClass(bp.letter));
-    }
-
-    // Exit
-    letter.exit().remove();
   }
 });
 
