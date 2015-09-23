@@ -116,4 +116,51 @@ describe('Interval', function() {
       new Interval(0, 10)
     ])).to.throw(/sorted ranges/);
   });
+
+  it('should subtract intervals', function() {
+    //   0123456789
+    // a ----------
+    // b ---
+    // c        ---
+    // d    -----
+    var a = new Interval(0, 9),
+        b = new Interval(0, 2),
+        c = new Interval(7, 9),
+        d = new Interval(3, 7);
+    expect(a.subtract(a).map(x => x.toString())).to.deep.equal([]);
+    expect(a.subtract(b).map(x => x.toString())).to.deep.equal(['[3, 9]']);
+    expect(a.subtract(c).map(x => x.toString())).to.deep.equal(['[0, 6]']);
+    expect(a.subtract(d).map(x => x.toString())).to.deep.equal(['[0, 2]','[8, 9]']);
+
+    expect(b.subtract(a).map(x => x.toString())).to.deep.equal([]);
+    expect(b.subtract(b).map(x => x.toString())).to.deep.equal([]);
+    expect(b.subtract(c).map(x => x.toString())).to.deep.equal([b.toString()]);
+    expect(b.subtract(d).map(x => x.toString())).to.deep.equal([b.toString()]);
+
+    expect(c.subtract(a).map(x => x.toString())).to.deep.equal([]);
+    expect(c.subtract(b).map(x => x.toString())).to.deep.equal([c.toString()]);
+    expect(c.subtract(c).map(x => x.toString())).to.deep.equal([]);
+    expect(c.subtract(d).map(x => x.toString())).to.deep.equal(['[8, 9]']);
+
+    expect(d.subtract(a).map(x => x.toString())).to.deep.equal([]);
+    expect(d.subtract(b).map(x => x.toString())).to.deep.equal([d.toString()]);
+    expect(d.subtract(c).map(x => x.toString())).to.deep.equal(['[3, 6]']);
+    expect(d.subtract(d).map(x => x.toString())).to.deep.equal([]);
+  });
+
+  it('should compute complements', function() {
+    var iv = new Interval(0, 99);
+    var exons = [
+        new Interval(10, 19),
+        new Interval(30, 39),
+        new Interval(35, 49),
+        new Interval(80, 99)
+    ];
+
+    expect(iv.complementIntervals(exons).map(x => x.toString())).to.deep.equal([
+      '[0, 9]',
+      '[20, 29]',
+      '[50, 79]'
+    ]);
+  });
 });

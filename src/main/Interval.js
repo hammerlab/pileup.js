@@ -62,6 +62,48 @@ class Interval {
     return false;
   }
 
+  /**
+   * Find the subintervals which are not in `other`.
+   * This can yield either zero, one or two Intervals.
+   */
+  subtract(other: Interval): Interval[] {
+    if (!this.intersects(other)) {
+      return [this];  // unaffected by this range
+    } else if (this.containsInterval(other)) {
+      // return the bit before and the bit after
+      return [new Interval(this.start, other.start - 1),
+              new Interval(other.stop + 1, this.stop)].filter(x => x.length() > 0);
+    } else if (other.containsInterval(this)) {
+      return [];  // it's been completely obliterated
+    } else {
+      // it overlaps one end
+      if (other.start < this.start) {
+        return [new Interval(other.stop + 1, this.stop)];
+      } else {
+        return [new Interval(this.start, other.start - 1)];
+      }
+    }
+  }
+
+  /**
+   * Find the disjoint subintervals not covered by any interval in the list.
+   *
+   * If comp = interval.complementIntervals(ranges), then this guarantees that:
+   * - comp union ranges = interval
+   * - a int b = 0 forall a \in comp, b in ranges
+   */
+  complementIntervals(ranges: Interval[]): Interval[] {
+    var comps = [this];
+    ranges.forEach(range => {
+      var newComps = [];
+      comps.forEach(iv => {
+        newComps = newComps.concat(iv.subtract(range));
+      });
+      comps = newComps;
+    });
+    return comps;
+  }
+
   static intersectAll(intervals: Array<Interval>): Interval {
     if (!intervals.length) {
       throw new Error('Tried to intersect zero intervals');
