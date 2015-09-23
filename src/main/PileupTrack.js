@@ -30,7 +30,6 @@ var READ_SPACING = 2;  // vertical pixels between reads
 var READ_STRAND_ARROW_WIDTH = 6;
 
 
-
 // Should the Cigar op be rendered to the screen?
 function isRendered(op) {
   return (op.op == CigarOp.MATCH ||
@@ -40,6 +39,11 @@ function isRendered(op) {
 
 // The renderer pulls out the canvas context and scale into shared variables in a closure.
 function getRenderer(ctx: DataCanvasRenderingContext2D, scale: (num: number) => number) {
+  // Should mismatched base pairs be shown as blocks of color or as letters?
+  var pxPerLetter = scale(1) - scale(0),
+      mode = DisplayMode.getDisplayMode(pxPerLetter),
+      showText = DisplayMode.isText(mode);
+
   function drawArrow(pos: number, refLength: number, top: number, direction: 'L' | 'R') {
     var left = scale(pos + 1),
         right = scale(pos + refLength + 1),
@@ -124,7 +128,12 @@ function getRenderer(ctx: DataCanvasRenderingContext2D, scale: (num: number) => 
     ctx.save();
     ctx.fillStyle = BASE_COLORS[bp.basePair];
     ctx.globalAlpha = opacityForQuality(bp.quality);
-    ctx.fillText(bp.basePair, scale(bp.pos), y + READ_HEIGHT - 2);
+    if (showText) {
+      // 0.5 = centered
+      ctx.fillText(bp.basePair, scale(1 + 0.5 + bp.pos), y + READ_HEIGHT - 2);
+    } else {
+      ctx.fillRect(scale(1 + bp.pos), y,  pxPerLetter - 1, READ_HEIGHT);
+    }
     ctx.restore();
     ctx.popObject();
   }
@@ -283,6 +292,7 @@ class PileupTrack extends React.Component {
 
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.fillStyle = '#c8c8c8';
+    ctx.font = 'bold 12px Helvetica Neue, Helvetica, Arial, sans-serif';
 
     var scale = this.getScale();
     var renderer = getRenderer(ctx, scale);
