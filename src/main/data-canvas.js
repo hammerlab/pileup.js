@@ -77,14 +77,22 @@ function RecordingContext(ctx: CanvasRenderingContext2D) {
   };
 }
 
+/**
+ * Get a list of objects which have been pushed to the data canvas that match
+ * the particular predicate.
+ */
 RecordingContext.prototype.drawnObjectsWith = function(predicate: (o: Object)=>boolean): Object[] {
-  var matches = [];
-  this.calls.forEach(x => {
-    if (x[0] == 'pushObject' && predicate(x[1])) {
-      matches.push(x[1]);
-    }
-  });
-  return matches;
+  return this.callsOf('pushObject').filter(x => predicate(x[1])).map(x => x[1]);
+};
+
+/**
+ * Find calls of a particular type, e.g. `fillText` or `pushObject`.
+ *
+ * Returns an array of the calls and their parameters, e.g.
+ * [ ['fillText', 'Hello!', 20, 10] ]
+ */
+RecordingContext.prototype.callsOf = function(type: string): Array[] {
+  return this.calls.filter(call => call[0] == type);
 };
 
 /**

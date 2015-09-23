@@ -5,7 +5,8 @@ var expect = require('chai').expect;
 
 var pileup = require('../main/pileup'),
     {waitFor} = require('./async'),
-    dataCanvas = require('../main/data-canvas');
+    dataCanvas = require('../main/data-canvas'),
+    _ = require('underscore');
 
 describe('pileup', function() {
   var tracks = [
@@ -54,15 +55,43 @@ describe('pileup', function() {
   ];
 
   var testDiv = document.getElementById('testdiv');
+
+  // These are helpers for working with RecordingContext.
   var origGetDataContext = dataCanvas.getDataContext,
-      recorder = null;
+      recorders = [];
+
+  function recorderForCanvas(canvas) {
+    var pair = _.find(recorders, r => r[0] == canvas);
+    if (pair) return pair[1];
+    return null;
+  }
+
+  function recorderForSelector(div, selector) {
+    var canvas = div.querySelector(selector + ' canvas');
+    if (!canvas) return null;
+    return recorderForCanvas(canvas);
+  }
+
+  // Find objects drawn on a particular recorded canvas
+  function drawnObjectsWith(div, selector, predicate) {
+    var recorder = recorderForSelector(div, selector);
+    return recorder ? recorder.drawnObjectsWith(predicate) : [];
+  }
+
+  // Find calls of particular drawing functions (e.g. fillText)
+  function callsOf(div, selector, type) {
+    var recorder = recorderForSelector(div, selector);
+    return recorder ? recorder.callsOf(type) : [];
+  }
 
   beforeEach(() => {
-    recorder = (null : ?RecordingContext);
+    recorders = [];
     dataCanvas.getDataContext = function(ctx) {
-      if (!recorder) {
-        recorder = new dataCanvas.RecordingContext(ctx);
-      }
+      var recorder = recorderForCanvas(ctx.canvas);
+      if (recorder) return recorder;
+
+      recorder = new dataCanvas.RecordingContext(ctx);
+      recorders.push([ctx.canvas, recorder]);
       return recorder;
     };
   });
@@ -86,21 +115,21 @@ describe('pileup', function() {
 
     var ready = (() =>
       div.querySelectorAll('.basepair').length > 0 &&
-      div.querySelectorAll('.gene').length > 0 &&
-      recorder != null &&
-      recorder.drawnObjectsWith(x => x.span).length > 0
+      drawnObjectsWith(div, '.genes', x => x.name).length > 0 &&
+      drawnObjectsWith(div, '.pileup', x => x.span).length > 0
     );
 
     return waitFor(ready, 5000)
       .then(() => {
         var basepairs = div.querySelectorAll('.basepair');
         expect(basepairs).to.have.length.at.least(10);
-        var geneNames = div.querySelectorAll('.gene text');
-        expect(geneNames.length).to.equal(1);
-        expect(geneNames[0].textContent).to.equal('TP53');
+
+        var geneTexts = callsOf(div, '.genes', 'fillText');
+        expect(geneTexts).to.have.length(1);
+        expect(geneTexts[0][1]).to.equal('TP53');
 
         // Note: there are 11 exons, but two are split into coding/non-coding
-        expect(div.querySelectorAll('.gene .exon').length).to.equal(13);
+        expect(callsOf(div, '.genes', 'fillRect')).to.have.length(13);
 
         expect(div.querySelector('div > .a').className).to.equal('track reference a');
         expect(div.querySelector('div > .b').className).to.equal('track variants b');
@@ -108,8 +137,7 @@ describe('pileup', function() {
         expect(div.querySelector('div > .d').className).to.equal('track pileup d');
 
         // Four read groups are visible
-        if (!recorder) throw 'impossible';  // here for flow
-        expect(recorder.drawnObjectsWith(x => x.span)).to.have.length(4);
+        expect(drawnObjectsWith(div, '.pileup', x => x.span)).to.have.length(4);
 
         expect(p.getRange()).to.deep.equal({
           contig: 'chr17',
