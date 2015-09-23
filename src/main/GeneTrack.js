@@ -16,20 +16,25 @@ var React = require('./react-shim'),
     dataCanvas = require('./data-canvas');
 
 
-// D3 function to hide overlapping elements in a selection.
-// nb: this is O(n^2) in the number of transcripts on-screen.
-// TODO: move into a d3utils module
-var PADDING = 10;  // empty pixels to require around each element.
+var ARROW_SIZE = 4;
+var GENE_COLOR = 'blue';  // color of the gene line, exons, text, etc.
+var GENE_COMPLEMENT_COLOR = 'white';  // a color visible on top of GENE_COLOR
 
+var GENE_FONT = `'Helvetica Neue', Helvetica, Arial, sans-serif`;
+var GENE_FONT_SIZE = 16;
+var GENE_TEXT_PADDING = 5;  // space between bottom of coding exon & top of gene name
+
+// Draw an arrow in the middle of the visible portion of range.
+// TODO: right-facing arrows!
 function drawArrow(ctx: CanvasRenderingContext2D, clampedScale: (x: number)=>number, range: Interval, tipY: number) {
   var x1 = clampedScale(range.start),
       x2 = clampedScale(range.stop);
   if (x1 != x2) {
     var cx = (x1 + x2) / 2;
     ctx.beginPath();
-    ctx.moveTo(cx + 4, tipY - 4);
+    ctx.moveTo(cx + ARROW_SIZE, tipY - ARROW_SIZE);
     ctx.lineTo(cx, tipY);
-    ctx.lineTo(cx + 4, tipY + 4);
+    ctx.lineTo(cx + ARROW_SIZE, tipY + ARROW_SIZE);
     ctx.stroke();
   }
 }
@@ -103,8 +108,8 @@ var GeneTrack = React.createClass({
     this.state.genes.forEach(gene => {
       ctx.pushObject(gene);
       ctx.lineWidth = 1;
-      ctx.strokeStyle = 'blue';
-      ctx.fillStyle = 'blue';
+      ctx.strokeStyle = GENE_COLOR;
+      ctx.fillStyle = GENE_COLOR;
       ctx.beginPath();
       ctx.moveTo(clampedScale(gene.position.start()), geneLineY);
       ctx.lineTo(clampedScale(gene.position.stop()), geneLineY);
@@ -119,12 +124,12 @@ var GeneTrack = React.createClass({
                      6 * (exon.isCoding ? 2 : 1));
       });
 
-      ctx.strokeStyle = 'blue';
+      ctx.strokeStyle = GENE_COMPLEMENT_COLOR;
       var introns = gene.position.interval.complementIntervals(gene.exons);
       introns.forEach(range => {
         drawArrow(ctx, clampedScale, range, geneLineY);
       });
-      ctx.strokeStyle = 'white';
+      ctx.strokeStyle = GENE_COMPLEMENT_COLOR;
       ctx.lineWidth = 2;
       gene.exons.forEach(range => {
         drawArrow(ctx, clampedScale, range, geneLineY);
@@ -132,7 +137,11 @@ var GeneTrack = React.createClass({
 
       var p = gene.position,
           centerX = 0.5 * (clampedScale(p.start()) + clampedScale(p.stop()));
-      ctx.fillText(gene.name || gene.id, centerX, geneLineY + 15);
+      ctx.font = `${GENE_FONT_SIZE}px ${GENE_FONT}`;
+      ctx.textAlign = 'center';
+      ctx.fillText(gene.name || gene.id,
+                   centerX,
+                   geneLineY + GENE_FONT_SIZE + GENE_TEXT_PADDING);
       ctx.popObject();
     });
   }
