@@ -147,5 +147,13 @@ describe('data-canvas', function() {
 
       // TODO: check drawing styles
     });
+
+    it('should return values from proxied functions', function() {
+      var dtx = new dataCanvas.RecordingContext(ctx);
+      var metrics = dtx.measureText('Hello');
+
+      expect(dtx.calls).to.deep.equal([['measureText', 'Hello']]);
+      expect(metrics.width).to.be.greaterThan(0);
+    });
   });
 });
