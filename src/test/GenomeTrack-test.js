@@ -14,6 +14,7 @@ var React = require('../main/react-shim');
 var pileup = require('../main/pileup'),
     TwoBit = require('../main/TwoBit'),
     TwoBitDataSource = require('../main/TwoBitDataSource'),
+    dataCanvas = require('../main/data-canvas'),
     MappedRemoteFile = require('./MappedRemoteFile'),
     {waitFor} = require('./async');
 
@@ -23,9 +24,11 @@ describe('GenomeTrack', function() {
   beforeEach(() => {
     // A fixed width container results in predictable x-positions for mismatches.
     testDiv.style.width = '800px';
+    dataCanvas.RecordingContext.recordAll();
   });
 
   afterEach(() => {
+    dataCanvas.RecordingContext.reset();
     // avoid pollution between tests.
     testDiv.innerHTML = '';
     testDiv.style.width = '';
@@ -35,10 +38,11 @@ describe('GenomeTrack', function() {
                             [[0, 16383], [691179834, 691183928], [694008946, 694009197]]),
       referenceSource = TwoBitDataSource.createFromTwoBitFile(new TwoBit(twoBitFile));
 
+  var {drawnObjectsWith} = dataCanvas.RecordingContext;
   var hasReference = () => {
       // The reference initially shows "unknown" base pairs, so we have to
       // check for a specific known one to ensure that it's really loaded.
-      return testDiv.querySelectorAll('.reference text.C').length > 0;
+      return drawnObjectsWith(testDiv, '.reference', x => x.letter).length > 0;
     };
 
   it('should tolerate non-chr ranges', function() {

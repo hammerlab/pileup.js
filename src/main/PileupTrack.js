@@ -21,7 +21,8 @@ var React = require('./react-shim'),
     Interval = require('./Interval'),
     DisplayMode = require('./DisplayMode'),
     PileupCache = require('./PileupCache'),
-    dataCanvas = require('./data-canvas');
+    dataCanvas = require('./data-canvas'),
+    style = require('./style');
 
 
 var READ_HEIGHT = 13;
@@ -82,14 +83,14 @@ function getRenderer(ctx: DataCanvasRenderingContext2D, scale: (num: number) => 
             x2 = scale(op.pos + 1 + op.length),
             yp = y + READ_HEIGHT / 2 - 0.5;
         ctx.save();
-        ctx.fillStyle = 'black';
+        ctx.fillStyle = style.DELETE_COLOR;
         ctx.fillRect(x1, yp, x2 - x1, 1);
         ctx.restore();
         break;
 
       case CigarOp.INSERT:
         ctx.save();
-        ctx.fillStyle = 'rgb(97, 0, 216)';
+        ctx.fillStyle = style.INSERT_COLOR;
         var x = scale(op.pos + 1) - 2,  // to cover a bit of the previous segment
             y1 = y - 1,
             y2 = y + READ_HEIGHT + 2;
@@ -126,7 +127,7 @@ function getRenderer(ctx: DataCanvasRenderingContext2D, scale: (num: number) => 
   function renderMismatch(bp: BasePair, y: number) {
     ctx.pushObject(bp);
     ctx.save();
-    ctx.fillStyle = BASE_COLORS[bp.basePair];
+    ctx.fillStyle = style.BASE_COLORS[bp.basePair];
     ctx.globalAlpha = opacityForQuality(bp.quality);
     if (showText) {
       // 0.5 = centered
@@ -161,14 +162,6 @@ function opacityForQuality(quality: number): number {
   return Math.min(1.0, alpha);
 }
 
-var BASE_COLORS = {
-  'A': '#188712',
-  'G': '#C45C16',
-  'C': '#0600F9',
-  'T': '#F70016',
-  'U': '#F70016',
-  'N': 'black'
-};
 
 class PileupTrack extends React.Component {
   cache: PileupCache;
@@ -290,9 +283,10 @@ class PileupTrack extends React.Component {
         range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop);
     var vGroups = this.cache.getGroupsOverlapping(range);
 
+    ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.fillStyle = '#c8c8c8';
-    ctx.font = 'bold 12px Helvetica Neue, Helvetica, Arial, sans-serif';
+    ctx.fillStyle = style.ALIGNMENT_COLOR;
+    ctx.font = style.TIGHT_TEXT_STYLE;
 
     var scale = this.getScale();
     var renderer = getRenderer(ctx, scale);
