@@ -40,7 +40,7 @@
   overflow-x: hidden;
   position: relative;
 }
-.track-content > div > div {
+.track-content > div {
   position: absolute; /* Gets the child of the flex-item to fill height 100% */
 }
 

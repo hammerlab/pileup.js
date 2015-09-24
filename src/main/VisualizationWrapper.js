@@ -3,44 +3,94 @@
  */
 
 var React = require('./react-shim'),
-    types = require('./react-types');
+    types = require('./react-types'),
+    d3utils = require('./d3utils'),
+    _ = require('underscore'),
+    d3 = require('d3');
 
-var VisualizationWrapper = React.createClass({
-  propTypes: {
-    range: types.GenomeRange,
-    onRangeChange: React.PropTypes.func.isRequired,
-    source: React.PropTypes.object.isRequired,
-    referenceSource: React.PropTypes.object.isRequired,
-    visualization: React.PropTypes.func.isRequired
-  },
+class VisualizationWrapper extends React.Component {
+  hasDragBeenInitialized: boolean;
 
-  getInitialState: function() {
-    return {
+  constructor(props: Object) {
+    super(props);
+    this.hasDragBeenInitialized = false;
+    this.state = {
       width: 0,
       height: 0
-    }
-  },
+    };
+  }
 
-  updateSize() {
-    var parentDiv = this.getDOMNode().parentNode;
+  updateSize(): any {
+    var parentDiv = React.findDOMNode(this).parentNode;
     this.setState({
       width: parentDiv.offsetWidth,
       height: parentDiv.offsetHeight
     });
-  },
+  }
 
-  componentDidMount() {
+  componentDidMount(): any {
     window.addEventListener('resize', () => this.updateSize());
     this.updateSize();
-  },
 
-  render: function(): any {
+    if (this.props.range && !this.hasDragBeenInitialized) this.addDragInterface();
+  }
+
+  componentDidUpdate(): any {
+    if (this.props.range && !this.hasDragBeenInitialized) this.addDragInterface();
+  }
+
+  getScale(): any {
+    return d3utils.getTrackScale(this.props.range, this.state.width);
+  }
+
+  addDragInterface(): any {
+    this.hasDragBeenInitialized = true;
+    var div = React.findDOMNode(this);
+    var originalRange, originalScale, dx=0;
+    var dragstarted = () => {
+      d3.event.sourceEvent.stopPropagation();
+      dx = 0;
+      originalRange = _.clone(this.props.range);
+      originalScale = this.getScale();
+    };
+    var updateRange = () => {
+      if (!originalScale) return;  // can never happen, but Flow don't know.
+      if (!originalRange) return;  // can never happen, but Flow don't know.
+      var newStart = originalScale.invert(-dx),
+          intStart = Math.round(newStart),
+          offsetPx = originalScale(newStart) - originalScale(intStart);
+
+      var newRange = {
+        contig: originalRange.contig,
+        start: intStart,
+        stop: intStart + (originalRange.stop - originalRange.start),
+        offsetPx: offsetPx
+      };
+      this.props.onRangeChange(newRange);
+    };
+    var dragmove = () => {
+      dx += d3.event.dx;  // these are integers, so no roundoff issues.
+      updateRange();
+    };
+    function dragended() {
+      updateRange();
+    }
+
+    var drag = d3.behavior.drag()
+        .on('dragstart', dragstarted)
+        .on('drag', dragmove)
+        .on('dragend', dragended);
+
+    d3.select(div).call(drag);
+  }
+
+  render(): any {
     var range = this.props.range;
     if (!range) {
       return <EmptyTrack className={this.props.visualization.displayName} />;
     }
 
-    return React.createElement(this.props.visualization, {
+    var el = React.createElement(this.props.visualization, {
       range: this.props.range,
       onRangeChange: this.props.onRangeChange,
       source: this.props.source,
@@ -48,8 +98,20 @@ var VisualizationWrapper = React.createClass({
       width: this.state.width,
       height: this.state.height
     });
+
+    return <div className='drag-wrapper'>{el}</div>;
   }
-});
+}
+VisualizationWrapper.displayName = 'VisualizationWrapper';
+
+VisualizationWrapper.propTypes = {
+  range: types.GenomeRange,
+  onRangeChange: React.PropTypes.func.isRequired,
+  source: React.PropTypes.object.isRequired,
+  referenceSource: React.PropTypes.object.isRequired,
+  visualization: React.PropTypes.func.isRequired
+};
+
 
 var EmptyTrack = React.createClass({
   render: function() {
