@@ -37,42 +37,6 @@ var GenomeTrack = React.createClass({
       this.updateVisualization();
     });
 
-    var originalRange, originalScale, dx=0;
-    var dragstarted = () => {
-      d3.event.sourceEvent.stopPropagation();
-      dx = 0;
-      originalRange = _.clone(this.props.range);
-      originalScale = this.getScale();
-    };
-    var updateRange = () => {
-      if (!originalScale) return;  // can never happen, but Flow don't know.
-      if (!originalRange) return;  // can never happen, but Flow don't know.
-      var newStart = originalScale.invert(-dx),
-          intStart = Math.round(newStart),
-          offsetPx = originalScale(newStart) - originalScale(intStart);
-
-      var newRange = {
-        contig: originalRange.contig,
-        start: intStart,
-        stop: intStart + (originalRange.stop - originalRange.start),
-        offsetPx: offsetPx
-      };
-      this.props.onRangeChange(newRange);
-    };
-    var dragmove = () => {
-      dx += d3.event.dx;  // these are integers, so no roundoff issues.
-      updateRange();
-    };
-    function dragended() {
-      updateRange();
-    }
-
-    var drag = d3.behavior.drag()
-        .on('dragstart', dragstarted)
-        .on('drag', dragmove)
-        .on('dragend', dragended);
-
-    d3.select(div).call(drag);
 
     this.updateVisualization();
   },
