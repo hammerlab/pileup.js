@@ -9,7 +9,7 @@ var ContigInterval = require('../main/ContigInterval');
 
 describe('BigBed', function() {
   function getTestBigBed() {
-    return new BigBed('/test-data/itemRgb.bb');   // See test/data/README.md
+    return new BigBed('/test-data/itemRgb.bb');   // See test-data/README.md
   }
 
   it('should extract features in a range', function() {
