@@ -69,7 +69,7 @@ function RecordingContext(ctx: CanvasRenderingContext2D) {
         // TODO: record current drawing style
         var args = Array.prototype.slice.call(arguments);
         calls.push([k].concat(args));
-        ctx[k].apply(ctx, arguments);
+        return ctx[k].apply(ctx, arguments);
       };
     })(k);
   }

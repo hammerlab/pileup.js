@@ -1,6 +1,8 @@
 /* @flow */
 'use strict';
 
+import type {Strand} from './Alignment';
+
 var Events = require('backbone').Events,
     _ = require('underscore'),
     Q = require('q');
@@ -11,10 +13,10 @@ var ContigInterval = require('./ContigInterval'),
     BigBed = require('./BigBed');
 
 
-type Gene = {
+export type Gene = {
   position: ContigInterval<string>;
   id: string;  // transcript ID, e.g. "ENST00000269305"
-  strand: string;  // '+' or '-'
+  strand: Strand;
   codingRegion: Interval;  // locus of coding start
   exons: Array<Interval>;
   geneId: string;  // ensembl gene ID
