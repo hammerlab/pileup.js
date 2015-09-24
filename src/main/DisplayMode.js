@@ -22,18 +22,6 @@ var DisplayMode = {
     }
   },
 
-  toString(mode: number): string {
-    if (mode == DisplayMode.LOOSE) {
-      return 'loose';
-    } else if (mode == DisplayMode.TIGHT) {
-      return 'tight';
-    } else if (mode == DisplayMode.BLOCKS) {
-      return 'blocks';
-    } else {
-      return 'hidden';
-    }
-  },
-
   isText(mode: number): boolean {
     return (mode == DisplayMode.LOOSE || mode == DisplayMode.TIGHT);
   }
