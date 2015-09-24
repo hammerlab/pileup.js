@@ -12,17 +12,9 @@ var React = require('./react-shim'),
     utils = require('./utils'),
     dataCanvas = require('./data-canvas'),
     d3utils = require('./d3utils'),
-    DisplayMode = require('./DisplayMode');
+    DisplayMode = require('./DisplayMode'),
+    style = require('./style');
 
-
-var BASE_COLORS = {
-  'A': '#188712',
-  'G': '#C45C16',
-  'C': '#0600F9',
-  'T': '#F70016',
-  'U': '#F70016',
-  'N': 'black'
-};
 
 var GenomeTrack = React.createClass({
   // This prevents updates if state & props have not changed.
@@ -129,9 +121,9 @@ var GenomeTrack = React.createClass({
 
       ctx.textAlign = 'center';
       if (mode == DisplayMode.LOOSE) {
-        ctx.font = '24px Helvetica Neue, Helvetica, Arial, sans-serif';
+        ctx.font = style.LOOSE_TEXT_STYLE;
       } else if (mode == DisplayMode.TIGHT) {
-        ctx.font = 'bold 12px Helvetica Neue, Helvetica, Arial, sans-serif';
+        ctx.font = style.TIGHT_TEXT_STYLE;
       }
 
       var contigColon = this.props.range.contig + ':';
@@ -140,7 +132,7 @@ var GenomeTrack = React.createClass({
 
         ctx.save();
         ctx.pushObject({pos, letter});
-        ctx.fillStyle = BASE_COLORS[letter];
+        ctx.fillStyle = style.BASE_COLORS[letter];
         if (showText) {
           // We only push objects in the text case as it involves creating a
           // new object & can become a performance issue.
