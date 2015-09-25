@@ -13,6 +13,8 @@ var React = require('./react-shim'),
     types = require('./react-types'),
     d3utils = require('./d3utils'),
     _ = require("underscore"),
+    dataCanvas = require('./data-canvas'),
+    style = require('./style'),
     ContigInterval = require('./ContigInterval');
 
 
@@ -55,55 +57,14 @@ class CoverageTrack extends React.Component {
   }
 
   render(): any {
-    // Fill the container up
-    // as we are going to use almost all the space available
-    var containerStyles = {
-      'height': '100%'
-    };
-
-    return (
-      <div>
-        <div ref='container' style={containerStyles}></div>
-      </div>
-    );
+    return <div><canvas ref='canvas' /></div>;
   }
 
   getScale() {
     return d3utils.getTrackScale(this.props.range, this.props.width);
   }
 
-  /**
-   * Create a dummy label to see how much space the label occupies.
-   * Once calculated, save it into the state for later use in
-   * padding-related calculations.
-   */
-  calculateLabelSize(svg) {
-    // Create a dummy element that matches with the style:
-    //        ".coverage .y-axis g.tick text {...}"
-    var dummyAxis = svg.append('g').attr('class', 'y-axis');
-    var dummySize = dummyAxis.append('g').attr('class', 'tick')
-      .append('text')
-      .text("100X")
-      .node()
-      .getBBox();  // Measure its size
-
-    // Save the size information
-    this.setState({
-          labelSize: {height: dummySize.height, width: dummySize.width}
-    });
-    dummyAxis.remove();
-  }
-
   componentDidMount() {
-    var div = this.refs.container.getDOMNode();
-    var svg = d3.select(div).append('svg');
-    this.calculateLabelSize(svg);
-
-    // Below, we create the container group for our bars upfront as we want
-    // to overlay the axis on top of them; therefore, we have to make sure
-    // their container is defined first in the SVG
-    svg.append('g').attr('class', 'bin-group');
-
     this.props.source.on('newdata', () => {
       var ci = new ContigInterval(this.props.range.contig, 0, Number.MAX_VALUE),
           reads = this.props.source.getAlignmentsInRange(ci),
@@ -130,62 +91,81 @@ class CoverageTrack extends React.Component {
         ({position}) => (position >= start && position <= stop));
   }
 
+  getContext(): CanvasRenderingContext2D {
+    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement);
+    // The typecast through `any` is because getContext could return a WebGL context.
+    var ctx = ((canvas.getContext('2d') : any) : CanvasRenderingContext2D);
+    return ctx;
+  }
+
   visualizeCoverage() {
-    var div = this.refs.container.getDOMNode(),
+    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement),
         width = this.props.width,
         height = this.props.height,
-        padding = this.state.labelSize.height / 2,  // half the text height
-        xScale = this.getScale(),
-        svg = d3.select(div).select('svg');
+        padding = 10,
+        xScale = this.getScale();
 
     // Hold off until height & width are known.
     if (width === 0) return;
-
-    svg.attr('width', width).attr('height', height);
+    d3.select(canvas).attr({width, height});
 
     var yScale = d3.scale.linear()
-      .domain([this.state.maxCoverage, 0])  // mind the inverted axis
+      .domain([this.state.maxCoverage, 0])
       .range([padding, height - padding])
       .nice();
     // The nice() call on the axis will give us a new domain to work with
     // Let's get our domain max back from the nicified scale
     var axisMax = yScale.domain()[0];
-    // Select the group we created first
-    var histBars = svg.select('g.bin-group').selectAll('rect.bin')
-      .data(this.binsInRange(), d => d.position);
 
-    var calcBarHeight = d => Math.max(0, yScale(axisMax - d.count)),
-        calcBarPosY = d => yScale(d.count) - yScale(axisMax),
-        calcBarWidth = d => xScale(d.position) - xScale(d.position - 1);
+    var calcBarHeight = bin => Math.max(0, yScale(axisMax - bin.count)),
+        calcBarPosX = bin => xScale(bin.position),
+        calcBarPosY = bin => yScale(bin.count) - yScale(axisMax),
+        calcBarWidth = bin => xScale(1) - xScale(0);
 
-    // D3 logic for our histogram bars
-    histBars
-      .enter()
-      .append('rect')
-      .attr('class', 'bin');
-    histBars
-      .attr('x', d => xScale(d.position))
-      .attr('y', calcBarPosY)
-      .attr('width', calcBarWidth)
-      .attr('height', calcBarHeight)
-    histBars.exit().remove();
+    var ctx = dataCanvas.getDataContext(this.getContext());
+    ctx.reset();
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    // Logic for our axis
-    var yAxis = d3.svg.axis()
-      .scale(yScale)
-      .orient('right')  // this is gonna be at the far left
-      .innerTickSize(5)  // Make our ticks much more visible
-      .outerTickSize(0)  // Remove the default range ticks (they are ugly)
-      .tickFormat(t => t + 'X')  // X -> times in coverage terminology
-      .tickValues([0, Math.round(axisMax / 2), axisMax]);  // show min, avg, max
-    var yAxisEl = svg.selectAll('g.y-axis');
-    if (yAxisEl.empty()) {  // no axis element yet
-      svg.append('rect').attr('class', 'y-axis-background');
-      // add this the second so it is on top of the background
-      svg.append('g').attr('class', 'y-axis');
-    } else {
-      yAxisEl.call(yAxis);  // update the axis
-    }
+    // Draw coverage bins
+    this.binsInRange().forEach(bin => {
+      ctx.pushObject(bin);
+      ctx.fillStyle = style.COVERAGE_BIN_COLOR;
+      var barWidth = calcBarWidth(bin),
+          barPadding = barWidth * style.COVERAGE_BIN_PADDING_CONSTANT;
+      ctx.fillRect(calcBarPosX(bin) + barPadding,
+                   calcBarPosY(bin),
+                   calcBarWidth(bin) - barPadding,
+                   calcBarHeight(bin));
+      ctx.popObject();
+      ctx.restore();
+    });
+
+    // Draw three ticks
+    [0, Math.round(axisMax / 2), axisMax].forEach(tick => {
+      // Draw a line indicating the tick
+      ctx.pushObject({value: tick, type: 'tick'});
+      ctx.beginPath();
+      var tickPosY = yScale(tick);
+      ctx.moveTo(0, tickPosY);
+      ctx.lineTo(style.COVERAGE_TICK_LENGTH, tickPosY);
+      ctx.stroke();
+      ctx.popObject();
+
+      var tickLabel = tick + 'X';
+      ctx.pushObject({value: tick, label: tickLabel, type: 'label'});
+      // Now print the coverage information
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = style.COVERAGE_FONT_COLOR;
+      ctx.fillStyle = style.COVERAGE_FONT_COLOR;
+      ctx.font = style.COVERAGE_FONT_STYLE;
+      var textPosY = tickPosY + style.COVERAGE_TEXT_Y_OFFSET;
+      ctx.fillText(tickLabel,
+                   style.COVERAGE_TICK_LENGTH + style.COVERAGE_TEXT_PADDING,
+                   textPosY);
+      ctx.popObject();
+      // Clean up with this tick
+      ctx.restore();
+    });
   }
 }
 

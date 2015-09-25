@@ -22,6 +22,7 @@ var pileup = require('../main/pileup'),
     RemoteFile = require('../main/RemoteFile'),
     MappedRemoteFile = require('./MappedRemoteFile'),
     ContigInterval = require('../main/ContigInterval'),
+    dataCanvas = require('../main/data-canvas'),
     {waitFor} = require('./async');
 
 describe('CoverageTrack', function() {
@@ -29,6 +30,7 @@ describe('CoverageTrack', function() {
   var range = {contig: '17', start: 7500730, stop: 7500790};
 
   beforeEach(() => {
+    dataCanvas.RecordingContext.recordAll();
     // A fixed width container results in predictable x-positions for mismatches.
     testDiv.style.width = '800px';
     var p = pileup.create(testDiv, {
@@ -53,6 +55,7 @@ describe('CoverageTrack', function() {
   });
 
   afterEach(() => {
+    dataCanvas.RecordingContext.reset();
     // avoid pollution between tests.
     testDiv.innerHTML = '';
     testDiv.style.width = '';
@@ -62,12 +65,14 @@ describe('CoverageTrack', function() {
                             [[0, 16383], [691179834, 691183928], [694008946, 694009197]]),
       referenceSource = TwoBitDataSource.createFromTwoBitFile(new TwoBit(twoBitFile));
 
+  var {drawnObjectsWith} = dataCanvas.RecordingContext;
+
   var findCoverageBins = () => {
-    return testDiv.querySelectorAll('.coverage .bin');
+    return drawnObjectsWith(testDiv, '.coverage', b => b.position);
   };
 
   var findCoverageLabels = () => {
-    return testDiv.querySelectorAll('.coverage .y-axis text');
+    return drawnObjectsWith(testDiv, '.coverage', l => l.type == 'label')
   };
 
   var hasCoverage = () => {
@@ -85,8 +90,8 @@ describe('CoverageTrack', function() {
   it('should create correct labels for coverage', function() {
     return waitFor(hasCoverage, 2000).then(() => {
       var labelTexts = findCoverageLabels();
-      expect(labelTexts[0].textContent).to.equal('0X');
-      expect(labelTexts[labelTexts.length-1].textContent).to.equal('50X');
+      expect(labelTexts[0].label).to.equal('0X');
+      expect(labelTexts[labelTexts.length-1].label).to.equal('50X');
     });
   });
 
