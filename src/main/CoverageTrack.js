@@ -57,7 +57,7 @@ class CoverageTrack extends React.Component {
   }
 
   render(): any {
-    return <div><canvas ref='canvas' /></div>;
+    return <canvas ref='canvas' />;
   }
 
   getScale() {
@@ -117,27 +117,25 @@ class CoverageTrack extends React.Component {
     // Let's get our domain max back from the nicified scale
     var axisMax = yScale.domain()[0];
 
-    var calcBarHeight = bin => Math.max(0, yScale(axisMax - bin.count)),
-        calcBarPosX = bin => xScale(bin.position),
-        calcBarPosY = bin => yScale(bin.count) - yScale(axisMax),
-        calcBarWidth = bin => xScale(1) - xScale(0);
-
     var ctx = dataCanvas.getDataContext(this.getContext());
+    ctx.save();
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
+    ctx.fillStyle = style.COVERAGE_BIN_COLOR;
+    var barWidth = xScale(1) - xScale(0);
     // Draw coverage bins
     this.binsInRange().forEach(bin => {
       ctx.pushObject(bin);
-      ctx.fillStyle = style.COVERAGE_BIN_COLOR;
-      var barWidth = calcBarWidth(bin),
+      var barPosX = xScale(bin.position),
+          barPosY = yScale(bin.count) - yScale(axisMax),
+          barHeight = Math.max(0, yScale(axisMax - bin.count)),
           barPadding = barWidth * style.COVERAGE_BIN_PADDING_CONSTANT;
-      ctx.fillRect(calcBarPosX(bin) + barPadding,
-                   calcBarPosY(bin),
-                   calcBarWidth(bin) - barPadding,
-                   calcBarHeight(bin));
+      ctx.fillRect(barPosX + barPadding,
+                   barPosY,
+                   barWidth - barPadding,
+                   barHeight);
       ctx.popObject();
-      ctx.restore();
     });
 
     // Draw three ticks
@@ -155,7 +153,6 @@ class CoverageTrack extends React.Component {
       ctx.pushObject({value: tick, label: tickLabel, type: 'label'});
       // Now print the coverage information
       ctx.lineWidth = 1;
-      ctx.strokeStyle = style.COVERAGE_FONT_COLOR;
       ctx.fillStyle = style.COVERAGE_FONT_COLOR;
       ctx.font = style.COVERAGE_FONT_STYLE;
       var textPosY = tickPosY + style.COVERAGE_TEXT_Y_OFFSET;
@@ -164,8 +161,9 @@ class CoverageTrack extends React.Component {
                    textPosY);
       ctx.popObject();
       // Clean up with this tick
-      ctx.restore();
     });
+
+    ctx.restore();
   }
 }
 

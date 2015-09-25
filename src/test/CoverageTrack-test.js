@@ -65,7 +65,7 @@ describe('CoverageTrack', function() {
                             [[0, 16383], [691179834, 691183928], [694008946, 694009197]]),
       referenceSource = TwoBitDataSource.createFromTwoBitFile(new TwoBit(twoBitFile));
 
-  var {drawnObjectsWith} = dataCanvas.RecordingContext;
+  var {drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
 
   var findCoverageBins = () => {
     return drawnObjectsWith(testDiv, '.coverage', b => b.position);
@@ -89,9 +89,14 @@ describe('CoverageTrack', function() {
 
   it('should create correct labels for coverage', function() {
     return waitFor(hasCoverage, 2000).then(() => {
+      // These are the objects being used to draw labels
       var labelTexts = findCoverageLabels();
       expect(labelTexts[0].label).to.equal('0X');
       expect(labelTexts[labelTexts.length-1].label).to.equal('50X');
+
+      // Now let's test if they are actually being put on the screen
+      var texts = callsOf(testDiv, '.coverage', 'fillText');
+      expect(texts.map(t => t[1])).to.deep.equal(['0X', '25X', '50X']);
     });
   });
 
