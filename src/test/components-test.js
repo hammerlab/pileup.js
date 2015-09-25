@@ -81,6 +81,7 @@ describe('pileup', function() {
 
     var ready = (() =>
       drawnObjectsWith(div, '.reference', x => x.letter).length > 0 &&
+      drawnObjectsWith(div, '.variants', x => x.alt).length > 0 &&
       drawnObjectsWith(div, '.genes', x => x.name).length > 0 &&
       drawnObjectsWith(div, '.pileup', x => x.span).length > 0
     );
@@ -89,6 +90,12 @@ describe('pileup', function() {
       .then(() => {
         var basepairs = drawnObjectsWith(div, '.reference', x => x.letter);
         expect(basepairs).to.have.length.at.least(10);
+
+        var variants = drawnObjectsWith(div, '.variants', x => x.alt);
+        expect(variants).to.have.length(1);
+        expect(variants[0].position).to.equal(125);
+        expect(variants[0].ref).to.equal('G');
+        expect(variants[0].alt).to.equal('T');
 
         var geneTexts = callsOf(div, '.genes', 'fillText');
         expect(geneTexts).to.have.length(1);

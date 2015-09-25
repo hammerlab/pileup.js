@@ -8,6 +8,7 @@ var React = require('./react-shim'),
     d3 = require('d3'),
     EmptySource = require('./EmptySource'),
     types = require('./react-types'),
+    canvasUtils = require('./canvas-utils'),
     dataCanvas = require('./data-canvas'),
     style = require('./style'),
     d3utils = require('./d3utils');
@@ -27,15 +28,8 @@ class LocationTrack extends React.Component {
     return d3utils.getTrackScale(this.props.range, this.props.width);
   }
 
-  getContext(): CanvasRenderingContext2D {
-    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement);
-    // The typecast through `any` is because getContext could return a WebGL context.
-    var ctx = ((canvas.getContext('2d') : any) : CanvasRenderingContext2D);
-    return ctx;
-  }
-
   render(): any {
-    return <canvas ref='canvas' />;
+    return <canvas />;
   }
 
   componentDidMount() {
@@ -51,15 +45,13 @@ class LocationTrack extends React.Component {
   }
 
   updateVisualization() {
-    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement),
-        range = this.props.range,
-        width = this.props.width,
-        scale = this.getScale(),
-        height = this.props.height;
+    var canvas = this.getDOMNode(),
+        {range, width, height} = this.props,
+        scale = this.getScale();
 
     d3.select(canvas).attr({width, height});
 
-    var ctx = dataCanvas.getDataContext(this.getContext());
+    var ctx = dataCanvas.getDataContext(canvasUtils.getContext(this.getDOMNode()));
     ctx.save();
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -69,22 +61,15 @@ class LocationTrack extends React.Component {
         leftLineX = scale(midPoint);
 
     // Left line
-    ctx.beginPath();
-    ctx.moveTo(rightLineX, 0);
-    ctx.lineTo(rightLineX, height);
-    ctx.stroke();
+    canvasUtils.drawLine(ctx, rightLineX, 0, rightLineX, height);
 
     // Right line
-    ctx.beginPath();
-    ctx.moveTo(leftLineX, 0);
-    ctx.lineTo(leftLineX, height);
-    ctx.stroke();
+    canvasUtils.drawLine(ctx, leftLineX, 0, leftLineX, height);
 
     // Mid label
     var midLabelFormat = d3.format(',d'),
         midY = height / 2;
 
-    ctx.lineWidth = 1;
     ctx.fillStyle = style.LOC_FONT_COLOR;
     ctx.font = style.LOC_FONT_STYLE;
     ctx.fillText(midLabelFormat(midPoint) + ' bp',
@@ -92,10 +77,7 @@ class LocationTrack extends React.Component {
                  midY + style.LOC_TEXT_Y_OFFSET);
 
     // Connect label with the right line
-    ctx.beginPath();
-    ctx.moveTo(rightLineX, midY);
-    ctx.lineTo(rightLineX + style.LOC_TICK_LENGTH, midY);
-    ctx.stroke();
+    canvasUtils.drawLine(ctx, rightLineX, midY, rightLineX + style.LOC_TICK_LENGTH, midY);
 
     // clean up
     ctx.restore();

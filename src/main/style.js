@@ -56,4 +56,9 @@ module.exports = {
   LOC_FONT_STYLE: `13px 'Helvetica Neue', Helvetica, Arial, sans-serif`,
   LOC_FONT_COLOR: 'black',
 
+  // Variant Track
+  VARIANT_STROKE: 'blue',
+  VARIANT_FILL: '#ddd',
+  VARIANT_HEIGHT: 14,
+
 };

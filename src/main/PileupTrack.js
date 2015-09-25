@@ -21,6 +21,7 @@ var React = require('./react-shim'),
     Interval = require('./Interval'),
     DisplayMode = require('./DisplayMode'),
     PileupCache = require('./PileupCache'),
+    canvasUtils = require('./canvas-utils'),
     dataCanvas = require('./data-canvas'),
     style = require('./style');
 
@@ -252,17 +253,10 @@ class PileupTrack extends React.Component {
           .forEach(read => this.cache.addAlignment(read));
   }
 
-  getCanvasContext(): CanvasRenderingContext2D {
-    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement);
-    // The typecast through `any` is because getContext could return a WebGL context.
-    var ctx = ((canvas.getContext('2d') : any) : CanvasRenderingContext2D);
-    return ctx;
-  }
-
   // Update the D3 visualization to reflect the cached reads &
   // currently-visible range.
   updateVisualization() {
-    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement),
+    var canvas = this.refs.canvas.getDOMNode(),
         width = this.props.width;
 
     // Hold off until height & width are known.
@@ -273,7 +267,7 @@ class PileupTrack extends React.Component {
 
     d3.select(canvas).attr({width, height});
 
-    var ctx = this.getCanvasContext();
+    var ctx = canvasUtils.getContext(canvas);
     var dtx = dataCanvas.getDataContext(ctx);
     this.renderScene(dtx);
   }
@@ -297,7 +291,7 @@ class PileupTrack extends React.Component {
     var ev = reactEvent.nativeEvent,
         x = ev.offsetX,
         y = ev.offsetY;
-    var ctx = this.getCanvasContext();
+    var ctx = canvasUtils.getContext(this.refs.canvas.getDOMNode());
     var trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
     this.renderScene(trackingCtx);
     var vRead = trackingCtx.hit && trackingCtx.hit[0];

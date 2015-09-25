@@ -16,6 +16,7 @@ var React = require('./react-shim'),
     Interval = require('./Interval'),
     d3utils = require('./d3utils'),
     ContigInterval = require('./ContigInterval'),
+    canvasUtils = require('./canvas-utils'),
     dataCanvas = require('./data-canvas'),
     style = require('./style');
 
@@ -78,7 +79,7 @@ var GeneTrack = React.createClass({
     };
   },
   render: function(): any {
-    return <div><canvas ref='canvas' /></div>;
+    return <canvas />;
   },
   componentDidMount: function() {
     var div = this.getDOMNode();
@@ -95,12 +96,6 @@ var GeneTrack = React.createClass({
     this.updateVisualization();
   },
 
-  getContext(): CanvasRenderingContext2D {
-    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement);
-    // The typecast through `any` is because getContext could return a WebGL context.
-    var ctx = ((canvas.getContext('2d') : any) : CanvasRenderingContext2D);
-    return ctx;
-  },
   getScale: function() {
     return d3utils.getTrackScale(this.props.range, this.props.width);
   },
@@ -111,9 +106,8 @@ var GeneTrack = React.createClass({
     }
   },
   updateVisualization: function() {
-    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement),
-        width = this.props.width,
-        height = this.props.height;
+    var canvas = this.getDOMNode(),
+        {width, height} = this.props;
 
     // Hold off until height & width are known.
     if (width === 0) return;
@@ -127,7 +121,7 @@ var GeneTrack = React.createClass({
 
     d3.select(canvas).attr({width, height});
 
-    var ctx = dataCanvas.getDataContext(this.getContext());
+    var ctx = dataCanvas.getDataContext(canvasUtils.getContext(canvas));
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
@@ -141,10 +135,9 @@ var GeneTrack = React.createClass({
       ctx.lineWidth = 1;
       ctx.strokeStyle = style.GENE_COLOR;
       ctx.fillStyle = style.GENE_COLOR;
-      ctx.beginPath();
-      ctx.moveTo(clampedScale(gene.position.start()), geneLineY);
-      ctx.lineTo(clampedScale(gene.position.stop()), geneLineY);
-      ctx.stroke();
+
+      canvasUtils.drawLine(ctx, clampedScale(gene.position.start()), geneLineY,
+                                clampedScale(gene.position.stop()), geneLineY);
 
       // TODO: only compute all these intervals when data becomes available.
       var exons = bedtools.splitCodingExons(gene.exons, gene.codingRegion);
