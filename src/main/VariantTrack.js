@@ -53,8 +53,7 @@ var VariantTrack = React.createClass({
 
   updateVisualization: function() {
     var canvas = this.getDOMNode(),
-        width = this.props.width,
-        height = this.props.height;
+        {width, height} = this.props;
 
     // Hold off until height & width are known.
     if (width === 0) return;
