@@ -81,7 +81,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
       reactElement.handleRangeChange(range);
     },
     getRange(): GenomeRange {
-      return reactElement.state.range;
+      return _.clone(reactElement.state.range);
     }
   };
 }

@@ -67,3 +67,36 @@ var p = pileup.create(yourDiv, {
   range: {contig: 'chr17', start: 7512284, stop: 7512644},
   tracks: sources
 });
+
+function jiggle() {
+  var r = p.getRange();
+  if (r.start % 10 == 0) {
+    r.start -= 9;
+    r.stop -= 9;
+  } else {
+    r.start += 1;
+    r.stop += 1;
+  }
+
+  p.setRange(r);
+}
+
+var isJiggling = false;
+document.getElementById('jiggle').onclick = function() {
+  if (isJiggling) {
+    isJiggling = false;
+    this.innerHTML = 'FPS test';
+    return;
+  }
+
+  var repeatedlyJiggle = function() {
+    jiggle();
+    if (isJiggling) {
+      window.requestAnimationFrame(repeatedlyJiggle);
+    }
+  };
+
+  isJiggling = true;
+  this.innerHTML = 'Stop!';
+  repeatedlyJiggle();
+};
