@@ -49,7 +49,7 @@ class LocationTrack extends React.Component {
         {range, width, height} = this.props,
         scale = this.getScale();
 
-    d3.select(canvas).attr({width, height});
+    d3utils.setAttributes(canvas, {width, height});
 
     var ctx = dataCanvas.getDataContext(canvasUtils.getContext(this.getDOMNode()));
     ctx.save();

@@ -2,7 +2,6 @@
 'use strict';
 
 var expect = require('chai').expect;
-var d3 = require('d3');
 var d3utils = require('../main/d3utils');
 
 describe('d3utils', function() {
