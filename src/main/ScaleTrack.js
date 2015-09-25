@@ -14,7 +14,7 @@ var React = require('./react-shim'),
     d3 = require('d3'),
     EmptySource = require('./EmptySource'),
     types = require('./react-types'),
-    utils = require('./utils'),
+    canvasUtils = require('./canvas-utils'),
     dataCanvas = require('./data-canvas'),
     style = require('./style'),
     d3utils = require('./d3utils');
@@ -47,22 +47,13 @@ class ScaleTrack extends React.Component {
     return React.findDOMNode(this);
   }
 
-  getContext(): CanvasRenderingContext2D {
-    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement);
-    // The typecast through `any` is because getContext could return a WebGL context.
-    var ctx = ((canvas.getContext('2d') : any) : CanvasRenderingContext2D);
-    return ctx;
-  }
-
   updateVisualization() {
-    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement),
-        range = this.props.range,
-        width = this.props.width,
-        height = this.props.height;
+    var canvas = this.getDOMNode(),
+        {range, width, height} = this.props;
 
     d3.select(canvas).attr({width, height});
 
-    var ctx = dataCanvas.getDataContext(this.getContext());
+    var ctx = dataCanvas.getDataContext(canvasUtils.getContext(canvas));
     ctx.save();
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);

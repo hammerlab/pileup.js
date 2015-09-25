@@ -10,6 +10,7 @@ var React = require('./react-shim'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     utils = require('./utils'),
+    canvasUtils = require('./canvas-utils'),
     dataCanvas = require('./data-canvas'),
     d3utils = require('./d3utils'),
     DisplayMode = require('./DisplayMode'),
@@ -27,7 +28,7 @@ var GenomeTrack = React.createClass({
     onRangeChange: React.PropTypes.func.isRequired,
   },
   render: function(): any {
-    return <div><canvas ref='canvas' /></div>;
+    return <canvas />;
   },
   componentDidMount: function() {
     var div = this.getDOMNode();
@@ -36,7 +37,6 @@ var GenomeTrack = React.createClass({
     this.props.source.on('newdata', () => {
       this.updateVisualization();
     });
-
 
     this.updateVisualization();
   },
@@ -50,18 +50,9 @@ var GenomeTrack = React.createClass({
     }
   },
 
-  getCanvasContext(): CanvasRenderingContext2D {
-    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement);
-    // The typecast through `any` is because getContext could return a WebGL context.
-    var ctx = ((canvas.getContext('2d') : any) : CanvasRenderingContext2D);
-    return ctx;
-  },
-
   updateVisualization: function() {
-    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement),
-        width = this.props.width,
-        height = this.props.height,
-        range = this.props.range;
+    var canvas = this.getDOMNode(),
+        {width, height, range} = this.props;
 
     // Hold off until height & width are known.
     if (width === 0) return;
@@ -72,7 +63,7 @@ var GenomeTrack = React.createClass({
     var mode = DisplayMode.getDisplayMode(pxPerLetter);
     var showText = DisplayMode.isText(mode);
 
-    var ctx = dataCanvas.getDataContext(this.getCanvasContext());
+    var ctx = dataCanvas.getDataContext(canvasUtils.getContext(canvas));
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
