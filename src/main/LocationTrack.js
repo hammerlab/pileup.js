@@ -61,22 +61,15 @@ class LocationTrack extends React.Component {
         leftLineX = scale(midPoint);
 
     // Left line
-    ctx.beginPath();
-    ctx.moveTo(rightLineX, 0);
-    ctx.lineTo(rightLineX, height);
-    ctx.stroke();
+    canvasUtils.drawLine(ctx, rightLineX, 0, rightLineX, height);
 
     // Right line
-    ctx.beginPath();
-    ctx.moveTo(leftLineX, 0);
-    ctx.lineTo(leftLineX, height);
-    ctx.stroke();
+    canvasUtils.drawLine(ctx, leftLineX, 0, leftLineX, height);
 
     // Mid label
     var midLabelFormat = d3.format(',d'),
         midY = height / 2;
 
-    ctx.lineWidth = 1;
     ctx.fillStyle = style.LOC_FONT_COLOR;
     ctx.font = style.LOC_FONT_STYLE;
     ctx.fillText(midLabelFormat(midPoint) + ' bp',
@@ -84,10 +77,7 @@ class LocationTrack extends React.Component {
                  midY + style.LOC_TEXT_Y_OFFSET);
 
     // Connect label with the right line
-    ctx.beginPath();
-    ctx.moveTo(rightLineX, midY);
-    ctx.lineTo(rightLineX + style.LOC_TICK_LENGTH, midY);
-    ctx.stroke();
+    canvasUtils.drawLine(ctx, rightLineX, midY, rightLineX + style.LOC_TICK_LENGTH, midY);
 
     // clean up
     ctx.restore();
