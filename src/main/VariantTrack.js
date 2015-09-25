@@ -13,6 +13,7 @@ var React = require('./react-shim'),
     d3utils = require('./d3utils'),
     types = require('./react-types'),
     ContigInterval = require('./ContigInterval'),
+    canvasUtils = require('./canvas-utils'),
     dataCanvas = require('./data-canvas'),
     style = require('./style');
 
@@ -25,7 +26,7 @@ var VariantTrack = React.createClass({
     onRangeChange: React.PropTypes.func.isRequired
   },
   render: function(): any {
-    return <canvas onClick={this.handleClick.bind(this)} />;
+    return <canvas onClick={this.handleClick} />;
   },
   getVariantSource(): VcfDataSource {
     return this.props.source;
@@ -50,13 +51,6 @@ var VariantTrack = React.createClass({
     }
   },
 
-  getCanvasContext(): CanvasRenderingContext2D {
-    var canvas = (this.getDOMNode() : HTMLCanvasElement);
-    // The typecast through `any` is because getContext could return a WebGL context.
-    var ctx = ((canvas.getContext('2d') : any) : CanvasRenderingContext2D);
-    return ctx;
-  },
-
   updateVisualization: function() {
     var canvas = this.getDOMNode(),
         width = this.props.width,
@@ -66,7 +60,7 @@ var VariantTrack = React.createClass({
     if (width === 0) return;
 
     d3.select(canvas).attr({width, height});
-    var ctx = this.getCanvasContext();
+    var ctx = canvasUtils.getContext(canvas);
     var dtx = dataCanvas.getDataContext(ctx);
     this.renderScene(dtx);
   },
@@ -101,7 +95,7 @@ var VariantTrack = React.createClass({
     var ev = reactEvent.nativeEvent,
         x = ev.offsetX,
         y = ev.offsetY;
-    var ctx = this.getCanvasContext();
+    var ctx = canvasUtils.getContext(this.getDOMNode());
     var trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
     this.renderScene(trackingCtx);
     var variant = trackingCtx.hit && trackingCtx.hit[0];
