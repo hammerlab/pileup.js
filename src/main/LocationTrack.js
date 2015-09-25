@@ -8,6 +8,8 @@ var React = require('./react-shim'),
     d3 = require('d3'),
     EmptySource = require('./EmptySource'),
     types = require('./react-types'),
+    dataCanvas = require('./data-canvas'),
+    style = require('./style'),
     d3utils = require('./d3utils');
 
 // This sets the width of the horizontal line (--) that connects the center
@@ -25,19 +27,18 @@ class LocationTrack extends React.Component {
     return d3utils.getTrackScale(this.props.range, this.props.width);
   }
 
+  getContext(): CanvasRenderingContext2D {
+    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement);
+    // The typecast through `any` is because getContext could return a WebGL context.
+    var ctx = ((canvas.getContext('2d') : any) : CanvasRenderingContext2D);
+    return ctx;
+  }
+
   render(): any {
-    return <div ref='container'></div>;
+    return <canvas ref='canvas' />;
   }
 
   componentDidMount() {
-    var div = this.getDOMNode(),
-        svg = d3.select(div).append('svg');
-
-    svg.append('line').attr('class', 'location-hline');
-    svg.append('line').attr('class', 'location-vline-left');
-    svg.append('line').attr('class', 'location-vline-right');
-    svg.append('text').attr('class', 'location-label');
-
     this.updateVisualization();
   }
 
@@ -50,60 +51,54 @@ class LocationTrack extends React.Component {
   }
 
   updateVisualization() {
-    var div = this.getDOMNode(),
-        {range, width, height} = this.props,
+    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement),
+        range = this.props.range,
+        width = this.props.width,
         scale = this.getScale(),
-        svg = d3.select(div).select('svg');
+        height = this.props.height;
 
-    svg.attr('width', width).attr('height', height);
+    d3.select(canvas).attr({width, height});
+
+    var ctx = dataCanvas.getDataContext(this.getContext());
+    ctx.save();
+    ctx.reset();
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     var midPoint = Math.floor((range.stop + range.start) / 2),
         rightLineX = scale(midPoint + 1),
         leftLineX = scale(midPoint);
 
-    // We are going to add transition, because the left and right borders
-    //  of the middle base tend to change when the ref track is dragged.
-    //  Transition will reduce the amount of wiggling for the labels.
-    var rightLine = svg.select('.location-vline-right');
-    rightLine
-      .transition()
-      .attr({
-        x1: rightLineX,
-        y1: 0,
-        x2: rightLineX,
-        y2: height
-      });
+    // Left line
+    ctx.beginPath();
+    ctx.moveTo(rightLineX, 0);
+    ctx.lineTo(rightLineX, height);
+    ctx.stroke();
 
-    var leftLine = svg.select('.location-vline-left');
-    leftLine
-      .transition()
-      .attr({
-        x1: leftLineX,
-        y1: 0,
-        x2: leftLineX,
-        y2: height
-      });
+    // Right line
+    ctx.beginPath();
+    ctx.moveTo(leftLineX, 0);
+    ctx.lineTo(leftLineX, height);
+    ctx.stroke();
 
+    // Mid label
     var midLabelFormat = d3.format(',d'),
-        midY = height / 2,
-        midLabel = svg.select('.location-label');
-    midLabel
-      .text(midLabelFormat(midPoint) + ' bp')
-      .transition()
-      .attr({
-        x: rightLineX + CONNECTOR_WIDTH + LABEL_PADDING,
-        y: midY
-      });
+        midY = height / 2;
 
-    var hLine = svg.select('.location-hline');
-    hLine
-      .transition()
-      .attr({
-        x1: rightLineX,
-        y1: midY,
-        x2: rightLineX + CONNECTOR_WIDTH,
-        y2: midY
-      });
+    ctx.lineWidth = 1;
+    ctx.fillStyle = style.LOC_FONT_COLOR;
+    ctx.font = style.LOC_FONT_STYLE;
+    ctx.fillText(midLabelFormat(midPoint) + ' bp',
+                 rightLineX + style.LOC_TICK_LENGTH + style.LOC_TEXT_PADDING,
+                 midY + style.LOC_TEXT_Y_OFFSET);
+
+    // Connect label with the right line
+    ctx.beginPath();
+    ctx.moveTo(rightLineX, midY);
+    ctx.lineTo(rightLineX + style.LOC_TICK_LENGTH, midY);
+    ctx.stroke();
+
+    // clean up
+    ctx.restore();
   }
 }
 
