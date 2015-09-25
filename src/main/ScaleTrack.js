@@ -73,10 +73,7 @@ class ScaleTrack extends React.Component {
                  midY + style.SCALE_TEXT_Y_OFFSET);
 
     // Left line
-    ctx.beginPath();
-    ctx.moveTo(0, midY);
-    ctx.lineTo(midX - style.SCALE_LINE_PADDING, midY);
-    ctx.stroke();
+    canvasUtils.drawLine(ctx, 0, midY, midX - style.SCALE_LINE_PADDING, midY);
     // Left arrow
     ctx.beginPath();
     ctx.moveTo(0 + style.SCALE_ARROW_SIZE, midY - style.SCALE_ARROW_SIZE);
@@ -87,10 +84,7 @@ class ScaleTrack extends React.Component {
     ctx.stroke();
 
     // Right line
-    ctx.beginPath();
-    ctx.moveTo(midX + style.SCALE_LINE_PADDING, midY);
-    ctx.lineTo(width, midY);
-    ctx.stroke();
+    canvasUtils.drawLine(ctx, midX + style.SCALE_LINE_PADDING, midY, width, midY);
     // Right arrow
     ctx.beginPath();
     ctx.moveTo(width - style.SCALE_ARROW_SIZE, midY - style.SCALE_ARROW_SIZE);

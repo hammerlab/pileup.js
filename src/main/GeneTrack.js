@@ -135,10 +135,9 @@ var GeneTrack = React.createClass({
       ctx.lineWidth = 1;
       ctx.strokeStyle = style.GENE_COLOR;
       ctx.fillStyle = style.GENE_COLOR;
-      ctx.beginPath();
-      ctx.moveTo(clampedScale(gene.position.start()), geneLineY);
-      ctx.lineTo(clampedScale(gene.position.stop()), geneLineY);
-      ctx.stroke();
+
+      canvasUtils.drawLine(ctx, clampedScale(gene.position.start()), geneLineY,
+                                clampedScale(gene.position.stop()), geneLineY);
 
       // TODO: only compute all these intervals when data becomes available.
       var exons = bedtools.splitCodingExons(gene.exons, gene.codingRegion);
