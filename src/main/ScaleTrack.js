@@ -15,6 +15,8 @@ var React = require('./react-shim'),
     EmptySource = require('./EmptySource'),
     types = require('./react-types'),
     utils = require('./utils'),
+    dataCanvas = require('./data-canvas'),
+    style = require('./style'),
     d3utils = require('./d3utils');
 
 class ScaleTrack extends React.Component {
@@ -30,23 +32,10 @@ class ScaleTrack extends React.Component {
   }
 
   render(): any {
-    return <div ref='container'></div>;
+    return <canvas ref='canvas' />;
   }
 
   componentDidMount() {
-    var div = this.getDOMNode(),
-        svg = d3.select(div).append('svg');
-
-    svg.append('line').attr('class', 'scale-lline');
-    svg.append('line').attr('class', 'scale-rline');
-
-    var label = svg.append('text').attr('class', 'scale-label');
-    var {height, width} = label.text("100 mb").node().getBBox();
-    // Save the size information for precise calculation
-    this.setState({
-          labelSize: {height: height, width: width}
-    });
-
     this.updateVisualization();
   }
 
@@ -58,53 +47,70 @@ class ScaleTrack extends React.Component {
     return React.findDOMNode(this);
   }
 
+  getContext(): CanvasRenderingContext2D {
+    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement);
+    // The typecast through `any` is because getContext could return a WebGL context.
+    var ctx = ((canvas.getContext('2d') : any) : CanvasRenderingContext2D);
+    return ctx;
+  }
+
   updateVisualization() {
-    var div = this.getDOMNode(),
+    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement),
         range = this.props.range,
         width = this.props.width,
-        height = this.props.height,
-        labelSize = this.state.labelSize,
-        svg = d3.select(div).select('svg');
+        height = this.props.height;
 
-    svg.attr('width', width).attr('height', height);
+    d3.select(canvas).attr({width, height});
+
+    var ctx = dataCanvas.getDataContext(this.getContext());
+    ctx.save();
+    ctx.reset();
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
     var viewSize = range.stop - range.start + 1,
         midX = width / 2,
         midY = height / 2;
 
+    // Mid label
     var {prefix, unit} = d3utils.formatRange(viewSize);
+    ctx.lineWidth = 1;
+    ctx.fillStyle = style.SCALE_FONT_COLOR;
+    ctx.font = style.SCALE_FONT_STYLE;
+    ctx.textAlign = "center";
+    ctx.fillText(prefix + " " + unit,
+                 midX,
+                 midY + style.SCALE_TEXT_Y_OFFSET);
 
-    var midLabel = svg.select('.scale-label');
-    var labelWidth = labelSize.width,
-        labelPadding = labelWidth;
-    midLabel
-      .attr({
-        x: midX,
-        y: midY
-      })
-      .text(prefix + " " + unit);
+    // Left line
+    ctx.beginPath();
+    ctx.moveTo(0, midY);
+    ctx.lineTo(midX - style.SCALE_LINE_PADDING, midY);
+    ctx.stroke();
+    // Left arrow
+    ctx.beginPath();
+    ctx.moveTo(0 + style.SCALE_ARROW_SIZE, midY - style.SCALE_ARROW_SIZE);
+    ctx.lineTo(0, midY);
+    ctx.lineTo(0 + style.SCALE_ARROW_SIZE, midY + style.SCALE_ARROW_SIZE);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
 
-    var lineStart = 0,
-        lineEnd = width;
+    // Right line
+    ctx.beginPath();
+    ctx.moveTo(midX + style.SCALE_LINE_PADDING, midY);
+    ctx.lineTo(width, midY);
+    ctx.stroke();
+    // Right arrow
+    ctx.beginPath();
+    ctx.moveTo(width - style.SCALE_ARROW_SIZE, midY - style.SCALE_ARROW_SIZE);
+    ctx.lineTo(width, midY);
+    ctx.lineTo(width - style.SCALE_ARROW_SIZE, midY + style.SCALE_ARROW_SIZE);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
 
-    var leftLine = svg.select('.scale-lline');
-    leftLine
-      .transition()
-      .attr({
-        x1: lineStart,
-        y1: midY,
-        x2: midX - labelPadding,
-        y2: midY
-      });
-
-    var rightLine = svg.select('.scale-rline');
-    rightLine
-      .transition()
-      .attr({
-        x1: midX + labelPadding,
-        y1: midY,
-        x2: lineEnd,
-        y2: midY
-      });
+    // Clean up afterwards
+    ctx.restore();
   }
 }
 
@@ -114,6 +120,5 @@ ScaleTrack.propTypes = {
 };
 ScaleTrack.displayName = 'scale';
 ScaleTrack.defaultSource = EmptySource.create();
-
 
 module.exports = ScaleTrack;

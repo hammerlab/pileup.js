@@ -21,7 +21,7 @@ module.exports = {
   TIGHT_TEXT_STYLE: `bold 12px 'Helvetica Neue', Helvetica, Arial, sans-serif`,
 
   // Gene track
-  GENE_ARROW_SIZE:4,
+  GENE_ARROW_SIZE: 4,
   GENE_COLOR: 'blue',  // color of the gene line, exons, text, etc.
   GENE_COMPLEMENT_COLOR: 'white',  // a color visible on top of GENE_COLOR
   GENE_FONT: `'Helvetica Neue', Helvetica, Arial, sans-serif`,
@@ -41,5 +41,12 @@ module.exports = {
   COVERAGE_TEXT_Y_OFFSET: 3,  // so that ticks and texts align better
   COVERAGE_BIN_COLOR: '#a0a0a0',
   COVERAGE_BIN_PADDING_CONSTANT: 0.01,  // 1% of bar width
+
+  // Scale Track
+  SCALE_LINE_PADDING: 40,  // space between mid point and left/right lines
+  SCALE_FONT_STYLE: `bold 12px 'Helvetica Neue', Helvetica, Arial, sans-serif`,
+  SCALE_TEXT_Y_OFFSET: 5,  // so that ticks and texts align better
+  SCALE_FONT_COLOR: 'black',
+  SCALE_ARROW_SIZE: 4,
 
 };
