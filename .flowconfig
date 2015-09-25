@@ -5,6 +5,16 @@
 .*node_modules/phantomjs.*
 .*pileup.js/dist.*
 .*node_modules/underscore.*
+.*node_modules/browserify.*
+.*node_modules/istanbul.*
+.*node_modules/watchify.*
+.*node_modules/sniper.*
+.*node_modules/jstransform.*
+.*node_modules/coveralls.*
+.*node_modules/http-server.*
+.*node_modules/jshint.*
+.*node_modules/jstransformify.*
+.*node_modules/uglify.*
 
 [include]
 
