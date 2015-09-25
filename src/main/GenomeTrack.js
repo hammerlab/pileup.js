@@ -1,3 +1,4 @@
+
 /**
  * A track which displays a reference genome.
  * @flow
@@ -91,6 +92,7 @@ var GenomeTrack = React.createClass({
       }
 
       var contigColon = this.props.range.contig + ':';
+      var previousBase = null;
       for (var pos = range.start - 1; pos <= range.stop; pos++) {
         var letter = basePairs[contigColon + pos];
 
@@ -103,10 +105,23 @@ var GenomeTrack = React.createClass({
           // 0.5 = centered
           ctx.fillText(letter, scale(1 + 0.5 + pos), height - 2);
         } else {
-          ctx.fillRect(scale(1 + pos), 0,  pxPerLetter - 1, height);
+          if (pxPerLetter >= 5) {
+            // We want a white space between blocks at this size, so we can see
+            // the difference between bases.
+            ctx.fillRect(scale(1 + pos) + 0.5, 0,  pxPerLetter - 1.5, height);
+          } else if (previousBase === letter) {
+            // Otherwise, we want runs of colors to be completely solid ...
+            ctx.fillRect(scale(1 + pos) - 1.5, 0, pxPerLetter + 1.5, height);
+          } else {
+            // ... and minimize the amount of smudging and whitespace between
+            // bases.
+            ctx.fillRect(scale(1 + pos) - 0.5, 0,  pxPerLetter + 1.5, height);
+          }
         }
         ctx.popObject();
         ctx.restore();
+
+        previousBase = letter;
       }
     }
   }
