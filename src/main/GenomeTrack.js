@@ -30,8 +30,6 @@ var GenomeTrack = React.createClass({
     return <div><canvas ref='canvas' /></div>;
   },
   componentDidMount: function() {
-    var div = this.getDOMNode();
-
     // Visualize new reference data as it comes in from the network.
     this.props.source.on('newdata', () => {
       this.updateVisualization();

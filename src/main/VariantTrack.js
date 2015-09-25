@@ -10,13 +10,12 @@ import type {Variant} from './vcf';
 var React = require('./react-shim'),
     _ = require('underscore'),
     d3 = require('d3'),
+    d3utils = require('./d3utils'),
     types = require('./react-types'),
-    ContigInterval = require('./ContigInterval');
+    ContigInterval = require('./ContigInterval'),
+    dataCanvas = require('./data-canvas'),
+    style = require('./style');
 
-
-function variantKey(v: Variant): string {
-  return `${v.contig}:${v.position}`;
-}
 
 var VariantTrack = React.createClass({
   displayName: 'variants',
@@ -26,15 +25,12 @@ var VariantTrack = React.createClass({
     onRangeChange: React.PropTypes.func.isRequired
   },
   render: function(): any {
-    return <div></div>;
+    return <canvas onClick={this.handleClick.bind(this)} />;
   },
   getVariantSource(): VcfDataSource {
     return this.props.source;
   },
   componentDidMount: function() {
-    var div = this.getDOMNode();
-    d3.select(div)
-      .append('svg');
     this.updateVisualization();
 
     this.getVariantSource().on('newdata', () => {
@@ -42,13 +38,7 @@ var VariantTrack = React.createClass({
     });
   },
   getScale: function() {
-    var range = this.props.range,
-        width = this.props.width,
-        offsetPx = range.offsetPx || 0;
-    var scale = d3.scale.linear()
-            .domain([range.start, range.stop + 1])  // 1 bp wide
-            .range([-offsetPx, width - offsetPx]);
-    return scale;
+    return d3utils.getTrackScale(this.props.range, this.props.width);
   },
   componentDidUpdate: function(prevProps: any, prevState: any) {
     // Check a whitelist of properties which could change the visualization.
@@ -59,45 +49,65 @@ var VariantTrack = React.createClass({
       this.updateVisualization();
     }
   },
+
+  getCanvasContext(): CanvasRenderingContext2D {
+    var canvas = (this.getDOMNode() : HTMLCanvasElement);
+    // The typecast through `any` is because getContext could return a WebGL context.
+    var ctx = ((canvas.getContext('2d') : any) : CanvasRenderingContext2D);
+    return ctx;
+  },
+
   updateVisualization: function() {
-    var div = this.getDOMNode(),
+    var canvas = this.getDOMNode(),
         width = this.props.width,
-        height = this.props.height,
-        svg = d3.select(div).select('svg');
+        height = this.props.height;
 
     // Hold off until height & width are known.
     if (width === 0) return;
 
-    var range = this.props.range;
-    var interval = new ContigInterval(range.contig, range.start, range.stop);
-    var variants = this.getVariantSource().getFeaturesInRange(interval);
+    d3.select(canvas).attr({width, height});
+    var ctx = this.getCanvasContext();
+    var dtx = dataCanvas.getDataContext(ctx);
+    this.renderScene(dtx);
+  },
 
-    var scale = this.getScale();
-    var pxPerLetter = scale(1) - scale(0);
+  renderScene(ctx: DataCanvasRenderingContext2D) {
+    var range = this.props.range,
+        interval = new ContigInterval(range.contig, range.start, range.stop),
+        variants = this.getVariantSource().getFeaturesInRange(interval),
+        scale = this.getScale(),
+        pxPerLetter = scale(1) - scale(0),
+        height = this.props.height,
+        y = height - style.VARIANT_HEIGHT - 1;
 
-    svg.attr('width', width)
-       .attr('height', height);
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.reset();
+    ctx.save();
 
-    var variantRects = svg.selectAll('.variant')
-       .data(variants, variantKey);
+    ctx.fillStyle = style.VARIANT_FILL;
+    ctx.strokeStyle = style.VARIANT_STROKE;
+    variants.forEach(variant => {
+      ctx.pushObject(variant);
+      var x = scale(variant.position);
+      ctx.fillRect(x, y, pxPerLetter, style.VARIANT_HEIGHT);
+      ctx.strokeRect(x, y, pxPerLetter, style.VARIANT_HEIGHT);
+      ctx.popObject();
+    });
 
-    // Enter
-    variantRects.enter()
-        .append('rect')
-        .attr('class', 'variant')
-        .on('click', variant => {
-          window.alert(JSON.stringify(variant));
-        });
+    ctx.restore();
+  },
 
-    // Update
-    variantRects
-        .attr('x', variant => scale(variant.position))
-        .attr('y', height - 15)
-        .attr('height', 14)
-        .attr('width', pxPerLetter - 1);
-
-    // Exit
-    variantRects.exit().remove();
+  handleClick(reactEvent: any) {
+    var ev = reactEvent.nativeEvent,
+        x = ev.offsetX,
+        y = ev.offsetY;
+    var ctx = this.getCanvasContext();
+    var trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
+    this.renderScene(trackingCtx);
+    var variant = trackingCtx.hit && trackingCtx.hit[0];
+    if (variant) {
+      alert(JSON.stringify(variant));
+    }
   }
 });
 
