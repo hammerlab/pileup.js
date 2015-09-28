@@ -11,6 +11,7 @@ var React = require('./react-shim'),
     _ = require('underscore'),
     d3 = require('d3'),
     d3utils = require('./d3utils'),
+    shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     ContigInterval = require('./ContigInterval'),
     canvasUtils = require('./canvas-utils'),
@@ -42,11 +43,8 @@ var VariantTrack = React.createClass({
     return d3utils.getTrackScale(this.props.range, this.props.width);
   },
   componentDidUpdate: function(prevProps: any, prevState: any) {
-    // Check a whitelist of properties which could change the visualization.
-    // TODO: this is imprecise; it would be better to deep check reads.
-    var newProps = this.props;
-    if (!_.isEqual(newProps.range, prevProps.range) ||
-       prevState != this.state) {
+    if (!shallowEquals(prevProps, this.props) ||
+        !shallowEquals(prevState, this.state)) {
       this.updateVisualization();
     }
   },
