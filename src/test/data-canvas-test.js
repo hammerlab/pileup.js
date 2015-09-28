@@ -46,6 +46,15 @@ describe('data-canvas', function() {
       expect(rgbAtPos(im, 50, 50)).to.deep.equal([0, 0, 0]);
       expect(rgbAtPos(im, 200, 60)).to.deep.equal([255, 0, 0]);
     });
+
+    it('should cache calls', function() {
+      if (!canvas) throw 'bad';  // for flow
+      var ctx = canvas.getContext('2d');
+      var dtx = dataCanvas.getDataContext(ctx);
+      var dtx2 = dataCanvas.getDataContext(ctx);
+
+      expect(dtx2).to.equal(dtx2);
+    });
   });
 
   describe('click tracking context', function() {
