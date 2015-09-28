@@ -40,14 +40,25 @@ function DataContext(ctx: CanvasRenderingContext2D) {
 
 var stubGetDataContext = null;
 
-// This is exposed as a method for easier testing.
+/**
+ * Get a DataContext for the built-in CanvasRenderingContext2D.
+ *
+ * This caches DataContexts and facilitates stubbing in tests.
+ */
 function getDataContext(ctx: CanvasRenderingContext2D) {
   if (stubGetDataContext) {
     return stubGetDataContext(ctx);
   } else {
-    return new DataContext(ctx);
+    for (var i = 0; i < getDataContext.cache.length; i++) {
+      var pair = getDataContext.cache[i];
+      if (pair[0] == ctx) return pair[1];
+    }
+    var dtx = new DataContext(ctx);
+    getDataContext.cache.push([ctx, dtx]);
+    return dtx;
   }
 }
+getDataContext.cache = [];  // (CanvasRenderingContext2D, DataContext) pairs
 
 
 /**
