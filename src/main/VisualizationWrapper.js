@@ -81,7 +81,13 @@ class VisualizationWrapper extends React.Component {
         .on('drag', dragmove)
         .on('dragend', dragended);
 
-    d3.select(div).call(drag);
+    d3.select(div).call(drag).on('click', this.handleClick.bind(this));
+  }
+
+  handleClick(): any {
+    if (d3.event.defaultPrevented) {
+      d3.event.stopPropagation();
+    }
   }
 
   render(): any {
@@ -92,7 +98,6 @@ class VisualizationWrapper extends React.Component {
 
     var el = React.createElement(this.props.visualization, {
       range: this.props.range,
-      onRangeChange: this.props.onRangeChange,
       source: this.props.source,
       referenceSource: this.props.referenceSource,
       width: this.state.width,

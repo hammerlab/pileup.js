@@ -86,7 +86,6 @@ class LocationTrack extends React.Component {
 
 LocationTrack.propTypes = {
   range: types.GenomeRange.isRequired,
-  onRangeChange: React.PropTypes.func.isRequired,
 };
 LocationTrack.displayName = 'location'
 LocationTrack.defaultSource = EmptySource.create();

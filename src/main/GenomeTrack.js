@@ -25,7 +25,6 @@ var GenomeTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange.isRequired,
     source: React.PropTypes.object.isRequired,
-    onRangeChange: React.PropTypes.func.isRequired,
   },
   render: function(): any {
     return <canvas />;
