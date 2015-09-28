@@ -101,7 +101,6 @@ class ScaleTrack extends React.Component {
 
 ScaleTrack.propTypes = {
   range: types.GenomeRange.isRequired,
-  onRangeChange: React.PropTypes.func.isRequired,
 };
 ScaleTrack.displayName = 'scale';
 ScaleTrack.defaultSource = EmptySource.create();

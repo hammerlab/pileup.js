@@ -172,7 +172,6 @@ CoverageTrack.propTypes = {
   range: types.GenomeRange.isRequired,
   source: React.PropTypes.object.isRequired,
   referenceSource: React.PropTypes.object.isRequired,
-  onRangeChange: React.PropTypes.func.isRequired
 };
 CoverageTrack.displayName = 'coverage';
 

@@ -92,7 +92,6 @@ class VisualizationWrapper extends React.Component {
 
     var el = React.createElement(this.props.visualization, {
       range: this.props.range,
-      onRangeChange: this.props.onRangeChange,
       source: this.props.source,
       referenceSource: this.props.referenceSource,
       width: this.state.width,

@@ -71,7 +71,6 @@ var GeneTrack = React.createClass({
   propTypes: {
     range: types.GenomeRange.isRequired,
     source: React.PropTypes.object.isRequired,
-    onRangeChange: React.PropTypes.func.isRequired,
   },
   getInitialState: function() {
     return {
