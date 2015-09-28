@@ -81,7 +81,13 @@ class VisualizationWrapper extends React.Component {
         .on('drag', dragmove)
         .on('dragend', dragended);
 
-    d3.select(div).call(drag);
+    d3.select(div).call(drag).on('click', this.handleClick.bind(this));
+  }
+
+  handleClick(): any {
+    if (d3.event.defaultPrevented) {
+      d3.event.stopPropagation();
+    }
   }
 
   render(): any {
