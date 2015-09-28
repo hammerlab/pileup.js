@@ -265,7 +265,7 @@ class PileupTrack extends React.Component {
     // Height can only be computed after the pileup has been updated.
     var height = yForRow(this.cache.pileupHeightForRef(this.props.range.contig));
 
-    d3.select(canvas).attr({width, height});
+    d3utils.setAttributes(canvas, {width, height});
 
     var ctx = canvasUtils.getContext(canvas);
     var dtx = dataCanvas.getDataContext(ctx);

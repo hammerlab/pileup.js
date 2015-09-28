@@ -4,7 +4,7 @@
  * mbp or gbp depending on the size of the view and also tries to round the
  * scale size (e.g. prefers "1,000 bp", "1,000 kbp" over "1 kbp" and "1 mbp")
  *
- *           ---------- 30 chars ----------
+ *           <---------- 30 bp ---------->
  *
  * @flow
  */
@@ -51,7 +51,7 @@ class ScaleTrack extends React.Component {
     var canvas = this.getDOMNode(),
         {range, width, height} = this.props;
 
-    d3.select(canvas).attr({width, height});
+    d3utils.setAttributes(canvas, {width, height});
 
     var ctx = dataCanvas.getDataContext(canvasUtils.getContext(canvas));
     ctx.save();

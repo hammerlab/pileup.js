@@ -107,7 +107,7 @@ class CoverageTrack extends React.Component {
 
     // Hold off until height & width are known.
     if (width === 0) return;
-    d3.select(canvas).attr({width, height});
+    d3utils.setAttributes(canvas, {width, height});
 
     var yScale = d3.scale.linear()
       .domain([this.state.maxCoverage, 0])

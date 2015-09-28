@@ -8,8 +8,7 @@
 var expect = require('chai').expect;
 
 var Q = require('q'),
-    _ = require('underscore'),
-    d3 = require('d3');
+    _ = require('underscore');
 
 import type * as SamRead from '../main/SamRead';
 

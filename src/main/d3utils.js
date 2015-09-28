@@ -33,7 +33,18 @@ function formatRange(viewSize: number): any {
   return {prefix, unit};
 }
 
+/**
+ * Set attributes on an element. This can be used in place of, e.g.
+ * d3.select(div).attr({width, height});
+ */
+function setAttributes(el: Element, attrs: {[key:string]: any}) {
+  for (var k in attrs) {
+    el.setAttribute(k, attrs[k]);
+  }
+}
+
 module.exports = {
   formatRange,
-  getTrackScale
+  getTrackScale,
+  setAttributes
 };
