@@ -89,7 +89,7 @@ var GenomeTrack = React.createClass({
           // We only push objects in the text case as it involves creating a
           // new object & can become a performance issue.
           // 0.5 = centered
-          ctx.fillText(letter, scale(1 + 0.5 + pos), height - 2);
+          ctx.fillText(letter, scale(1 + 0.5 + pos), height - 1);
         } else {
           ctx.fillRect(scale(1 + pos), 0,  pxPerLetter - 1, height);
         }
