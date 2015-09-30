@@ -6,6 +6,7 @@
 
 import type {VcfDataSource} from './VcfDataSource';
 import type {Variant} from './vcf';
+import type {DataCanvasRenderingContext2D} from 'data-canvas';
 
 var React = require('./react-shim'),
     _ = require('underscore'),
@@ -15,7 +16,7 @@ var React = require('./react-shim'),
     types = require('./react-types'),
     ContigInterval = require('./ContigInterval'),
     canvasUtils = require('./canvas-utils'),
-    dataCanvas = require('./data-canvas'),
+    dataCanvas = require('data-canvas'),
     style = require('./style');
 
 

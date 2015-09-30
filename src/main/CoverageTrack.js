@@ -13,7 +13,7 @@ var React = require('./react-shim'),
     types = require('./react-types'),
     d3utils = require('./d3utils'),
     _ = require("underscore"),
-    dataCanvas = require('./data-canvas'),
+    dataCanvas = require('data-canvas'),
     style = require('./style'),
     ContigInterval = require('./ContigInterval');
 

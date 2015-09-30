@@ -21,7 +21,7 @@ var pileup = require('../main/pileup'),
     MappedRemoteFile = require('./MappedRemoteFile'),
     ContigInterval = require('../main/ContigInterval'),
     {waitFor} = require('./async'),
-    dataCanvas = require('../main/data-canvas');
+    dataCanvas = require('data-canvas');
 
 
 // This is like TwoBit, but allows a controlled release of sequence data.

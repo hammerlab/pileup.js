@@ -21,7 +21,7 @@ var pileup = require('../main/pileup'),
     RemoteFile = require('../main/RemoteFile'),
     MappedRemoteFile = require('./MappedRemoteFile'),
     ContigInterval = require('../main/ContigInterval'),
-    dataCanvas = require('../main/data-canvas'),
+    dataCanvas = require('data-canvas'),
     {waitFor} = require('./async');
 
 describe('CoverageTrack', function() {

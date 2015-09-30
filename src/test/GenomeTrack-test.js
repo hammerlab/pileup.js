@@ -14,7 +14,7 @@ var React = require('../main/react-shim');
 var pileup = require('../main/pileup'),
     TwoBit = require('../main/TwoBit'),
     TwoBitDataSource = require('../main/TwoBitDataSource'),
-    dataCanvas = require('../main/data-canvas'),
+    dataCanvas = require('data-canvas'),
     MappedRemoteFile = require('./MappedRemoteFile'),
     {waitFor} = require('./async');
 
