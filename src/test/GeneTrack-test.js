@@ -32,10 +32,11 @@ describe('GeneTrack', function() {
     // avoid pollution between tests.
     testDiv.innerHTML = '';
   });
-  var {drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
+  var {drawnObjects, callsOf} = dataCanvas.RecordingContext;
 
   function ready() {
-    return drawnObjectsWith(testDiv, '.genes', x => x.geneId).length > 0;
+    return testDiv.querySelector('canvas') &&
+        drawnObjects(testDiv, '.genes').length > 0;
   }
 
   it('should render genes', function() {
@@ -60,7 +61,7 @@ describe('GeneTrack', function() {
 
     return waitFor(ready, 2000)
       .then(() => {
-        var genes = drawnObjectsWith(testDiv, '.genes', x => x.geneId);
+        var genes = drawnObjects(testDiv, '.genes');
         expect(genes).to.have.length(4);
         expect(genes.map(g => g.name)).to.deep.equal(
             [ 'STX8', 'WDR16', 'WDR16', 'USP43' ]);  // two transcripts of WDR16

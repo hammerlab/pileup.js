@@ -77,13 +77,18 @@ describe('pileup', function() {
       tracks: tracks
     });
 
-    var {drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
+    var {drawnObjects, drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
+
+    // TODO: consider moving this into the data-canvas library
+    function hasCanvasAndObjects(div, selector) {
+      return div.querySelector(selector + ' canvas') && drawnObjects(div, selector).length > 0;
+    }
 
     var ready = (() =>
-      drawnObjectsWith(div, '.reference', x => x.letter).length > 0 &&
-      drawnObjectsWith(div, '.variants', x => x.alt).length > 0 &&
-      drawnObjectsWith(div, '.genes', x => x.name).length > 0 &&
-      drawnObjectsWith(div, '.pileup', x => x.span).length > 0
+      hasCanvasAndObjects(div, '.reference') &&
+      hasCanvasAndObjects(div, '.variants') &&
+      hasCanvasAndObjects(div, '.genes') &&
+      hasCanvasAndObjects(div, '.pileup')
     );
 
     return waitFor(ready, 5000)

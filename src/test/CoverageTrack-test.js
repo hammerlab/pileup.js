@@ -78,7 +78,9 @@ describe('CoverageTrack', function() {
 
   var hasCoverage = () => {
     // Check whether the coverage bins are loaded yet
-    return findCoverageBins().length > 1 && findCoverageLabels().length > 1;
+    return testDiv.querySelector('canvas') &&
+        findCoverageBins().length > 1 &&
+        findCoverageLabels().length > 1;
   };
 
   it('should create coverage information for all bases shown in the view', function() {

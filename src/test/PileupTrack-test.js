@@ -133,10 +133,12 @@ describe('PileupTrack', function() {
   var hasReference = () => {
       // The reference initially shows "unknown" base pairs, so we have to
       // check for a specific known one to ensure that it's really loaded.
-      return drawnObjectsWith(testDiv, '.reference', x => x.letter).length > 0;
+      return testDiv.querySelector('.reference canvas') &&
+          drawnObjectsWith(testDiv, '.reference', x => x.letter).length > 0;
     },
     hasAlignments = () => {
-      return drawnObjectsWith(testDiv, '.pileup', x => x.span).length > 0;
+      return testDiv.querySelector('.pileup canvas') &&
+          drawnObjectsWith(testDiv, '.pileup', x => x.span).length > 0;
     },
 
     // Helpers for working with DataCanvas
