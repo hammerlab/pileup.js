@@ -34,17 +34,22 @@ function formatRange(viewSize: number): any {
 }
 
 /**
- * Set attributes on an element. This can be used in place of, e.g.
- * d3.select(div).attr({width, height});
+ * Sizes a canvas appropriately for this device.
  */
-function setAttributes(el: Element, attrs: {[key:string]: any}) {
-  for (var k in attrs) {
-    el.setAttribute(k, attrs[k]);
+function sizeCanvas(el: HTMLCanvasElement, width: number, height: number) {
+  var ratio = window.devicePixelRatio;
+  el.width = width * ratio;
+  el.height = height * ratio;
+  el.style.width = width + 'px';
+  el.style.height = height + 'px';
+  var ctx = el.getContext('2d');
+  if (ctx != null && ctx instanceof CanvasRenderingContext2D) {
+    ctx.scale(ratio, ratio);
   }
 }
 
 module.exports = {
   formatRange,
   getTrackScale,
-  setAttributes
+  sizeCanvas
 };

@@ -53,7 +53,7 @@ var GenomeTrack = React.createClass({
 
     // Hold off until height & width are known.
     if (width === 0) return;
-    d3utils.setAttributes(canvas, {width, height});
+    d3utils.sizeCanvas(canvas, width, height);
 
     var scale = this.getScale();
     var pxPerLetter = scale(1) - scale(0);

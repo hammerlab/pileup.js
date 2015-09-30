@@ -51,7 +51,7 @@ class ScaleTrack extends React.Component {
     var canvas = this.getDOMNode(),
         {range, width, height} = this.props;
 
-    d3utils.setAttributes(canvas, {width, height});
+    d3utils.sizeCanvas(canvas, width, height);
 
     var ctx = dataCanvas.getDataContext(canvasUtils.getContext(canvas));
     ctx.save();

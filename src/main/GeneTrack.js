@@ -118,7 +118,7 @@ var GeneTrack = React.createClass({
             .range([0, width])
             .clamp(true);
 
-    d3utils.setAttributes(canvas, {width, height});
+    d3utils.sizeCanvas(canvas, width, height);
 
     var ctx = dataCanvas.getDataContext(canvasUtils.getContext(canvas));
     ctx.reset();

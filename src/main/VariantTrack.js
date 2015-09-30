@@ -55,7 +55,7 @@ var VariantTrack = React.createClass({
     // Hold off until height & width are known.
     if (width === 0) return;
 
-    d3utils.setAttributes(canvas, {width, height});
+    d3utils.sizeCanvas(canvas, width, height);
     var ctx = canvasUtils.getContext(canvas);
     var dtx = dataCanvas.getDataContext(ctx);
     this.renderScene(dtx);
