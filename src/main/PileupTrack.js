@@ -8,6 +8,7 @@ import type {Strand, Alignment, AlignmentDataSource} from './Alignment';
 import type {TwoBitSource} from './TwoBitDataSource';
 import type {BasePair} from './pileuputils';
 import type {VisualAlignment, VisualGroup} from './PileupCache';
+import type {DataCanvasRenderingContext2D} from 'data-canvas';
 
 var React = require('./react-shim'),
     d3 = require('d3'),
@@ -22,7 +23,7 @@ var React = require('./react-shim'),
     DisplayMode = require('./DisplayMode'),
     PileupCache = require('./PileupCache'),
     canvasUtils = require('./canvas-utils'),
-    dataCanvas = require('./data-canvas'),
+    dataCanvas = require('data-canvas'),
     style = require('./style');
 
 

@@ -9,7 +9,7 @@ var React = require('./react-shim'),
     EmptySource = require('./EmptySource'),
     types = require('./react-types'),
     canvasUtils = require('./canvas-utils'),
-    dataCanvas = require('./data-canvas'),
+    dataCanvas = require('data-canvas'),
     style = require('./style'),
     d3utils = require('./d3utils');
 

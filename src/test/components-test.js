@@ -5,7 +5,7 @@ var expect = require('chai').expect;
 
 var pileup = require('../main/pileup'),
     {waitFor} = require('./async'),
-    dataCanvas = require('../main/data-canvas'),
+    dataCanvas = require('data-canvas'),
     _ = require('underscore');
 
 describe('pileup', function() {
@@ -77,13 +77,18 @@ describe('pileup', function() {
       tracks: tracks
     });
 
-    var {drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
+    var {drawnObjects, drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
+
+    // TODO: consider moving this into the data-canvas library
+    function hasCanvasAndObjects(div, selector) {
+      return div.querySelector(selector + ' canvas') && drawnObjects(div, selector).length > 0;
+    }
 
     var ready = (() =>
-      drawnObjectsWith(div, '.reference', x => x.letter).length > 0 &&
-      drawnObjectsWith(div, '.variants', x => x.alt).length > 0 &&
-      drawnObjectsWith(div, '.genes', x => x.name).length > 0 &&
-      drawnObjectsWith(div, '.pileup', x => x.span).length > 0
+      hasCanvasAndObjects(div, '.reference') &&
+      hasCanvasAndObjects(div, '.variants') &&
+      hasCanvasAndObjects(div, '.genes') &&
+      hasCanvasAndObjects(div, '.pileup')
     );
 
     return waitFor(ready, 5000)
@@ -122,6 +127,8 @@ describe('pileup', function() {
         // See react-shim.js for details.
         expect(div.querySelectorAll('[data-pileupid]')).to.have.length.above(0);
         expect(div.querySelectorAll('[data-reactid]')).to.have.length(0);
+
+        p.destroy();
       });
   });
 });

@@ -17,7 +17,7 @@ var React = require('./react-shim'),
     d3utils = require('./d3utils'),
     ContigInterval = require('./ContigInterval'),
     canvasUtils = require('./canvas-utils'),
-    dataCanvas = require('./data-canvas'),
+    dataCanvas = require('data-canvas'),
     style = require('./style');
 
 

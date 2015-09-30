@@ -15,7 +15,7 @@ var Q = require('q');
 var pileup = require('../main/pileup'),
     TwoBit = require('../main/TwoBit'),
     TwoBitDataSource = require('../main/TwoBitDataSource'),
-    dataCanvas = require('../main/data-canvas'),
+    dataCanvas = require('data-canvas'),
     MappedRemoteFile = require('./MappedRemoteFile'),
     {waitFor} = require('./async');
 
@@ -32,10 +32,11 @@ describe('GeneTrack', function() {
     // avoid pollution between tests.
     testDiv.innerHTML = '';
   });
-  var {drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
+  var {drawnObjects, callsOf} = dataCanvas.RecordingContext;
 
   function ready() {
-    return drawnObjectsWith(testDiv, '.genes', x => x.geneId).length > 0;
+    return testDiv.querySelector('canvas') &&
+        drawnObjects(testDiv, '.genes').length > 0;
   }
 
   it('should render genes', function() {
@@ -60,7 +61,7 @@ describe('GeneTrack', function() {
 
     return waitFor(ready, 2000)
       .then(() => {
-        var genes = drawnObjectsWith(testDiv, '.genes', x => x.geneId);
+        var genes = drawnObjects(testDiv, '.genes');
         expect(genes).to.have.length(4);
         expect(genes.map(g => g.name)).to.deep.equal(
             [ 'STX8', 'WDR16', 'WDR16', 'USP43' ]);  // two transcripts of WDR16
@@ -68,6 +69,7 @@ describe('GeneTrack', function() {
         // Only one WDR16 gets drawn (they're overlapping)
         var texts = callsOf(testDiv, '.genes', 'fillText');
         expect(texts.map(t => t[1])).to.deep.equal(['STX8', 'WDR16', 'USP43']);
+        p.destroy();
       });
   });
 

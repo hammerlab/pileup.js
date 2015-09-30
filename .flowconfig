@@ -15,11 +15,13 @@
 .*node_modules/jshint.*
 .*node_modules/jstransformify.*
 .*node_modules/uglify.*
+.*node_modules/data-canvas.*
 
 [include]
 
 [libs]
 lib
 types
+node_modules/data-canvas/flowtype
 
 [options]

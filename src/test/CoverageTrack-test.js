@@ -21,18 +21,19 @@ var pileup = require('../main/pileup'),
     RemoteFile = require('../main/RemoteFile'),
     MappedRemoteFile = require('./MappedRemoteFile'),
     ContigInterval = require('../main/ContigInterval'),
-    dataCanvas = require('../main/data-canvas'),
+    dataCanvas = require('data-canvas'),
     {waitFor} = require('./async');
 
 describe('CoverageTrack', function() {
   var testDiv = document.getElementById('testdiv');
   var range = {contig: '17', start: 7500730, stop: 7500790};
+  var p;
 
   beforeEach(() => {
     dataCanvas.RecordingContext.recordAll();
     // A fixed width container results in predictable x-positions for mismatches.
     testDiv.style.width = '800px';
-    var p = pileup.create(testDiv, {
+    p = pileup.create(testDiv, {
       range: range,
       tracks: [
         {
@@ -55,6 +56,7 @@ describe('CoverageTrack', function() {
 
   afterEach(() => {
     dataCanvas.RecordingContext.reset();
+    if (p) p.destroy();
     // avoid pollution between tests.
     testDiv.innerHTML = '';
     testDiv.style.width = '';
@@ -76,7 +78,9 @@ describe('CoverageTrack', function() {
 
   var hasCoverage = () => {
     // Check whether the coverage bins are loaded yet
-    return findCoverageBins().length > 1 && findCoverageLabels().length > 1;
+    return testDiv.querySelector('canvas') &&
+        findCoverageBins().length > 1 &&
+        findCoverageLabels().length > 1;
   };
 
   it('should create coverage information for all bases shown in the view', function() {

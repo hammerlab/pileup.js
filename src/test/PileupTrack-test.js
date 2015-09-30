@@ -21,7 +21,7 @@ var pileup = require('../main/pileup'),
     MappedRemoteFile = require('./MappedRemoteFile'),
     ContigInterval = require('../main/ContigInterval'),
     {waitFor} = require('./async'),
-    dataCanvas = require('../main/data-canvas');
+    dataCanvas = require('data-canvas');
 
 
 // This is like TwoBit, but allows a controlled release of sequence data.
@@ -133,10 +133,12 @@ describe('PileupTrack', function() {
   var hasReference = () => {
       // The reference initially shows "unknown" base pairs, so we have to
       // check for a specific known one to ensure that it's really loaded.
-      return drawnObjectsWith(testDiv, '.reference', x => x.letter).length > 0;
+      return testDiv.querySelector('.reference canvas') &&
+          drawnObjectsWith(testDiv, '.reference', x => x.letter).length > 0;
     },
     hasAlignments = () => {
-      return drawnObjectsWith(testDiv, '.pileup', x => x.span).length > 0;
+      return testDiv.querySelector('.pileup canvas') &&
+          drawnObjectsWith(testDiv, '.pileup', x => x.span).length > 0;
     },
 
     // Helpers for working with DataCanvas
@@ -159,7 +161,7 @@ describe('PileupTrack', function() {
     };
 
   it('should indicate mismatches when the reference loads first', function() {
-    var {fakeTwoBit, fakeBam} = testSetup();
+    var {p, fakeTwoBit, fakeBam} = testSetup();
 
     // Release the reference first.
     fakeTwoBit.release(reference);
@@ -174,12 +176,13 @@ describe('PileupTrack', function() {
       var mismatches = drawnObjectsWith(testDiv, '.pileup', x => x.basePair);
       expect(mismatches).to.have.length.below(60);
       assertHasColumnOfTs();
+      p.destroy();
     });
   });
 
   // Same as the previous test, but with the loads reversed.
   it('should indicate mismatches when the alignments load first', function() {
-    var {fakeTwoBit, fakeBam} = testSetup();
+    var {p, fakeTwoBit, fakeBam} = testSetup();
 
     // Release the alignments first.
     fakeBam.release(alignments);
@@ -192,6 +195,7 @@ describe('PileupTrack', function() {
       var mismatches = drawnObjectsWith(testDiv, '.pileup', x => x.basePair);
       expect(mismatches).to.have.length.below(60);
       assertHasColumnOfTs();
+      p.destroy();
     });
   });
 });
