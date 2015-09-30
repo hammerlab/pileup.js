@@ -122,6 +122,8 @@ describe('pileup', function() {
         // See react-shim.js for details.
         expect(div.querySelectorAll('[data-pileupid]')).to.have.length.above(0);
         expect(div.querySelectorAll('[data-reactid]')).to.have.length(0);
+
+        p.destroy();
       });
   });
 });

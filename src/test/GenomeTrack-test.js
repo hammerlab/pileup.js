@@ -38,11 +38,12 @@ describe('GenomeTrack', function() {
                             [[0, 16383], [691179834, 691183928], [694008946, 694009197]]),
       referenceSource = TwoBitDataSource.createFromTwoBitFile(new TwoBit(twoBitFile));
 
-  var {drawnObjectsWith} = dataCanvas.RecordingContext;
+  var {drawnObjects} = dataCanvas.RecordingContext;
   var hasReference = () => {
       // The reference initially shows "unknown" base pairs, so we have to
       // check for a specific known one to ensure that it's really loaded.
-      return drawnObjectsWith(testDiv, '.reference', x => x.letter).length > 0;
+      return testDiv.querySelector('canvas') &&
+          drawnObjects(testDiv, '.reference').length > 0;
     };
 
   it('should tolerate non-chr ranges', function() {
@@ -70,6 +71,7 @@ describe('GenomeTrack', function() {
         start: 7500730,
         stop: 7500790
       });
+      p.destroy();
     });
   });
 
@@ -122,6 +124,7 @@ describe('GenomeTrack', function() {
       });
       expect(startTxt.value).to.equal('7500725');
       expect(stopTxt.value).to.equal('7500775');
+      p.destroy();
     });
   });
 });

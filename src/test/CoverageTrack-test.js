@@ -27,12 +27,13 @@ var pileup = require('../main/pileup'),
 describe('CoverageTrack', function() {
   var testDiv = document.getElementById('testdiv');
   var range = {contig: '17', start: 7500730, stop: 7500790};
+  var p;
 
   beforeEach(() => {
     dataCanvas.RecordingContext.recordAll();
     // A fixed width container results in predictable x-positions for mismatches.
     testDiv.style.width = '800px';
-    var p = pileup.create(testDiv, {
+    p = pileup.create(testDiv, {
       range: range,
       tracks: [
         {
@@ -55,6 +56,7 @@ describe('CoverageTrack', function() {
 
   afterEach(() => {
     dataCanvas.RecordingContext.reset();
+    if (p) p.destroy();
     // avoid pollution between tests.
     testDiv.innerHTML = '';
     testDiv.style.width = '';

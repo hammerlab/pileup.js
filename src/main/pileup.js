@@ -32,8 +32,9 @@ type GenomeRange = {
 }
 
 type Pileup = {
-  setRange: (range: GenomeRange)=>void;
+  setRange(range: GenomeRange): void;
   getRange(): GenomeRange;
+  destroy(): void;
 }
 
 type PileupParams = {
@@ -78,10 +79,28 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
                          initialRange={params.range} />, el);
   return {
     setRange(range: GenomeRange) {
+      if (reactElement == null) {
+        throw 'Cannot call setRange on a destroyed pileup';
+      }
       reactElement.handleRangeChange(range);
     },
     getRange(): GenomeRange {
+      if (reactElement == null) {
+        throw 'Cannot call setRange on a destroyed pileup';
+      }
       return _.clone(reactElement.state.range);
+    },
+    destroy(): void {
+      if (!vizTracks) {
+        throw 'Cannot call destroy() twice on the same pileup';
+      }
+      vizTracks.forEach(({source}) => {
+        source.off();
+      });
+      React.unmountComponentAtNode(el);
+      reactElement = null;
+      referenceTrack = null;
+      vizTracks = null;
     }
   };
 }

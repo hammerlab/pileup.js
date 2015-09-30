@@ -159,7 +159,7 @@ describe('PileupTrack', function() {
     };
 
   it('should indicate mismatches when the reference loads first', function() {
-    var {fakeTwoBit, fakeBam} = testSetup();
+    var {p, fakeTwoBit, fakeBam} = testSetup();
 
     // Release the reference first.
     fakeTwoBit.release(reference);
@@ -174,12 +174,13 @@ describe('PileupTrack', function() {
       var mismatches = drawnObjectsWith(testDiv, '.pileup', x => x.basePair);
       expect(mismatches).to.have.length.below(60);
       assertHasColumnOfTs();
+      p.destroy();
     });
   });
 
   // Same as the previous test, but with the loads reversed.
   it('should indicate mismatches when the alignments load first', function() {
-    var {fakeTwoBit, fakeBam} = testSetup();
+    var {p, fakeTwoBit, fakeBam} = testSetup();
 
     // Release the alignments first.
     fakeBam.release(alignments);
@@ -192,6 +193,7 @@ describe('PileupTrack', function() {
       var mismatches = drawnObjectsWith(testDiv, '.pileup', x => x.basePair);
       expect(mismatches).to.have.length.below(60);
       assertHasColumnOfTs();
+      p.destroy();
     });
   });
 });

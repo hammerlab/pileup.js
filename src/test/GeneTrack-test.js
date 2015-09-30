@@ -68,6 +68,7 @@ describe('GeneTrack', function() {
         // Only one WDR16 gets drawn (they're overlapping)
         var texts = callsOf(testDiv, '.genes', 'fillText');
         expect(texts.map(t => t[1])).to.deep.equal(['STX8', 'WDR16', 'USP43']);
+        p.destroy();
       });
   });
 
