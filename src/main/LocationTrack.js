@@ -13,12 +13,6 @@ var React = require('./react-shim'),
     style = require('./style'),
     d3utils = require('./d3utils');
 
-// This sets the width of the horizontal line (--) that connects the center
-//  marker to the label:
-//     | |-- 42 bp
-var LABEL_PADDING = 5,
-    CONNECTOR_WIDTH = 10;
-
 class LocationTrack extends React.Component {
   constructor(props: Object) {
     super(props);

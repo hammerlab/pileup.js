@@ -48,7 +48,7 @@ function drawArrow(ctx: CanvasRenderingContext2D,
   ctx.stroke();
 }
 
-function drawGeneName(ctx: CanvasRenderingContext2D, 
+function drawGeneName(ctx: CanvasRenderingContext2D,
                       clampedScale: (x: number)=>number,
                       geneLineY: number,
                       gene: Gene,
@@ -81,8 +81,6 @@ var GeneTrack = React.createClass({
     return <canvas />;
   },
   componentDidMount: function() {
-    var div = this.getDOMNode();
-
     // Visualize new reference data as it comes in from the network.
     this.props.source.on('newdata', () => {
       var range = this.props.range,

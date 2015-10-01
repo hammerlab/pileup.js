@@ -14,7 +14,7 @@ import type {BasePair} from './pileuputils';
 var _ = require('underscore'),
     ContigInterval = require('./ContigInterval'),
     Interval = require('./Interval'),
-    {addToPileup, getOpInfo, CigarOp} = require('./pileuputils'),
+    {addToPileup, getOpInfo} = require('./pileuputils'),
     utils = require('./utils');
 
 // This bundles everything intrinsic to the alignment that we need to display
@@ -60,8 +60,7 @@ class PileupCache {
   // Calling this multiple times with the same read is a no-op.
   addAlignment(read: Alignment) {
     var key = groupKey(read),
-        range = read.getInterval(),
-        iv = range.interval;
+        range = read.getInterval();
 
     if (!(key in this.groups)) {
       this.groups[key] = {
