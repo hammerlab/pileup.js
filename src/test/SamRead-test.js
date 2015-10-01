@@ -30,13 +30,13 @@ describe('SamRead', function() {
       // The first record in test_input_1_a.sam is:
       // r000 99 insert 50 30 10M = 80 30 ATTTAGCTAC AAAAAAAAAA RG:Z:cow PG:Z:bull
       var read = reads[0];
-      expect(read.getName()).to.equal('r000');
+      expect(read.name).to.equal('r000');
       expect(read.refID).to.equal(0);
       expect(read.ref).to.equal('insert');
       expect(read.pos).to.equal(49);  // 0-based
       expect(read.l_seq).to.equal(10);
       expect(read.toString()).to.equal('insert:50-59');
-      expect(read.getCigarOps()).to.deep.equal([{op: 'M', length: 10}]);
+      expect(read.cigarOps).to.deep.equal([{op: 'M', length: 10}]);
       expect(read.getStrand()).to.equal('+');
 
       expect(read.getMateProperties()).to.deep.equal({
@@ -46,7 +46,7 @@ describe('SamRead', function() {
       });
 
       // This one has a more interesting Cigar string
-      expect(reads[3].getCigarOps()).to.deep.equal([
+      expect(reads[3].cigarOps).to.deep.equal([
         {op: 'S', length: 1},
         {op: 'I', length: 2},
         {op: 'M', length: 6},

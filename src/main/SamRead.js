@@ -44,6 +44,8 @@ class SamRead /* implements Alignment */ {
   refID: number;
   ref: string;
   l_seq: number;
+  name: string;
+  cigarOps: CigarOp[];
 
   // cached values
   _full: ?Object;
@@ -68,6 +70,8 @@ class SamRead /* implements Alignment */ {
     this.ref = ref;
     this.pos = jv.getInt32(4);
     this.l_seq = jv.getInt32(16);
+    this.cigarOps = this._getCigarOps();
+    this.name = this._getName();
   }
 
   toString(): string {
@@ -87,13 +91,11 @@ class SamRead /* implements Alignment */ {
     return this.offset.toString();
   }
 
-  // TODO: optimize
-  getName(): string {
-    var l_read_name = this._getJDataView().getUint8(8);
-    var jb = new jBinary(this.buffer, {
-      'jBinary.littleEndian': true
-    });
-    return jb.read([nullString, l_read_name], 32);
+  _getName(): string {
+    var jv = this._getJDataView();
+    var l_read_name = jv.getUint8(8);
+    jv.seek(32);  // the read-name starts at byte 32
+    return jv.getString(l_read_name - 1);  // ignore null-terminator
   }
 
   getFlag(): number {
@@ -125,20 +127,20 @@ class SamRead /* implements Alignment */ {
     return interval.intersects(this.getInterval());
   }
 
-  getCigarOps(): CigarOp[] {
+  _getCigarOps(): CigarOp[] {
     var jv = this._getJDataView(),
         l_read_name = jv.getUint8(8),
         n_cigar_op = jv.getUint16(12),
         pos = 32 + l_read_name,
-        ops = new Array(n_cigar_op);
+        cigar_ops = new Array(n_cigar_op);
     for (var i = 0; i < n_cigar_op; i++) {
       var v = jv.getUint32(pos + 4 * i);
-      ops[i] = {
+      cigar_ops[i] = {
         op: CIGAR_OPS[v & 0xf],
         length: v >> 4
       };
     }
-    return ops;
+    return cigar_ops;
   }
 
   /**
@@ -186,7 +188,7 @@ class SamRead /* implements Alignment */ {
 
   // Returns the length of the alignment from first aligned read to last aligned read.
   getReferenceLength(): number {
-    return SamRead.referenceLengthFromOps(this.getCigarOps());
+    return SamRead.referenceLengthFromOps(this.cigarOps);
   }
 
   getMateProperties(): ?MateProperties {
@@ -209,7 +211,7 @@ class SamRead /* implements Alignment */ {
   debugString(): string {
     var f = this.getFull();
 
-    return `Name: ${this.getName()}
+    return `Name: ${this.name}
 FLAG: ${this.getFlag()}
 Position: ${this.getInterval()}
 CIGAR: ${this.getCigarString()}
