@@ -22,12 +22,12 @@ describe('GA4GHAlignment', function() {
 
   it('should provide basic accessors', function() {
     var a = new GA4GHAlignment(sampleAlignments[0]);
-    expect(a.getName()).to.equal('r000');
+    expect(a.name).to.equal('r000');
     expect(a.getSequence()).to.equal('ATTTAGCTAC');
     expect(a.getQualityScores()).to.deep.equal([32,32,32,32,32,32,32,32,32,32]);
     expect(a.getStrand()).to.equal('+');
     expect(a.getInterval().toString()).to.equal('chr17:4-13');  // 0-based
-    expect(a.getCigarOps()).to.deep.equal([
+    expect(a.cigarOps).to.deep.equal([
       {op: 'M', length: 10}
     ]);
     expect(a.getMateProperties()).to.deep.equal({
@@ -55,7 +55,7 @@ describe('GA4GHAlignment', function() {
         if (quality.length) {
           expect(quality).to.deep.equal(bam.getQualityScores());
         }
-        expect(ga4gh.getCigarOps()).to.deep.equal(bam.getCigarOps());
+        expect(ga4gh.cigarOps).to.deep.equal(bam.cigarOps);
         // After ga4gh#491, change this to a .deep.equal on getMateProperties()
         var ga4ghMate = ga4gh.getMateProperties(),
             bamMate = bam.getMateProperties();

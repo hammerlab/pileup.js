@@ -25,11 +25,11 @@ export type MateProperties = {
 export type Alignment = {
   pos: number;
   ref: string;
+  name: string;
+  cigarOps: CigarOp[];
 
   getKey(): string;
-  getName(): string;
   getStrand(): Strand;
-  getCigarOps(): CigarOp[];
   getQualityScores(): number[];
   getSequence(): string;
   getInterval(): ContigInterval<string>;

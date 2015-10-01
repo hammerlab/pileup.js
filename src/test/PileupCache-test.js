@@ -21,6 +21,7 @@ class TestAlignment /* implements Alignment */ {
   mateProps: ?MateProperties;
   name: string;
   strand: Strand;
+  cigarOps: CigarOp[];
 
   constructor(interval: ContigInterval<string>, name: string, strand: Strand, mateProps: ?MateProperties) {
     this.interval = interval;
@@ -30,12 +31,11 @@ class TestAlignment /* implements Alignment */ {
     this.strand = strand;
     this.key = 'align:' + (numAlignments++);
     this.mateProps = mateProps;
+    this.cigarOps = [];
   }
 
   getKey(): string { return this.key; }
-  getName(): string { return this.name; }
   getStrand(): Strand { return this.strand; }
-  getCigarOps(): CigarOp[] { return []; }
   getQualityScores(): number[] { return []; }
   getSequence(): string { return ''; }
   getInterval(): ContigInterval<string> { return this.interval; }

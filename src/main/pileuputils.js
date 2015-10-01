@@ -92,7 +92,7 @@ function findMismatches(reference: string, seq: string, refPos: number, scores: 
 // Determine which alignment segment to render as an arrow.
 // This is either the first or last 'M' section, excluding soft clipping.
 function getArrowIndex(read: Alignment): number {
-  var i, op, ops = read.getCigarOps();
+  var i, op, ops = read.cigarOps;
   if (read.getStrand() == '-') {
     for (i = 0; i < ops.length; i++) {
       op = ops[i];
@@ -138,7 +138,7 @@ type OpInfo = {
 
 // Breaks the read down into Cigar Ops suitable for display
 function getOpInfo(read: Alignment, referenceSource: Object): OpInfo {
-  var ops = read.getCigarOps();
+  var ops = read.cigarOps;
 
   var range = read.getInterval(),
       start = range.start(),

@@ -14,7 +14,7 @@ import type {BasePair} from './pileuputils';
 var _ = require('underscore'),
     ContigInterval = require('./ContigInterval'),
     Interval = require('./Interval'),
-    {addToPileup, getOpInfo, CigarOp} = require('./pileuputils'),
+    {addToPileup, getOpInfo} = require('./pileuputils'),
     utils = require('./utils');
 
 // This bundles everything intrinsic to the alignment that we need to display
@@ -39,7 +39,7 @@ export type VisualGroup = {
 // read name would make a good key, but paired reads from different contigs
 // shouldn't be grouped visually. Hence we use read name + contig.
 function groupKey(read: Alignment): string {
-  return `${read.getName()}:${read.ref}`;
+  return `${read.name}:${read.ref}`;
 }
 
 // This class provides data management for the visualization, grouping paired

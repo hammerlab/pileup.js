@@ -30,7 +30,8 @@ class GA4GHAlignment /* implements Alignment */ {
   pos: number;
   ref: string;
   alignment: Object;
-  _cigarOps: CigarOp[];
+  name: string;
+  cigarOps: CigarOp[];
   _interval: ContigInterval<string>;
 
   // alignment follows org.ga4gh.GAReadAlignment
@@ -39,8 +40,9 @@ class GA4GHAlignment /* implements Alignment */ {
     this.alignment = alignment;
     this.pos = alignment.alignment.position.position;
     this.ref = alignment.alignment.position.referenceName;
+    this.name = alignment.fragmentName;
 
-    this._cigarOps = alignment.alignment.cigar.map(
+    this.cigarOps = alignment.alignment.cigar.map(
         ({operation, operationLength: length}) => ({ op: OP_MAP[operation], length }));
     this._interval = new ContigInterval(this.ref,
                                         this.pos,
@@ -51,16 +53,8 @@ class GA4GHAlignment /* implements Alignment */ {
     return GA4GHAlignment.keyFromGA4GHResponse(this.alignment);
   }
 
-  getName(): string {
-    return this.alignment.fragmentName;
-  }
-
   getStrand(): Strand {
     return this.alignment.alignment.position.reverseStrand ? '-' : '+';
-  }
-
-  getCigarOps(): CigarOp[] {
-    return this._cigarOps;
   }
 
   getQualityScores(): number[] {
@@ -80,7 +74,7 @@ class GA4GHAlignment /* implements Alignment */ {
   }
 
   getReferenceLength(): number {
-    return SamRead.referenceLengthFromOps(this.getCigarOps());
+    return SamRead.referenceLengthFromOps(this.cigarOps);
   }
 
   getMateProperties(): ?MateProperties {
