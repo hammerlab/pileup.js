@@ -32,8 +32,23 @@ phantomjs \
   http://localhost:8080/src/test/coverage.html \
   spec '{"hooks": "mocha-phantomjs-istanbul", "coverageFile": "coverage/coverage.json"}'
 
-# Convert the JSON coverage to LCOV for coveralls.
-istanbul report --include coverage/*.json lcovonly
+if [ $CI ]; then
+  # Convert the JSON coverage to LCOV for coveralls.
+  istanbul report --include coverage/*.json lcovonly
 
-# Monkey patch in the untransformed source paths.
-perl -i -pe 's,dist/main,src/main,' coverage/lcov.info
+  # Monkey patch in the untransformed source paths.
+  perl -i -pe 's,dist/main,src/main,' coverage/lcov.info
+  echo ''  # reset exit code -- failure to post coverage shouldn't be an error.
+
+else
+
+  # Convert the JSON coverage to HTML for viewing
+  istanbul report --include coverage/*.json html
+  set +x
+
+  echo 'To browse coverage, run:'
+  echo
+  echo '  open coverage/index.html'
+  echo
+
+fi
