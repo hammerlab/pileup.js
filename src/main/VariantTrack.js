@@ -9,8 +9,6 @@ import type {Variant} from './vcf';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 
 var React = require('./react-shim'),
-    _ = require('underscore'),
-    d3 = require('d3'),
     d3utils = require('./d3utils'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),

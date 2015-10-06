@@ -5,11 +5,8 @@
 'use strict';
 
 var React = require('./react-shim'),
-    _ = require('underscore'),
-    d3 = require('d3'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
-    utils = require('./utils'),
     canvasUtils = require('./canvas-utils'),
     dataCanvas = require('data-canvas'),
     d3utils = require('./d3utils'),

@@ -11,7 +11,6 @@
 'use strict';
 
 var React = require('./react-shim'),
-    d3 = require('d3'),
     EmptySource = require('./EmptySource'),
     types = require('./react-types'),
     canvasUtils = require('./canvas-utils'),

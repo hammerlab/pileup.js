@@ -60,8 +60,7 @@ class PileupCache {
   // Calling this multiple times with the same read is a no-op.
   addAlignment(read: Alignment) {
     var key = groupKey(read),
-        range = read.getInterval(),
-        iv = range.interval;
+        range = read.getInterval();
 
     if (!(key in this.groups)) {
       this.groups[key] = {
