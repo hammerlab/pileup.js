@@ -90,10 +90,10 @@ function getRenderer(ctx: DataCanvasRenderingContext2D, scale: (num: number) => 
       case CigarOp.INSERT:
         ctx.save();
         ctx.fillStyle = style.INSERT_COLOR;
-        var x = scale(op.pos + 1) - 2,  // to cover a bit of the previous segment
+        var x0 = scale(op.pos + 1) - 2,  // to cover a bit of the previous segment
             y1 = y - 1,
             y2 = y + READ_HEIGHT + 2;
-        ctx.fillRect(x, y1, 1, y2 - y1);
+        ctx.fillRect(x0, y1, 1, y2 - y1);
         ctx.restore();
         break;
     }
@@ -138,7 +138,7 @@ function getRenderer(ctx: DataCanvasRenderingContext2D, scale: (num: number) => 
     ctx.popObject();
   }
 
-  return {drawArrow, drawSegment, drawGroup}
+  return {drawArrow, drawSegment, drawGroup};
 }
 
 
@@ -293,6 +293,7 @@ class PileupTrack extends React.Component {
     var trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
     this.renderScene(trackingCtx);
     var vRead = trackingCtx.hit && trackingCtx.hit[0];
+    var alert = window.alert || console.log;
     if (vRead) {
       alert(vRead.read.debugString());
     }

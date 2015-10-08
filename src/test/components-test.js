@@ -5,9 +5,8 @@ var expect = require('chai').expect;
 
 var pileup = require('../main/pileup'),
     {waitFor} = require('./async'),
-    dataCanvas = require('data-canvas'),
-    _ = require('underscore');
-
+    dataCanvas = require('data-canvas');
+    
 describe('pileup', function() {
   var tracks = [
     {

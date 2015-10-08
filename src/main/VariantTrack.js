@@ -94,6 +94,7 @@ var VariantTrack = React.createClass({
     var trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
     this.renderScene(trackingCtx);
     var variant = trackingCtx.hit && trackingCtx.hit[0];
+    var alert = window.alert || console.log;
     if (variant) {
       alert(JSON.stringify(variant));
     }

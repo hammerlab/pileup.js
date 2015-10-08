@@ -118,7 +118,7 @@ describe('pileuputils', function() {
     };
 
     var unknownReferenceSource = {
-      getRangeAsString: function({contig, start, stop}) {
+      getRangeAsString: function({start, stop}) {
         return _.range(start, stop + 1).map(x => '.').join('');
       }
     };

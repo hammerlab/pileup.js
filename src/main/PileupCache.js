@@ -87,27 +87,26 @@ class PileupCache {
     };
     group.alignments.push(visualAlignment);
 
+    var mateInterval = null;
     if (group.alignments.length == 1) {
       // This is the first read in the group. Infer its span from its mate properties.
       // TODO: if the mate Alignment is also available, it would be better to use that.
       var intervals = [range];
       var mateProps = read.getMateProperties();
       if (mateProps && mateProps.ref && mateProps.ref == read.ref) {
-        var mateInterval = new ContigInterval(mateProps.ref, mateProps.pos, mateProps.pos + range.length());
+        mateInterval = new ContigInterval(mateProps.ref, mateProps.pos, mateProps.pos + range.length());
         intervals.push(mateInterval);
       }
-      var {span, insert} = spanAndInsert(intervals);
-      group.insert = insert;
-      group.span = span;
+      group = _.extend(group, spanAndInsert(intervals));
 
       if (!(read.ref in this.refToPileup)) {
         this.refToPileup[read.ref] = [];
       }
       var pileup = this.refToPileup[read.ref];
-      group.row = addToPileup(span.interval, pileup);
+      group.row = addToPileup(group.span.interval, pileup);
     } else if (group.alignments.length == 2) {
       // Refine the connector
-      var mateInterval = group.alignments[0].read.getInterval();
+      mateInterval = group.alignments[0].read.getInterval();
       var {span, insert} = spanAndInsert([range, mateInterval]);
       group.insert = insert;
       if (insert) {

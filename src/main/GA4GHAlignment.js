@@ -3,6 +3,7 @@
  * pileup.js Alignment type.
  * @flow
  */
+'use strict';
 
 import type {CigarOp, MateProperties, Strand} from './Alignment';
 
@@ -91,6 +92,6 @@ class GA4GHAlignment /* implements Alignment */ {
     // this.alignment.id would be appealing here, but it's not actually unique!
     return alignment.fragmentName + ':' + alignment.readNumber;
   }
-};
+}
 
 module.exports = GA4GHAlignment;

@@ -8,19 +8,12 @@
 
 var expect = require('chai').expect;
 
-var Q = require('q'),
-    _ = require('underscore');
-
 import type * as SamRead from '../main/SamRead';
 
 var pileup = require('../main/pileup'),
     TwoBit = require('../main/TwoBit'),
     TwoBitDataSource = require('../main/TwoBitDataSource'),
-    Bam = require('../main/bam'),
-    BamDataSource = require('../main/BamDataSource'),
-    RemoteFile = require('../main/RemoteFile'),
     MappedRemoteFile = require('./MappedRemoteFile'),
-    ContigInterval = require('../main/ContigInterval'),
     dataCanvas = require('data-canvas'),
     {waitFor} = require('./async');
 
@@ -73,7 +66,7 @@ describe('CoverageTrack', function() {
   };
 
   var findCoverageLabels = () => {
-    return drawnObjectsWith(testDiv, '.coverage', l => l.type == 'label')
+    return drawnObjectsWith(testDiv, '.coverage', l => l.type == 'label');
   };
 
   var hasCoverage = () => {

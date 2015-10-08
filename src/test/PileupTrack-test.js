@@ -128,7 +128,7 @@ describe('PileupTrack', function() {
     return {p, fakeTwoBit, fakeBam};
   }
 
-  var {drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
+  var {drawnObjectsWith} = dataCanvas.RecordingContext;
 
   var hasReference = () => {
       // The reference initially shows "unknown" base pairs, so we have to
@@ -150,7 +150,7 @@ describe('PileupTrack', function() {
       var ref = drawnObjectsWith(testDiv, '.reference', x => x.pos == 7500765 - 1);
       expect(ref).to.have.length(1);
       expect(ref[0].letter).to.equal('C');
-      
+
       var mismatches = mismatchesAtPos(7500765 - 1);
       expect(mismatches).to.have.length(22);
       _.each(mismatches, mm => {

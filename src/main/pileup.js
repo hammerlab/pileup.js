@@ -79,13 +79,13 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
                          initialRange={params.range} />, el);
   return {
     setRange(range: GenomeRange) {
-      if (reactElement == null) {
+      if (reactElement === null) {
         throw 'Cannot call setRange on a destroyed pileup';
       }
       reactElement.handleRangeChange(range);
     },
     getRange(): GenomeRange {
-      if (reactElement == null) {
+      if (reactElement === null) {
         throw 'Cannot call setRange on a destroyed pileup';
       }
       return _.clone(reactElement.state.range);
