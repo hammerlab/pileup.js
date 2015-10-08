@@ -6,4 +6,4 @@ if [ -n "$noflow" ]; then
   exit 1
 fi
 
-./node_modules/.bin/jsxhint --es6module --harmony 'main/src/**/*.js' 'main/test/**/*.js'
+./node_modules/.bin/jsxhint --es6module --harmony 'src/main/**/*.js' 'src/test/**/*.js'

@@ -18,7 +18,6 @@ import type {Strand, CigarOp, MateProperties} from './Alignment';
 var jDataView = require('jdataview'),
     jBinary = require('jbinary'),
     _ = require('underscore'),
-    {nullString} = require('./formats/helpers'),
     bamTypes = require('./formats/bamTypes'),
     ContigInterval = require('./ContigInterval');
 

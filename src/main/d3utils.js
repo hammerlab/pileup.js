@@ -43,7 +43,7 @@ function sizeCanvas(el: HTMLCanvasElement, width: number, height: number) {
   el.style.width = width + 'px';
   el.style.height = height + 'px';
   var ctx = el.getContext('2d');
-  if (ctx != null && ctx instanceof CanvasRenderingContext2D) {
+  if (ctx !== null && ctx instanceof CanvasRenderingContext2D) {
     ctx.scale(ratio, ratio);
   }
 }

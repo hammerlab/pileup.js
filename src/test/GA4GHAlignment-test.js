@@ -1,10 +1,10 @@
 /** @flow */
+'use strict';
 
 var expect = require('chai').expect;
 
 var GA4GHAlignment = require('../main/GA4GHAlignment'),
     RemoteFile = require('../main/RemoteFile'),
-    SamRead = require('../main/SamRead'),
     Bam = require('../main/bam');
 
 describe('GA4GHAlignment', function() {

@@ -3,6 +3,7 @@
  * Currently only used to load alignments.
  * @flow
  */
+'use strict';
 
 import type {Alignment, AlignmentDataSource} from './Alignment';
 

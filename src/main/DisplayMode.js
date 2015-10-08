@@ -3,6 +3,7 @@
  * This enum & associated functions help track these transitions.
  * @flow
  */
+'use strict';
 
 var DisplayMode = {
   LOOSE: 1,   // Lots of space -- a big font is OK.

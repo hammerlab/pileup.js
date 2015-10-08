@@ -1,4 +1,5 @@
 /** @flow */
+'use strict';
 
 var expect = require('chai').expect;
 
@@ -6,10 +7,8 @@ var sinon = require('sinon');
 
 var ContigInterval = require('../main/ContigInterval'),
     GA4GHDataSource = require('../main/GA4GHDataSource'),
-    RemoteFile = require('../main/RemoteFile'),
-    SamRead = require('../main/SamRead'),
-    Bam = require('../main/bam');
-
+    RemoteFile = require('../main/RemoteFile');
+    
 describe('GA4GHDataSource', function() {
   var server: any = null, response;
 

@@ -9,8 +9,7 @@ var expect = require('chai').expect;
 var _ = require('underscore');
 
 var PileupCache = require('../main/PileupCache'),
-    ContigInterval = require('../main/ContigInterval'),
-    Interval = require('../main/Interval');
+    ContigInterval = require('../main/ContigInterval');
 
 var numAlignments = 1;
 class TestAlignment /* implements Alignment */ {
@@ -56,11 +55,6 @@ function makeReadPair(range1: ContigInterval<string>, range2: ContigInterval<str
   ];
 }
 
-function makeUnpairedRead(range: ContigInterval<string>, strand: Strand): Alignment {
-  var name = 'group:' + (nameCounter++);
-  return new TestAlignment(range, name, strand, null);
-}
-
 function dieFn() { throw 'Should not have called this.'; }
 var fakeSource = {
   rangeChanged: dieFn,
@@ -75,7 +69,7 @@ var fakeSource = {
 };
 
 describe('PileupCache', function() {
-  function ci(...x: any) { return new ContigInterval(...x); }
+  function ci(...x: any) { return new ContigInterval(...x)(); }
 
   function makeCache(args) {
     var cache = new PileupCache(fakeSource);
