@@ -3,6 +3,7 @@
  *
  * @flow
  */
+'use strict';
 
 // Return the 2D context for a canvas. This is helpful for type safety.
 function getContext(el: Element): CanvasRenderingContext2D {
@@ -23,4 +24,4 @@ function drawLine(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: num
 module.exports = {
   getContext,
   drawLine
-}
+};

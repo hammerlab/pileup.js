@@ -1,6 +1,7 @@
 /**
  * @flow
  */
+'use strict';
 
 var React = require('./react-shim'),
     types = require('./react-types'),
