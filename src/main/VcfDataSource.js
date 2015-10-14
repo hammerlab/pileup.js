@@ -5,7 +5,7 @@
  */
 'use strict';
 
-var Events = require('backbone').Events,
+var Events = require('./Events'),
     _ = require('underscore'),
     Q = require('q');
 

@@ -7,7 +7,7 @@
 
 import type {Alignment, AlignmentDataSource} from './Alignment';
 
-var Events = require('backbone').Events,
+var Events = require('./Events'),
     _ = require('underscore');
 
 var ContigInterval = require('./ContigInterval'),
