@@ -1,13 +1,12 @@
 // Backbone.Events
 // ---------------
+// jshint ignore: start
 
 var _ = require('underscore');
 
 // Create local references to array methods we'll want to use later.
 var array = [];
-var push = array.push;
 var slice = array.slice;
-var splice = array.splice;
 
 // The remainder of this files corresponds to
 // https://github.com/jashkenas/backbone/blob/1.2.2/backbone.js#L119-L374
