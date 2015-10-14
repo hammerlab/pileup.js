@@ -21,7 +21,8 @@ var React = require('./react-shim'),
     PileupCache = require('./PileupCache'),
     canvasUtils = require('./canvas-utils'),
     dataCanvas = require('data-canvas'),
-    style = require('./style');
+    style = require('./style'),
+    _ = require('underscore');
 
 
 var READ_HEIGHT = 13;
@@ -292,7 +293,7 @@ class PileupTrack extends React.Component {
     var ctx = canvasUtils.getContext(this.refs.canvas.getDOMNode());
     var trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
     this.renderScene(trackingCtx);
-    var vRead = trackingCtx.hit && trackingCtx.hit[0];
+    var vRead = _.find(trackingCtx.hits[0], hit => hit.read);
     var alert = window.alert || console.log;
     if (vRead) {
       alert(vRead.read.debugString());
