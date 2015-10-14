@@ -59,7 +59,6 @@
     "lint"
   ],
   "dependencies": {
-    "backbone": "1.1.2",
     "d3": "^3.5.5",
     "data-canvas": "0.0.0",
     "jbinary": "^2.1.3",
