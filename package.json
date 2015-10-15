@@ -77,7 +77,7 @@
     "coveralls": "2.10.x",
     "envify": "^3.4.0",
     "es5-shim": "^4.1.0",
-    "flow-bin": "^0.16.0",
+    "flow-bin": "^0.17.0",
     "http-server": "^0.8.0",
     "istanbul": "^0.3.17",
     "jstransform": "^11.0.2",
