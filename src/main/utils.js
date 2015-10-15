@@ -7,7 +7,7 @@
 import type {InflatedBlock} from './types';
 import type * as Q from 'q';
 
-var pako = require('pako');
+var pako = require('pako/lib/inflate');
 
 // Compare two tuples of equal length. Is t1 <= t2?
 // TODO: make this tupleLessOrEqual<T> -- it works with strings or booleans, too.

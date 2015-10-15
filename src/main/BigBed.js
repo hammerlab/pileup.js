@@ -8,7 +8,7 @@
 var Q = require('q'),
     _ = require('underscore'),
     jBinary = require('jbinary'),
-    pako = require('pako');  // for gzip inflation
+    pako = require('pako/lib/inflate');  // for gzip inflation
     
 
 var RemoteFile = require('./RemoteFile'),
