@@ -47,7 +47,7 @@ type PileupParams = {
 }
 
 function findReference(tracks: VisualizedTrack[]): ?VisualizedTrack {
-  return _.findWhere(tracks, t => t.track.isReference);
+  return _.find(tracks, t => !!t.track.isReference);
 }
 
 function create(elOrId: string|Element, params: PileupParams): Pileup {
