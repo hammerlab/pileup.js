@@ -7,7 +7,7 @@ var React = require('./react-shim'),
     types = require('./react-types'),
     d3utils = require('./d3utils'),
     _ = require('underscore'),
-    d3 = require('d3');
+    d3 = require('d3/minid3');
 
 class VisualizationWrapper extends React.Component {
   hasDragBeenInitialized: boolean;

@@ -11,7 +11,7 @@ import type {VisualAlignment, VisualGroup} from './PileupCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 
 var React = require('./react-shim'),
-    d3 = require('d3'),
+    d3 = require('d3/minid3'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     d3utils = require('./d3utils'),

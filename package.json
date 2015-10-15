@@ -25,6 +25,7 @@
     "url": "https://github.com/hammerlab/pileup.js.git"
   },
   "scripts": {
+    "minid3": "./scripts/make-mini-d3.sh",
     "jstransform": "./scripts/jstransform.sh",
     "jstransform-watch": "./scripts/jstransform.sh --watch",
     "browserify-all": "npm run browserify && npm run browserify-test",
@@ -41,7 +42,7 @@
     "flow-check": "flow check",
     "coverage": "./scripts/generate-coverage.sh",
     "sniper": "biojs-sniper",
-    "build": "npm run jstransform && npm run browserify-all && npm run uglify"
+    "build": "npm run minid3 && npm run jstransform && npm run browserify-all && npm run uglify"
   },
   "author": "Dan Vanderkam",
   "contributors": [
@@ -92,6 +93,7 @@
     "phantomjs": "^1.9.17",
     "prepush-hook": "^0.1.0",
     "sinon": "^1.12.2",
+    "smash": "0.0.14",
     "sniper": "^0.2.16",
     "source-map": "^0.3.0",
     "stats.js": "^1.0.0",
