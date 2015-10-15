@@ -10,6 +10,16 @@ var pileup = require('../main/pileup'),
 describe('pileup', function() {
   var tracks = [
     {
+      viz: pileup.viz.scale(),
+      data: pileup.formats.empty(),
+      name: 'Scale'
+    },
+    {
+      viz: pileup.viz.location(),
+      data: pileup.formats.empty(),
+      name: 'Location'
+    },
+    {
       viz: pileup.viz.genome(),
       isReference: true,
       data: pileup.formats.twoBit({
@@ -32,16 +42,6 @@ describe('pileup', function() {
         url: '/test-data/tp53.shifted.bb'
       }),
       cssClass: 'c'
-    },
-    {
-      viz: pileup.viz.scale(),
-      data: pileup.formats.empty(),
-      name: 'Scale'
-    },
-    {
-      viz: pileup.viz.location(),
-      data: pileup.formats.empty(),
-      name: 'Location'
     },
     {
       viz: pileup.viz.pileup(),
