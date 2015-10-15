@@ -5,7 +5,7 @@
 'use strict';
 
 var React = require('./react-shim'),
-    d3 = require('d3'),
+    d3 = require('d3/minid3'),
     EmptySource = require('./EmptySource'),
     types = require('./react-types'),
     canvasUtils = require('./canvas-utils'),

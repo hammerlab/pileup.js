@@ -6,7 +6,7 @@
 
 import type {GenomeRange} from './react-types';
 
-var d3 = require('d3');
+var d3 = require('d3/minid3');
 
 /**
  * Shared x-axis scaling logic for tracks

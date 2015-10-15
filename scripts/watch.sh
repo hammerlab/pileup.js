@@ -5,6 +5,7 @@
 trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
 
 # Start watchers
+npm run minid3 &
 npm run jstransform-watch &
 npm run watch-dist &
 npm run watch-test &

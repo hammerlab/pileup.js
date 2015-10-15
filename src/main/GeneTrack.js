@@ -9,7 +9,7 @@ import type {Gene} from './BigBedDataSource';
 
 var React = require('./react-shim'),
     _ = require('underscore'),
-    d3 = require('d3'),
+    d3 = require('d3/minid3'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     bedtools = require('./bedtools'),
