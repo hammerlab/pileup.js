@@ -15,6 +15,7 @@ var pileup = require('../main/pileup'),
     TwoBitDataSource = require('../main/TwoBitDataSource'),
     MappedRemoteFile = require('./MappedRemoteFile'),
     dataCanvas = require('data-canvas'),
+    _ = require('underscore'),
     {waitFor} = require('./async');
 
 describe('CoverageTrack', function() {
@@ -62,8 +63,13 @@ describe('CoverageTrack', function() {
   var {drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
 
   var findCoverageBins = () => {
-    return drawnObjectsWith(testDiv, '.coverage', b => b.position);
+    return drawnObjectsWith(testDiv, '.coverage', b => b.position && b.mismatches);
   };
+
+  var findMismatchBins = ():Array<any> => {
+    return drawnObjectsWith(testDiv, '.coverage', b => b.base);
+  };
+
 
   var findCoverageLabels = () => {
     return drawnObjectsWith(testDiv, '.coverage', l => l.type == 'label');
@@ -73,6 +79,7 @@ describe('CoverageTrack', function() {
     // Check whether the coverage bins are loaded yet
     return testDiv.querySelector('canvas') &&
         findCoverageBins().length > 1 &&
+        findMismatchBins().length > 1 &&
         findCoverageLabels().length > 1;
   };
 
@@ -80,6 +87,16 @@ describe('CoverageTrack', function() {
     return waitFor(hasCoverage, 2000).then(() => {
       var bins = findCoverageBins();
       expect(bins).to.have.length.at.least(range.stop - range.start + 1);
+    });
+  });
+
+  it('should show mismatch information', function() {
+    return waitFor(hasCoverage, 2000).then(() => {
+      var mbins = findMismatchBins();
+      expect(mbins).to.have.length(12);
+      var tMismatch = _.filter(mbins, mb => mb.position == 7500765)[0];
+      expect(tMismatch.base).to.equal("T");
+      expect(tMismatch.count).to.equal(22);
     });
   });
 

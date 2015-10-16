@@ -6,6 +6,7 @@
 
 import type * as SamRead from './SamRead';
 import type * as Interval from './Interval';
+import type {TwoBitSource} from './TwoBitDataSource';
 
 var React = require('./react-shim'),
     d3 = require('d3/minid3'),
@@ -14,6 +15,7 @@ var React = require('./react-shim'),
     d3utils = require('./d3utils'),
     _ = require("underscore"),
     dataCanvas = require('data-canvas'),
+    {getOpInfo} = require('./pileuputils'),
     style = require('./style'),
     ContigInterval = require('./ContigInterval');
 
@@ -21,23 +23,42 @@ var React = require('./react-shim'),
 /**
  * Extract summary statistics from the read data.
  */
-function extractSummaryStatistics(reads: Array<SamRead>, contig: string) {
-  var binCounts = ({}: {[key: number]: number});
+function extractSummaryStatistics(reads: Array<SamRead>,
+                                  contig: string,
+                                  referenceSource: TwoBitSource) {
+  var binCounts = ({}: {[key: number]: any});
 
   // This is written in an imperative style (instead of with _.groupBy)
   // as an optimization.
   _.each(reads, read => {
     var interval = read.getInterval();
 
+    var opInfo = getOpInfo(read, referenceSource);
+
     var start = interval.start(),
         stop = interval.stop();
     for (var j = start; j <= stop; j++) {
-      binCounts[j] = (binCounts[j] || 0) + 1;
+      var binCount = binCounts[j] || { count: 0, mismatches: [] };
+      binCount.count += 1;
+      binCounts[j] = binCount;
     }
-  });
-  var maxCoverage = _.max(binCounts);
 
-  var posCounts = _.map(binCounts, (count, position) => ({position: Number(position), count}));
+    // Capture mismatches for future use
+    _.each(opInfo.mismatches, m => {
+      var binCount = binCounts[m.pos + 1];
+      if(binCount) {
+        binCounts[m.pos + 1].mismatches.push(m.basePair);
+      } else {
+        // do nothing, we don't info on this position yet
+      }
+    });
+  });
+  var maxCoverage = _.max(binCounts, bc => bc.count).count;
+
+  var posCounts = _.map(binCounts,
+                        (bc, position) => ({position: Number(position),
+                                            count: bc.count,
+                                            mismatches: bc.mismatches}));
   var sortedPosCounts = _.sortBy(posCounts, bin => bin.position);
 
   return {binCounts: sortedPosCounts, maxCoverage};
@@ -65,17 +86,20 @@ class CoverageTrack extends React.Component {
   }
 
   componentDidMount() {
-    this.props.source.on('newdata', () => {
+    var updateState = () => {
       var ci = new ContigInterval(this.props.range.contig, 0, Number.MAX_VALUE),
           reads = this.props.source.getAlignmentsInRange(ci),
-          {binCounts, maxCoverage} = extractSummaryStatistics(reads, this.props.range.contig);
+          {binCounts, maxCoverage} = extractSummaryStatistics(reads, this.props.range.contig, this.props.referenceSource);
 
       this.setState({
         reads,
         binCounts,
         maxCoverage
       });
-    });
+    };
+
+    this.props.source.on('newdata', updateState);
+    this.props.referenceSource.on('newdata', updateState);
   }
 
   componentDidUpdate(prevProps: any, prevState: any) {
@@ -85,7 +109,7 @@ class CoverageTrack extends React.Component {
     }
   }
 
-  binsInRange(): Array<{position:string,count:number}> {
+  binsInRange(): Array<{position:string,count:number,mismatches:Array<string>}> {
     var {start, stop} = this.props.range;
     return this.state.binCounts.filter(
         ({position}) => (position >= start && position <= stop));
@@ -122,7 +146,6 @@ class CoverageTrack extends React.Component {
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    ctx.fillStyle = style.COVERAGE_BIN_COLOR;
     var barWidth = xScale(1) - xScale(0),
         barPadding = barWidth * style.COVERAGE_BIN_PADDING_CONSTANT;
 
@@ -132,10 +155,34 @@ class CoverageTrack extends React.Component {
       var barPosX = xScale(bin.position),
           barPosY = yScale(bin.count) - yScale(axisMax),
           barHeight = Math.max(0, yScale(axisMax - bin.count));
+      // These are generic coverage bins
+      ctx.fillStyle = style.COVERAGE_BIN_COLOR;
       ctx.fillRect(barPosX + barPadding,
                    barPosY,
                    barWidth - barPadding,
                    barHeight);
+
+      // These are variant bars
+      if(bin.mismatches.length > 0) {
+          var vBasePosY = yScale(0);  // the very bottom of the canvas
+          _.chain(bin.mismatches).countBy().each((count, base) => {
+              var misMatchObj = {position: bin.position, count, base};
+              ctx.pushObject(misMatchObj);  // for debugging purposes
+
+              // Scale the height based on the percent of reads w/ this mismatch
+              var vBarHeight = barHeight * (count / bin.count);
+              vBasePosY -= vBarHeight;
+
+              ctx.fillStyle = style.BASE_COLORS[base];
+              ctx.fillRect(barPosX + barPadding,
+                           vBasePosY,
+                           barWidth - barPadding,
+                           vBarHeight);
+
+              ctx.popObject();
+          });
+      }
+
       ctx.popObject();
     });
 
