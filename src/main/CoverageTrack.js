@@ -20,6 +20,12 @@ var React = require('./react-shim'),
     ContigInterval = require('./ContigInterval');
 
 
+// Basic setup (TODO: make this configurable by the user)
+var SHOW_MISMATCHES = true;
+// Only show mismatch information when there are more than this many
+// reads supporting that mismatch.
+var MISMATCH_THRESHOLD = 1;
+
 /**
  * Extract summary statistics from the read data.
  */
@@ -163,9 +169,14 @@ class CoverageTrack extends React.Component {
                    barHeight);
 
       // These are variant bars
-      if(bin.mismatches.length > 0) {
+      if(SHOW_MISMATCHES && bin.mismatches.length > 0) {
           var vBasePosY = yScale(0);  // the very bottom of the canvas
           _.chain(bin.mismatches).countBy().each((count, base) => {
+              if(count <= MISMATCH_THRESHOLD) {
+                // Don't show this as it doesn't have enough evidence
+                return;
+              }
+
               var misMatchObj = {position: bin.position, count, base};
               ctx.pushObject(misMatchObj);  // for debugging purposes
 

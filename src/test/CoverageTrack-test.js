@@ -79,7 +79,7 @@ describe('CoverageTrack', function() {
     // Check whether the coverage bins are loaded yet
     return testDiv.querySelector('canvas') &&
         findCoverageBins().length > 1 &&
-        findMismatchBins().length > 1 &&
+        findMismatchBins().length > 0 &&
         findCoverageLabels().length > 1;
   };
 
@@ -93,7 +93,7 @@ describe('CoverageTrack', function() {
   it('should show mismatch information', function() {
     return waitFor(hasCoverage, 2000).then(() => {
       var mbins = findMismatchBins();
-      expect(mbins).to.have.length(12);
+      expect(mbins).to.have.length(1); // only one should survive from threshold
       var tMismatch = _.filter(mbins, mb => mb.position == 7500765)[0];
       expect(tMismatch.base).to.equal("T");
       expect(tMismatch.count).to.equal(22);
