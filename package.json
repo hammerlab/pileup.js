@@ -32,9 +32,10 @@
     "browserify": "browserify -r .:pileup -v -t [ envify --NODE_ENV production ] --debug -o dist/pileup.js",
     "watch-dist": "watchify -r .:pileup -v -t [ envify --NODE_ENV development ] --debug -o dist/pileup.js",
     "browserify-test": "browserify dist/test/*.js -v --debug -o dist/tests.js",
+    "exorcist": "cat dist/pileup.js | exorcist dist/pileup.js.map > /dev/null",
     "watch": "./scripts/watch.sh",
     "watch-test": "watchify dist/test/*.js -v --debug -o dist/tests.js",
-    "uglify": "uglifyjs --compress --mangle -o dist/pileup.min.js dist/pileup.js",
+    "uglify": "uglifyjs --compress --mangle --in-source-map dist/pileup.js.map --source-map-include-sources --source-map dist/pileup.min.js.map -o dist/pileup.min.js dist/pileup.js",
     "lint": "./scripts/lint.sh",
     "http-server": "http-server .",
     "test": "./scripts/test.sh",
@@ -42,7 +43,7 @@
     "flow-check": "flow check",
     "coverage": "./scripts/generate-coverage.sh",
     "sniper": "biojs-sniper",
-    "build": "npm run minid3 && npm run jstransform && npm run browserify-all && npm run uglify"
+    "build": "npm run minid3 && npm run jstransform && npm run browserify-all && npm run exorcist && npm run uglify"
   },
   "author": "Dan Vanderkam",
   "contributors": [
@@ -79,6 +80,7 @@
     "envify": "^3.4.0",
     "es5-shim": "^4.1.0",
     "flow-bin": "^0.17.0",
+    "exorcist": "^0.4.0",
     "http-server": "^0.8.0",
     "istanbul": "^0.3.17",
     "jstransform": "^11.0.2",
