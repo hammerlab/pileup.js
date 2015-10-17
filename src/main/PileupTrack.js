@@ -30,6 +30,9 @@ var READ_SPACING = 2;  // vertical pixels between reads
 
 var READ_STRAND_ARROW_WIDTH = 6;
 
+// PhantomJS does not support setLineDash.
+var SUPPORTS_DASHES = !!CanvasRenderingContext2D.prototype.setLineDash;
+
 
 // Should the Cigar op be rendered to the screen?
 function isRendered(op) {
@@ -284,6 +287,32 @@ class PileupTrack extends React.Component {
     var scale = this.getScale();
     var renderer = getRenderer(ctx, scale);
     vGroups.forEach(vGroup => renderer.drawGroup(vGroup));
+
+    this.renderCenterLine(ctx, range, scale);
+  }
+
+  // Draw the center line(s), which orient the user
+  renderCenterLine(ctx: CanvasRenderingContext2D,
+                   range: ContigInterval<string>,
+                   scale: (num: number) => number) {
+    var midPoint = Math.floor((range.stop() + range.start()) / 2),
+        rightLineX = scale(midPoint + 1),
+        leftLineX = scale(midPoint),
+        height = ctx.canvas.height;
+    ctx.save();
+    ctx.lineWidth = 1;
+    if (SUPPORTS_DASHES) {
+      ctx.setLineDash([5, 5]);
+    }
+    if (rightLineX - leftLineX < 3) {
+      // If the lines are very close, then just draw a center line.
+      var midX = (leftLineX + rightLineX) / 2;
+      canvasUtils.drawLine(ctx, midX - 0.5, 0, midX - 0.5, height);
+    } else {
+      canvasUtils.drawLine(ctx, leftLineX - 0.5, 0, leftLineX - 0.5, height);
+      canvasUtils.drawLine(ctx, rightLineX - 0.5, 0, rightLineX - 0.5, height);
+    }
+    ctx.restore();
   }
 
   handleClick(reactEvent: any) {

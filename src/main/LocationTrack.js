@@ -55,10 +55,10 @@ class LocationTrack extends React.Component {
         leftLineX = scale(midPoint);
 
     // Left line
-    canvasUtils.drawLine(ctx, rightLineX, 0, rightLineX, height);
+    canvasUtils.drawLine(ctx, leftLineX, 0, leftLineX, height);
 
     // Right line
-    canvasUtils.drawLine(ctx, leftLineX, 0, leftLineX, height);
+    canvasUtils.drawLine(ctx, rightLineX, 0, rightLineX, height);
 
     // Mid label
     var midLabelFormat = d3.format(',d'),
