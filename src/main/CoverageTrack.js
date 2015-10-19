@@ -118,7 +118,7 @@ class CoverageTrack extends React.Component {
   binsInRange(): BinSummaryWithLocation[] {
     var {start, stop} = this.props.range;
     return this.state.binCounts.filter(
-        ({position}) => (position >= start && position <= stop));
+        ({position}) => (position >= start - 1 && position <= stop + 1));
   }
 
   getContext(): CanvasRenderingContext2D {
