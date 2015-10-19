@@ -10,13 +10,13 @@ import type {Gene} from './BigBedDataSource';
 var React = require('react'),
     ReactDOM = require('react-dom'),
     _ = require('underscore'),
-    d3 = require('d3/minid3'),
     shallowEquals = require('shallow-equals');
 
 var types = require('./react-types'),
     bedtools = require('./bedtools'),
     Interval = require('./Interval'),
     d3utils = require('./d3utils'),
+    scale = require('./scale'),
     ContigInterval = require('./ContigInterval'),
     canvasUtils = require('./canvas-utils'),
     dataCanvas = require('data-canvas'),
@@ -111,10 +111,10 @@ var GeneTrack = React.createClass({
     // Hold off until height & width are known.
     if (width === 0) return;
 
-    var scale = this.getScale(),
+    var sc = this.getScale(),
         // We can't clamp scale directly because of offsetPx.
-        clampedScale = d3.scale.linear()
-            .domain([scale.invert(0), scale.invert(width)])
+        clampedScale = scale.linear()
+            .domain([sc.invert(0), sc.invert(width)])
             .range([0, width])
             .clamp(true);
 
@@ -141,9 +141,9 @@ var GeneTrack = React.createClass({
       // TODO: only compute all these intervals when data becomes available.
       var exons = bedtools.splitCodingExons(gene.exons, gene.codingRegion);
       exons.forEach(exon => {
-        ctx.fillRect(scale(exon.start),
+        ctx.fillRect(sc(exon.start),
                      geneLineY - 3 * (exon.isCoding ? 2 : 1),
-                     scale(exon.stop + 1) - scale(exon.start),
+                     sc(exon.stop + 1) - sc(exon.start),
                      6 * (exon.isCoding ? 2 : 1));
       });
 

@@ -6,18 +6,18 @@
 
 import type {GenomeRange} from './react-types';
 
-var d3 = require('d3/minid3');
+var d3 = require('d3/minid3'),
+    scale = require('./scale');
 
 /**
  * Shared x-axis scaling logic for tracks
  */
-function getTrackScale(range: GenomeRange, width: number) {
-  if (!range) return d3.scale.linear();
+function getTrackScale(range: GenomeRange, width: number): any {
+  if (!range) return scale.linear();
   var offsetPx = range.offsetPx || 0;
-  var scale = d3.scale.linear()
+  return scale.linear()
           .domain([range.start, range.stop + 1])  // 1 bp wide
           .range([-offsetPx, width - offsetPx]);
-  return scale;
 }
 
 /**

@@ -98,7 +98,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
       vizTracks.forEach(({source}) => {
         source.off();
       });
-      React.unmountComponentAtNode(el);
+      ReactDOM.unmountComponentAtNode(el);
       reactElement = null;
       referenceTrack = null;
       vizTracks = null;
