@@ -43,3 +43,15 @@ export type InflatedBlock = {
   compressedLength: number;
   buffer: ArrayBuffer;
 }
+
+// Coverage Track
+export type BinSummary = {
+  count: number;
+  mismatches: string[];
+}
+
+export type BinSummaryWithLocation = {
+  position: string;
+  count:number;
+  mismatches: string[];
+}

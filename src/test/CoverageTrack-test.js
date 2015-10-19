@@ -62,8 +62,13 @@ describe('CoverageTrack', function() {
   var {drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
 
   var findCoverageBins = () => {
-    return drawnObjectsWith(testDiv, '.coverage', b => b.position);
+    return drawnObjectsWith(testDiv, '.coverage', b => b.position && b.mismatches);
   };
+
+  var findMismatchBins = ():Array<any> => {
+    return drawnObjectsWith(testDiv, '.coverage', b => b.base);
+  };
+
 
   var findCoverageLabels = () => {
     return drawnObjectsWith(testDiv, '.coverage', l => l.type == 'label');
@@ -73,6 +78,7 @@ describe('CoverageTrack', function() {
     // Check whether the coverage bins are loaded yet
     return testDiv.querySelector('canvas') &&
         findCoverageBins().length > 1 &&
+        findMismatchBins().length > 0 &&
         findCoverageLabels().length > 1;
   };
 
@@ -80,6 +86,13 @@ describe('CoverageTrack', function() {
     return waitFor(hasCoverage, 2000).then(() => {
       var bins = findCoverageBins();
       expect(bins).to.have.length.at.least(range.stop - range.start + 1);
+    });
+  });
+
+  it('should show mismatch information', function() {
+    return waitFor(hasCoverage, 2000).then(() => {
+      expect(findMismatchBins()).to.deep.equal(
+        [{position: 7500765, count: 22, base: 'T'}]);
     });
   });
 
