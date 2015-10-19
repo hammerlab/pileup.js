@@ -4,7 +4,7 @@
  */
 'use strict';
 
-var React = require('./react-shim'),
+var React = require('react'),
     d3 = require('d3/minid3'),
     EmptySource = require('./EmptySource'),
     types = require('./react-types'),

@@ -7,7 +7,7 @@
 import type {Strand} from './Alignment';
 import type {Gene} from './BigBedDataSource';
 
-var React = require('./react-shim'),
+var React = require('react'),
     _ = require('underscore'),
     d3 = require('d3/minid3'),
     shallowEquals = require('shallow-equals'),

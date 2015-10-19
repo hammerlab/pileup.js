@@ -4,7 +4,7 @@
  */
 'use strict';
 
-var React = require('./react-shim'),
+var React = require('react'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     canvasUtils = require('./canvas-utils'),

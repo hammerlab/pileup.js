@@ -10,7 +10,7 @@
  */
 'use strict';
 
-var React = require('./react-shim'),
+var React = require('react'),
     EmptySource = require('./EmptySource'),
     types = require('./react-types'),
     canvasUtils = require('./canvas-utils'),

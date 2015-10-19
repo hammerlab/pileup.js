@@ -10,7 +10,7 @@ import type {BasePair} from './pileuputils';
 import type {VisualAlignment, VisualGroup} from './PileupCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 
-var React = require('./react-shim'),
+var React = require('react'),
     d3 = require('d3/minid3'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),

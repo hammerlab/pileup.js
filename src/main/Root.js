@@ -6,7 +6,7 @@
 
 import type {VisualizedTrack} from './types';
 
-var React = require('./react-shim'),
+var React = require('react'),
     Controls = require('./Controls'),
     VisualizationWrapper = require('./VisualizationWrapper');
 

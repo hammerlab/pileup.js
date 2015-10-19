@@ -3,7 +3,7 @@
  */
 'use strict';
 
-var React = require('./react-shim'),
+var React = require('react'),
     types = require('./react-types'),
     d3utils = require('./d3utils'),
     _ = require('underscore'),

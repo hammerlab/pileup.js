@@ -9,7 +9,7 @@
 
 var expect = require('chai').expect;
 
-var React = require('../main/react-shim');
+var React = require('../main/react');
 
 var pileup = require('../main/pileup'),
     TwoBit = require('../main/TwoBit'),
