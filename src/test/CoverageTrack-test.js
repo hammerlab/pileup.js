@@ -15,7 +15,6 @@ var pileup = require('../main/pileup'),
     TwoBitDataSource = require('../main/TwoBitDataSource'),
     MappedRemoteFile = require('./MappedRemoteFile'),
     dataCanvas = require('data-canvas'),
-    _ = require('underscore'),
     {waitFor} = require('./async');
 
 describe('CoverageTrack', function() {
@@ -92,11 +91,8 @@ describe('CoverageTrack', function() {
 
   it('should show mismatch information', function() {
     return waitFor(hasCoverage, 2000).then(() => {
-      var mbins = findMismatchBins();
-      expect(mbins).to.have.length(1); // only one should survive from threshold
-      var tMismatch = _.filter(mbins, mb => mb.position == 7500765)[0];
-      expect(tMismatch.base).to.equal("T");
-      expect(tMismatch.count).to.equal(22);
+      expect(findMismatchBins()).to.deep.equal(
+        [{position: 7500765, count: 22, base: 'T'}]);
     });
   });
 

@@ -7,6 +7,7 @@
 import type * as SamRead from './SamRead';
 import type * as Interval from './Interval';
 import type {TwoBitSource} from './TwoBitDataSource';
+import type {BinSummary, BinSummaryWithLocation} from './types';
 
 var React = require('./react-shim'),
     d3 = require('d3/minid3'),
@@ -32,7 +33,7 @@ var MISMATCH_THRESHOLD = 1;
 function extractSummaryStatistics(reads: Array<SamRead>,
                                   contig: string,
                                   referenceSource: TwoBitSource) {
-  var binCounts = ({}: {[key: number]: any});
+  var binCounts = ({}: {[key: number]: BinSummary});
 
   // This is written in an imperative style (instead of with _.groupBy)
   // as an optimization.
@@ -44,15 +45,14 @@ function extractSummaryStatistics(reads: Array<SamRead>,
     var start = interval.start(),
         stop = interval.stop();
     for (var j = start; j <= stop; j++) {
-      var binCount = binCounts[j] || { count: 0, mismatches: [] };
-      binCount.count += 1;
-      binCounts[j] = binCount;
+      if (!binCounts[j]) binCounts[j] = {count: 0, mismatches: []};
+      binCounts[j].count += 1;
     }
 
     // Capture mismatches for future use
     _.each(opInfo.mismatches, m => {
       var binCount = binCounts[m.pos + 1];
-      if(binCount) {
+      if (binCount) {
         binCounts[m.pos + 1].mismatches.push(m.basePair);
       } else {
         // do nothing, we don't info on this position yet
@@ -115,7 +115,7 @@ class CoverageTrack extends React.Component {
     }
   }
 
-  binsInRange(): Array<{position:string,count:number,mismatches:Array<string>}> {
+  binsInRange(): BinSummaryWithLocation[] {
     var {start, stop} = this.props.range;
     return this.state.binCounts.filter(
         ({position}) => (position >= start && position <= stop));
@@ -169,28 +169,33 @@ class CoverageTrack extends React.Component {
                    barHeight);
 
       // These are variant bars
-      if(SHOW_MISMATCHES && bin.mismatches.length > 0) {
-          var vBasePosY = yScale(0);  // the very bottom of the canvas
-          _.chain(bin.mismatches).countBy().each((count, base) => {
-              if(count <= MISMATCH_THRESHOLD) {
-                // Don't show this as it doesn't have enough evidence
-                return;
-              }
+      if (SHOW_MISMATCHES && bin.mismatches.length > 0) {
+        var vBasePosY = yScale(0);  // the very bottom of the canvas
+        _.chain(bin.mismatches)
+          .countBy()
+          .map((count, base) => ({count, base}))  // pull base into the object
+          .sortBy(mc => -mc.count)  // the most common mismatch at the bottom
+          .each(mc => {
+            var {count, base} = mc;
+            if (count <= MISMATCH_THRESHOLD) {
+              // Don't show this as it doesn't have enough evidence
+              return;
+            }
 
-              var misMatchObj = {position: bin.position, count, base};
-              ctx.pushObject(misMatchObj);  // for debugging purposes
+            var misMatchObj = {position: bin.position, count, base};
+            ctx.pushObject(misMatchObj);  // for debugging and click-tracking
 
-              // Scale the height based on the percent of reads w/ this mismatch
-              var vBarHeight = barHeight * (count / bin.count);
-              vBasePosY -= vBarHeight;
+            // Scale the height based on the percent of reads w/ this mismatch
+            var vBarHeight = barHeight * (count / bin.count);
+            vBasePosY -= vBarHeight;
 
-              ctx.fillStyle = style.BASE_COLORS[base];
-              ctx.fillRect(barPosX + barPadding,
-                           vBasePosY,
-                           barWidth - barPadding,
-                           vBarHeight);
+            ctx.fillStyle = style.BASE_COLORS[base];
+            ctx.fillRect(barPosX + barPadding,
+                         vBasePosY,
+                         barWidth - barPadding,
+                         vBarHeight);
 
-              ctx.popObject();
+            ctx.popObject();
           });
       }
 
