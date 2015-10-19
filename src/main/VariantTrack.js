@@ -8,8 +8,10 @@ import type {VcfDataSource} from './VcfDataSource';
 import type {Variant} from './vcf';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 
-var React = require('./react-shim'),
-    d3utils = require('./d3utils'),
+var React = require('react'),
+    ReactDOM = require('react-dom');
+
+var d3utils = require('./d3utils'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     ContigInterval = require('./ContigInterval'),
@@ -48,7 +50,7 @@ var VariantTrack = React.createClass({
   },
 
   updateVisualization: function() {
-    var canvas = this.getDOMNode(),
+    var canvas = ReactDOM.findDOMNode(this),
         {width, height} = this.props;
 
     // Hold off until height & width are known.
@@ -89,9 +91,10 @@ var VariantTrack = React.createClass({
   handleClick(reactEvent: any) {
     var ev = reactEvent.nativeEvent,
         x = ev.offsetX,
-        y = ev.offsetY;
-    var ctx = canvasUtils.getContext(this.getDOMNode());
-    var trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
+        y = ev.offsetY,
+        canvas = ReactDOM.findDOMNode(this),
+        ctx = canvasUtils.getContext(canvas),
+        trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
     this.renderScene(trackingCtx);
     var variant = trackingCtx.hit && trackingCtx.hit[0];
     var alert = window.alert || console.log;

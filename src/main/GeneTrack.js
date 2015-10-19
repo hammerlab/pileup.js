@@ -7,11 +7,13 @@
 import type {Strand} from './Alignment';
 import type {Gene} from './BigBedDataSource';
 
-var React = require('./react-shim'),
+var React = require('react'),
+    ReactDOM = require('react-dom'),
     _ = require('underscore'),
     d3 = require('d3/minid3'),
-    shallowEquals = require('shallow-equals'),
-    types = require('./react-types'),
+    shallowEquals = require('shallow-equals');
+
+var types = require('./react-types'),
     bedtools = require('./bedtools'),
     Interval = require('./Interval'),
     d3utils = require('./d3utils'),
@@ -103,7 +105,7 @@ var GeneTrack = React.createClass({
     }
   },
   updateVisualization: function() {
-    var canvas = this.getDOMNode(),
+    var canvas = ReactDOM.findDOMNode(this),
         {width, height} = this.props;
 
     // Hold off until height & width are known.

@@ -4,7 +4,7 @@
  */
 'use strict';
 
-var React = require('./react-shim');
+var React = require('react');
 
 module.exports = {
   // A range in a genome. Note: may be null.

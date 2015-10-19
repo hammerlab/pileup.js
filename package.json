@@ -68,7 +68,9 @@
     "jdataview": "^2.5.0",
     "pako": "^0.2.5",
     "q": "^1.1.2",
-    "react": "^0.13.2",
+    "react": "^0.14.0",
+    "react-dom": "^0.14.0",
+    "react-addons-pure-render-mixin": "^0.14.0",
     "shallow-equals": "0.0.0",
     "underscore": "^1.7.0"
   },
@@ -94,6 +96,7 @@
     "parse-data-uri": "^0.2.0",
     "phantomjs": "^1.9.17",
     "prepush-hook": "^0.1.0",
+    "react-addons-test-utils": "^0.14.0",
     "sinon": "^1.12.2",
     "smash": "0.0.14",
     "sniper": "^0.2.16",

@@ -3,7 +3,8 @@
  */
 'use strict';
 
-var React = require('./react-shim'),
+var React = require('react'),
+    ReactDOM = require('react-dom'),
     types = require('./react-types'),
     d3utils = require('./d3utils'),
     _ = require('underscore'),
@@ -22,7 +23,7 @@ class VisualizationWrapper extends React.Component {
   }
 
   updateSize(): any {
-    var parentDiv = React.findDOMNode(this).parentNode;
+    var parentDiv = ReactDOM.findDOMNode(this).parentNode;
     this.setState({
       width: parentDiv.offsetWidth,
       height: parentDiv.offsetHeight
@@ -46,7 +47,7 @@ class VisualizationWrapper extends React.Component {
 
   addDragInterface(): any {
     this.hasDragBeenInitialized = true;
-    var div = React.findDOMNode(this);
+    var div = ReactDOM.findDOMNode(this);
     var originalRange, originalScale, dx=0;
     var dragstarted = () => {
       d3.event.sourceEvent.stopPropagation();

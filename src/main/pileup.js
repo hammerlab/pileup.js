@@ -5,7 +5,8 @@
 'use strict';
 
 var _ = require('underscore'),
-    React = require('./react-shim'),
+    React = require('react'),
+    ReactDOM = require('react-dom'),
     // Data sources
     TwoBitDataSource = require('./TwoBitDataSource'),
     BigBedDataSource = require('./BigBedDataSource'),
@@ -74,9 +75,9 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
   }
 
   var reactElement =
-      React.render(<Root referenceSource={referenceTrack.source}
-                         tracks={vizTracks}
-                         initialRange={params.range} />, el);
+      ReactDOM.render(<Root referenceSource={referenceTrack.source}
+                            tracks={vizTracks}
+                            initialRange={params.range} />, el);
   return {
     setRange(range: GenomeRange) {
       if (reactElement === null) {

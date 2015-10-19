@@ -8,7 +8,7 @@ import type * as SamRead from './SamRead';
 import type * as Interval from './Interval';
 import type {TwoBitSource} from './TwoBitDataSource';
 
-var React = require('./react-shim'),
+var React = require('react'),
     d3 = require('d3/minid3'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
@@ -132,14 +132,14 @@ class CoverageTrack extends React.Component {
   }
 
   getContext(): CanvasRenderingContext2D {
-    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement);
+    var canvas = (this.refs.canvas : HTMLCanvasElement);
     // The typecast through `any` is because getContext could return a WebGL context.
     var ctx = ((canvas.getContext('2d') : any) : CanvasRenderingContext2D);
     return ctx;
   }
 
   visualizeCoverage() {
-    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement),
+    var canvas = (this.refs.canvas : HTMLCanvasElement),
         width = this.props.width,
         height = this.props.height,
         padding = 10,

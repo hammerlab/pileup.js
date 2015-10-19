@@ -4,7 +4,8 @@
  */
 'use strict';
 
-var React = require('./react-shim'),
+var React = require('react'),
+    ReactDOM = require('react-dom'),
     d3 = require('d3/minid3'),
     EmptySource = require('./EmptySource'),
     types = require('./react-types'),
@@ -34,18 +35,14 @@ class LocationTrack extends React.Component {
     this.updateVisualization();
   }
 
-  getDOMNode(): any {
-    return React.findDOMNode(this);
-  }
-
   updateVisualization() {
-    var canvas = this.getDOMNode(),
+    var canvas = ReactDOM.findDOMNode(this),
         {range, width, height} = this.props,
         scale = this.getScale();
 
     d3utils.sizeCanvas(canvas, width, height);
 
-    var ctx = dataCanvas.getDataContext(canvasUtils.getContext(this.getDOMNode()));
+    var ctx = dataCanvas.getDataContext(canvasUtils.getContext(canvas));
     ctx.save();
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);

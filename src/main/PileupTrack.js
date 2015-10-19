@@ -10,7 +10,7 @@ import type {BasePair} from './pileuputils';
 import type {VisualAlignment, VisualGroup} from './PileupCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 
-var React = require('./react-shim'),
+var React = require('react'),
     d3 = require('d3/minid3'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
@@ -258,7 +258,7 @@ class PileupTrack extends React.Component {
   // Update the D3 visualization to reflect the cached reads &
   // currently-visible range.
   updateVisualization() {
-    var canvas = this.refs.canvas.getDOMNode(),
+    var canvas = this.refs.canvas,
         width = this.props.width;
 
     // Hold off until height & width are known.
@@ -319,7 +319,7 @@ class PileupTrack extends React.Component {
     var ev = reactEvent.nativeEvent,
         x = ev.offsetX,
         y = ev.offsetY;
-    var ctx = canvasUtils.getContext(this.refs.canvas.getDOMNode());
+    var ctx = canvasUtils.getContext(this.refs.canvas);
     var trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
     this.renderScene(trackingCtx);
     var vRead = _.find(trackingCtx.hits[0], hit => hit.read);

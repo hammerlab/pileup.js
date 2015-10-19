@@ -4,8 +4,11 @@
  */
 'use strict';
 
-var React = require('./react-shim'),
-    shallowEquals = require('shallow-equals'),
+var React = require('react'),
+    ReactDOM = require('react-dom'),
+    PureRenderMixin = require('react-addons-pure-render-mixin');
+
+var shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     canvasUtils = require('./canvas-utils'),
     dataCanvas = require('data-canvas'),
@@ -16,7 +19,7 @@ var React = require('./react-shim'),
 
 var GenomeTrack = React.createClass({
   // This prevents updates if state & props have not changed.
-  mixins: [React.addons.PureRenderMixin],
+  mixins: [PureRenderMixin],
   displayName: 'reference',
 
   propTypes: {
@@ -43,9 +46,8 @@ var GenomeTrack = React.createClass({
       this.updateVisualization();
     }
   },
-
   updateVisualization: function() {
-    var canvas = this.getDOMNode(),
+    var canvas = ReactDOM.findDOMNode(this),
         {width, height, range} = this.props;
 
     // Hold off until height & width are known.
