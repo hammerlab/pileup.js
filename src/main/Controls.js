@@ -17,9 +17,9 @@ var Controls = React.createClass({
   },
   makeRange: function(): GenomeRange {
     return {
-      contig: this.refs.contig.getDOMNode().value,
-      start: Number(this.refs.start.getDOMNode().value),
-      stop: Number(this.refs.stop.getDOMNode().value)
+      contig: this.refs.contig.value,
+      start: Number(this.refs.start.value),
+      stop: Number(this.refs.stop.value)
     };
   },
   handleContigChange: function(e: SyntheticEvent) {
@@ -32,12 +32,12 @@ var Controls = React.createClass({
   // Sets the values of the input elements to match `props.range`.
   updateRangeUI: function() {
     var r = this.props.range || {contig: '', start: '', stop: ''};
-    this.refs.start.getDOMNode().value = r.start;
-    this.refs.stop.getDOMNode().value = r.stop;
+    this.refs.start.value = r.start;
+    this.refs.stop.value = r.stop;
 
     if (this.props.contigList) {
       var contigIdx = this.props.contigList.indexOf(r.contig);
-      this.refs.contig.getDOMNode().selectedIndex = contigIdx;
+      this.refs.contig.selectedIndex = contigIdx;
     }
   },
   zoomIn: function(e: any) {

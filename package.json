@@ -96,6 +96,7 @@
     "parse-data-uri": "^0.2.0",
     "phantomjs": "^1.9.17",
     "prepush-hook": "^0.1.0",
+    "react-addons-test-utils": "^0.14.0",
     "sinon": "^1.12.2",
     "smash": "0.0.14",
     "sniper": "^0.2.16",

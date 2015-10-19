@@ -9,7 +9,7 @@
 
 var expect = require('chai').expect;
 
-var React = require('../main/react');
+var ReactTestUtils = require('react-addons-test-utils');
 
 var pileup = require('../main/pileup'),
     TwoBit = require('../main/TwoBit'),
@@ -106,7 +106,7 @@ describe('GenomeTrack', function() {
     return waitFor(hasReference, 2000).then(() => {
       expect(startTxt.value).to.equal('7500725');
       expect(stopTxt.value).to.equal('7500775');
-      React.addons.TestUtils.Simulate.click(minusBtn);
+      ReactTestUtils.Simulate.click(minusBtn);
     }).delay(50).then(() => {
       expect(p.getRange()).to.deep.equal({
         contig: 'chr17',
@@ -115,7 +115,7 @@ describe('GenomeTrack', function() {
       });
       expect(startTxt.value).to.equal('7500700');
       expect(stopTxt.value).to.equal('7500800');
-      React.addons.TestUtils.Simulate.click(plusBtn);
+      ReactTestUtils.Simulate.click(plusBtn);
     }).delay(50).then(() => {
       expect(p.getRange()).to.deep.equal({
         contig: 'chr17',

@@ -11,6 +11,7 @@
 'use strict';
 
 var React = require('react'),
+    ReactDOM = require('react-dom'),
     EmptySource = require('./EmptySource'),
     types = require('./react-types'),
     canvasUtils = require('./canvas-utils'),
@@ -43,7 +44,7 @@ class ScaleTrack extends React.Component {
   }
 
   getDOMNode(): any {
-    return React.findDOMNode(this);
+    return ReactDOM.findDOMNode(this);
   }
 
   updateVisualization() {

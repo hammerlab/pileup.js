@@ -92,14 +92,14 @@ class CoverageTrack extends React.Component {
   }
 
   getContext(): CanvasRenderingContext2D {
-    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement);
+    var canvas = (this.refs.canvas : HTMLCanvasElement);
     // The typecast through `any` is because getContext could return a WebGL context.
     var ctx = ((canvas.getContext('2d') : any) : CanvasRenderingContext2D);
     return ctx;
   }
 
   visualizeCoverage() {
-    var canvas = (this.refs.canvas.getDOMNode() : HTMLCanvasElement),
+    var canvas = (this.refs.canvas : HTMLCanvasElement),
         width = this.props.width,
         height = this.props.height,
         padding = 10,
