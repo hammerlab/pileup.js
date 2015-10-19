@@ -7,7 +7,6 @@
 import type * as SamRead from './SamRead';
 import type * as Interval from './Interval';
 import type {TwoBitSource} from './TwoBitDataSource';
-import type {BinSummary, BinSummaryWithLocation} from './types';
 
 var React = require('./react-shim'),
     d3 = require('d3/minid3'),
@@ -20,6 +19,16 @@ var React = require('./react-shim'),
     style = require('./style'),
     ContigInterval = require('./ContigInterval');
 
+type BinSummary = {
+  count: number;
+  mismatches: {[key: string]: number};
+}
+
+type BinSummaryWithLocation = {
+  position: string;
+  count:number;
+  mismatches: {[key: string]: number};
+}
 
 // Basic setup (TODO: make this configurable by the user)
 var SHOW_MISMATCHES = true;
@@ -45,7 +54,7 @@ function extractSummaryStatistics(reads: Array<SamRead>,
     var start = interval.start(),
         stop = interval.stop();
     for (var j = start; j <= stop; j++) {
-      if (!binCounts[j]) binCounts[j] = {count: 0, mismatches: []};
+      if (!binCounts[j]) binCounts[j] = {count: 0, mismatches: {}};
       binCounts[j].count += 1;
     }
 
@@ -53,7 +62,8 @@ function extractSummaryStatistics(reads: Array<SamRead>,
     _.each(opInfo.mismatches, m => {
       var binCount = binCounts[m.pos + 1];
       if (binCount) {
-        binCounts[m.pos + 1].mismatches.push(m.basePair);
+        var basecount = binCount.mismatches[m.basePair] || 0;
+        binCounts[m.pos + 1].mismatches[m.basePair] = ++basecount;
       } else {
         // do nothing, we don't info on this position yet
       }
@@ -169,10 +179,9 @@ class CoverageTrack extends React.Component {
                    barHeight);
 
       // These are variant bars
-      if (SHOW_MISMATCHES && bin.mismatches.length > 0) {
+      if (SHOW_MISMATCHES && !_.isEmpty(bin.mismatches)) {
         var vBasePosY = yScale(0);  // the very bottom of the canvas
         _.chain(bin.mismatches)
-          .countBy()
           .map((count, base) => ({count, base}))  // pull base into the object
           .sortBy(mc => -mc.count)  // the most common mismatch at the bottom
           .each(mc => {
