@@ -7,15 +7,10 @@ set -o errexit
 # Ensure a clean dist directory
 rm -rf dist
 
-npm run jstransform
-npm run browserify
-npm run uglify
-
-# jstransform creates this, but we don't want to distribute it.
-rm -rf dist/.module-cache
+npm run build
 
 # No need to distribute tests
-rm -rf dist/test
+rm dist/tests.js
 
 # Once we have more confidence in it, this script should just run `npm publish`.
 echo
