@@ -93,6 +93,7 @@
     "mocha-lcov-reporter": ">=0.0.2",
     "mocha-phantomjs": "3.5.3",
     "mocha-phantomjs-istanbul": "0.0.2",
+    "number-to-locale-string": "^1.0.0",
     "parse-data-uri": "^0.2.0",
     "phantomjs": "^1.9.17",
     "prepush-hook": "^0.1.0",

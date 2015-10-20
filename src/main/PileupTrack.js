@@ -11,7 +11,7 @@ import type {VisualAlignment, VisualGroup} from './PileupCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 
 var React = require('react'),
-    d3 = require('d3/minid3'),
+    scale = require('./scale'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     d3utils = require('./d3utils'),
@@ -153,10 +153,10 @@ function yForRow(row) {
 // This is adapted from IGV.
 var MIN_Q = 5,  // these are Phred-scaled scores
     MAX_Q = 20,
-    Q_SCALE = d3.scale.linear()
-                .domain([MIN_Q, MAX_Q])
-                .range([0.1, 0.9])
-                .clamp(true);  // clamp output to [0.1, 0.9]
+    Q_SCALE = scale.linear()
+                   .domain([MIN_Q, MAX_Q])
+                   .range([0.1, 0.9])
+                   .clamp(true);  // clamp output to [0.1, 0.9]
 function opacityForQuality(quality: number): number {
   var alpha = Q_SCALE(quality);
 

@@ -7,8 +7,6 @@
 
 smash \
     node_modules/d3/src/start.js \
-    node_modules/d3/src/format/format.js \
-    node_modules/d3/src/scale/linear.js \
     node_modules/d3/src/behavior/drag.js \
     node_modules/d3/src/end.js \
     | perl -pe 's/ε/EPSILON/g' \

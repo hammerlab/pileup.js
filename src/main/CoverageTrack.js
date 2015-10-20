@@ -9,7 +9,7 @@ import type * as Interval from './Interval';
 import type {TwoBitSource} from './TwoBitDataSource';
 
 var React = require('react'),
-    d3 = require('d3/minid3'),
+    scale = require('./scale'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     d3utils = require('./d3utils'),
@@ -149,7 +149,7 @@ class CoverageTrack extends React.Component {
     if (width === 0) return;
     d3utils.sizeCanvas(canvas, width, height);
 
-    var yScale = d3.scale.linear()
+    var yScale = scale.linear()
       .domain([this.state.maxCoverage, 0])
       .range([padding, height - padding])
       .nice();

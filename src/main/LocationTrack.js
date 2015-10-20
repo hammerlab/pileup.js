@@ -6,7 +6,6 @@
 
 var React = require('react'),
     ReactDOM = require('react-dom'),
-    d3 = require('d3/minid3'),
     EmptySource = require('./EmptySource'),
     types = require('./react-types'),
     canvasUtils = require('./canvas-utils'),
@@ -58,12 +57,11 @@ class LocationTrack extends React.Component {
     canvasUtils.drawLine(ctx, rightLineX, 0, rightLineX, height);
 
     // Mid label
-    var midLabelFormat = d3.format(',d'),
-        midY = height / 2;
+    var midY = height / 2;
 
     ctx.fillStyle = style.LOC_FONT_COLOR;
     ctx.font = style.LOC_FONT_STYLE;
-    ctx.fillText(midLabelFormat(midPoint) + ' bp',
+    ctx.fillText(midPoint.toLocaleString() + ' bp',
                  rightLineX + style.LOC_TICK_LENGTH + style.LOC_TEXT_PADDING,
                  midY + style.LOC_TEXT_Y_OFFSET);
 
