@@ -106,7 +106,10 @@ var GeneTrack = React.createClass({
   },
   updateVisualization: function() {
     var canvas = ReactDOM.findDOMNode(this),
-        {width, height} = this.props;
+        {width, height} = this.props,
+        genomeRange = this.props.range;
+
+    var range = genomeRange ? new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop) : null;
 
     // Hold off until height & width are known.
     if (width === 0) return;
@@ -130,6 +133,7 @@ var GeneTrack = React.createClass({
     ctx.font = `${style.GENE_FONT_SIZE}px ${style.GENE_FONT}`;
     ctx.textAlign = 'center';
     this.state.genes.forEach(gene => {
+      if (!gene.position.chrIntersects(range)) return;
       ctx.pushObject(gene);
       ctx.lineWidth = 1;
       ctx.strokeStyle = style.GENE_COLOR;
