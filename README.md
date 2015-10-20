@@ -17,7 +17,6 @@ To create a pileup, use `pileup.create()`. You specify a container DOM element,
 an initial range and a list of tracks:
 
 ```javascript
-var pileup = require('pileup');
 var div = document.getElementById('your-id');
 var p = pileup.create(div, {
   range: {contig: 'chr17', start: 7512384, stop: 7512544},

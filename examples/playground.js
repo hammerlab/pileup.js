@@ -1,5 +1,3 @@
-var pileup = require('pileup');
-
 // We are going to use the same data source for multiple tracks
 var bamSource = pileup.formats.bam({
   url: '/test-data/synth3.normal.17.7500000-7515000.bam',
