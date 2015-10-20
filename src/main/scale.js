@@ -3,6 +3,7 @@
  * This only supports numeric scales, e.g. scale.range(['red', 'blue']) is invalid.
  * @flow
  */
+'use strict';
 
 function linear(): any {
   var clamped = false,
@@ -48,9 +49,9 @@ function linear(): any {
         err = m / span * step;
 
     // Filter ticks to get closer to the desired count.
-    if (err <= .15) step *= 10;
-    else if (err <= .35) step *= 5;
-    else if (err <= .75) step *= 2;
+    if (err <= 0.15) step *= 10;
+    else if (err <= 0.35) step *= 5;
+    else if (err <= 0.75) step *= 2;
 
     var nice = {
       floor: function(x) { return Math.floor(x / step) * step; },
@@ -64,8 +65,8 @@ function linear(): any {
         dx;
 
     if (x1 < x0) {
-      dx = i0, i0 = i1, i1 = dx;
-      dx = x0, x0 = x1, x1 = dx;
+      dx = i0; i0 = i1; i1 = dx;
+      dx = x0; x0 = x1; x1 = dx;
     }
 
     domain[i0] = nice.floor(x0);

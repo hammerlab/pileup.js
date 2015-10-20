@@ -6,7 +6,6 @@
 
 var React = require('react'),
     ReactDOM = require('react-dom'),
-    d3 = require('d3/minid3'),
     EmptySource = require('./EmptySource'),
     types = require('./react-types'),
     canvasUtils = require('./canvas-utils'),

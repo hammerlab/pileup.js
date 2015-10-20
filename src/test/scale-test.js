@@ -30,7 +30,7 @@ describe('scale', function() {
     var sc = scale.linear().domain([33, 0]).range(0, 100).nice();
     expect(sc.domain()).to.deep.equal([35, 0]);
 
-    var sc = scale.linear().domain([0, 33]).range(0, 100).nice();
+    sc = scale.linear().domain([0, 33]).range(0, 100).nice();
     expect(sc.domain()).to.deep.equal([0, 35]);
   });
 });
