@@ -5,7 +5,8 @@ npm run minid3  # TODO: remove
 
 # Transpile individual files. This is useful if another module,
 # e.g. cycledash, wants to require('pileup').
-babel src/main --out-dir dist/main
+# The dist/test files are required for code coverage
+babel src --out-dir dist
 
 # Create dist/tests
 browserify -v -t babelify src/test/*.js --debug -o dist/tests.js
