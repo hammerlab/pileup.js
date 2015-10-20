@@ -77,5 +77,4 @@ function linear(): any {
   return me;
 }
 
-// module.exports = d3.scale;
 module.exports = { linear };
