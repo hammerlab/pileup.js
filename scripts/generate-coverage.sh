@@ -10,6 +10,7 @@ set -x
 rm -rf coverage/*  # Clear out everything to ensure a hermetic run.
 istanbul instrument --output coverage/main dist/main
 cp -r dist/test coverage/test  # test code needn't be covered
+cp -r dist/lib coverage/lib
 
 # Build a combined file for running the tests in-browser
 browserify coverage/**/*.js -o coverage/tests.js
