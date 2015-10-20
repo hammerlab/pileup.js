@@ -68,6 +68,7 @@
   "devDependencies": {
     "arraybuffer-slice": "^0.1.2",
     "babel": "^5.8.23",
+    "babel-core": "^5.8.23",
     "babelify": "^6.3.0",
     "browserify": "^10.2.4",
     "chai": "^2.0.0",
