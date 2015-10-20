@@ -25,7 +25,6 @@
     "url": "https://github.com/hammerlab/pileup.js.git"
   },
   "scripts": {
-    "minid3": "./scripts/make-mini-d3.sh",
     "watch": "./scripts/watch.sh",
     "lint": "./scripts/lint.sh",
     "http-server": "http-server .",

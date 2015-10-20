@@ -1,19 +1,26 @@
 #!/bin/bash
 # Build require-ale and minified assets for distribution.
 set -o errexit
-npm run minid3  # TODO: remove
+./scripts/make-mini-d3.sh # TODO: remove
 
 # Transpile individual files. This is useful if another module,
 # e.g. cycledash, wants to require('pileup').
 # The dist/test files are required for code coverage
-babel src --out-dir dist
+babel src --ignore src/lib --out-dir dist
+cp -r src/lib dist/
 
 # Create dist/tests
-browserify -v -t babelify src/test/*.js --debug -o dist/tests.js
+browserify \
+  -v \
+  -t [ babelify --ignore src/lib ] \
+  --debug \
+  -o dist/tests.js \
+  src/test/*.js
 
 # Create dist/pileup.js
-browserify -v \
-  -t babelify \
+browserify \
+  -v \
+  -t [ babelify --ignore src/lib ] \
   -g [ envify --NODE_ENV production ] \
   -g uglifyify \
   src/main/pileup.js \

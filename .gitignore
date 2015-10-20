@@ -37,3 +37,6 @@ dist
 /*.bed
 /*.bam
 /*.vcf
+
+# Generated files
+src/lib

@@ -5,6 +5,7 @@
 # The unicode replacements are a workaround for
 # https://github.com/facebook/flow/issues/521
 
+mkdir -p src/lib
 smash \
     node_modules/d3/src/start.js \
     node_modules/d3/src/behavior/drag.js \
@@ -12,4 +13,4 @@ smash \
     | perl -pe 's/ε/EPSILON/g' \
     | perl -pe 's/π/PI/g' \
     | perl -pe 's/τ/TAU/g' \
-    > node_modules/d3/minid3.js
+    > src/lib/minid3.js
