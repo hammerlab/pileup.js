@@ -132,6 +132,7 @@ function getRenderer(ctx: DataCanvasRenderingContext2D, scale: (num: number) => 
     ctx.save();
     ctx.fillStyle = style.BASE_COLORS[bp.basePair];
     ctx.globalAlpha = opacityForQuality(bp.quality);
+    ctx.textAlign = 'center';
     if (showText) {
       // 0.5 = centered
       ctx.fillText(bp.basePair, scale(1 + 0.5 + bp.pos), y + READ_HEIGHT - 2);
