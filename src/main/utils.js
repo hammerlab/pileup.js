@@ -9,6 +9,8 @@ import type * as Q from 'q';
 
 var pako = require('pako/lib/inflate');
 
+var Interval = require('./Interval');
+
 // Compare two tuples of equal length. Is t1 <= t2?
 // TODO: make this tupleLessOrEqual<T> -- it works with strings or booleans, too.
 function tupleLessOrEqual(t1: Array<number>, t2: Array<number>): boolean {
@@ -153,6 +155,20 @@ function pipePromise<T>(deferred: Q.Deferred<T>, promise: Q.Promise<T>) {
   promise.then(deferred.resolve, deferred.reject, deferred.notify);
 }
 
+/**
+ * Scale the range by `factor` about its center.
+ * factor 2.0 will produce a range with twice the span, 0.5 with half.
+ * An invariant is that the center value will be identical before and after.
+ */
+function scaleRange(range: Interval, factor: number): Interval {
+  var span = range.stop - range.start,
+      center = Math.floor((range.start + range.stop) / 2),
+      newSpan = Math.round(factor * span / 2) * 2,
+      start = Math.max(0, center - newSpan / 2),
+      stop = center + newSpan / 2;  // TODO: clamp
+  return new Interval(start, stop);
+}
+
 module.exports = {
   tupleLessOrEqual,
   tupleRangeOverlaps,
@@ -160,5 +176,6 @@ module.exports = {
   inflateConcatenatedGzip,
   inflateGzip,
   altContigName,
-  pipePromise
+  pipePromise,
+  scaleRange
 };
