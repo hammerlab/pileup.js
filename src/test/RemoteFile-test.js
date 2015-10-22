@@ -113,7 +113,8 @@ describe('RemoteFile', () => {
       // The majority of the browsers will return 404
       // and a minority (like PhantomJS) will fail fast
       // (more information: https://github.com/ariya/phantomjs/issues/11195)
-      expect(err).to.match(/404|^Request failed/);
+      expect(err).to.match(/404|^Request.*failed/);
+      expect(err).to.match(/nonexistent/);
     });
   });
 

@@ -146,6 +146,7 @@ class RemoteFile {
   // Wrapper to convert XHRs to Promises.
   // The promised values are the response (e.g. an ArrayBuffer) and the Event.
   promiseXHR(xhr: XMLHttpRequest): Q.Promise<[any, Event]> {
+    var url = this.url;
     var deferred = Q.defer();
     xhr.addEventListener('load', function(e) {
       if (this.status >= 400) {
@@ -155,7 +156,7 @@ class RemoteFile {
       }
     });
     xhr.addEventListener('error', function(e) {
-      deferred.reject("Request failed with status: " + this.status);
+      deferred.reject(`Request for ${url} failed with status: ${this.status}`);
     });
     this.numNetworkRequests++;
     xhr.send();
