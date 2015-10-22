@@ -17,6 +17,7 @@ var React = require('react'),
     d3utils = require('./d3utils'),
     {CigarOp} = require('./pileuputils'),
     ContigInterval = require('./ContigInterval'),
+    Interval = require('./Interval'),
     DisplayMode = require('./DisplayMode'),
     PileupCache = require('./PileupCache'),
     canvasUtils = require('./canvas-utils'),
@@ -33,6 +34,8 @@ var READ_STRAND_ARROW_WIDTH = 6;
 // PhantomJS does not support setLineDash.
 var SUPPORTS_DASHES = !!CanvasRenderingContext2D.prototype.setLineDash;
 
+var SCROLLING_CLASS_NAME = 'track-content';
+
 
 // Should the Cigar op be rendered to the screen?
 function isRendered(op) {
@@ -42,7 +45,9 @@ function isRendered(op) {
 }
 
 // The renderer pulls out the canvas context and scale into shared variables in a closure.
-function getRenderer(ctx: DataCanvasRenderingContext2D, scale: (num: number) => number) {
+function getRenderer(ctx: DataCanvasRenderingContext2D,
+                     scale: (num: number) => number,
+                     visibleYRange: Interval) {
   // Should mismatched base pairs be shown as blocks of color or as letters?
   var pxPerLetter = scale(1) - scale(0),
       mode = DisplayMode.getDisplayMode(pxPerLetter),
@@ -115,8 +120,12 @@ function getRenderer(ctx: DataCanvasRenderingContext2D, scale: (num: number) => 
   }
 
   function drawGroup(vGroup: VisualGroup) {
-    ctx.pushObject(vGroup);
     var y = yForRow(vGroup.row);
+    if (y < visibleYRange.start - READ_HEIGHT || y > visibleYRange.stop) {
+      // Optimization: don't render off-screen alignments.
+      return;
+    }
+    ctx.pushObject(vGroup);
     vGroup.alignments.forEach(vRead => drawAlignment(vRead, y));
     if (vGroup.insert) {
       var span = vGroup.insert,
@@ -173,7 +182,7 @@ class PileupTrack extends React.Component {
   constructor(props: Object) {
     super(props);
     this.state = {
-      reads: []
+      visibleYRange: new Interval(0, Number.MAX_VALUE)
     };
   }
 
@@ -234,12 +243,29 @@ class PileupTrack extends React.Component {
     }).on('networkdone', e => {
       this.setState({networkStatus: null});
     });
+    this.getScrollParent().addEventListener('scroll', e => {
+      this.updateVisibleYRange();
+    });
 
     this.updateVisualization();
   }
 
   getScale() {
     return d3utils.getTrackScale(this.props.range, this.props.width);
+  }
+
+  getScrollParent(): HTMLElement {
+    var node = this.refs.container;
+    while (node && !node.classList.contains(SCROLLING_CLASS_NAME)) {
+      node = node.parentElement;
+    }
+    return node;
+  }
+
+  updateVisibleYRange() {
+    var node = this.getScrollParent();
+    var top = node.scrollTop;
+    this.setState({visibleYRange: new Interval(top, top + node.offsetHeight)});
   }
 
   componentDidUpdate(prevProps: any, prevState: any) {
@@ -256,7 +282,7 @@ class PileupTrack extends React.Component {
           .forEach(read => this.cache.addAlignment(read));
   }
 
-  // Update the D3 visualization to reflect the cached reads &
+  // Update the visualization to reflect the cached reads &
   // currently-visible range.
   updateVisualization() {
     var canvas = this.refs.canvas,
@@ -286,7 +312,7 @@ class PileupTrack extends React.Component {
     ctx.font = style.TIGHT_TEXT_STYLE;
 
     var scale = this.getScale();
-    var renderer = getRenderer(ctx, scale);
+    var renderer = getRenderer(ctx, scale, this.state.visibleYRange);
     vGroups.forEach(vGroup => renderer.drawGroup(vGroup));
 
     this.renderCenterLine(ctx, range, scale);
