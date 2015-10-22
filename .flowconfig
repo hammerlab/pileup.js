@@ -16,6 +16,9 @@
 .*node_modules/jstransformify.*
 .*node_modules/uglify.*
 .*node_modules/data-canvas.*
+.*node_modules/babel.*
+.*node_modules/d3.*
+.*node_modules/smash.*
 .*react/node_modules/fbjs.*
 .*coverage.*
 

@@ -6,7 +6,8 @@ var expect = require('chai').expect;
 var pako = require('pako'),
     jBinary = require('jbinary');
 
-var utils = require('../main/utils');
+var utils = require('../main/utils'),
+    Interval = require('../main/Interval');
 
 describe('utils', function() {
   describe('tupleLessOrEqual', function() {
@@ -118,6 +119,60 @@ describe('utils', function() {
     expect(utils.altContigName('chr21')).to.equal('21');
     expect(utils.altContigName('M')).to.equal('chrM');
     expect(utils.altContigName('chrM')).to.equal('M');
+  });
+
+  describe('scaleRanges', function() {
+    // This matches how LocationTrack and PileupTrack define "center".
+    function center(iv: Interval) {
+      return Math.floor((iv.stop + iv.start) / 2);
+    }
+
+    it('should scaleRanges', function() {
+      // Zooming in and out should not change the center.
+      // See https://github.com/hammerlab/pileup.js/issues/321
+      var iv = new Interval(7, 17);
+      expect(center(iv)).to.equal(12);
+      var iv2 = utils.scaleRange(iv, 0.5);
+      expect(center(iv2)).to.equal(12);
+      var iv3 = utils.scaleRange(iv2, 2.0);
+      expect(center(iv3)).to.equal(12);
+
+      // Zooming in & out once can shift the frame, but doing so repeatedly will
+      // not produce any drift or growth/shrinkage.
+      var iv4 = iv3.clone();
+      for (var i = 0; i < 10; i++) {
+        iv4 = utils.scaleRange(iv4, 0.5);
+        iv4 = utils.scaleRange(iv4, 2.0);
+      }
+      expect(iv4.toString()).to.equal(iv3.toString());
+    });
+
+    it('should preserve centers', function() {
+      function checkCenterThroughZoom(origIv: Interval) {
+        var c = center(origIv);
+        // Zoom in then out
+        var iv = utils.scaleRange(origIv, 0.5);
+        expect(center(iv)).to.equal(c);
+        iv = utils.scaleRange(iv, 2.0);
+        expect(center(iv)).to.equal(c);
+        // Zoom out then in
+        iv = utils.scaleRange(origIv, 2.0);
+        expect(center(iv)).to.equal(c);
+        iv = utils.scaleRange(iv, 0.5);
+        expect(center(iv)).to.equal(c);
+      }
+
+      checkCenterThroughZoom(new Interval(7, 17));
+      checkCenterThroughZoom(new Interval(8, 18));
+      checkCenterThroughZoom(new Interval(8, 19));
+      checkCenterThroughZoom(new Interval(7, 18));
+    });
+
+    it('should stay positive', function() {
+      var iv = new Interval(5, 25),
+          iv2 = utils.scaleRange(iv, 2.0);
+      expect(iv2.toString()).to.equal('[0, 40]');
+    });
   });
 
 });

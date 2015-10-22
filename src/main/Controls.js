@@ -5,8 +5,11 @@
 'use strict';
 
 var React = require('react'),
-    types = require('./react-types'),
     _ = require('underscore');
+
+var types = require('./react-types'),
+    utils = require('./utils'),
+    Interval = require('./Interval');
 
 var Controls = React.createClass({
   propTypes: {
@@ -52,13 +55,11 @@ var Controls = React.createClass({
     var r = this.props.range;
     if (!r) return;
 
-    var span = r.stop - r.start,
-        center = r.start + span / 2,
-        newSpan = factor * span;
+    var iv = utils.scaleRange(new Interval(r.start, r.stop), factor);
     this.props.onChange({
       contig: r.contig,
-      start: Math.floor(Math.max(0, center - newSpan / 2)),
-      stop: Math.floor(center + newSpan / 2)  // TODO: clamp
+      start: iv.start,
+      stop: iv.stop
     });
   },
   render: function(): any {
