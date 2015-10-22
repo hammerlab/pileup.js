@@ -164,8 +164,14 @@ function scaleRange(range: Interval, factor: number): Interval {
   var span = range.stop - range.start,
       center = Math.floor((range.start + range.stop) / 2),
       newSpan = Math.round(factor * span / 2) * 2,
-      start = Math.max(0, center - newSpan / 2),
+      start = center - newSpan / 2,
       stop = center + newSpan / 2;  // TODO: clamp
+
+  if (start < 0) {
+    // Shift to the right so that the range starts at zero.
+    stop -= start;
+    start = 0;
+  }
   return new Interval(start, stop);
 }
 
