@@ -32,7 +32,9 @@ var READ_SPACING = 2;  // vertical pixels between reads
 var READ_STRAND_ARROW_WIDTH = 6;
 
 // PhantomJS does not support setLineDash.
-var SUPPORTS_DASHES = !!CanvasRenderingContext2D.prototype.setLineDash;
+// Node doesn't even know about the symbol.
+var SUPPORTS_DASHES = typeof(CanvasRenderingContext2D) !== 'undefined' &&
+                      !!CanvasRenderingContext2D.prototype.setLineDash;
 
 var SCROLLING_CLASS_NAME = 'track-content';
 
