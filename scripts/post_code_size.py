@@ -20,6 +20,7 @@ import urllib2
 
 TRAVIS_COMMIT = os.environ['TRAVIS_COMMIT']
 TRAVIS_PULL_REQUEST = os.environ.get('TRAVIS_PULL_REQUEST')
+TRAVIS_COMMIT_RANGE = os.environ.get('TRAVIS_COMMIT_RANGE')
 TRAVIS_REPO_SLUG = os.environ['TRAVIS_REPO_SLUG']
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN')
 
@@ -143,6 +144,8 @@ if __name__ == '__main__':
     if not os.environ.get('TRAVIS'):
         print 'Not Travis; exiting'
         sys.exit(0)
+
+    print 'commit range: %s' % TRAVIS_COMMIT_RANGE
 
     current_size = os.stat(filename).st_size
     previous_size = get_base_size(filename)
