@@ -108,8 +108,11 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
 
 type VizObject = ((options: ?Object) => {component: React.Component, options:?Object});
 
-function makeVizObject(component: React.Component): VizObject {
-  return options => ({component, options});
+function makeVizObject(component: React.Component, defaultOptions: ?Object): VizObject {
+  return options => {
+    options = _.extend({}, defaultOptions, options);
+    return {component, options};
+  };
 }
 
 var pileup = {
@@ -129,7 +132,7 @@ var pileup = {
     location: makeVizObject(LocationTrack),
     scale:    makeVizObject(ScaleTrack),
     variants: makeVizObject(VariantTrack),
-    pileup:   makeVizObject(PileupTrack)
+    pileup:   makeVizObject(PileupTrack, {viewAsPairs: false})
   }
 };
 

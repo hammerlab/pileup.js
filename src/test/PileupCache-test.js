@@ -73,15 +73,15 @@ describe('PileupCache', function() {
     return new ContigInterval(chr, start, end);
   }
 
-  function makeCache(args) {
-    var cache = new PileupCache(fakeSource);
+  function makeCache(args, viewAsPairs: boolean) {
+    var cache = new PileupCache(fakeSource, viewAsPairs);
     _.flatten(args).forEach(read => cache.addAlignment(read));
     return cache;
   }
 
   it('should group read pairs', function() {
     var cache = makeCache(makeReadPair(ci('chr1', 100, 200),
-                                       ci('chr1', 300, 400)));
+                                       ci('chr1', 300, 400)), true /* viewAsPairs */);
 
     var groups = _.values(cache.groups);
     expect(groups).to.have.length(1);
@@ -104,7 +104,7 @@ describe('PileupCache', function() {
       makeReadPair(ci('chr1', 100, 200), ci('chr1', 300, 400)),  // A
       makeReadPair(ci('chr1', 300, 400), ci('chr1', 500, 600)),  // B
       makeReadPair(ci('chr1', 700, 800), ci('chr1', 500, 600))   // C
-    ]);
+    ], true /* viewAsPairs */);
 
     var groups = _.values(cache.groups);
     expect(groups).to.have.length(3);
@@ -119,7 +119,7 @@ describe('PileupCache', function() {
     var cache = makeCache([
       makeReadPair(ci('chr1', 100, 200), ci('chr1', 800, 900)),
       makeReadPair(ci('chr1', 300, 400), ci('chr1', 500, 600))
-    ]);
+    ], true /* viewAsPairs */);
 
     var groups = _.values(cache.groups);
     expect(groups).to.have.length(2);
@@ -128,9 +128,21 @@ describe('PileupCache', function() {
     expect(cache.pileupHeightForRef('chr1')).to.equal(2);
   });
 
+  it('should pack unpaired reads more tightly', function() {
+    // Same as the previous test, but with viewAsPairs = false.
+    // When the inserts aren't rendered, the reads all fit on a single line.
+    var cache = makeCache([
+      makeReadPair(ci('chr1', 100, 200), ci('chr1', 800, 900)),
+      makeReadPair(ci('chr1', 300, 400), ci('chr1', 500, 600))
+    ], false /* viewAsPairs */);
+    var groups = _.values(cache.groups);
+    expect(groups).to.have.length(4);
+    expect(cache.pileupHeightForRef('chr1')).to.equal(1);
+  });
+
   it('should separate pairs on differing contigs', function() {
     var cache = makeCache(makeReadPair(ci('chr1', 100, 200),
-                                       ci('chr2', 150, 250)));
+                                       ci('chr2', 150, 250)), true /* viewAsPairs */);
 
     var groups = _.values(cache.groups);
     expect(groups).to.have.length(2);
@@ -151,7 +163,7 @@ describe('PileupCache', function() {
       makeReadPair(ci('chr1', 100, 200), ci('chr1', 800, 900)),
       makeReadPair(ci('chr1', 300, 400), ci('chr1', 500, 600)),
       makeReadPair(ci('chr2', 100, 200), ci('chr2', 300, 400))
-    ]);
+    ], true /* viewAsPairs */);
 
     expect(cache.getGroupsOverlapping(ci('chr1', 50, 150))).to.have.length(1);
     expect(cache.getGroupsOverlapping(ci('chr1', 50, 350))).to.have.length(2);
