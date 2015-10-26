@@ -72,7 +72,7 @@ To play with the demo, start an [http-server][hs]:
 
     npm run http-server
 
-Then open [http://localhost:8080/examples/playground-complete.html](http://localhost:8080/examples/playground-complete.html) in your browser of choice.
+Then open [http://localhost:8080/examples/index.html](http://localhost:8080/examples/index.html) in your browser of choice.
 
 ### BioJS
 
