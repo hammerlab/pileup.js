@@ -366,6 +366,9 @@ PileupTrack.propTypes = {
   options: React.PropTypes.object
 };
 PileupTrack.displayName = 'pileup';
+PileupTrack.defaultOptions = {
+  viewAsPairs: false
+};
 
 
 module.exports = PileupTrack;
