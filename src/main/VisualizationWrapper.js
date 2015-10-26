@@ -94,16 +94,18 @@ class VisualizationWrapper extends React.Component {
 
   render(): any {
     var range = this.props.range;
+    var component = this.props.visualization.component;
     if (!range) {
-      return <EmptyTrack className={this.props.visualization.displayName} />;
+      return <EmptyTrack className={component.displayName} />;
     }
 
-    var el = React.createElement(this.props.visualization, {
+    var el = React.createElement(component, {
       range: this.props.range,
       source: this.props.source,
       referenceSource: this.props.referenceSource,
       width: this.state.width,
-      height: this.state.height
+      height: this.state.height,
+      options: this.props.visualization.options
     });
 
     return <div className='drag-wrapper'>{el}</div>;
@@ -116,7 +118,7 @@ VisualizationWrapper.propTypes = {
   onRangeChange: React.PropTypes.func.isRequired,
   source: React.PropTypes.object.isRequired,
   referenceSource: React.PropTypes.object.isRequired,
-  visualization: React.PropTypes.func.isRequired
+  visualization: React.PropTypes.object.isRequired,
 };
 
 
