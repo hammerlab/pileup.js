@@ -6,7 +6,7 @@ set -o errexit
 # Transpile individual files. This is useful if another module,
 # e.g. cycledash, wants to require('pileup').
 # The dist/test files are required for code coverage
-babel src --ignore src/lib --out-dir dist
+babel src --retain-lines --ignore src/lib --out-dir dist
 cp -r src/lib dist/
 
 # Create dist/tests
