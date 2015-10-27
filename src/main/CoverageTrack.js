@@ -146,24 +146,32 @@ class CoverageTrack extends React.Component {
 
     var xScale = this.getScale();
     var barWidth = xScale(1) - xScale(0);
+    var showPadding = (barWidth > style.COVERAGE_MIN_BAR_WIDTH_FOR_GAP);
+    var padding = showPadding ? 1 : 0;
 
     var binPos = function(bin) {
-      var barPosX = xScale(bin.position),
-          barPosY = Math.round(yScale(bin.count));
-      return {barPosX, barPosY};
+      // Round to integer coordinates for crisp lines, without aliasing.
+      var barX1 = Math.round(xScale(bin.position)),
+          barX2 = Math.round(xScale(bin.position + 1)) - padding,
+          barY = Math.round(yScale(bin.count));
+      return {barX1, barX2, barY};
     };
 
     var mismatchBins = [];  // keep track of which ones have mismatches
     var vBasePosY = yScale(0);  // the very bottom of the canvas
     ctx.fillStyle = style.COVERAGE_BIN_COLOR;
     ctx.beginPath();
-    var {barPosX} = binPos(bins[0]);
-    ctx.moveTo(barPosX, vBasePosY);
+    var {barX1} = binPos(bins[0]);
+    ctx.moveTo(barX1, vBasePosY);
     bins.forEach(bin => {
       ctx.pushObject(bin);
-      var {barPosX, barPosY} = binPos(bin);
-      ctx.lineTo(barPosX, barPosY);
-      ctx.lineTo(barPosX + barWidth, barPosY);
+      var {barX1, barX2, barY} = binPos(bin);
+      ctx.lineTo(barX1, barY);
+      ctx.lineTo(barX2, barY);
+      if (showPadding) {
+        ctx.lineTo(barX2, vBasePosY);
+        ctx.lineTo(barX2 + 1, vBasePosY);
+      }
 
       if (SHOW_MISMATCHES && !_.isEmpty(bin.mismatches)) {
         mismatchBins.push(bin);
@@ -171,13 +179,13 @@ class CoverageTrack extends React.Component {
 
       ctx.popObject();
     });
-    ({barPosX} = binPos(bins[bins.length - 1]));
-    ctx.lineTo(barPosX + barWidth, vBasePosY);  // right edge of the right bar.
+    var {barX2} = binPos(bins[bins.length - 1]);
+    ctx.lineTo(barX2, vBasePosY);  // right edge of the right bar.
     ctx.closePath();
     ctx.fill();
 
     mismatchBins.forEach(bin => {
-      var {barPosX} = binPos(bin);
+      var {barX1, barX2} = binPos(bin);
       ctx.pushObject(bin);
       var countSoFar = 0;
       _.chain(bin.mismatches)
@@ -190,9 +198,9 @@ class CoverageTrack extends React.Component {
 
           ctx.fillStyle = style.BASE_COLORS[base];
           var y = yScale(countSoFar);
-          ctx.fillRect(barPosX,
+          ctx.fillRect(barX1,
                        y,
-                       barWidth,
+                       barX2 - barX1,
                        yScale(countSoFar + count) - y);
           countSoFar += count;
 
