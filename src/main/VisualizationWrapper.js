@@ -5,10 +5,13 @@
 
 var React = require('react'),
     ReactDOM = require('react-dom'),
-    types = require('./react-types'),
-    d3utils = require('./d3utils'),
     _ = require('underscore'),
     d3 = require('../lib/minid3');
+
+var types = require('./react-types'),
+    d3utils = require('./d3utils'),
+    utils = require('./utils'),
+    Interval = require('./Interval');
 
 class VisualizationWrapper extends React.Component {
   hasDragBeenInitialized: boolean;
@@ -84,12 +87,30 @@ class VisualizationWrapper extends React.Component {
         .on('dragend', dragended);
 
     d3.select(div).call(drag).on('click', this.handleClick.bind(this));
+
+    // This is saved in a member var for later removal via removeEventListener.
+    // this.dblClickListener = e => {
+    //   e.preventDefault();
+    //   this.handleDoubleClick();
+    // };
+    // div.addEventListener('dblclick', this.dblClickListener);
   }
 
   handleClick(): any {
     if (d3.event.defaultPrevented) {
       d3.event.stopPropagation();
+    } else {
     }
+  }
+
+  handleDoubleClick(): any {
+    var r = this.props.range;
+    var iv = utils.scaleRange(new Interval(r.start, r.stop), 0.5);
+    this.props.onRangeChange({
+      contig: r.contig,
+      start: iv.start,
+      stop: iv.stop
+    });
   }
 
   render(): any {
@@ -109,6 +130,13 @@ class VisualizationWrapper extends React.Component {
     });
 
     return <div className='drag-wrapper'>{el}</div>;
+  }
+
+  componentWillUnmount() {
+    if (this.dblClickListener) {
+      var div = ReactDOM.findDOMNode(this);
+      div.removeEventListener('dblclick', this.dblClickListener);
+    }
   }
 }
 VisualizationWrapper.displayName = 'VisualizationWrapper';
