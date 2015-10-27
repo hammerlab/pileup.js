@@ -15,6 +15,7 @@ var React = require('react'),
     d3utils = require('./d3utils'),
     _ = require("underscore"),
     dataCanvas = require('data-canvas'),
+    canvasUtils = require('./canvas-utils'),
     {getOpInfo} = require('./pileuputils'),
     style = require('./style'),
     ContigInterval = require('./ContigInterval');
@@ -138,40 +139,20 @@ class CoverageTrack extends React.Component {
     return ctx;
   }
 
-  visualizeCoverage() {
-    var canvas = (this.refs.canvas : HTMLCanvasElement),
-        width = this.props.width,
-        height = this.props.height,
-        padding = 10,
-        xScale = this.getScale();
+  // Draw coverage bins & mismatches
+  renderBars(ctx, yScale) {
+    var bins = this.binsInRange();
+    if (bins.length === 0) return;
 
-    // Hold off until height & width are known.
-    if (width === 0) return;
-    d3utils.sizeCanvas(canvas, width, height);
-
-    var yScale = scale.linear()
-      .domain([this.state.maxCoverage, 0])
-      .range([padding, height - padding])
-      .nice();
-    // The nice() call on the axis will give us a new domain to work with
-    // Let's get our domain max back from the nicified scale
-    var axisMax = yScale.domain()[0];
-
-    var ctx = dataCanvas.getDataContext(this.getContext());
-    ctx.save();
-    ctx.reset();
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
+    var xScale = this.getScale();
     var barWidth = xScale(1) - xScale(0);
 
     var binPos = function(bin) {
       var barPosX = xScale(bin.position),
-          barPosY = Math.round(yScale(bin.count) - yScale(axisMax));
+          barPosY = Math.round(yScale(bin.count));
       return {barPosX, barPosY};
     };
 
-    // Draw coverage bins
-    var bins = this.binsInRange();
     var mismatchBins = [];  // keep track of which ones have mismatches
     var vBasePosY = yScale(0);  // the very bottom of the canvas
     ctx.fillStyle = style.COVERAGE_BIN_COLOR;
@@ -190,7 +171,7 @@ class CoverageTrack extends React.Component {
 
       ctx.popObject();
     });
-    var {barPosX} = binPos(bins[bins.length - 1]);
+    ({barPosX} = binPos(bins[bins.length - 1]));
     ctx.lineTo(barPosX + barWidth, vBasePosY);  // right edge of the right bar.
     ctx.closePath();
     ctx.fill();
@@ -201,14 +182,9 @@ class CoverageTrack extends React.Component {
       var countSoFar = 0;
       _.chain(bin.mismatches)
         .map((count, base) => ({count, base}))  // pull base into the object
-        .sortBy(mc => -mc.count)  // the most common mismatch at the bottom
-        .each(mc => {
-          var {count, base} = mc;
-          if (count <= MISMATCH_THRESHOLD) {
-            // Don't show this as it doesn't have enough evidence
-            return;
-          }
-
+        .filter(({count}) => count > MISMATCH_THRESHOLD)
+        .sortBy(({count}) => -count)  // the most common mismatch at the bottom
+        .each(({count, base}) => {
           var misMatchObj = {position: bin.position, count, base};
           ctx.pushObject(misMatchObj);  // for debugging and click-tracking
 
@@ -225,30 +201,58 @@ class CoverageTrack extends React.Component {
       ctx.popObject();
     });
 
-    // Draw three ticks
+  }
+
+  // Draw three ticks on the left to set the scale for the user
+  renderTicks(ctx, yScale) {
+    var axisMax = yScale.domain()[0];
     [0, Math.round(axisMax / 2), axisMax].forEach(tick => {
       // Draw a line indicating the tick
       ctx.pushObject({value: tick, type: 'tick'});
-      ctx.beginPath();
-      var tickPosY = yScale(tick);
-      ctx.moveTo(0, tickPosY);
-      ctx.lineTo(style.COVERAGE_TICK_LENGTH, tickPosY);
-      ctx.stroke();
+      var tickPosY = Math.round(yScale(tick));
+      ctx.strokeStyle = style.COVERAGE_FONT_COLOR;
+      canvasUtils.drawLine(ctx, 0, tickPosY, style.COVERAGE_TICK_LENGTH, tickPosY);
       ctx.popObject();
 
       var tickLabel = tick + 'X';
       ctx.pushObject({value: tick, label: tickLabel, type: 'label'});
       // Now print the coverage information
+      ctx.font = style.COVERAGE_FONT_STYLE;
+      var textPosX = style.COVERAGE_TICK_LENGTH + style.COVERAGE_TEXT_PADDING,
+          textPosY = tickPosY + style.COVERAGE_TEXT_Y_OFFSET;
+      // The stroke creates a border around the text to make it legible over the bars.
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 2;
+      ctx.strokeText(tickLabel, textPosX, textPosY);
       ctx.lineWidth = 1;
       ctx.fillStyle = style.COVERAGE_FONT_COLOR;
-      ctx.font = style.COVERAGE_FONT_STYLE;
-      var textPosY = tickPosY + style.COVERAGE_TEXT_Y_OFFSET;
-      ctx.fillText(tickLabel,
-                   style.COVERAGE_TICK_LENGTH + style.COVERAGE_TEXT_PADDING,
-                   textPosY);
+      ctx.fillText(tickLabel, textPosX, textPosY);
       ctx.popObject();
-      // Clean up with this tick
     });
+  }
+
+  visualizeCoverage() {
+    var canvas = (this.refs.canvas : HTMLCanvasElement),
+        width = this.props.width,
+        height = this.props.height,
+        padding = 10;
+
+    // Hold off until height & width are known.
+    if (width === 0) return;
+    d3utils.sizeCanvas(canvas, width, height);
+
+    var yScale = scale.linear()
+      .domain([this.state.maxCoverage, 0])
+      .range([padding, height - padding])
+      .nice();
+
+    var ctx = dataCanvas.getDataContext(this.getContext());
+    ctx.save();
+    ctx.reset();
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    this.renderBars(ctx, yScale);
+    this.renderTicks(ctx, yScale);
 
     ctx.restore();
   }
