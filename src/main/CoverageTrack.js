@@ -162,52 +162,66 @@ class CoverageTrack extends React.Component {
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    var barWidth = xScale(1) - xScale(0),
-        barPadding = barWidth * style.COVERAGE_BIN_PADDING_CONSTANT;
+    var barWidth = xScale(1) - xScale(0);
+
+    var binPos = function(bin) {
+      var barPosX = xScale(bin.position),
+          barPosY = Math.round(yScale(bin.count) - yScale(axisMax));
+      return {barPosX, barPosY};
+    };
 
     // Draw coverage bins
-    this.binsInRange().forEach(bin => {
+    var bins = this.binsInRange();
+    var mismatchBins = [];  // keep track of which ones have mismatches
+    var vBasePosY = yScale(0);  // the very bottom of the canvas
+    ctx.fillStyle = style.COVERAGE_BIN_COLOR;
+    ctx.beginPath();
+    var {barPosX} = binPos(bins[0]);
+    ctx.moveTo(barPosX, vBasePosY);
+    bins.forEach(bin => {
       ctx.pushObject(bin);
-      var barPosX = xScale(bin.position),
-          barPosY = yScale(bin.count) - yScale(axisMax),
-          barHeight = Math.max(0, yScale(axisMax - bin.count));
-      // These are generic coverage bins
-      ctx.fillStyle = style.COVERAGE_BIN_COLOR;
-      ctx.fillRect(barPosX + barPadding,
-                   barPosY,
-                   barWidth - barPadding,
-                   barHeight);
+      var {barPosX, barPosY} = binPos(bin);
+      ctx.lineTo(barPosX, barPosY);
+      ctx.lineTo(barPosX + barWidth, barPosY);
 
-      // These are variant bars
       if (SHOW_MISMATCHES && !_.isEmpty(bin.mismatches)) {
-        var vBasePosY = yScale(0);  // the very bottom of the canvas
-        _.chain(bin.mismatches)
-          .map((count, base) => ({count, base}))  // pull base into the object
-          .sortBy(mc => -mc.count)  // the most common mismatch at the bottom
-          .each(mc => {
-            var {count, base} = mc;
-            if (count <= MISMATCH_THRESHOLD) {
-              // Don't show this as it doesn't have enough evidence
-              return;
-            }
-
-            var misMatchObj = {position: bin.position, count, base};
-            ctx.pushObject(misMatchObj);  // for debugging and click-tracking
-
-            // Scale the height based on the percent of reads w/ this mismatch
-            var vBarHeight = barHeight * (count / bin.count);
-            vBasePosY -= vBarHeight;
-
-            ctx.fillStyle = style.BASE_COLORS[base];
-            ctx.fillRect(barPosX + barPadding,
-                         vBasePosY,
-                         barWidth - barPadding,
-                         vBarHeight);
-
-            ctx.popObject();
-          });
+        mismatchBins.push(bin);
       }
 
+      ctx.popObject();
+    });
+    var {barPosX} = binPos(bins[bins.length - 1]);
+    ctx.lineTo(barPosX + barWidth, vBasePosY);  // right edge of the right bar.
+    ctx.closePath();
+    ctx.fill();
+
+    mismatchBins.forEach(bin => {
+      var {barPosX} = binPos(bin);
+      ctx.pushObject(bin);
+      var countSoFar = 0;
+      _.chain(bin.mismatches)
+        .map((count, base) => ({count, base}))  // pull base into the object
+        .sortBy(mc => -mc.count)  // the most common mismatch at the bottom
+        .each(mc => {
+          var {count, base} = mc;
+          if (count <= MISMATCH_THRESHOLD) {
+            // Don't show this as it doesn't have enough evidence
+            return;
+          }
+
+          var misMatchObj = {position: bin.position, count, base};
+          ctx.pushObject(misMatchObj);  // for debugging and click-tracking
+
+          ctx.fillStyle = style.BASE_COLORS[base];
+          var y = yScale(countSoFar);
+          ctx.fillRect(barPosX,
+                       y,
+                       barWidth,
+                       yScale(countSoFar + count) - y);
+          countSoFar += count;
+
+          ctx.popObject();
+        });
       ctx.popObject();
     });
 

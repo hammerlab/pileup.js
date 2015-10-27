@@ -40,7 +40,6 @@ module.exports = {
   COVERAGE_TEXT_PADDING: 3,  // space between axis ticks and text
   COVERAGE_TEXT_Y_OFFSET: 3,  // so that ticks and texts align better
   COVERAGE_BIN_COLOR: '#a0a0a0',
-  COVERAGE_BIN_PADDING_CONSTANT: 0.01,  // 1% of bar width
 
   // Scale Track
   SCALE_LINE_PADDING: 40,  // space between mid point and left/right lines
