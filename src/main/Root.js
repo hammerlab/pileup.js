@@ -83,7 +83,7 @@ var Root = React.createClass({
           <div className='track-content'>
             <Controls contigList={this.state.contigList}
                       range={this.state.range}
-                      onChange={this.handleRangeChange} />
+                      onRangeChange={this.handleRangeChange} />
           </div>
         </div>
         {trackEls}

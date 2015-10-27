@@ -16,7 +16,7 @@ var Controls = React.createClass({
     range: types.GenomeRange,
     contigList: React.PropTypes.arrayOf(React.PropTypes.string),
     // XXX: can we be more specific than this with Flow?
-    onChange: React.PropTypes.func.isRequired
+    onRangeChange: React.PropTypes.func.isRequired
   },
   makeRange: function(): GenomeRange {
     return {
@@ -26,11 +26,11 @@ var Controls = React.createClass({
     };
   },
   handleContigChange: function(e: SyntheticEvent) {
-    this.props.onChange(this.makeRange());
+    this.props.onRangeChange(this.makeRange());
   },
   handleFormSubmit: function(e: SyntheticEvent) {
     e.preventDefault();
-    this.props.onChange(this.makeRange());
+    this.props.onRangeChange(this.makeRange());
   },
   // Sets the values of the input elements to match `props.range`.
   updateRangeUI: function() {
@@ -56,7 +56,7 @@ var Controls = React.createClass({
     if (!r) return;
 
     var iv = utils.scaleRange(new Interval(r.start, r.stop), factor);
-    this.props.onChange({
+    this.props.onRangeChange({
       contig: r.contig,
       start: iv.start,
       stop: iv.stop
@@ -70,7 +70,7 @@ var Controls = React.createClass({
     // Note: input values are set in componentDidUpdate.
     return (
       <form className='controls' onSubmit={this.handleFormSubmit}>
-        <select ref='contig' onChange={this.handleContigChange}>
+        <select ref='contig' onRangeChange={this.handleContigChange}>
           {contigOptions}
         </select>{' '}
         <input ref='start' type='text' />–
