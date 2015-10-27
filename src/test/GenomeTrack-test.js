@@ -97,15 +97,13 @@ describe('GenomeTrack', function() {
 
     var buttons = testDiv.querySelectorAll('.controls button');
     var [goBtn, minusBtn, plusBtn] = buttons;
-    var [startTxt, stopTxt] = getInputs('.controls input[type="text"]');
-        // testDiv.querySelectorAll('.controls input[type="text"]');
+    var [locationTxt] = getInputs('.controls input[type="text"]');
     expect(goBtn.textContent).to.equal('Go');
     expect(minusBtn.className).to.equal('btn-zoom-out');
     expect(plusBtn.className).to.equal('btn-zoom-in');
 
     return waitFor(hasReference, 2000).then(() => {
-      expect(startTxt.value).to.equal('7500725');
-      expect(stopTxt.value).to.equal('7500775');
+      expect(locationTxt.value).to.equal('7,500,725-7,500,775');
       ReactTestUtils.Simulate.click(minusBtn);
     }).delay(50).then(() => {
       expect(p.getRange()).to.deep.equal({
@@ -113,8 +111,7 @@ describe('GenomeTrack', function() {
         start: 7500700,
         stop: 7500800
       });
-      expect(startTxt.value).to.equal('7500700');
-      expect(stopTxt.value).to.equal('7500800');
+      expect(locationTxt.value).to.equal('7,500,700-7,500,800');
       ReactTestUtils.Simulate.click(plusBtn);
     }).delay(50).then(() => {
       expect(p.getRange()).to.deep.equal({
@@ -122,8 +119,7 @@ describe('GenomeTrack', function() {
         start: 7500725,
         stop: 7500775
       });
-      expect(startTxt.value).to.equal('7500725');
-      expect(stopTxt.value).to.equal('7500775');
+      expect(locationTxt.value).to.equal('7,500,725-7,500,775');
       p.destroy();
     });
   });

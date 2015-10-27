@@ -175,4 +175,41 @@ describe('utils', function() {
     });
   });
 
+  describe('formatInterval', function() {
+    it('should add commas to numbers', function() {
+      expect(utils.formatInterval(new Interval(0, 1234))).to.equal('0-1,234');
+      expect(utils.formatInterval(new Interval(1234, 567890123))).to.equal('1,234-567,890,123');
+    });
+  });
+
+  describe('parseRange', function() {
+    var parseRange = utils.parseRange;
+    it('should parse intervals with and without commas', function() {
+      expect(parseRange('1-1234')).to.deep.equal({start: 1, stop: 1234});
+      expect(parseRange('1-1,234')).to.deep.equal({start: 1, stop: 1234});
+      expect(parseRange('1-1,234')).to.deep.equal({start: 1, stop: 1234});
+      expect(parseRange('1,234-567,890,123')).to.deep.equal({start:1234, stop:567890123});
+    });
+
+    it('should parse bare contigs', function() {
+      expect(parseRange('17:')).to.deep.equal({contig: '17'});
+      expect(parseRange('chr17')).to.deep.equal({contig: 'chr17'});
+      expect(parseRange('17')).to.deep.equal({start: 17});  // this one is ambiguous
+    });
+
+    it('should parse contig + location', function() {
+      expect(parseRange('17:1,234')).to.deep.equal({contig: '17', start: 1234});
+      expect(parseRange('chrM:1,234,567')).to.deep.equal({contig: 'chrM', start: 1234567});
+    });
+
+    it('should parse combined locations', function() {
+      expect(parseRange('17:1,234-5,678')).to.deep.equal(
+          {contig: '17', start: 1234, stop: 5678});
+    });
+
+    it('should return null for invalid ranges', function() {
+      expect(parseRange('::')).to.be.null;
+    });
+  });
+
 });

@@ -4,7 +4,7 @@
  */
 'use strict';
 
-import type {InflatedBlock} from './types';
+import type {InflatedBlock, PartialGenomeRange} from './types';
 import type * as Q from 'q';
 
 var pako = require('pako/lib/inflate');
@@ -146,6 +146,12 @@ function altContigName(contig: string): string {
   }
 }
 
+// Are two strings equal module a 'chr' prefix?
+// e.g. isChrMatch('17', 'chr17') == true
+function isChrMatch(a: string, b: string): boolean {
+  return a == b || 'chr' + a == b || a == 'chr' + b;
+}
+
 /**
  * Pipe all promise events through a deferred object.
  * This is similar to deferred.resolve(promise), except that it allows progress
@@ -175,6 +181,73 @@ function scaleRange(range: Interval, factor: number): Interval {
   return new Interval(start, stop);
 }
 
+/**
+ * Parse a user-specified range into a range.
+ * Only the specified portions of the range will be filled out in the returned object.
+ * For example:
+ * 'chr17' --> {contig:'chr17'}
+ * '10-20' --> {start: 10, stop: 20}
+ * '17:10-20' --> {contig: '17', start: 10, stop: 20}
+ * Returns null if the range can't be parsed.
+ */
+function parseRange(range: string): ?PartialGenomeRange {
+  // First try 'contig:start-stop'
+  var m = /^([^ :]+):([0-9,]+)-([0-9,]+)$/.exec(range);
+  if (m) {
+    return {
+      contig: m[1],
+      start: parseNumberWithCommas(m[2]),
+      stop: parseNumberWithCommas(m[3])
+    };
+  }
+  
+  // Then contig:number
+  m = /^([^ :]+):([0-9,]+)$/.exec(range);
+  if (m) {
+    return {
+      contig: m[1],
+      start: parseNumberWithCommas(m[2]),
+    };
+  }
+
+  // Then 'start:stop'
+  m = /^([0-9,]+)-([0-9,]+)$/.exec(range);
+  if (m) {
+    return {
+      start: parseNumberWithCommas(m[1]),
+      stop: parseNumberWithCommas(m[2])
+    };
+  }
+
+  // Then 'contig:' or non-numeric 'contig'
+  m = /^([^ :]+):$/.exec(range) || /^([^0-9][^ :]+)$/.exec(range);
+  if (m) {
+    return { contig: m[1] };
+  }
+
+  // Then plain-old numbers.
+  m = /^([0-9,]+)$/.exec(range);
+  if (m) {
+    return { start: parseNumberWithCommas(m[1]) };
+  }
+
+
+  return null;
+}
+
+function formatInterval(iv: Interval): string {
+  return numberWithCommas(iv.start) + '-' + numberWithCommas(iv.stop);
+}
+
+// See http://stackoverflow.com/a/2901298/388951
+function numberWithCommas(x: number): string {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function parseNumberWithCommas(x: string): number {
+  return parseInt(x.replace(/,/g, ''), 10);
+}
+
 module.exports = {
   tupleLessOrEqual,
   tupleRangeOverlaps,
@@ -183,5 +256,8 @@ module.exports = {
   inflateGzip,
   altContigName,
   pipePromise,
-  scaleRange
+  scaleRange,
+  parseRange,
+  formatInterval,
+  isChrMatch
 };
