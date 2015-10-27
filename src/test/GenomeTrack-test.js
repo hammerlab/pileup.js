@@ -75,6 +75,12 @@ describe('GenomeTrack', function() {
     });
   });
 
+  var getInputs = function(selector): HTMLInputElement[] {
+    var els = testDiv.querySelectorAll(selector);
+    // note: this isn't really true, but it makes flow happy
+    return ((els: any): HTMLInputElement[]);
+  };
+
   it('should zoom in and out', function() {
     var p = pileup.create(testDiv, {
       range: {contig: '17', start: 7500725, stop: 7500775},
@@ -87,25 +93,17 @@ describe('GenomeTrack', function() {
       ]
     });
 
-    var getInputs = function(selector): HTMLInputElement[] {
-      var els = testDiv.querySelectorAll(selector);
-      // note: this isn't really true, but it makes flow happy
-      return ((els: any): HTMLInputElement[]);
-    };
-
     expect(testDiv.querySelectorAll('.zoom-controls')).to.have.length(1);
 
     var buttons = testDiv.querySelectorAll('.controls button');
     var [goBtn, minusBtn, plusBtn] = buttons;
-    var [startTxt, stopTxt] = getInputs('.controls input[type="text"]');
-        // testDiv.querySelectorAll('.controls input[type="text"]');
+    var [locationTxt] = getInputs('.controls input[type="text"]');
     expect(goBtn.textContent).to.equal('Go');
     expect(minusBtn.className).to.equal('btn-zoom-out');
     expect(plusBtn.className).to.equal('btn-zoom-in');
 
     return waitFor(hasReference, 2000).then(() => {
-      expect(startTxt.value).to.equal('7500725');
-      expect(stopTxt.value).to.equal('7500775');
+      expect(locationTxt.value).to.equal('7,500,725-7,500,775');
       ReactTestUtils.Simulate.click(minusBtn);
     }).delay(50).then(() => {
       expect(p.getRange()).to.deep.equal({
@@ -113,8 +111,7 @@ describe('GenomeTrack', function() {
         start: 7500700,
         stop: 7500800
       });
-      expect(startTxt.value).to.equal('7500700');
-      expect(stopTxt.value).to.equal('7500800');
+      expect(locationTxt.value).to.equal('7,500,700-7,500,800');
       ReactTestUtils.Simulate.click(plusBtn);
     }).delay(50).then(() => {
       expect(p.getRange()).to.deep.equal({
@@ -122,8 +119,38 @@ describe('GenomeTrack', function() {
         start: 7500725,
         stop: 7500775
       });
-      expect(startTxt.value).to.equal('7500725');
-      expect(stopTxt.value).to.equal('7500775');
+      expect(locationTxt.value).to.equal('7,500,725-7,500,775');
+      p.destroy();
+    });
+  });
+
+  it('should accept user-entered locations', function() {
+    var p = pileup.create(testDiv, {
+      range: {contig: '17', start: 7500725, stop: 7500775},
+      tracks: [
+        {
+          data: referenceSource,
+          viz: pileup.viz.genome(),
+          isReference: true
+        }
+      ]
+    });
+
+    var [locationTxt] = getInputs('.controls input[type="text"]');
+    var [goBtn] = testDiv.querySelectorAll('.controls button');
+    expect(goBtn.textContent).to.equal('Go');
+
+    return waitFor(hasReference, 2000).then(() => {
+      expect(locationTxt.value).to.equal('7,500,725-7,500,775');
+      locationTxt.value = '17:7500745-7500785';
+      ReactTestUtils.Simulate.click(goBtn);
+    }).delay(50).then(() => {
+      expect(p.getRange()).to.deep.equal({
+        contig: 'chr17',  // note: not '17'
+        start: 7500745,
+        stop: 7500785
+      });
+      expect(locationTxt.value).to.equal('7,500,745-7,500,785');
       p.destroy();
     });
   });

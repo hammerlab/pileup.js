@@ -32,6 +32,19 @@ export type VisualizedTrack = {
   track: Track;  // for css class and options
 }
 
+/*
+TODO(danvk): kill types/types.js and use this
+export type GenomeRange = {
+  contig: string;
+  start: number;  // inclusive
+  stop: number;  // inclusive
+}
+*/
+export type PartialGenomeRange = {
+  contig?: string;
+  start?: number;
+  stop?: number;
+}
 
 // BAM/BAI parsing
 

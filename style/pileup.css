@@ -60,7 +60,12 @@
 .pileup-root > .controls .btn-zoom-in:before {
   content: '+';
 }
-
+.pileup-root > .controls input,
+.pileup-root > .controls button,
+.pileup-root > .controls select,
+.pileup-root > .controls option {
+  font-size: 0.9em;
+}
 /* reference track */
 .pileup-root > .reference {
   flex: 0 0 20px;  /* fixed height */

@@ -4,6 +4,8 @@
  */
 'use strict';
 
+import type {PartialGenomeRange} from './types';
+
 var React = require('react'),
     _ = require('underscore');
 
@@ -14,7 +16,7 @@ var types = require('./react-types'),
 var Controls = React.createClass({
   propTypes: {
     range: types.GenomeRange,
-    contigList: React.PropTypes.arrayOf(React.PropTypes.string),
+    contigList: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     // XXX: can we be more specific than this with Flow?
     onChange: React.PropTypes.func.isRequired
   },
@@ -25,18 +27,38 @@ var Controls = React.createClass({
       stop: Number(this.refs.stop.value)
     };
   },
+  completeRange: function(range: ?PartialGenomeRange): GenomeRange {
+    range = range || {};
+    if (range.start && range.stop === undefined) {
+      // Construct a range centered around a value. This matches IGV.
+      range.stop = range.start + 20;
+      range.start -= 20;
+    }
+
+    if (range.contig) {
+      // There are major performance issues with having a 'chr' mismatch in the
+      // global location object.
+      const contig = range.contig;
+      var altContig = _.find(this.props.contigList, ref => utils.isChrMatch(contig, ref));
+      if (altContig) range.contig = altContig;
+    }
+
+    return (_.extend({}, this.props.range, range) : any);
+  },
   handleContigChange: function(e: SyntheticEvent) {
-    this.props.onChange(this.makeRange());
+    this.props.onChange(this.completeRange({contig: this.refs.contig.value}));
   },
   handleFormSubmit: function(e: SyntheticEvent) {
     e.preventDefault();
-    this.props.onChange(this.makeRange());
+    var range = this.completeRange(utils.parseRange(this.refs.position.value));
+    this.props.onChange(range);
   },
   // Sets the values of the input elements to match `props.range`.
   updateRangeUI: function() {
-    var r = this.props.range || {contig: '', start: '', stop: ''};
-    this.refs.start.value = r.start;
-    this.refs.stop.value = r.stop;
+    const r = this.props.range;
+    if (!r) return;
+
+    this.refs.position.value = utils.formatInterval(new Interval(r.start, r.stop));
 
     if (this.props.contigList) {
       var contigIdx = this.props.contigList.indexOf(r.contig);
@@ -73,9 +95,8 @@ var Controls = React.createClass({
         <select ref='contig' onChange={this.handleContigChange}>
           {contigOptions}
         </select>{' '}
-        <input ref='start' type='text' />–
-        <input ref='stop' type='text' />{' '}
-        <button className='btn-submit'>Go</button>{' '}
+        <input ref='position' type='text' />{' '}
+        <button className='btn-submit' onClick={this.handleFormSubmit}>Go</button>{' '}
         <div className='zoom-controls'>
           <button className='btn-zoom-out' onClick={this.zoomOut}></button>{' '}
           <button className='btn-zoom-in' onClick={this.zoomIn}></button>
