@@ -5,7 +5,7 @@ node_js:
 
 script: >
     npm run build &&
-    ./scripts/post_code_size.py dist/pileup.min.js &&
+    ./scripts/post-code-size.sh &&
     npm run test &&
     npm run flow-check &&
     npm run lint &&
