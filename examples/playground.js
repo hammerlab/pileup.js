@@ -54,7 +54,9 @@ var sources = [
     name: 'Coverage'
   },
   {
-    viz: pileup.viz.pileup(),
+    viz: pileup.viz.pileup({
+      viewAsPairs: true
+    }),
     data: bamSource,
     cssClass: 'tumor',
     name: 'Alignments'

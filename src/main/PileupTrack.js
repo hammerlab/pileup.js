@@ -231,7 +231,7 @@ class PileupTrack extends React.Component {
   }
 
   componentDidMount() {
-    this.cache = new PileupCache(this.props.referenceSource);
+    this.cache = new PileupCache(this.props.referenceSource, this.props.options.viewAsPairs);
     this.props.source.on('newdata', range => {
       this.updateReads(range);
       this.updateVisualization();
@@ -363,8 +363,12 @@ PileupTrack.propTypes = {
   range: types.GenomeRange.isRequired,
   source: React.PropTypes.object.isRequired,
   referenceSource: React.PropTypes.object.isRequired,
+  options: React.PropTypes.object
 };
 PileupTrack.displayName = 'pileup';
+PileupTrack.defaultOptions = {
+  viewAsPairs: false
+};
 
 
 module.exports = PileupTrack;

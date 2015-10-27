@@ -57,11 +57,11 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
     throw new Error(`Attempted to create pileup with non-existent element ${elOrId}`);
   }
 
-  var vizTracks = params.tracks.map(function(track) {
-    var source = track.data ? track.data : track.viz.defaultSource;
+  var vizTracks = params.tracks.map(function(track: Track): VisualizedTrack {
+    var source = track.data ? track.data : track.viz.component.defaultSource;
     if(!source) {
       throw new Error(
-        `Track '${track.viz.displayName}' doesn't have a default ` +
+        `Track '${track.viz.component.displayName}' doesn't have a default ` +
         `data source; you must specify one when initializing it.`
       );
     }
@@ -106,6 +106,15 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
   };
 }
 
+type VizObject = ((options: ?Object) => {component: React.Component, options:?Object});
+
+function makeVizObject(component: React.Component): VizObject {
+  return options => {
+    options = _.extend({}, component.defaultOptions, options);
+    return {component, options};
+  };
+}
+
 var pileup = {
   create: create,
   formats: {
@@ -117,13 +126,13 @@ var pileup = {
     empty: EmptySource.create
   },
   viz: {
-    coverage: () => CoverageTrack,
-    genome: () => GenomeTrack,
-    genes: () => GeneTrack,
-    location: () => LocationTrack,
-    scale: () => ScaleTrack,
-    variants: () => VariantTrack,
-    pileup: () => PileupTrack
+    coverage: makeVizObject(CoverageTrack),
+    genome:   makeVizObject(GenomeTrack),
+    genes:    makeVizObject(GeneTrack),
+    location: makeVizObject(LocationTrack),
+    scale:    makeVizObject(ScaleTrack),
+    variants: makeVizObject(VariantTrack),
+    pileup:   makeVizObject(PileupTrack)
   }
 };
 

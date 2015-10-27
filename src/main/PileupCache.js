@@ -36,12 +36,6 @@ export type VisualGroup = {
   alignments: VisualAlignment[];
 };
 
-// read name would make a good key, but paired reads from different contigs
-// shouldn't be grouped visually. Hence we use read name + contig.
-function groupKey(read: Alignment): string {
-  return `${read.name}:${read.ref}`;
-}
-
 // This class provides data management for the visualization, grouping paired
 // reads and managing the pileup.
 class PileupCache {
@@ -49,17 +43,29 @@ class PileupCache {
   groups: {[key: string]: VisualGroup};
   refToPileup: {[key: string]: Array<Interval[]>};
   referenceSource: TwoBitSource;
+  viewAsPairs: boolean;
 
-  constructor(referenceSource: TwoBitSource) {
+  constructor(referenceSource: TwoBitSource, viewAsPairs: boolean) {
     this.groups = {};
     this.refToPileup = {};
     this.referenceSource = referenceSource;
+    this.viewAsPairs = viewAsPairs;
+  }
+
+  // read name would make a good key, but paired reads from different contigs
+  // shouldn't be grouped visually. Hence we use read name + contig.
+  groupKey(read: Alignment): string {
+    if (this.viewAsPairs) {
+      return `${read.name}:${read.ref}`;
+    } else {
+      return read.getKey();
+    }
   }
 
   // Load a new read into the visualization cache.
   // Calling this multiple times with the same read is a no-op.
   addAlignment(read: Alignment) {
-    var key = groupKey(read),
+    var key = this.groupKey(read),
         range = read.getInterval();
 
     if (!(key in this.groups)) {
@@ -91,13 +97,17 @@ class PileupCache {
     if (group.alignments.length == 1) {
       // This is the first read in the group. Infer its span from its mate properties.
       // TODO: if the mate Alignment is also available, it would be better to use that.
-      var intervals = [range];
-      var mateProps = read.getMateProperties();
-      if (mateProps && mateProps.ref && mateProps.ref == read.ref) {
-        mateInterval = new ContigInterval(mateProps.ref, mateProps.pos, mateProps.pos + range.length());
-        intervals.push(mateInterval);
+      if (this.viewAsPairs) {
+        var mateProps = read.getMateProperties();
+        var intervals = [range];
+        if (mateProps && mateProps.ref && mateProps.ref == read.ref) {
+          mateInterval = new ContigInterval(mateProps.ref, mateProps.pos, mateProps.pos + range.length());
+          intervals.push(mateInterval);
+        }
+        group = _.extend(group, spanAndInsert(intervals));
+      } else {
+        group.span = range;
       }
-      group = _.extend(group, spanAndInsert(intervals));
 
       if (!(read.ref in this.refToPileup)) {
         this.refToPileup[read.ref] = [];
@@ -160,7 +170,7 @@ function spanAndInsert(intervals: ContigInterval<string>[]) {
   if (intervals.length == 1) {
     return {insert: null, span: intervals[0]};
   } else if (intervals.length !=2) {
-    throw `Called spanAndInsert with ${intervals.length} \in [1, 2]`;
+    throw `Called spanAndInsert with ${intervals.length} \notin [1, 2]`;
   }
 
   if (!intervals[0].chrOnContig(intervals[1].contig)) {

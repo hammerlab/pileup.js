@@ -58,7 +58,7 @@ var Root = React.createClass({
             referenceSource={this.props.referenceSource}
           />);
 
-    var className = ['track', track.visualization.displayName || '', track.track.cssClass || ''].join(' ');
+    var className = ['track', track.visualization.component.displayName || '', track.track.cssClass || ''].join(' ');
 
     return (
       <div key={key} className={className}>

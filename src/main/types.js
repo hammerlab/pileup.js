@@ -13,8 +13,13 @@
 
 import type * as React from 'react';
 
+export type VizWithOptions = {
+  component: React.Component;
+  options: ?Object;
+}
+
 export type Track = {
-  viz: any;  // for now, a React class
+  viz: VizWithOptions;
   data: Object;  // This is a DataSource object
   name?: string;
   cssClass?: string;
