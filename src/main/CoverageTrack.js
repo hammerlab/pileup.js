@@ -78,6 +78,16 @@ function extractSummaryStatistics(reads: Array<SamRead>,
                                             mismatches: bc.mismatches}));
   var sortedPosCounts = _.sortBy(posCounts, bin => bin.position);
 
+  sortedPosCounts.forEach(({position, count, mismatches}) => {
+    if (_.isEmpty(mismatches)) return;
+    var ref = referenceSource.getRangeAsString({contig, start: position - 1, stop: position - 1});
+    // var cs = _.map(mismatches, mc => mc.count);
+    var mismatchCount = _.reduce(mismatches, (x,y) => x+y);
+    if (mismatchCount > 0.2 * count) {
+      mismatches[ref] = count - mismatchCount;
+    }
+  });
+
   return {binCounts: sortedPosCounts, maxCoverage};
 }
 
