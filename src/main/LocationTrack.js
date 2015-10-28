@@ -47,14 +47,14 @@ class LocationTrack extends React.Component {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     var midPoint = Math.floor((range.stop + range.start) / 2),
-        rightLineX = scale(midPoint + 1),
-        leftLineX = scale(midPoint);
+        rightLineX = Math.round(scale(midPoint + 1)),
+        leftLineX = Math.round(scale(midPoint));
 
     // Left line
-    canvasUtils.drawLine(ctx, leftLineX, 0, leftLineX, height);
+    canvasUtils.drawLine(ctx, leftLineX - 0.5, 0, leftLineX - 0.5, height);
 
     // Right line
-    canvasUtils.drawLine(ctx, rightLineX, 0, rightLineX, height);
+    canvasUtils.drawLine(ctx, rightLineX - 0.5, 0, rightLineX - 0.5, height);
 
     // Mid label
     var midY = height / 2;
@@ -66,7 +66,7 @@ class LocationTrack extends React.Component {
                  midY + style.LOC_TEXT_Y_OFFSET);
 
     // Connect label with the right line
-    canvasUtils.drawLine(ctx, rightLineX, midY, rightLineX + style.LOC_TICK_LENGTH, midY);
+    canvasUtils.drawLine(ctx, rightLineX - 0.5, midY - 0.5, rightLineX + style.LOC_TICK_LENGTH - 0.5, midY - 0.5);
 
     // clean up
     ctx.restore();
