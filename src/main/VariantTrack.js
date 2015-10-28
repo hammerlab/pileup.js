@@ -67,7 +67,6 @@ var VariantTrack = React.createClass({
         interval = new ContigInterval(range.contig, range.start, range.stop),
         variants = this.getVariantSource().getFeaturesInRange(interval),
         scale = this.getScale(),
-        pxPerLetter = scale(1) - scale(0),
         height = this.props.height,
         y = height - style.VARIANT_HEIGHT - 1;
 
@@ -79,9 +78,10 @@ var VariantTrack = React.createClass({
     ctx.strokeStyle = style.VARIANT_STROKE;
     variants.forEach(variant => {
       ctx.pushObject(variant);
-      var x = scale(variant.position);
-      ctx.fillRect(x, y, pxPerLetter, style.VARIANT_HEIGHT);
-      ctx.strokeRect(x, y, pxPerLetter, style.VARIANT_HEIGHT);
+      var x = Math.round(scale(variant.position));
+      var width = Math.round(scale(variant.position + 1)) - 1 - x;
+      ctx.fillRect(x - 0.5, y - 0.5, width, style.VARIANT_HEIGHT);
+      ctx.strokeRect(x - 0.5, y - 0.5, width, style.VARIANT_HEIGHT);
       ctx.popObject();
     });
 
