@@ -59,8 +59,8 @@ class ScaleTrack extends React.Component {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     var viewSize = range.stop - range.start + 1,
-        midX = width / 2,
-        midY = height / 2;
+        midX = Math.round(width / 2),
+        midY = Math.round(height / 2);
 
     // Mid label
     var {prefix, unit} = d3utils.formatRange(viewSize);
@@ -73,23 +73,23 @@ class ScaleTrack extends React.Component {
                  midY + style.SCALE_TEXT_Y_OFFSET);
 
     // Left line
-    canvasUtils.drawLine(ctx, 0, midY, midX - style.SCALE_LINE_PADDING, midY);
+    canvasUtils.drawLine(ctx, 0.5, midY - 0.5, midX - style.SCALE_LINE_PADDING - 0.5, midY - 0.5);
     // Left arrow
     ctx.beginPath();
-    ctx.moveTo(0 + style.SCALE_ARROW_SIZE, midY - style.SCALE_ARROW_SIZE);
-    ctx.lineTo(0, midY);
-    ctx.lineTo(0 + style.SCALE_ARROW_SIZE, midY + style.SCALE_ARROW_SIZE);
+    ctx.moveTo(0.5 + style.SCALE_ARROW_SIZE, midY - style.SCALE_ARROW_SIZE - 0.5);
+    ctx.lineTo(0.5, midY - 0.5);
+    ctx.lineTo(0.5 + style.SCALE_ARROW_SIZE, midY + style.SCALE_ARROW_SIZE - 0.5);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
     // Right line
-    canvasUtils.drawLine(ctx, midX + style.SCALE_LINE_PADDING, midY, width, midY);
+    canvasUtils.drawLine(ctx, midX + style.SCALE_LINE_PADDING - 0.5, midY - 0.5, width - 0.5, midY - 0.5);
     // Right arrow
     ctx.beginPath();
-    ctx.moveTo(width - style.SCALE_ARROW_SIZE, midY - style.SCALE_ARROW_SIZE);
-    ctx.lineTo(width, midY);
-    ctx.lineTo(width - style.SCALE_ARROW_SIZE, midY + style.SCALE_ARROW_SIZE);
+    ctx.moveTo(width - style.SCALE_ARROW_SIZE - 0.5, midY - style.SCALE_ARROW_SIZE - 0.5);
+    ctx.lineTo(width - 0.5, midY - 0.5);
+    ctx.lineTo(width - style.SCALE_ARROW_SIZE - 0.5, midY + style.SCALE_ARROW_SIZE - 0.5);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
