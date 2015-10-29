@@ -3,7 +3,8 @@
 
 import type * as SamRead from './SamRead';
 import type {Alignment, CigarSymbol} from './Alignment';
-import type * as Interval from './Interval';
+
+var Interval = require('./Interval');
 
 /**
  * Given a list of Intervals, return a parallel list of row numbers for each.
@@ -200,6 +201,19 @@ function getOpInfo(read: Alignment, referenceSource: Object): OpInfo {
     mismatches
   };
 }
+
+const MIN_PX_PER_BUFFER = 500;
+function getNewTileRanges(uncoveredIntervals: Interval[], existingTiles: Interval[], range: Interval, pixelsPerBase: number) {
+  var allIntervals = [];
+  uncoveredIntervals.forEach(iv => {
+    for (var start = iv.start; start <= iv.stop; start += (1 + MIN_PX_PER_BUFFER)) {
+      var newIv = new Interval(start, start + MIN_PX_PER_BUFFER);
+      var remains = newIv.complementIntervals(allIntervals);
+      allIntervals = allIntervals.concat(remains);
+    }
+  });
+}
+
 
 module.exports = {
   pileup,

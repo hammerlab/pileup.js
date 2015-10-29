@@ -96,6 +96,8 @@ class TileCache {
       buffer: document.createElement('canvas')
     }));
 
+    console.log('new tiles', newTiles);
+
     newTiles.forEach(tile => this.renderTile(tile));
     this.tileCache = this.tileCache.concat(newTiles);
     return newTiles;
@@ -322,10 +324,12 @@ class PileupTrack extends React.Component {
 
     this.props.source.on('newdata', range => {
       this.updateReads(range);
+      this.tiles.invalidateAll();
       this.updateVisualization();
     });
     this.props.referenceSource.on('newdata', range => {
       this.cache.updateMismatches(range);
+      this.tiles.invalidateAll();
       this.updateVisualization();
     });
     this.props.source.on('networkprogress', e => {
