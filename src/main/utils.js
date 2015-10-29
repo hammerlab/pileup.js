@@ -7,7 +7,8 @@
 import type {InflatedBlock, PartialGenomeRange} from './types';
 import type * as Q from 'q';
 
-var pako = require('pako/lib/inflate');
+var pako = require('pako/lib/inflate'),
+    _ = require('underscore');
 
 var Interval = require('./Interval');
 
@@ -248,6 +249,10 @@ function parseNumberWithCommas(x: string): number {
   return parseInt(x.replace(/,/g, ''), 10);
 }
 
+function flatMap<T, R>(array: T[], fn: (t: T)=>R[]): R[] {
+  return _.flatten(array.map(fn), true /* shallow */);
+}
+
 module.exports = {
   tupleLessOrEqual,
   tupleRangeOverlaps,
@@ -259,5 +264,6 @@ module.exports = {
   scaleRange,
   parseRange,
   formatInterval,
-  isChrMatch
+  isChrMatch,
+  flatMap
 };
