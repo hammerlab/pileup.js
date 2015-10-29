@@ -35,24 +35,24 @@ var sources = [
     }),
     name: 'Genes'
   },
-  {
-    viz: pileup.viz.coverage(),
-    data: bamSource,
-    cssClass: 'normal',
-    name: 'Coverage'
-  },
-  {
-    viz: pileup.viz.pileup(),
-    data: bamSource,
-    cssClass: 'normal',
-    name: 'Alignments'
-  },
-  {
-    viz: pileup.viz.coverage(),
-    data: bamSource,
-    cssClass: 'tumor',
-    name: 'Coverage'
-  },
+  // {
+  //   viz: pileup.viz.coverage(),
+  //   data: bamSource,
+  //   cssClass: 'normal',
+  //   name: 'Coverage'
+  // },
+  // {
+  //   viz: pileup.viz.pileup(),
+  //   data: bamSource,
+  //   cssClass: 'normal',
+  //   name: 'Alignments'
+  // },
+  // {
+  //   viz: pileup.viz.coverage(),
+  //   data: bamSource,
+  //   cssClass: 'tumor',
+  //   name: 'Coverage'
+  // },
   {
     viz: pileup.viz.pileup({
       viewAsPairs: true
