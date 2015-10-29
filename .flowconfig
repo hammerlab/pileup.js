@@ -19,6 +19,8 @@
 .*node_modules/babel.*
 .*node_modules/d3.*
 .*node_modules/smash.*
+.*node_modules/source-map.*
+.*node_modules/exorcist.*
 .*react/node_modules/fbjs.*
 .*coverage.*
 

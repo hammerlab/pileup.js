@@ -39,6 +39,93 @@ var SUPPORTS_DASHES = typeof(CanvasRenderingContext2D) !== 'undefined' &&
 var SCROLLING_CLASS_NAME = 'track-content';
 
 
+// Ideas:
+// - all rendering must be done into off-screen tiles.
+// - Rendering to an on-screen canvas should consist entirely of drawImage calls.
+// - Drawing into tiles should happen in response to new data coming in, or to
+//     new tiles becoming visible on screen.
+// - New data coming in invalidates all tiles.
+
+type Tile = {
+  pixelsPerBase: number;
+  range: ContigInterval<string>;
+  buffer: HTMLCanvasElement;
+};
+
+const EPSILON = 1e-6;
+
+class TileCache {
+  tileCache: Tile[];
+  pileup: PileupCache;
+
+  constructor(pileup: PileupCache) {
+    this.tileCache = [];
+    this.pileup = pileup;
+  }
+
+  renderTile(tile: Tile) {
+    var range = tile.range;
+    var height = this.pileup.pileupHeightForRef(range.contig) *
+                    (READ_HEIGHT + READ_SPACING),
+        width = Math.round(tile.pixelsPerBase * range.length());
+    var vGroups = this.pileup.getGroupsOverlapping(range);
+    tile.buffer = document.createElement('canvas');
+    tile.buffer.width = width;
+    tile.buffer.height = height;
+
+    var sc = scale.linear().domain([range.start(), range.stop()]).range([0, width]);
+    var ctx = canvasUtils.getContext(tile.buffer);
+    var dtx = dataCanvas.getDataContext(ctx);
+    renderPileup(dtx, sc, range, vGroups);
+  }
+
+  // Create (and render) new tiles to fill the gaps.
+  makeNewTiles(pixelsPerBase: number,
+               uncoveredIntervals: Interval[],
+               range: ContigInterval<string>): Tile[] {
+    var tilesAtRes = this.tileCache.filter(tile => Math.abs(tile.pixelsPerBase - pixelsPerBase) < EPSILON && range.chrOnContig(tile.range.contig));
+    var bpPerWindow = tilesAtRes.length ? tilesAtRes[0].range.length() : range.length();
+
+    // - determine a good tile size for this resolution.
+    // - figure out which tiles need to be created
+
+    // XXX this is a dumb strategy; results in lots of small buffers.
+    var newTiles = uncoveredIntervals.map(iv => ({
+      pixelsPerBase,
+      range: new ContigInterval(range.contig, iv.start, iv.stop),
+      buffer: document.createElement('canvas')
+    }));
+
+    newTiles.forEach(tile => this.renderTile(tile));
+    this.tileCache = this.tileCache.concat(newTiles);
+    return newTiles;
+  }
+
+  renderToScreen(ctx: CanvasRenderingContext2D,
+                 range: ContigInterval<string>,
+                 scale: (num: number) => number) {
+    var pixelsPerBase = scale(1) - scale(0);
+    var tilesAtRes = this.tileCache.filter(tile => Math.abs(tile.pixelsPerBase - pixelsPerBase) < EPSILON && range.chrOnContig(tile.range.contig));
+
+    var existingIntervals = tilesAtRes.map(tile => tile.range.interval);
+    var uncoveredIntervals = range.interval.complementIntervals(existingIntervals);
+    if (uncoveredIntervals.length) {
+      tilesAtRes = tilesAtRes.concat(this.makeNewTiles(pixelsPerBase, uncoveredIntervals, range));
+    }
+
+    var tiles = tilesAtRes.filter(tile => range.chrIntersects(tile.range));
+
+    tiles.forEach(tile => {
+      ctx.drawImage(tile.buffer, scale(tile.range.start()), 0);
+    });
+  }
+
+  invalidateAll() {
+    this.tileCache = [];
+  }
+}
+
+
 // Should the Cigar op be rendered to the screen?
 function isRendered(op) {
   return (op.op == CigarOp.MATCH ||
@@ -151,31 +238,9 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
     ctx.popObject();
   }
 
-  // Draw the center line(s), which orient the user
-  function renderCenterLine() {
-    var midPoint = Math.floor((range.stop() + range.start()) / 2),
-        rightLineX = Math.ceil(scale(midPoint + 1)),
-        leftLineX = Math.floor(scale(midPoint)),
-        height = ctx.canvas.height;
-    ctx.save();
-    ctx.lineWidth = 1;
-    if (SUPPORTS_DASHES) {
-      ctx.setLineDash([5, 5]);
-    }
-    if (rightLineX - leftLineX < 3) {
-      // If the lines are very close, then just draw a center line.
-      var midX = Math.round((leftLineX + rightLineX) / 2);
-      canvasUtils.drawLine(ctx, midX - 0.5, 0, midX - 0.5, height);
-    } else {
-      canvasUtils.drawLine(ctx, leftLineX - 0.5, 0, leftLineX - 0.5, height);
-      canvasUtils.drawLine(ctx, rightLineX - 0.5, 0, rightLineX - 0.5, height);
-    }
-    ctx.restore();
-  }
-
-  // TODO: the center line should go above alignments, but below mismatches
+  ctx.fillStyle = style.ALIGNMENT_COLOR;
+  ctx.font = style.TIGHT_TEXT_STYLE;
   vGroups.forEach(vGroup => drawGroup(vGroup));
-  renderCenterLine();
 }
 
 
@@ -201,6 +266,7 @@ function opacityForQuality(quality: number): number {
 
 class PileupTrack extends React.Component {
   cache: PileupCache;
+  tiles: TileCache;
 
   constructor(props: Object) {
     super(props);
@@ -252,6 +318,8 @@ class PileupTrack extends React.Component {
 
   componentDidMount() {
     this.cache = new PileupCache(this.props.referenceSource, this.props.options.viewAsPairs);
+    this.tiles = new TileCache(this.cache);
+
     this.props.source.on('newdata', range => {
       this.updateReads(range);
       this.updateVisualization();
@@ -308,16 +376,39 @@ class PileupTrack extends React.Component {
 
   renderScene(ctx: DataCanvasRenderingContext2D) {
     var genomeRange = this.props.range,
-        range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop);
-    var vGroups = this.cache.getGroupsOverlapping(range);
+        range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop),
+        scale = this.getScale();
 
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.fillStyle = style.ALIGNMENT_COLOR;
-    ctx.font = style.TIGHT_TEXT_STYLE;
+    this.tiles.renderToScreen(ctx, range, scale);
 
-    var scale = this.getScale();
-    renderPileup(ctx, scale, range, vGroups);
+    // TODO: the center line should go above alignments, but below mismatches
+    this.renderCenterLine(ctx, range, scale);
+  }
+
+  // Draw the center line(s), which orient the user
+  renderCenterLine(ctx: CanvasRenderingContext2D,
+                   range: ContigInterval<string>,
+                   scale: (num: number) => number) {
+    var midPoint = Math.floor((range.stop() + range.start()) / 2),
+        rightLineX = Math.ceil(scale(midPoint + 1)),
+        leftLineX = Math.floor(scale(midPoint)),
+        height = ctx.canvas.height;
+    ctx.save();
+    ctx.lineWidth = 1;
+    if (SUPPORTS_DASHES) {
+      ctx.setLineDash([5, 5]);
+    }
+    if (rightLineX - leftLineX < 3) {
+      // If the lines are very close, then just draw a center line.
+      var midX = Math.round((leftLineX + rightLineX) / 2);
+      canvasUtils.drawLine(ctx, midX - 0.5, 0, midX - 0.5, height);
+    } else {
+      canvasUtils.drawLine(ctx, leftLineX - 0.5, 0, leftLineX - 0.5, height);
+      canvasUtils.drawLine(ctx, rightLineX - 0.5, 0, rightLineX - 0.5, height);
+    }
+    ctx.restore();
   }
 
   handleClick(reactEvent: any) {
