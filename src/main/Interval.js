@@ -91,6 +91,8 @@ class Interval {
    * If comp = interval.complementIntervals(ranges), then this guarantees that:
    * - comp union ranges = interval
    * - a int b = 0 forall a \in comp, b in ranges
+   *
+   * (The input ranges need not be disjoint.)
    */
   complementIntervals(ranges: Interval[]): Interval[] {
     var comps = [this];

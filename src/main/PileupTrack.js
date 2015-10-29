@@ -9,21 +9,23 @@ import type {TwoBitSource} from './TwoBitDataSource';
 import type {BasePair} from './pileuputils';
 import type {VisualAlignment, VisualGroup} from './PileupCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
+import type * as Interval from './Interval';
 
 var React = require('react'),
-    scale = require('./scale'),
     shallowEquals = require('shallow-equals'),
+    _ = require('underscore');
+
+var scale = require('./scale'),
     types = require('./react-types'),
     d3utils = require('./d3utils'),
     {CigarOp} = require('./pileuputils'),
     ContigInterval = require('./ContigInterval'),
-    Interval = require('./Interval'),
     DisplayMode = require('./DisplayMode'),
     PileupCache = require('./PileupCache'),
+    TileCache = require('./TiledCanvas'),
     canvasUtils = require('./canvas-utils'),
     dataCanvas = require('data-canvas'),
-    style = require('./style'),
-    _ = require('underscore');
+    style = require('./style');
 
 
 var READ_HEIGHT = 13;
@@ -36,7 +38,28 @@ var READ_STRAND_ARROW_WIDTH = 6;
 var SUPPORTS_DASHES = typeof(CanvasRenderingContext2D) !== 'undefined' &&
                       !!CanvasRenderingContext2D.prototype.setLineDash;
 
-var SCROLLING_CLASS_NAME = 'track-content';
+// var SCROLLING_CLASS_NAME = 'track-content';
+
+class PileupTileCache extends TileCache {
+  pileup: PileupCache;
+
+  constructor(pileup: PileupCache) {
+    super();
+    this.pileup = pileup;
+  }
+
+  heightForRef(ref: string): number {
+    return this.pileup.pileupHeightForRef(ref) *
+                    (READ_HEIGHT + READ_SPACING);
+  }
+
+  render(ctx: DataCanvasRenderingContext2D,
+         scale: (x: number)=>number,
+         range: ContigInterval<string>) {
+    var vGroups = this.pileup.getGroupsOverlapping(range);
+    renderPileup(ctx, scale, range, vGroups);
+  }
+}
 
 
 // Should the Cigar op be rendered to the screen?
@@ -151,31 +174,9 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
     ctx.popObject();
   }
 
-  // Draw the center line(s), which orient the user
-  function renderCenterLine() {
-    var midPoint = Math.floor((range.stop() + range.start()) / 2),
-        rightLineX = Math.ceil(scale(midPoint + 1)),
-        leftLineX = Math.floor(scale(midPoint)),
-        height = ctx.canvas.height;
-    ctx.save();
-    ctx.lineWidth = 1;
-    if (SUPPORTS_DASHES) {
-      ctx.setLineDash([5, 5]);
-    }
-    if (rightLineX - leftLineX < 3) {
-      // If the lines are very close, then just draw a center line.
-      var midX = Math.round((leftLineX + rightLineX) / 2);
-      canvasUtils.drawLine(ctx, midX - 0.5, 0, midX - 0.5, height);
-    } else {
-      canvasUtils.drawLine(ctx, leftLineX - 0.5, 0, leftLineX - 0.5, height);
-      canvasUtils.drawLine(ctx, rightLineX - 0.5, 0, rightLineX - 0.5, height);
-    }
-    ctx.restore();
-  }
-
-  // TODO: the center line should go above alignments, but below mismatches
+  ctx.fillStyle = style.ALIGNMENT_COLOR;
+  ctx.font = style.TIGHT_TEXT_STYLE;
   vGroups.forEach(vGroup => drawGroup(vGroup));
-  renderCenterLine();
 }
 
 
@@ -201,6 +202,7 @@ function opacityForQuality(quality: number): number {
 
 class PileupTrack extends React.Component {
   cache: PileupCache;
+  tiles: TileCache;
 
   constructor(props: Object) {
     super(props);
@@ -252,12 +254,16 @@ class PileupTrack extends React.Component {
 
   componentDidMount() {
     this.cache = new PileupCache(this.props.referenceSource, this.props.options.viewAsPairs);
+    this.tiles = new PileupTileCache(this.cache);
+
     this.props.source.on('newdata', range => {
       this.updateReads(range);
+      this.tiles.invalidateAll();
       this.updateVisualization();
     });
     this.props.referenceSource.on('newdata', range => {
       this.cache.updateMismatches(range);
+      this.tiles.invalidateAll();
       this.updateVisualization();
     });
     this.props.source.on('networkprogress', e => {
@@ -308,16 +314,39 @@ class PileupTrack extends React.Component {
 
   renderScene(ctx: DataCanvasRenderingContext2D) {
     var genomeRange = this.props.range,
-        range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop);
-    var vGroups = this.cache.getGroupsOverlapping(range);
+        range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop),
+        scale = this.getScale();
 
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.fillStyle = style.ALIGNMENT_COLOR;
-    ctx.font = style.TIGHT_TEXT_STYLE;
+    this.tiles.renderToScreen(ctx, range, scale);
 
-    var scale = this.getScale();
-    renderPileup(ctx, scale, range, vGroups);
+    // TODO: the center line should go above alignments, but below mismatches
+    this.renderCenterLine(ctx, range, scale);
+  }
+
+  // Draw the center line(s), which orient the user
+  renderCenterLine(ctx: CanvasRenderingContext2D,
+                   range: ContigInterval<string>,
+                   scale: (num: number) => number) {
+    var midPoint = Math.floor((range.stop() + range.start()) / 2),
+        rightLineX = Math.ceil(scale(midPoint + 1)),
+        leftLineX = Math.floor(scale(midPoint)),
+        height = ctx.canvas.height;
+    ctx.save();
+    ctx.lineWidth = 1;
+    if (SUPPORTS_DASHES) {
+      ctx.setLineDash([5, 5]);
+    }
+    if (rightLineX - leftLineX < 3) {
+      // If the lines are very close, then just draw a center line.
+      var midX = Math.round((leftLineX + rightLineX) / 2);
+      canvasUtils.drawLine(ctx, midX - 0.5, 0, midX - 0.5, height);
+    } else {
+      canvasUtils.drawLine(ctx, leftLineX - 0.5, 0, leftLineX - 0.5, height);
+      canvasUtils.drawLine(ctx, rightLineX - 0.5, 0, rightLineX - 0.5, height);
+    }
+    ctx.restore();
   }
 
   handleClick(reactEvent: any) {
