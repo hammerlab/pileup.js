@@ -46,9 +46,11 @@ function isRendered(op) {
           op.op == CigarOp.INSERT);
 }
 
-// The renderer pulls out the canvas context and scale into shared variables in a closure.
-function getRenderer(ctx: DataCanvasRenderingContext2D,
-                     scale: (num: number) => number) {
+// Render a portion of the pileup into the canvas.
+function renderPileup(ctx: DataCanvasRenderingContext2D,
+                      scale: (num: number) => number,
+                      range: ContigInterval<string>,
+                      vGroups: VisualGroup[]) {
   // Should mismatched base pairs be shown as blocks of color or as letters?
   var pxPerLetter = scale(1) - scale(0),
       mode = DisplayMode.getDisplayMode(pxPerLetter),
@@ -149,7 +151,31 @@ function getRenderer(ctx: DataCanvasRenderingContext2D,
     ctx.popObject();
   }
 
-  return {drawArrow, drawSegment, drawGroup};
+  // Draw the center line(s), which orient the user
+  function renderCenterLine() {
+    var midPoint = Math.floor((range.stop() + range.start()) / 2),
+        rightLineX = Math.ceil(scale(midPoint + 1)),
+        leftLineX = Math.floor(scale(midPoint)),
+        height = ctx.canvas.height;
+    ctx.save();
+    ctx.lineWidth = 1;
+    if (SUPPORTS_DASHES) {
+      ctx.setLineDash([5, 5]);
+    }
+    if (rightLineX - leftLineX < 3) {
+      // If the lines are very close, then just draw a center line.
+      var midX = Math.round((leftLineX + rightLineX) / 2);
+      canvasUtils.drawLine(ctx, midX - 0.5, 0, midX - 0.5, height);
+    } else {
+      canvasUtils.drawLine(ctx, leftLineX - 0.5, 0, leftLineX - 0.5, height);
+      canvasUtils.drawLine(ctx, rightLineX - 0.5, 0, rightLineX - 0.5, height);
+    }
+    ctx.restore();
+  }
+
+  // TODO: the center line should go above alignments, but below mismatches
+  vGroups.forEach(vGroup => drawGroup(vGroup));
+  renderCenterLine();
 }
 
 
@@ -291,35 +317,7 @@ class PileupTrack extends React.Component {
     ctx.font = style.TIGHT_TEXT_STYLE;
 
     var scale = this.getScale();
-    var renderer = getRenderer(ctx, scale, this.state.visibleYRange);
-    vGroups.forEach(vGroup => renderer.drawGroup(vGroup));
-
-    // TODO: the center line should go above alignments, but below mismatches
-    this.renderCenterLine(ctx, range, scale);
-  }
-
-  // Draw the center line(s), which orient the user
-  renderCenterLine(ctx: CanvasRenderingContext2D,
-                   range: ContigInterval<string>,
-                   scale: (num: number) => number) {
-    var midPoint = Math.floor((range.stop() + range.start()) / 2),
-        rightLineX = Math.ceil(scale(midPoint + 1)),
-        leftLineX = Math.floor(scale(midPoint)),
-        height = ctx.canvas.height;
-    ctx.save();
-    ctx.lineWidth = 1;
-    if (SUPPORTS_DASHES) {
-      ctx.setLineDash([5, 5]);
-    }
-    if (rightLineX - leftLineX < 3) {
-      // If the lines are very close, then just draw a center line.
-      var midX = Math.round((leftLineX + rightLineX) / 2);
-      canvasUtils.drawLine(ctx, midX - 0.5, 0, midX - 0.5, height);
-    } else {
-      canvasUtils.drawLine(ctx, leftLineX - 0.5, 0, leftLineX - 0.5, height);
-      canvasUtils.drawLine(ctx, rightLineX - 0.5, 0, rightLineX - 0.5, height);
-    }
-    ctx.restore();
+    renderPileup(ctx, scale, range, vGroups);
   }
 
   handleClick(reactEvent: any) {
