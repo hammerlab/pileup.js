@@ -203,8 +203,8 @@ function getOpInfo(read: Alignment, referenceSource: Object): OpInfo {
 }
 
 const MIN_PX_PER_BUFFER = 500;
-function getNewTileRanges(uncoveredIntervals: Interval[], existingTiles: Interval[], range: Interval, pixelsPerBase: number) {
-  var allIntervals = [];
+function getNewTileRanges(uncoveredIntervals: Interval[], existingTiles: Interval[], range: Interval, pixelsPerBase: number): Interval[] {
+  var allIntervals = existingTiles.slice();
   uncoveredIntervals.forEach(iv => {
     for (var start = iv.start; start <= iv.stop; start += (1 + MIN_PX_PER_BUFFER)) {
       var newIv = new Interval(start, start + MIN_PX_PER_BUFFER);
@@ -212,6 +212,7 @@ function getNewTileRanges(uncoveredIntervals: Interval[], existingTiles: Interva
       allIntervals = allIntervals.concat(remains);
     }
   });
+  return allIntervals.slice(existingTiles.length);
 }
 
 
@@ -219,5 +220,6 @@ module.exports = {
   pileup,
   addToPileup,
   getOpInfo,
-  CigarOp
+  CigarOp,
+  getNewTileRanges
 };

@@ -15,7 +15,7 @@ var React = require('react'),
     shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
     d3utils = require('./d3utils'),
-    {CigarOp} = require('./pileuputils'),
+    {CigarOp, getNewTileRanges} = require('./pileuputils'),
     ContigInterval = require('./ContigInterval'),
     Interval = require('./Interval'),
     DisplayMode = require('./DisplayMode'),
@@ -89,8 +89,10 @@ class TileCache {
     // - determine a good tile size for this resolution.
     // - figure out which tiles need to be created
 
+    var newIntervals = getNewTileRanges(uncoveredIntervals, tilesAtRes.map(tile => tile.range.interval), range.interval, pixelsPerBase);
+
     // XXX this is a dumb strategy; results in lots of small buffers.
-    var newTiles = uncoveredIntervals.map(iv => ({
+    var newTiles = newIntervals.map(iv => ({
       pixelsPerBase,
       range: new ContigInterval(range.contig, iv.start, iv.stop),
       buffer: document.createElement('canvas')
