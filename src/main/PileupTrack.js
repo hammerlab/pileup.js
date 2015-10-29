@@ -9,6 +9,7 @@ import type {TwoBitSource} from './TwoBitDataSource';
 import type {BasePair} from './pileuputils';
 import type {VisualAlignment, VisualGroup} from './PileupCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
+import type * as Interval from './Interval';
 
 var React = require('react'),
     scale = require('./scale'),
@@ -17,7 +18,6 @@ var React = require('react'),
     d3utils = require('./d3utils'),
     {CigarOp, getNewTileRanges} = require('./pileuputils'),
     ContigInterval = require('./ContigInterval'),
-    Interval = require('./Interval'),
     DisplayMode = require('./DisplayMode'),
     PileupCache = require('./PileupCache'),
     canvasUtils = require('./canvas-utils'),
@@ -36,7 +36,7 @@ var READ_STRAND_ARROW_WIDTH = 6;
 var SUPPORTS_DASHES = typeof(CanvasRenderingContext2D) !== 'undefined' &&
                       !!CanvasRenderingContext2D.prototype.setLineDash;
 
-var SCROLLING_CLASS_NAME = 'track-content';
+// var SCROLLING_CLASS_NAME = 'track-content';
 
 
 // Ideas:
@@ -84,7 +84,6 @@ class TileCache {
                uncoveredIntervals: Interval[],
                range: ContigInterval<string>): Tile[] {
     var tilesAtRes = this.tileCache.filter(tile => Math.abs(tile.pixelsPerBase - pixelsPerBase) < EPSILON && range.chrOnContig(tile.range.contig));
-    var bpPerWindow = tilesAtRes.length ? tilesAtRes[0].range.length() : range.length();
 
     // - determine a good tile size for this resolution.
     // - figure out which tiles need to be created
