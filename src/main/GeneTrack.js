@@ -127,7 +127,7 @@ var GeneTrack = React.createClass({
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    var geneLineY = height / 4;
+    var geneLineY = Math.round(height / 4);
     var textIntervals = [];  // x-intervals with rendered gene names, to avoid over-drawing.
     // TODO: don't pull in genes via state.
     ctx.font = `${style.GENE_FONT_SIZE}px ${style.GENE_FONT}`;
@@ -139,8 +139,8 @@ var GeneTrack = React.createClass({
       ctx.strokeStyle = style.GENE_COLOR;
       ctx.fillStyle = style.GENE_COLOR;
 
-      canvasUtils.drawLine(ctx, clampedScale(gene.position.start()), geneLineY,
-                                clampedScale(gene.position.stop()), geneLineY);
+      canvasUtils.drawLine(ctx, clampedScale(gene.position.start()), geneLineY + 0.5,
+                                clampedScale(gene.position.stop()), geneLineY + 0.5);
 
       // TODO: only compute all these intervals when data becomes available.
       var exons = bedtools.splitCodingExons(gene.exons, gene.codingRegion);
@@ -153,12 +153,12 @@ var GeneTrack = React.createClass({
 
       var introns = gene.position.interval.complementIntervals(gene.exons);
       introns.forEach(range => {
-        drawArrow(ctx, clampedScale, range, geneLineY, gene.strand);
+        drawArrow(ctx, clampedScale, range, geneLineY + 0.5, gene.strand);
       });
       ctx.strokeStyle = style.GENE_COMPLEMENT_COLOR;
       ctx.lineWidth = 2;
       gene.exons.forEach(range => {
-        drawArrow(ctx, clampedScale, range, geneLineY, gene.strand);
+        drawArrow(ctx, clampedScale, range, geneLineY + 0.5, gene.strand);
       });
 
       drawGeneName(ctx, clampedScale, geneLineY, gene, textIntervals);
