@@ -48,8 +48,7 @@ function isRendered(op) {
 
 // The renderer pulls out the canvas context and scale into shared variables in a closure.
 function getRenderer(ctx: DataCanvasRenderingContext2D,
-                     scale: (num: number) => number,
-                     visibleYRange: Interval) {
+                     scale: (num: number) => number) {
   // Should mismatched base pairs be shown as blocks of color or as letters?
   var pxPerLetter = scale(1) - scale(0),
       mode = DisplayMode.getDisplayMode(pxPerLetter),
@@ -123,10 +122,6 @@ function getRenderer(ctx: DataCanvasRenderingContext2D,
 
   function drawGroup(vGroup: VisualGroup) {
     var y = yForRow(vGroup.row);
-    if (y < visibleYRange.start - READ_HEIGHT || y > visibleYRange.stop) {
-      // Optimization: don't render off-screen alignments.
-      return;
-    }
     ctx.pushObject(vGroup);
     vGroup.alignments.forEach(vRead => drawAlignment(vRead, y));
     if (vGroup.insert) {
@@ -184,7 +179,6 @@ class PileupTrack extends React.Component {
   constructor(props: Object) {
     super(props);
     this.state = {
-      visibleYRange: new Interval(0, Number.MAX_VALUE)
     };
   }
 
@@ -245,29 +239,12 @@ class PileupTrack extends React.Component {
     }).on('networkdone', e => {
       this.setState({networkStatus: null});
     });
-    this.getScrollParent().addEventListener('scroll', e => {
-      this.updateVisibleYRange();
-    });
 
     this.updateVisualization();
   }
 
   getScale() {
     return d3utils.getTrackScale(this.props.range, this.props.width);
-  }
-
-  getScrollParent(): HTMLElement {
-    var node = this.refs.container;
-    while (node && !node.classList.contains(SCROLLING_CLASS_NAME)) {
-      node = node.parentElement;
-    }
-    return node;
-  }
-
-  updateVisibleYRange() {
-    var node = this.getScrollParent();
-    var top = node.scrollTop;
-    this.setState({visibleYRange: new Interval(top, top + node.offsetHeight)});
   }
 
   componentDidUpdate(prevProps: any, prevState: any) {
