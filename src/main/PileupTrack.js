@@ -80,27 +80,20 @@ class TileCache {
   }
 
   // Create (and render) new tiles to fill the gaps.
-  makeNewTiles(pixelsPerBase: number,
-               uncoveredIntervals: Interval[],
+  makeNewTiles(existingTiles: Interval[],
+               pixelsPerBase: number,
                range: ContigInterval<string>): Tile[] {
-    var tilesAtRes = this.tileCache.filter(tile => Math.abs(tile.pixelsPerBase - pixelsPerBase) < EPSILON && range.chrOnContig(tile.range.contig));
+    var newIntervals = getNewTileRanges(existingTiles, range.interval, pixelsPerBase);
 
-    // - determine a good tile size for this resolution.
-    // - figure out which tiles need to be created
-
-    var newIntervals = getNewTileRanges(uncoveredIntervals, tilesAtRes.map(tile => tile.range.interval), range.interval, pixelsPerBase);
-
-    // XXX this is a dumb strategy; results in lots of small buffers.
     var newTiles = newIntervals.map(iv => ({
       pixelsPerBase,
       range: new ContigInterval(range.contig, iv.start, iv.stop),
       buffer: document.createElement('canvas')
     }));
 
-    console.log('new tiles', newTiles);
-
     newTiles.forEach(tile => this.renderTile(tile));
     this.tileCache = this.tileCache.concat(newTiles);
+    this.tileCache.sort((a, b) => ContigInterval.compare(a.range, b.range));
     return newTiles;
   }
 
@@ -111,9 +104,8 @@ class TileCache {
     var tilesAtRes = this.tileCache.filter(tile => Math.abs(tile.pixelsPerBase - pixelsPerBase) < EPSILON && range.chrOnContig(tile.range.contig));
 
     var existingIntervals = tilesAtRes.map(tile => tile.range.interval);
-    var uncoveredIntervals = range.interval.complementIntervals(existingIntervals);
-    if (uncoveredIntervals.length) {
-      tilesAtRes = tilesAtRes.concat(this.makeNewTiles(pixelsPerBase, uncoveredIntervals, range));
+    if (!range.interval.isCoveredBy(existingIntervals)) {
+      tilesAtRes = tilesAtRes.concat(this.makeNewTiles(existingIntervals, pixelsPerBase, range));
     }
 
     var tiles = tilesAtRes.filter(tile => range.chrIntersects(tile.range));
@@ -125,6 +117,7 @@ class TileCache {
 
   invalidateAll() {
     this.tileCache = [];
+    console.log('invalidate tile cache');
   }
 }
 

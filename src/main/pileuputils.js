@@ -4,7 +4,10 @@
 import type * as SamRead from './SamRead';
 import type {Alignment, CigarSymbol} from './Alignment';
 
-var Interval = require('./Interval');
+var _ = require('underscore');
+
+var Interval = require('./Interval'),
+    utils = require('./utils');
 
 /**
  * Given a list of Intervals, return a parallel list of row numbers for each.
@@ -202,17 +205,20 @@ function getOpInfo(read: Alignment, referenceSource: Object): OpInfo {
   };
 }
 
+
+// requires that existingIntervals be sorted.
 const MIN_PX_PER_BUFFER = 500;
-function getNewTileRanges(uncoveredIntervals: Interval[], existingTiles: Interval[], range: Interval, pixelsPerBase: number): Interval[] {
-  var allIntervals = existingTiles.slice();
-  uncoveredIntervals.forEach(iv => {
-    for (var start = iv.start; start <= iv.stop; start += (1 + MIN_PX_PER_BUFFER)) {
-      var newIv = new Interval(start, start + MIN_PX_PER_BUFFER);
-      var remains = newIv.complementIntervals(allIntervals);
-      allIntervals = allIntervals.concat(remains);
-    }
-  });
-  return allIntervals.slice(existingTiles.length);
+function getNewTileRanges(existingIntervals: Interval[],
+                          range: Interval,
+                          pixelsPerBase: number): Interval[] {
+  var ivWidth = Math.ceil(MIN_PX_PER_BUFFER / pixelsPerBase);
+  var firstStart = Math.floor(range.start / ivWidth) * ivWidth;
+  var ivs = _.range(firstStart, range.stop, ivWidth)
+             .map(start => new Interval(start, start + ivWidth - 1))
+             .filter(iv => !iv.isCoveredBy(existingIntervals));
+
+  return utils.flatMap(ivs, iv => iv.complementIntervals(existingIntervals))
+              .filter(iv => iv.intersects(range));
 }
 
 

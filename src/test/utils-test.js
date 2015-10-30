@@ -212,4 +212,11 @@ describe('utils', function() {
     });
   });
 
+  it('should flatMap', function() {
+    expect(utils.flatMap([1, 2, 3], x => [x])).to.deep.equal([1, 2, 3]);
+    expect(utils.flatMap([1, 2, 3], x => x % 2 == 0 ? [x, x] : [])).to.deep.equal([2, 2]);
+
+    expect(utils.flatMap([[1,2], [2,3]], a => a)).to.deep.equal([1, 2, 2, 3]);
+    expect(utils.flatMap([[1,2], [2,3]], a => [a])).to.deep.equal([[1, 2], [2, 3]]);
+  });
 });
