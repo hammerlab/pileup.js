@@ -92,7 +92,9 @@ describe('CoverageTrack', function() {
   it('should show mismatch information', function() {
     return waitFor(hasCoverage, 2000).then(() => {
       expect(findMismatchBins()).to.deep.equal(
-        [{position: 7500765, count: 22, base: 'T'}]);
+        [{position: 7500765, count: 22, base: 'T'},
+         {position: 7500765, count: 22, base: 'C'}]);
+      // TODO: IGV shows counts of 20 and 20 at this locus. Whither the two bases?
     });
   });
 

@@ -32,10 +32,15 @@ type BinSummaryWithLocation = {
 }
 
 // Basic setup (TODO: make this configurable by the user)
-var SHOW_MISMATCHES = true;
+const SHOW_MISMATCHES = true;
+
 // Only show mismatch information when there are more than this many
 // reads supporting that mismatch.
-var MISMATCH_THRESHOLD = 1;
+const MISMATCH_THRESHOLD = 1;
+
+// Color the reference base in the bar chart when the Variant Allele Fraction
+// exceeds this amount.
+const REF_COLOR_VAF_THRESHOLD = 0.2;
 
 /**
  * Extract summary statistics from the read data.
@@ -80,10 +85,14 @@ function extractSummaryStatistics(reads: Array<SamRead>,
 
   sortedPosCounts.forEach(({position, count, mismatches}) => {
     if (_.isEmpty(mismatches)) return;
-    var ref = referenceSource.getRangeAsString({contig, start: position - 1, stop: position - 1});
-    // var cs = _.map(mismatches, mc => mc.count);
-    var mismatchCount = _.reduce(mismatches, (x,y) => x+y);
-    if (mismatchCount > 0.2 * count) {
+
+    // If there's a high variant allele fraction at this locus, add the
+    // reference in as a "mismatch" as well. This makes the locus more visually
+    // distinct and gives a better indication of the proportion of base pairs.
+    var ref = referenceSource.getRangeAsString(
+        {contig, start: position - 1, stop: position - 1});
+    var mismatchCount = _.reduce(mismatches, (x, y) => x + y);
+    if (mismatchCount > REF_COLOR_VAF_THRESHOLD * count) {
       mismatches[ref] = count - mismatchCount;
     }
   });
