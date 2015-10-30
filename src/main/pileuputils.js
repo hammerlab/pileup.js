@@ -206,26 +206,9 @@ function getOpInfo(read: Alignment, referenceSource: Object): OpInfo {
 }
 
 
-// requires that existingIntervals be sorted.
-const MIN_PX_PER_BUFFER = 500;
-function getNewTileRanges(existingIntervals: Interval[],
-                          range: Interval,
-                          pixelsPerBase: number): Interval[] {
-  var ivWidth = Math.ceil(MIN_PX_PER_BUFFER / pixelsPerBase);
-  var firstStart = Math.floor(range.start / ivWidth) * ivWidth;
-  var ivs = _.range(firstStart, range.stop, ivWidth)
-             .map(start => new Interval(start, start + ivWidth - 1))
-             .filter(iv => !iv.isCoveredBy(existingIntervals));
-
-  return utils.flatMap(ivs, iv => iv.complementIntervals(existingIntervals))
-              .filter(iv => iv.intersects(range));
-}
-
-
 module.exports = {
   pileup,
   addToPileup,
   getOpInfo,
-  CigarOp,
-  getNewTileRanges
+  CigarOp
 };

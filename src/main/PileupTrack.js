@@ -12,18 +12,20 @@ import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type * as Interval from './Interval';
 
 var React = require('react'),
-    scale = require('./scale'),
     shallowEquals = require('shallow-equals'),
+    _ = require('underscore');
+
+var scale = require('./scale'),
     types = require('./react-types'),
     d3utils = require('./d3utils'),
-    {CigarOp, getNewTileRanges} = require('./pileuputils'),
+    {CigarOp} = require('./pileuputils'),
     ContigInterval = require('./ContigInterval'),
     DisplayMode = require('./DisplayMode'),
     PileupCache = require('./PileupCache'),
+    TileCache = require('./TiledCanvas'),
     canvasUtils = require('./canvas-utils'),
     dataCanvas = require('data-canvas'),
-    style = require('./style'),
-    _ = require('underscore');
+    style = require('./style');
 
 
 var READ_HEIGHT = 13;
@@ -38,86 +40,24 @@ var SUPPORTS_DASHES = typeof(CanvasRenderingContext2D) !== 'undefined' &&
 
 // var SCROLLING_CLASS_NAME = 'track-content';
 
-
-// Ideas:
-// - all rendering must be done into off-screen tiles.
-// - Rendering to an on-screen canvas should consist entirely of drawImage calls.
-// - Drawing into tiles should happen in response to new data coming in, or to
-//     new tiles becoming visible on screen.
-// - New data coming in invalidates all tiles.
-
-type Tile = {
-  pixelsPerBase: number;
-  range: ContigInterval<string>;
-  buffer: HTMLCanvasElement;
-};
-
-const EPSILON = 1e-6;
-
-class TileCache {
-  tileCache: Tile[];
+class PileupTileCache extends TileCache {
   pileup: PileupCache;
 
   constructor(pileup: PileupCache) {
-    this.tileCache = [];
+    super();
     this.pileup = pileup;
   }
 
-  renderTile(tile: Tile) {
-    var range = tile.range;
-    var height = this.pileup.pileupHeightForRef(range.contig) *
-                    (READ_HEIGHT + READ_SPACING),
-        width = Math.round(tile.pixelsPerBase * range.length());
+  heightForRef(ref: string): number {
+    return this.pileup.pileupHeightForRef(ref) *
+                    (READ_HEIGHT + READ_SPACING);
+  }
+
+  render(ctx: DataCanvasRenderingContext2D,
+         scale: (x: number)=>number,
+         range: ContigInterval<string>) {
     var vGroups = this.pileup.getGroupsOverlapping(range);
-    tile.buffer = document.createElement('canvas');
-    tile.buffer.width = width;
-    tile.buffer.height = height;
-
-    var sc = scale.linear().domain([range.start(), range.stop()]).range([0, width]);
-    var ctx = canvasUtils.getContext(tile.buffer);
-    var dtx = dataCanvas.getDataContext(ctx);
-    renderPileup(dtx, sc, range, vGroups);
-  }
-
-  // Create (and render) new tiles to fill the gaps.
-  makeNewTiles(existingTiles: Interval[],
-               pixelsPerBase: number,
-               range: ContigInterval<string>): Tile[] {
-    var newIntervals = getNewTileRanges(existingTiles, range.interval, pixelsPerBase);
-
-    var newTiles = newIntervals.map(iv => ({
-      pixelsPerBase,
-      range: new ContigInterval(range.contig, iv.start, iv.stop),
-      buffer: document.createElement('canvas')
-    }));
-
-    newTiles.forEach(tile => this.renderTile(tile));
-    this.tileCache = this.tileCache.concat(newTiles);
-    this.tileCache.sort((a, b) => ContigInterval.compare(a.range, b.range));
-    return newTiles;
-  }
-
-  renderToScreen(ctx: CanvasRenderingContext2D,
-                 range: ContigInterval<string>,
-                 scale: (num: number) => number) {
-    var pixelsPerBase = scale(1) - scale(0);
-    var tilesAtRes = this.tileCache.filter(tile => Math.abs(tile.pixelsPerBase - pixelsPerBase) < EPSILON && range.chrOnContig(tile.range.contig));
-
-    var existingIntervals = tilesAtRes.map(tile => tile.range.interval);
-    if (!range.interval.isCoveredBy(existingIntervals)) {
-      tilesAtRes = tilesAtRes.concat(this.makeNewTiles(existingIntervals, pixelsPerBase, range));
-    }
-
-    var tiles = tilesAtRes.filter(tile => range.chrIntersects(tile.range));
-
-    tiles.forEach(tile => {
-      ctx.drawImage(tile.buffer, scale(tile.range.start()), 0);
-    });
-  }
-
-  invalidateAll() {
-    this.tileCache = [];
-    console.log('invalidate tile cache');
+    renderPileup(ctx, scale, range, vGroups);
   }
 }
 
@@ -314,7 +254,7 @@ class PileupTrack extends React.Component {
 
   componentDidMount() {
     this.cache = new PileupCache(this.props.referenceSource, this.props.options.viewAsPairs);
-    this.tiles = new TileCache(this.cache);
+    this.tiles = new PileupTileCache(this.cache);
 
     this.props.source.on('newdata', range => {
       this.updateReads(range);
