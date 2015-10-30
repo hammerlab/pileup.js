@@ -2,12 +2,9 @@
 'use strict';
 
 import type * as SamRead from './SamRead';
+import type * as Interval from './Interval';
 import type {Alignment, CigarSymbol} from './Alignment';
 
-var _ = require('underscore');
-
-var Interval = require('./Interval'),
-    utils = require('./utils');
 
 /**
  * Given a list of Intervals, return a parallel list of row numbers for each.

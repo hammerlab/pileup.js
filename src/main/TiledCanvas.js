@@ -2,6 +2,7 @@
  * A canvas which maintains a cache of previously-rendered tiles.
  * @flow
  */
+'use strict';
 
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 
@@ -12,7 +13,6 @@ var scale = require('./scale'),
     Interval = require('./Interval'),
     canvasUtils = require('./canvas-utils'),
     dataCanvas = require('data-canvas'),
-    {CigarOp} = require('./pileuputils'),
     utils = require('./utils');
 
 type Tile = {
@@ -24,7 +24,7 @@ type Tile = {
 const EPSILON = 1e-6;
 const MIN_PX_PER_BUFFER = 500;
 
-class TileCache {
+class TiledCanvas {
   tileCache: Tile[];
 
   constructor() {
@@ -49,7 +49,8 @@ class TileCache {
   makeNewTiles(existingTiles: Interval[],
                pixelsPerBase: number,
                range: ContigInterval<string>): Tile[] {
-    var newIntervals = TileCache.getNewTileRanges(existingTiles, range.interval, pixelsPerBase);
+    var newIntervals = TiledCanvas.getNewTileRanges(
+          existingTiles, range.interval, pixelsPerBase);
 
     var newTiles = newIntervals.map(iv => ({
       pixelsPerBase,
@@ -57,6 +58,8 @@ class TileCache {
       buffer: document.createElement('canvas')
     }));
 
+    // TODO: it would be better to wrap these calls in requestAnimationFrame,
+    // so that rendering is done off the main event loop.
     newTiles.forEach(tile => this.renderTile(tile));
     this.tileCache = this.tileCache.concat(newTiles);
     this.tileCache.sort((a, b) => ContigInterval.compare(a.range, b.range));
@@ -118,4 +121,4 @@ class TileCache {
 
 }
 
-module.exports = TileCache;
+module.exports = TiledCanvas;
