@@ -22,7 +22,7 @@ var scale = require('./scale'),
     ContigInterval = require('./ContigInterval'),
     DisplayMode = require('./DisplayMode'),
     PileupCache = require('./PileupCache'),
-    TileCache = require('./TiledCanvas'),
+    TiledCanvas = require('./TiledCanvas'),
     canvasUtils = require('./canvas-utils'),
     dataCanvas = require('data-canvas'),
     style = require('./style');
@@ -38,25 +38,23 @@ var READ_STRAND_ARROW_WIDTH = 6;
 var SUPPORTS_DASHES = typeof(CanvasRenderingContext2D) !== 'undefined' &&
                       !!CanvasRenderingContext2D.prototype.setLineDash;
 
-// var SCROLLING_CLASS_NAME = 'track-content';
+class PileupTileCache extends TiledCanvas {
+  cache: PileupCache;
 
-class PileupTileCache extends TileCache {
-  pileup: PileupCache;
-
-  constructor(pileup: PileupCache) {
+  constructor(cache: PileupCache) {
     super();
-    this.pileup = pileup;
+    this.cache = cache;
   }
 
   heightForRef(ref: string): number {
-    return this.pileup.pileupHeightForRef(ref) *
+    return this.cache.pileupHeightForRef(ref) *
                     (READ_HEIGHT + READ_SPACING);
   }
 
   render(ctx: DataCanvasRenderingContext2D,
          scale: (x: number)=>number,
          range: ContigInterval<string>) {
-    var vGroups = this.pileup.getGroupsOverlapping(range);
+    var vGroups = this.cache.getGroupsOverlapping(range);
     renderPileup(ctx, scale, range, vGroups);
   }
 }
@@ -202,7 +200,7 @@ function opacityForQuality(quality: number): number {
 
 class PileupTrack extends React.Component {
   cache: PileupCache;
-  tiles: TileCache;
+  tiles: TiledCanvas;
 
   constructor(props: Object) {
     super(props);
@@ -258,11 +256,13 @@ class PileupTrack extends React.Component {
 
     this.props.source.on('newdata', range => {
       this.updateReads(range);
+      // TODO: only invalidate tiles in the range
       this.tiles.invalidateAll();
       this.updateVisualization();
     });
     this.props.referenceSource.on('newdata', range => {
       this.cache.updateMismatches(range);
+      // TODO: only invalidate tiles in the range
       this.tiles.invalidateAll();
       this.updateVisualization();
     });
@@ -355,7 +355,15 @@ class PileupTrack extends React.Component {
         y = ev.offsetY;
     var ctx = canvasUtils.getContext(this.refs.canvas);
     var trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
-    this.renderScene(trackingCtx);
+
+    var genomeRange = this.props.range,
+        range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop),
+        scale = this.getScale(),
+        // If click-tracking gets slow, this range could be narrowed to one
+        // closer to the click coordinate, rather than the whole visible range.
+        vGroups = this.cache.getGroupsOverlapping(range);
+
+    renderPileup(trackingCtx, scale, range, vGroups);
     var vRead = _.find(trackingCtx.hits[0], hit => hit.read);
     var alert = window.alert || console.log;
     if (vRead) {
@@ -374,6 +382,7 @@ PileupTrack.displayName = 'pileup';
 PileupTrack.defaultOptions = {
   viewAsPairs: false
 };
+PileupTrack.renderPileup = renderPileup;  // exposed for testing
 
 
 module.exports = PileupTrack;
