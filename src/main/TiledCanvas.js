@@ -24,7 +24,7 @@ type Tile = {
 const EPSILON = 1e-6;
 const MIN_PX_PER_BUFFER = 500;
 
-const DEBUG_RENDER_TILE_EDGES = true;
+const DEBUG_RENDER_TILE_EDGES = false;
 
 class TiledCanvas {
   tileCache: Tile[];
@@ -42,7 +42,9 @@ class TiledCanvas {
     tile.buffer.width = width;
     tile.buffer.height = height;
 
-    var sc = scale.linear().domain([range.start(), range.stop()]).range([0, width]);
+    // The far right edge of the tile is the start of the _next_ range's base
+    // pair, not the start of the last one in this tile.
+    var sc = scale.linear().domain([range.start(), range.stop() + 1]).range([0, width]);
     var ctx = canvasUtils.getContext(tile.buffer);
     var dtx = dataCanvas.getDataContext(ctx);
     this.render(dtx, sc, range);
@@ -93,7 +95,7 @@ class TiledCanvas {
       // rounding issues, which can result in 1px gaps or overdrawing.
       // We always have:
       //   width - tile.buffer.width \in {-1, 0, +1}
-      ctx.drawImage(tile.buffer, left, 0, width, height);
+      ctx.drawImage(tile.buffer, left, 0 , width, height);
 
       if (DEBUG_RENDER_TILE_EDGES) {
         ctx.save();
