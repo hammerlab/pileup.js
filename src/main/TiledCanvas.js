@@ -24,6 +24,8 @@ type Tile = {
 const EPSILON = 1e-6;
 const MIN_PX_PER_BUFFER = 500;
 
+const DEBUG_RENDER_TILE_EDGES = true;
+
 class TiledCanvas {
   tileCache: Tile[];
 
@@ -92,6 +94,14 @@ class TiledCanvas {
       // We always have:
       //   width - tile.buffer.width \in {-1, 0, +1}
       ctx.drawImage(tile.buffer, left, 0, width, height);
+
+      if (DEBUG_RENDER_TILE_EDGES) {
+        ctx.save();
+        ctx.strokeStyle = 'black';
+        canvasUtils.drawLine(ctx, left - 0.5, 0, left - 0.5, height);
+        canvasUtils.drawLine(ctx, nextLeft - 0.5, 0, nextLeft - 0.5, height);
+        ctx.restore();
+      }
     });
   }
 
