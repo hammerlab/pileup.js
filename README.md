@@ -74,18 +74,6 @@ To play with the demo, start an [http-server][hs]:
 
 Then open [http://localhost:8080/examples/index.html](http://localhost:8080/examples/index.html) in your browser of choice.
 
-### BioJS
-
-Alternatively you can use [BioJS sniper][sniper] for the demo:
-
-    npm install -g sniper # installs sniper globally
-
-Once installed, start sniper in the `pileup.js` folder:
-
-    sniper # and keep it running
-
-And browse to [http://localhost:9090/examples/playground](http://localhost:9090/examples/playground).
-
 ## Testing
 
 Run the tests from the command line:
@@ -97,15 +85,33 @@ Run the tests in a real browser:
     npm run http-server
     open http://localhost:8080/src/test/runner.html
 
-To continuously regenerate the combined JS, run:
+To continuously regenerate the combined pileup and test JS, run:
 
     npm run watch
+
+To run a single test from the command line, use:
+
+    npm run test -- --grep=pileuputils
+
+To do the same in the web UI, pass in a `?grep=` URL parameter.
 
 To typecheck the code, run
 
     npm run flow
 
 For best results, use one of the flowtype editor integrations.
+
+### BioJS
+
+Alternatively you can use [BioJS sniper][sniper] for the demo:
+
+    npm install -g sniper # installs sniper globally
+
+Once installed, start sniper in the `pileup.js` folder:
+
+    sniper # and keep it running
+
+And browse to [http://localhost:9090/examples/playground](http://localhost:9090/examples/playground).
 
 ## License
 
