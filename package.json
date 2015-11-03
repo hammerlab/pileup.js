@@ -93,6 +93,7 @@
     "sniper": "^0.2.16",
     "source-map": "^0.3.0",
     "stats.js": "^1.0.0",
+    "travis-weigh-in": "^1.0.2",
     "uglify-js": "^2.4.23",
     "uglifyify": "^3.0.1",
     "watchify": "^3.2.1"
