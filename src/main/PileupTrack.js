@@ -9,21 +9,23 @@ import type {TwoBitSource} from './TwoBitDataSource';
 import type {BasePair} from './pileuputils';
 import type {VisualAlignment, VisualGroup} from './PileupCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
+import type * as Interval from './Interval';
 
 var React = require('react'),
-    scale = require('./scale'),
     shallowEquals = require('shallow-equals'),
+    _ = require('underscore');
+
+var scale = require('./scale'),
     types = require('./react-types'),
     d3utils = require('./d3utils'),
     {CigarOp} = require('./pileuputils'),
     ContigInterval = require('./ContigInterval'),
-    Interval = require('./Interval'),
     DisplayMode = require('./DisplayMode'),
     PileupCache = require('./PileupCache'),
+    TiledCanvas = require('./TiledCanvas'),
     canvasUtils = require('./canvas-utils'),
     dataCanvas = require('data-canvas'),
-    style = require('./style'),
-    _ = require('underscore');
+    style = require('./style');
 
 
 var READ_HEIGHT = 13;
@@ -36,7 +38,26 @@ var READ_STRAND_ARROW_WIDTH = 6;
 var SUPPORTS_DASHES = typeof(CanvasRenderingContext2D) !== 'undefined' &&
                       !!CanvasRenderingContext2D.prototype.setLineDash;
 
-var SCROLLING_CLASS_NAME = 'track-content';
+class PileupTileCache extends TiledCanvas {
+  cache: PileupCache;
+
+  constructor(cache: PileupCache) {
+    super();
+    this.cache = cache;
+  }
+
+  heightForRef(ref: string): number {
+    return this.cache.pileupHeightForRef(ref) *
+                    (READ_HEIGHT + READ_SPACING);
+  }
+
+  render(ctx: DataCanvasRenderingContext2D,
+         scale: (x: number)=>number,
+         range: ContigInterval<string>) {
+    var vGroups = this.cache.getGroupsOverlapping(range);
+    renderPileup(ctx, scale, range, vGroups);
+  }
+}
 
 
 // Should the Cigar op be rendered to the screen?
@@ -46,10 +67,11 @@ function isRendered(op) {
           op.op == CigarOp.INSERT);
 }
 
-// The renderer pulls out the canvas context and scale into shared variables in a closure.
-function getRenderer(ctx: DataCanvasRenderingContext2D,
-                     scale: (num: number) => number,
-                     visibleYRange: Interval) {
+// Render a portion of the pileup into the canvas.
+function renderPileup(ctx: DataCanvasRenderingContext2D,
+                      scale: (num: number) => number,
+                      range: ContigInterval<string>,
+                      vGroups: VisualGroup[]) {
   // Should mismatched base pairs be shown as blocks of color or as letters?
   var pxPerLetter = scale(1) - scale(0),
       mode = DisplayMode.getDisplayMode(pxPerLetter),
@@ -123,10 +145,6 @@ function getRenderer(ctx: DataCanvasRenderingContext2D,
 
   function drawGroup(vGroup: VisualGroup) {
     var y = yForRow(vGroup.row);
-    if (y < visibleYRange.start - READ_HEIGHT || y > visibleYRange.stop) {
-      // Optimization: don't render off-screen alignments.
-      return;
-    }
     ctx.pushObject(vGroup);
     vGroup.alignments.forEach(vRead => drawAlignment(vRead, y));
     if (vGroup.insert) {
@@ -139,6 +157,9 @@ function getRenderer(ctx: DataCanvasRenderingContext2D,
   }
 
   function renderMismatch(bp: BasePair, y: number) {
+    // This can happen if the mismatch is in a different tile, for example.
+    if (!range.interval.contains(bp.pos)) return;
+
     ctx.pushObject(bp);
     ctx.save();
     ctx.fillStyle = style.BASE_COLORS[bp.basePair];
@@ -154,7 +175,9 @@ function getRenderer(ctx: DataCanvasRenderingContext2D,
     ctx.popObject();
   }
 
-  return {drawArrow, drawSegment, drawGroup};
+  ctx.fillStyle = style.ALIGNMENT_COLOR;
+  ctx.font = style.TIGHT_TEXT_STYLE;
+  vGroups.forEach(vGroup => drawGroup(vGroup));
 }
 
 
@@ -180,11 +203,11 @@ function opacityForQuality(quality: number): number {
 
 class PileupTrack extends React.Component {
   cache: PileupCache;
+  tiles: TiledCanvas;
 
   constructor(props: Object) {
     super(props);
     this.state = {
-      visibleYRange: new Interval(0, Number.MAX_VALUE)
     };
   }
 
@@ -232,12 +255,18 @@ class PileupTrack extends React.Component {
 
   componentDidMount() {
     this.cache = new PileupCache(this.props.referenceSource, this.props.options.viewAsPairs);
+    this.tiles = new PileupTileCache(this.cache);
+
     this.props.source.on('newdata', range => {
       this.updateReads(range);
+      // TODO: only invalidate tiles in the range
+      this.tiles.invalidateAll();
       this.updateVisualization();
     });
     this.props.referenceSource.on('newdata', range => {
       this.cache.updateMismatches(range);
+      // TODO: only invalidate tiles in the range
+      this.tiles.invalidateAll();
       this.updateVisualization();
     });
     this.props.source.on('networkprogress', e => {
@@ -245,29 +274,12 @@ class PileupTrack extends React.Component {
     }).on('networkdone', e => {
       this.setState({networkStatus: null});
     });
-    this.getScrollParent().addEventListener('scroll', e => {
-      this.updateVisibleYRange();
-    });
 
     this.updateVisualization();
   }
 
   getScale() {
     return d3utils.getTrackScale(this.props.range, this.props.width);
-  }
-
-  getScrollParent(): HTMLElement {
-    var node = this.refs.container;
-    while (node && !node.classList.contains(SCROLLING_CLASS_NAME)) {
-      node = node.parentElement;
-    }
-    return node;
-  }
-
-  updateVisibleYRange() {
-    var node = this.getScrollParent();
-    var top = node.scrollTop;
-    this.setState({visibleYRange: new Interval(top, top + node.offsetHeight)});
   }
 
   componentDidUpdate(prevProps: any, prevState: any) {
@@ -305,17 +317,12 @@ class PileupTrack extends React.Component {
 
   renderScene(ctx: DataCanvasRenderingContext2D) {
     var genomeRange = this.props.range,
-        range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop);
-    var vGroups = this.cache.getGroupsOverlapping(range);
+        range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop),
+        scale = this.getScale();
 
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.fillStyle = style.ALIGNMENT_COLOR;
-    ctx.font = style.TIGHT_TEXT_STYLE;
-
-    var scale = this.getScale();
-    var renderer = getRenderer(ctx, scale, this.state.visibleYRange);
-    vGroups.forEach(vGroup => renderer.drawGroup(vGroup));
+    this.tiles.renderToScreen(ctx, range, scale);
 
     // TODO: the center line should go above alignments, but below mismatches
     this.renderCenterLine(ctx, range, scale);
@@ -351,7 +358,15 @@ class PileupTrack extends React.Component {
         y = ev.offsetY;
     var ctx = canvasUtils.getContext(this.refs.canvas);
     var trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
-    this.renderScene(trackingCtx);
+
+    var genomeRange = this.props.range,
+        range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop),
+        scale = this.getScale(),
+        // If click-tracking gets slow, this range could be narrowed to one
+        // closer to the click coordinate, rather than the whole visible range.
+        vGroups = this.cache.getGroupsOverlapping(range);
+
+    renderPileup(trackingCtx, scale, range, vGroups);
     var vRead = _.find(trackingCtx.hits[0], hit => hit.read);
     var alert = window.alert || console.log;
     if (vRead) {
@@ -370,6 +385,7 @@ PileupTrack.displayName = 'pileup';
 PileupTrack.defaultOptions = {
   viewAsPairs: false
 };
+PileupTrack.renderPileup = renderPileup;  // exposed for testing
 
 
 module.exports = PileupTrack;

@@ -3,9 +3,12 @@
 
 var expect = require('chai').expect;
 
-var pileup = require('../main/pileup'),
-    {waitFor} = require('./async'),
+var _ = require('underscore'),
     dataCanvas = require('data-canvas');
+
+var pileup = require('../main/pileup'),
+    ContigInterval = require('../main/ContigInterval'),
+    {waitFor} = require('./async');
     
 describe('pileup', function() {
   var tracks = [
@@ -78,6 +81,13 @@ describe('pileup', function() {
 
     var {drawnObjects, drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
 
+    var uniqDrawnObjectsWith = function() {
+      return _.uniq(
+          drawnObjectsWith.apply(null, arguments),
+          false,  // not sorted
+          x => x.key);
+    };
+
     // TODO: consider moving this into the data-canvas library
     function hasCanvasAndObjects(div, selector) {
       return div.querySelector(selector + ' canvas') && drawnObjects(div, selector).length > 0;
@@ -113,14 +123,19 @@ describe('pileup', function() {
         expect(div.querySelector('div > .c').className).to.equal('track genes c');
         expect(div.querySelector('div > .d').className).to.equal('track pileup d');
 
-        // Four read groups are visible
-        expect(drawnObjectsWith(div, '.pileup', x => x.span)).to.have.length(4);
-
         expect(p.getRange()).to.deep.equal({
           contig: 'chr17',
           start: 100,
           stop: 150
         });
+
+        // Four read groups are visible.
+        // Due to tiling, some rendered reads may be off-screen.
+        var range = p.getRange();
+        var cRange = new ContigInterval(range.contig, range.start, range.stop);
+        var visibleReads = uniqDrawnObjectsWith(div, '.pileup', x => x.span)
+              .filter(x => x.span.intersects(cRange));
+        expect(visibleReads).to.have.length(4);
 
         p.destroy();
       });

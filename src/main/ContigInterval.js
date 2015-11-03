@@ -87,18 +87,21 @@ class ContigInterval<T: (number|string)> {
     return `${this.contig}:${this.start()}-${this.stop()}`;
   }
 
+  // Comparator for use with Array.prototype.sort
+  static compare(a: ContigInterval, b: ContigInterval): number {
+    if (a.contig > b.contig) {
+      return -1;
+    } else if (a.contig < b.contig) {
+      return +1;
+    } else {
+      return a.start() - b.start();
+    }
+  }
+
   // Sort an array of intervals & coalesce adjacent/overlapping ranges.
   // NB: this may re-order the intervals parameter
   static coalesce(intervals: ContigInterval[]): ContigInterval[] {
-    intervals.sort((a, b) => {
-      if (a.contig > b.contig) {
-        return -1;
-      } else if (a.contig < b.contig) {
-        return +1;
-      } else {
-        return a.start() - b.start();
-      }
-    });
+    intervals.sort(ContigInterval.compare);
 
     var rs = [];
     intervals.forEach(r => {

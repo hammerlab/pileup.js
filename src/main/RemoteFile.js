@@ -150,13 +150,13 @@ class RemoteFile {
     var deferred = Q.defer();
     xhr.addEventListener('load', function(e) {
       if (this.status >= 400) {
-        deferred.reject(this.status + ' ' + this.statusText);
+        deferred.reject(`Request for ${url} failed with status: ${this.status} ${this.statusText}`);
       } else {
         deferred.resolve([this.response, e]);
       }
     });
     xhr.addEventListener('error', function(e) {
-      deferred.reject(`Request for ${url} failed with status: ${this.status}`);
+      deferred.reject(`Request for ${url} failed with status: ${this.status} ${this.statusText}`);
     });
     this.numNetworkRequests++;
     xhr.send();
