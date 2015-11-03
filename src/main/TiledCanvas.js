@@ -35,6 +35,7 @@ class TiledCanvas {
     var range = tile.range;
     var height = this.heightForRef(range.contig),
         width = Math.round(tile.pixelsPerBase * range.length());
+    // TODO: does it make sense to re-use canvases?
     tile.buffer = document.createElement('canvas');
     tile.buffer.width = width;
     tile.buffer.height = height;
@@ -82,12 +83,15 @@ class TiledCanvas {
     tiles.forEach(tile => {
       var left = Math.round(scale(tile.range.start())),
           nextLeft = Math.round(scale(tile.range.stop() + 1)),
-          width = nextLeft - left;
+          width = nextLeft - left,
+          height = tile.buffer.height;
+      // Drawing a 0px tall canvas throws in Firefox and PhantomJS.
+      if (height === 0) return;
       // We can't just throw the images on the screen without scaling due to
       // rounding issues, which can result in 1px gaps or overdrawing.
       // We always have:
       //   width - tile.buffer.width \in {-1, 0, +1}
-      ctx.drawImage(tile.buffer, left, 0, width, tile.buffer.height);
+      ctx.drawImage(tile.buffer, left, 0, width, height);
     });
   }
 

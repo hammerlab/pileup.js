@@ -157,6 +157,9 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
   }
 
   function renderMismatch(bp: BasePair, y: number) {
+    // This can happen if the mismatch is in a different tile, for example.
+    if (!range.interval.contains(bp.pos)) return;
+
     ctx.pushObject(bp);
     ctx.save();
     ctx.fillStyle = style.BASE_COLORS[bp.basePair];
