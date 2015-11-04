@@ -4,9 +4,10 @@
  */
 'use strict';
 
-import type * as SamRead from './SamRead';
+import type {Alignment} from './Alignment';
 import type * as Interval from './Interval';
 import type {TwoBitSource} from './TwoBitDataSource';
+import type {DataCanvasRenderingContext2D} from 'data-canvas';
 
 var React = require('react'),
     scale = require('./scale'),
@@ -17,6 +18,7 @@ var React = require('react'),
     dataCanvas = require('data-canvas'),
     canvasUtils = require('./canvas-utils'),
     {getOpInfo} = require('./pileuputils'),
+    TiledCanvas = require('./TiledCanvas'),
     style = require('./style'),
     ContigInterval = require('./ContigInterval');
 
@@ -26,8 +28,8 @@ type BinSummary = {
 }
 
 type BinSummaryWithLocation = {
-  position: string;
-  count:number;
+  position: number;
+  count: number;
   mismatches: {[key: string]: number};
 }
 
@@ -45,7 +47,7 @@ const REF_COLOR_VAF_THRESHOLD = 0.2;
 /**
  * Extract summary statistics from the read data.
  */
-function extractSummaryStatistics(reads: Array<SamRead>,
+function extractSummaryStatistics(reads: Array<Alignment>,
                                   contig: string,
                                   referenceSource: TwoBitSource) {
   var binCounts = ({}: {[key: number]: BinSummary});
@@ -100,6 +102,97 @@ function extractSummaryStatistics(reads: Array<SamRead>,
   return {binCounts: sortedPosCounts, maxCoverage};
 }
 
+// TODO: what about matching contigs?
+function binsInRange(binCounts: BinSummaryWithLocation[],
+                     range: ContigInterval): BinSummaryWithLocation[] {
+  var start = range.start(),
+      stop = range.stop();
+  return binCounts.filter(
+      ({position}) => (position >= start - 1 && position <= stop + 1));
+}
+
+function renderCoverage(ctx: DataCanvasRenderingContext2D,
+                        xScale: (num: number) => number,
+                        yScale: (num: number) => number,
+                        range: ContigInterval<string>,
+                        maxCoverage: number,
+                        binCounts: BinSummaryWithLocation[]) {
+  var bins = binsInRange(binCounts, range);
+  renderBars(ctx, xScale, yScale, bins);
+}
+
+// Draw coverage bins & mismatches
+function renderBars(ctx: DataCanvasRenderingContext2D,
+                    xScale: (num: number) => number,
+                    yScale: (num: number) => number,
+                    bins: BinSummaryWithLocation[]) {
+  if (bins.length === 0) return;
+
+  var barWidth = xScale(1) - xScale(0);
+  var showPadding = (barWidth > style.COVERAGE_MIN_BAR_WIDTH_FOR_GAP);
+  var padding = showPadding ? 1 : 0;
+
+  var binPos = function(bin) {
+    // Round to integer coordinates for crisp lines, without aliasing.
+    var barX1 = Math.round(xScale(bin.position)),
+        barX2 = Math.round(xScale(bin.position + 1)) - padding,
+        barY = Math.round(yScale(bin.count));
+    return {barX1, barX2, barY};
+  };
+
+  var mismatchBins = [];  // keep track of which ones have mismatches
+  var vBasePosY = yScale(0);  // the very bottom of the canvas
+  ctx.fillStyle = style.COVERAGE_BIN_COLOR;
+  ctx.beginPath();
+  var {barX1} = binPos(bins[0]);
+  ctx.moveTo(barX1, vBasePosY);
+  bins.forEach(bin => {
+    ctx.pushObject(bin);
+    var {barX1, barX2, barY} = binPos(bin);
+    ctx.lineTo(barX1, barY);
+    ctx.lineTo(barX2, barY);
+    if (showPadding) {
+      ctx.lineTo(barX2, vBasePosY);
+      ctx.lineTo(barX2 + 1, vBasePosY);
+    }
+
+    if (SHOW_MISMATCHES && !_.isEmpty(bin.mismatches)) {
+      mismatchBins.push(bin);
+    }
+
+    ctx.popObject();
+  });
+  var {barX2} = binPos(bins[bins.length - 1]);
+  ctx.lineTo(barX2, vBasePosY);  // right edge of the right bar.
+  ctx.closePath();
+  ctx.fill();
+
+  mismatchBins.forEach(bin => {
+    var {barX1, barX2} = binPos(bin);
+    ctx.pushObject(bin);
+    var countSoFar = 0;
+    _.chain(bin.mismatches)
+      .map((count, base) => ({count, base}))  // pull base into the object
+      .filter(({count}) => count > MISMATCH_THRESHOLD)
+      .sortBy(({count}) => -count)  // the most common mismatch at the bottom
+      .each(({count, base}) => {
+        var misMatchObj = {position: bin.position, count, base};
+        ctx.pushObject(misMatchObj);  // for debugging and click-tracking
+
+        ctx.fillStyle = style.BASE_COLORS[base];
+        var y = yScale(countSoFar);
+        ctx.fillRect(barX1,
+                     y,
+                     barX2 - barX1,
+                     yScale(countSoFar + count) - y);
+        countSoFar += count;
+
+        ctx.popObject();
+      });
+    ctx.popObject();
+  });
+}
+
 class CoverageTrack extends React.Component {
   constructor(props: Object) {
     super(props);
@@ -145,89 +238,11 @@ class CoverageTrack extends React.Component {
     }
   }
 
-  binsInRange(): BinSummaryWithLocation[] {
-    var {start, stop} = this.props.range;
-    return this.state.binCounts.filter(
-        ({position}) => (position >= start - 1 && position <= stop + 1));
-  }
-
   getContext(): CanvasRenderingContext2D {
     var canvas = (this.refs.canvas : HTMLCanvasElement);
     // The typecast through `any` is because getContext could return a WebGL context.
     var ctx = ((canvas.getContext('2d') : any) : CanvasRenderingContext2D);
     return ctx;
-  }
-
-  // Draw coverage bins & mismatches
-  renderBars(ctx, yScale) {
-    var bins = this.binsInRange();
-    if (bins.length === 0) return;
-
-    var xScale = this.getScale();
-    var barWidth = xScale(1) - xScale(0);
-    var showPadding = (barWidth > style.COVERAGE_MIN_BAR_WIDTH_FOR_GAP);
-    var padding = showPadding ? 1 : 0;
-
-    var binPos = function(bin) {
-      // Round to integer coordinates for crisp lines, without aliasing.
-      var barX1 = Math.round(xScale(bin.position)),
-          barX2 = Math.round(xScale(bin.position + 1)) - padding,
-          barY = Math.round(yScale(bin.count));
-      return {barX1, barX2, barY};
-    };
-
-    var mismatchBins = [];  // keep track of which ones have mismatches
-    var vBasePosY = yScale(0);  // the very bottom of the canvas
-    ctx.fillStyle = style.COVERAGE_BIN_COLOR;
-    ctx.beginPath();
-    var {barX1} = binPos(bins[0]);
-    ctx.moveTo(barX1, vBasePosY);
-    bins.forEach(bin => {
-      ctx.pushObject(bin);
-      var {barX1, barX2, barY} = binPos(bin);
-      ctx.lineTo(barX1, barY);
-      ctx.lineTo(barX2, barY);
-      if (showPadding) {
-        ctx.lineTo(barX2, vBasePosY);
-        ctx.lineTo(barX2 + 1, vBasePosY);
-      }
-
-      if (SHOW_MISMATCHES && !_.isEmpty(bin.mismatches)) {
-        mismatchBins.push(bin);
-      }
-
-      ctx.popObject();
-    });
-    var {barX2} = binPos(bins[bins.length - 1]);
-    ctx.lineTo(barX2, vBasePosY);  // right edge of the right bar.
-    ctx.closePath();
-    ctx.fill();
-
-    mismatchBins.forEach(bin => {
-      var {barX1, barX2} = binPos(bin);
-      ctx.pushObject(bin);
-      var countSoFar = 0;
-      _.chain(bin.mismatches)
-        .map((count, base) => ({count, base}))  // pull base into the object
-        .filter(({count}) => count > MISMATCH_THRESHOLD)
-        .sortBy(({count}) => -count)  // the most common mismatch at the bottom
-        .each(({count, base}) => {
-          var misMatchObj = {position: bin.position, count, base};
-          ctx.pushObject(misMatchObj);  // for debugging and click-tracking
-
-          ctx.fillStyle = style.BASE_COLORS[base];
-          var y = yScale(countSoFar);
-          ctx.fillRect(barX1,
-                       y,
-                       barX2 - barX1,
-                       yScale(countSoFar + count) - y);
-          countSoFar += count;
-
-          ctx.popObject();
-        });
-      ctx.popObject();
-    });
-
   }
 
   // Draw three ticks on the left to set the scale for the user
@@ -278,7 +293,7 @@ class CoverageTrack extends React.Component {
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    this.renderBars(ctx, yScale);
+    renderBars(ctx, this.getScale(), yScale, this.state.binCounts);
     this.renderTicks(ctx, yScale);
 
     ctx.restore();
