@@ -12,7 +12,6 @@ import type {DataCanvasRenderingContext2D} from 'data-canvas';
 var React = require('react'),
     scale = require('./scale'),
     shallowEquals = require('shallow-equals'),
-    types = require('./react-types'),
     d3utils = require('./d3utils'),
     _ = require("underscore"),
     dataCanvas = require('data-canvas'),
@@ -102,6 +101,40 @@ function extractSummaryStatistics(reads: Array<Alignment>,
   return {binCounts: sortedPosCounts, maxCoverage};
 }
 
+
+class CoverageTiledCanvas extends TiledCanvas {
+  height: number;
+  yScale: (count: number) => number;
+  binCounts: BinSummaryWithLocation[];
+
+  constructor() {
+    super();
+
+    this.height = 0;
+    this.yScale = x => x;
+    this.binCounts = [];
+  }
+
+  heightForRef(ref: string): number {
+    return this.height;
+  }
+
+  update(height: number, yScale: (count: number) => number, binCounts: BinSummaryWithLocation[]) {
+    this.height = height;
+    this.yScale = yScale;
+    this.binCounts = binCounts;
+    // this.invalidateAll();
+  }
+
+  render(ctx: DataCanvasRenderingContext2D,
+         xScale: (x: number)=>number,
+         range: ContigInterval<string>) {
+    var bins = binsInRange(this.binCounts, range);
+    renderBars(ctx, xScale, this.yScale, bins);
+  }
+}
+
+
 // TODO: what about matching contigs?
 function binsInRange(binCounts: BinSummaryWithLocation[],
                      range: ContigInterval): BinSummaryWithLocation[] {
@@ -109,15 +142,6 @@ function binsInRange(binCounts: BinSummaryWithLocation[],
       stop = range.stop();
   return binCounts.filter(
       ({position}) => (position >= start - 1 && position <= stop + 1));
-}
-
-function renderCoverage(ctx: DataCanvasRenderingContext2D,
-                        xScale: (num: number) => number,
-                        yScale: (num: number) => number,
-                        range: ContigInterval<string>,
-                        binCounts: BinSummaryWithLocation[]) {
-  var bins = binsInRange(binCounts, range);
-  renderBars(ctx, xScale, yScale, bins);
 }
 
 // Draw coverage bins & mismatches
@@ -200,15 +224,20 @@ type Props = {
   referenceSource: TwoBitSource;
 };
 
+type State = {
+  reads: Alignment[];
+  binCounts: BinSummaryWithLocation[];
+  maxCoverage: number;
+};
+
 class CoverageTrack extends React.Component {
   props: Props;
+  state: State;
+  tiles: CoverageTiledCanvas;
 
   constructor(props: Props) {
     super(props);
     this.state = {
-      width: 0,
-      height: 0,
-      labelSize: {weight: 0, height: 0},  // for precise padding calculations
       reads: [],
       binCounts: [],
       maxCoverage: 0
@@ -229,6 +258,14 @@ class CoverageTrack extends React.Component {
           reads = this.props.source.getAlignmentsInRange(ci),
           {binCounts, maxCoverage} = extractSummaryStatistics(reads, this.props.range.contig, this.props.referenceSource);
 
+      var padding = 10;  // TODO: move into style
+      var yScale = scale.linear()
+        .domain([maxCoverage, 0])
+        .range([padding, this.props.height - padding])
+        .nice();
+
+      this.tiles.update(this.props.height, yScale, binCounts);
+      this.tiles.invalidateAll();
       this.setState({
         reads,
         binCounts,
@@ -236,6 +273,7 @@ class CoverageTrack extends React.Component {
       });
     };
 
+    this.tiles = new CoverageTiledCanvas();
     this.props.source.on('newdata', updateState);
     this.props.referenceSource.on('newdata', updateState);
   }
@@ -243,6 +281,7 @@ class CoverageTrack extends React.Component {
   componentDidUpdate(prevProps: any, prevState: any) {
     if (!shallowEquals(this.props, prevProps) ||
         !shallowEquals(this.state, prevState)) {
+      // TODO: check for a height change.
       this.visualizeCoverage();
     }
   }
@@ -255,7 +294,7 @@ class CoverageTrack extends React.Component {
   }
 
   // Draw three ticks on the left to set the scale for the user
-  renderTicks(ctx, yScale) {
+  renderTicks(ctx: DataCanvasRenderingContext2D, yScale: (num: number)=>number) {
     var axisMax = yScale.domain()[0];
     [0, Math.round(axisMax / 2), axisMax].forEach(tick => {
       // Draw a line indicating the tick
@@ -286,24 +325,20 @@ class CoverageTrack extends React.Component {
     var canvas = (this.refs.canvas : HTMLCanvasElement),
         width = this.props.width,
         height = this.props.height,
-        padding = 10,  // TODO: move into style
         range = ContigInterval.fromGenomeRange(this.props.range);
 
     // Hold off until height & width are known.
     if (width === 0) return;
     d3utils.sizeCanvas(canvas, width, height);
 
-    var yScale = scale.linear()
-      .domain([this.state.maxCoverage, 0])
-      .range([padding, height - padding])
-      .nice();
-
     var ctx = dataCanvas.getDataContext(this.getContext());
     ctx.save();
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    renderCoverage(ctx, this.getScale(), yScale, range, this.state.binCounts);
+    var yScale = this.tiles.yScale;
+
+    this.tiles.renderToScreen(ctx, range, this.getScale());
     this.renderTicks(ctx, yScale);
 
     ctx.restore();
