@@ -87,6 +87,17 @@ class ContigInterval<T: (number|string)> {
     return `${this.contig}:${this.start()}-${this.stop()}`;
   }
 
+  toGenomeRange(): GenomeRange {
+    if (!(this.contig instanceof String)) {
+      throw 'Cannot convert numeric ContigInterval to GenomeRange';
+    }
+    return {
+      contig: this.contig,
+      start: this.start(),
+      stop: this.stop()
+    };
+  }
+
   // Comparator for use with Array.prototype.sort
   static compare(a: ContigInterval, b: ContigInterval): number {
     if (a.contig > b.contig) {
@@ -119,6 +130,10 @@ class ContigInterval<T: (number|string)> {
     });
 
     return rs;
+  }
+
+  static fromGenomeRange(range: GenomeRange): ContigInterval<string> {
+    return new ContigInterval(range.contig, range.start, range.stop);
   }
 }
 
