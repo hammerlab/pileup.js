@@ -4,7 +4,7 @@
  */
 'use strict';
 
-import type {Alignment} from './Alignment';
+import type {Alignment, AlignmentDataSource} from './Alignment';
 import type * as Interval from './Interval';
 import type {TwoBitSource} from './TwoBitDataSource';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
@@ -115,7 +115,6 @@ function renderCoverage(ctx: DataCanvasRenderingContext2D,
                         xScale: (num: number) => number,
                         yScale: (num: number) => number,
                         range: ContigInterval<string>,
-                        maxCoverage: number,
                         binCounts: BinSummaryWithLocation[]) {
   var bins = binsInRange(binCounts, range);
   renderBars(ctx, xScale, yScale, bins);
@@ -193,8 +192,18 @@ function renderBars(ctx: DataCanvasRenderingContext2D,
   });
 }
 
+type Props = {
+  width: number;
+  height: number;
+  range: GenomeRange;
+  source: AlignmentDataSource;
+  referenceSource: TwoBitSource;
+};
+
 class CoverageTrack extends React.Component {
-  constructor(props: Object) {
+  props: Props;
+
+  constructor(props: Props) {
     super(props);
     this.state = {
       width: 0,
@@ -277,7 +286,8 @@ class CoverageTrack extends React.Component {
     var canvas = (this.refs.canvas : HTMLCanvasElement),
         width = this.props.width,
         height = this.props.height,
-        padding = 10;
+        padding = 10,  // TODO: move into style
+        range = ContigInterval.fromGenomeRange(this.props.range);
 
     // Hold off until height & width are known.
     if (width === 0) return;
@@ -293,18 +303,13 @@ class CoverageTrack extends React.Component {
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    renderBars(ctx, this.getScale(), yScale, this.state.binCounts);
+    renderCoverage(ctx, this.getScale(), yScale, range, this.state.binCounts);
     this.renderTicks(ctx, yScale);
 
     ctx.restore();
   }
 }
 
-CoverageTrack.propTypes = {
-  range: types.GenomeRange.isRequired,
-  source: React.PropTypes.object.isRequired,
-  referenceSource: React.PropTypes.object.isRequired,
-};
 CoverageTrack.displayName = 'coverage';
 
 
