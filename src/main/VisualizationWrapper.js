@@ -144,11 +144,12 @@ VisualizationWrapper.propTypes = {
 };
 
 
-var EmptyTrack = React.createClass({
-  render: function() {
+class EmptyTrack extends (React.Component : typeof ReactComponent) {
+  props: {className: string};
+  render() {
     var className = this.props.className + ' empty';
     return <div className={className}></div>;
   }
-});
+}
 
 module.exports = VisualizationWrapper;

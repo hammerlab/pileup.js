@@ -9,8 +9,7 @@ import type {PartialGenomeRange} from './types';
 var React = require('react'),
     _ = require('underscore');
 
-var types = require('./react-types'),
-    utils = require('./utils'),
+var utils = require('./utils'),
     Interval = require('./Interval');
 
 type Props = {
@@ -22,6 +21,10 @@ type Props = {
 class Controls extends (React.Component : typeof ReactComponent) {
   props: Props;
   state: void;  // no state
+
+  constructor(props: Object) {
+    super(props);
+  }
 
   makeRange(): GenomeRange {
     return {
@@ -102,15 +105,15 @@ class Controls extends (React.Component : typeof ReactComponent) {
 
     // Note: input values are set in componentDidUpdate.
     return (
-      <form className='controls' onSubmit={this.handleFormSubmit}>
-        <select ref='contig' onChange={this.handleContigChange}>
+      <form className='controls' onSubmit={this.handleFormSubmit.bind(this)}>
+        <select ref='contig' onChange={this.handleContigChange.bind(this)}>
           {contigOptions}
         </select>{' '}
         <input ref='position' type='text' />{' '}
-        <button className='btn-submit' onClick={this.handleFormSubmit}>Go</button>{' '}
+        <button className='btn-submit' onClick={this.handleFormSubmit.bind(this)}>Go</button>{' '}
         <div className='zoom-controls'>
-          <button className='btn-zoom-out' onClick={this.zoomOut}></button>{' '}
-          <button className='btn-zoom-in' onClick={this.zoomIn}></button>
+          <button className='btn-zoom-out' onClick={this.zoomOut.bind(this)}></button>{' '}
+          <button className='btn-zoom-in' onClick={this.zoomIn.bind(this)}></button>
         </div>
       </form>
     );
