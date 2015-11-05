@@ -69,7 +69,6 @@ describe('CoverageTrack', function() {
     return drawnObjectsWith(testDiv, '.coverage', b => b.base);
   };
 
-
   var findCoverageLabels = () => {
     return drawnObjectsWith(testDiv, '.coverage', l => l.type == 'label');
   };
@@ -91,7 +90,9 @@ describe('CoverageTrack', function() {
 
   it('should show mismatch information', function() {
     return waitFor(hasCoverage, 2000).then(() => {
-      expect(findMismatchBins()).to.deep.equal(
+      var visibleMismatches = findMismatchBins()
+          .filter(bin => bin.position >= range.start && bin.position <= range.stop);
+      expect(visibleMismatches).to.deep.equal(
         [{position: 7500765, count: 22, base: 'T'},
          {position: 7500765, count: 22, base: 'C'}]);
       // TODO: IGV shows counts of 20 and 20 at this locus. Whither the two bases?
