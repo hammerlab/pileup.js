@@ -120,10 +120,10 @@ class CoverageTiledCanvas extends TiledCanvas {
   }
 
   update(height: number, yScale: (count: number) => number, binCounts: BinSummaryWithLocation[]) {
-    this.height = height;
+    // workaround for an issue in PhantomJS where height always comes out to zero.
+    this.height = Math.max(1, height);
     this.yScale = yScale;
     this.binCounts = binCounts;
-    // this.invalidateAll();
   }
 
   render(ctx: DataCanvasRenderingContext2D,
