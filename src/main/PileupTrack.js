@@ -352,6 +352,14 @@ class PileupTrack extends React.Component {
     ctx.restore();
   }
 
+  handleSort() {
+    var {start, stop} = this.props.range,
+        middle = (start + stop) / 2;
+    this.cache.sortReadsAt(this.props.range.contig, middle);
+    this.tiles.invalidateAll();
+    this.updateVisualization();
+  }
+
   handleClick(reactEvent: any) {
     var ev = reactEvent.nativeEvent,
         x = ev.offsetX,

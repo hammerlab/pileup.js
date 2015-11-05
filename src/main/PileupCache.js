@@ -141,25 +141,67 @@ class PileupCache {
     }
   }
 
-  // How many rows tall is the pileup for a given ref? This is related to the
-  // maximum read depth. This is 'chr'-agnostic.
-  pileupHeightForRef(ref: string): number {
+  pileupForRef(ref: string): Array<Interval[]> {
     if (ref in this.refToPileup) {
-      return this.refToPileup[ref].length;
+      return this.refToPileup[ref];
     } else {
       var alt = utils.altContigName(ref);
       if (alt in this.refToPileup) {
-        return this.refToPileup[alt].length;
+        return this.refToPileup[alt];
       } else {
-        return 0;
+        return [];
       }
     }
+  }
+
+  // How many rows tall is the pileup for a given ref? This is related to the
+  // maximum read depth. This is 'chr'-agnostic.
+  pileupHeightForRef(ref: string): number {
+    var pileup = this.pileupForRef(ref);
+    return pileup ? pileup.length : 0;
   }
 
   // Find groups overlapping the range. This is 'chr'-agnostic.
   getGroupsOverlapping(range: ContigInterval<string>): VisualGroup[] {
     // TODO: speed this up using an interval tree
     return _.filter(this.groups, group => group.span.chrIntersects(range));
+  }
+
+  // Re-sort the pileup so that reads overlapping the locus are on top.
+  sortReadsAt(contig: string, position: number) {
+    // Strategy: For each pileup row, determine whether it overlaps the locus.
+    // Then sort the array indices to get a permutation.
+    // Build a new pileup by permuting the old pileup
+    // Update all the `row` properties of the relevant visual groups
+
+    const pileup = this.pileupForRef(contig);
+
+    // Find the groups for which an alignment overlaps the locus.
+    var groups = _.filter(this.groups,
+          group => _.any(group.alignments,
+              a => a.read.getInterval().chrContainsLocus(contig, position)));
+
+    // For each row, find the left-most point (for sorting).
+    var rowsOverlapping =
+        _.mapObject(_.groupBy(groups, g => g.row),
+                    gs => _.min(gs, g=>g.span.start()).span.start());
+
+    // Sort groups by whether they overlap, then by their start.
+    // TODO: is there an easier way to construct the forward map directly?
+    var permutation = _.sortBy(_.range(0, pileup.length),
+                               idx => rowsOverlapping[idx] || Infinity);
+    var oldToNew = ([]: number[]);
+    permutation.forEach((oldIndex, newIndex) => { oldToNew[oldIndex] = newIndex; });
+    var newPileup = _.range(0, pileup.length).map(i => pileup[oldToNew[i]]);
+
+    var normRef = contig in this.refToPileup ? contig : utils.altContigName(contig);
+    this.refToPileup[normRef] = newPileup;
+
+    _.each(this.groups, g => {
+      if (g.span.chrOnContig(contig)) {
+        g.row = oldToNew[g.row];
+      }
+    });
   }
 }
 
