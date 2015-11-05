@@ -14,7 +14,7 @@
 import type * as React from 'react';
 
 export type VizWithOptions = {
-  component: React.Component;
+  component: ReactClass;
   options: ?Object;
 }
 
@@ -27,7 +27,7 @@ export type Track = {
 }
 
 export type VisualizedTrack = {
-  visualization: React.Component;
+  visualization: VizWithOptions;
   source: Object;  // data source
   track: Track;  // for css class and options
 }

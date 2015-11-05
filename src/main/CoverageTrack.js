@@ -26,7 +26,7 @@ type BinSummary = {
 }
 
 type BinSummaryWithLocation = {
-  position: string;
+  position: number;
   count:number;
   mismatches: {[key: string]: number};
 }

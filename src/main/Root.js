@@ -5,7 +5,7 @@
 'use strict';
 
 import type {TwoBitSource} from './TwoBitDataSource';
-import type {VisualizedTrack} from './types';
+import type {VisualizedTrack, VizWithOptions} from './types';
 
 var React = require('react'),
     Controls = require('./Controls'),
@@ -17,7 +17,7 @@ type Props = {
   initialRange: GenomeRange;
 };
 
-class Root extends (React.Component : typeof ReactComponent) {
+class Root extends React.Component {
   props: Props;
   state: {
     contigList: string[];

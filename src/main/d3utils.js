@@ -4,14 +4,18 @@
  */
 'use strict';
 
-import type {GenomeRange} from './react-types';
-
 var scale = require('./scale');
+
+// Subtype of GenomeRange
+type Range = {
+  start: number;
+  stop: number;
+};
 
 /**
  * Shared x-axis scaling logic for tracks
  */
-function getTrackScale(range: GenomeRange, width: number): any {
+function getTrackScale(range: Range, width: number): any {
   if (!range) return scale.linear();
   var offsetPx = range.offsetPx || 0;
   return scale.linear()

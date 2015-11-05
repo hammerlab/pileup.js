@@ -206,7 +206,7 @@ type State = {
 };
 
 
-class PileupTrack extends (React.Component : typeof ReactComponent) {
+class PileupTrack extends React.Component {
   props: VizProps & { source: AlignmentDataSource };
   state: State;
   cache: PileupCache;

@@ -14,7 +14,7 @@ var React = require('react'),
     style = require('./style'),
     d3utils = require('./d3utils');
 
-class LocationTrack extends (React.Component : typeof ReactComponent) {
+class LocationTrack extends React.Component {
   props: VizProps;
   state: void;  // no state
   static defaultSource: Object;

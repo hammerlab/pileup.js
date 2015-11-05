@@ -20,7 +20,7 @@ var d3utils = require('./d3utils'),
     style = require('./style');
 
 
-class VariantTrack extends (React.Component : typeof ReactComponent) {
+class VariantTrack extends React.Component {
   props: VizProps & {source: VcfDataSource};
   state: void;  // no state
 
