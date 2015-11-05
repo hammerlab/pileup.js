@@ -10,6 +10,7 @@ import type {BasePair} from './pileuputils';
 import type {VisualAlignment, VisualGroup} from './PileupCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type * as Interval from './Interval';
+import type {VizProps} from './VisualizationWrapper';
 
 var React = require('react'),
     shallowEquals = require('shallow-equals'),
@@ -202,10 +203,11 @@ function opacityForQuality(quality: number): number {
 
 
 class PileupTrack extends React.Component {
+  props: VizProps & { source: AlignmentDataSource };
   cache: PileupCache;
   tiles: TiledCanvas;
 
-  constructor(props: Object) {
+  constructor(props: VizProps) {
     super(props);
     this.state = {
     };
@@ -271,7 +273,8 @@ class PileupTrack extends React.Component {
     });
     this.props.source.on('networkprogress', e => {
       this.setState({networkStatus: e});
-    }).on('networkdone', e => {
+    });
+    this.props.source.on('networkdone', e => {
       this.setState({networkStatus: null});
     });
 
