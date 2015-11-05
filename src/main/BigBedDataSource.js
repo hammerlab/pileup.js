@@ -24,7 +24,7 @@ export type Gene = {
 }
 
 // Flow type for export.
-type BigBedSource = {
+export type BigBedSource = {
   rangeChanged: (newRange: GenomeRange) => void;
   getGenesInRange: (range: ContigInterval<string>) => Gene[];
   on: (event: string, handler: Function) => void;

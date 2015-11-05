@@ -4,6 +4,9 @@
  */
 'use strict';
 
+import type {VizProps} from './VisualizationWrapper';
+import type {BigBedSource} from './BigBedDataSource';
+
 var React = require('react'),
     ReactDOM = require('react-dom'),
     PureRenderMixin = require('react-addons-pure-render-mixin');
@@ -16,37 +19,34 @@ var shallowEquals = require('shallow-equals'),
     DisplayMode = require('./DisplayMode'),
     style = require('./style');
 
+// props: VizProps & {source: BigBedSource};
 
-var GenomeTrack = React.createClass({
-  // This prevents updates if state & props have not changed.
-  mixins: [PureRenderMixin],
-  displayName: 'reference',
-
-  propTypes: {
-    range: types.GenomeRange.isRequired,
-    source: React.PropTypes.object.isRequired,
-  },
-  render: function(): any {
+class GenomeTrack extends React.Component {
+  render(): any {
     return <canvas />;
-  },
-  componentDidMount: function() {
+  }
+
+  componentDidMount() {
     // Visualize new reference data as it comes in from the network.
     this.props.source.on('newdata', () => {
       this.updateVisualization();
     });
 
     this.updateVisualization();
-  },
-  getScale: function() {
+  }
+
+  getScale() {
     return d3utils.getTrackScale(this.props.range, this.props.width);
-  },
-  componentDidUpdate: function(prevProps: any, prevState: any) {
+  }
+
+  componentDidUpdate(prevProps: any, prevState: any) {
     if (!shallowEquals(prevProps, this.props) ||
         !shallowEquals(prevState, this.state)) {
       this.updateVisualization();
     }
-  },
-  updateVisualization: function() {
+  }
+
+  updateVisualization() {
     var canvas = ReactDOM.findDOMNode(this),
         {width, height, range} = this.props;
 
@@ -111,6 +111,15 @@ var GenomeTrack = React.createClass({
       }
     }
   }
-});
+}
+
+// This prevents updates if state & props have not changed.
+GenomeTrack.mixins = [PureRenderMixin];
+GenomeTrack.displayName = 'reference';
+
+GenomeTrack.propTypes = {
+  range: types.GenomeRange.isRequired,
+  source: React.PropTypes.object.isRequired,
+};
 
 module.exports = GenomeTrack;
