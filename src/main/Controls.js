@@ -13,21 +13,25 @@ var types = require('./react-types'),
     utils = require('./utils'),
     Interval = require('./Interval');
 
-var Controls = React.createClass({
-  propTypes: {
-    range: types.GenomeRange,
-    contigList: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-    // XXX: can we be more specific than this with Flow?
-    onChange: React.PropTypes.func.isRequired
-  },
-  makeRange: function(): GenomeRange {
+type Props = {
+  range: GenomeRange;
+  contigList: string[];
+  onChange: (newRange: GenomeRange)=>void;
+};
+
+class Controls extends (React.Component : typeof ReactComponent) {
+  props: Props;
+  state: void;  // no state
+
+  makeRange(): GenomeRange {
     return {
       contig: this.refs.contig.value,
       start: Number(this.refs.start.value),
       stop: Number(this.refs.stop.value)
     };
-  },
-  completeRange: function(range: ?PartialGenomeRange): GenomeRange {
+  }
+
+  completeRange(range: ?PartialGenomeRange): GenomeRange {
     range = range || {};
     if (range.start && range.stop === undefined) {
       // Construct a range centered around a value. This matches IGV.
@@ -44,17 +48,20 @@ var Controls = React.createClass({
     }
 
     return (_.extend({}, this.props.range, range) : any);
-  },
-  handleContigChange: function(e: SyntheticEvent) {
+  }
+
+  handleContigChange(e: SyntheticEvent) {
     this.props.onChange(this.completeRange({contig: this.refs.contig.value}));
-  },
-  handleFormSubmit: function(e: SyntheticEvent) {
+  }
+
+  handleFormSubmit(e: SyntheticEvent) {
     e.preventDefault();
     var range = this.completeRange(utils.parseRange(this.refs.position.value));
     this.props.onChange(range);
-  },
+  }
+
   // Sets the values of the input elements to match `props.range`.
-  updateRangeUI: function() {
+  updateRangeUI() {
     const r = this.props.range;
     if (!r) return;
 
@@ -64,16 +71,19 @@ var Controls = React.createClass({
       var contigIdx = this.props.contigList.indexOf(r.contig);
       this.refs.contig.selectedIndex = contigIdx;
     }
-  },
-  zoomIn: function(e: any) {
+  }
+
+  zoomIn(e: any) {
     e.preventDefault();
     this.zoomByFactor(0.5);
-  },
-  zoomOut: function(e: any) {
+  }
+
+  zoomOut(e: any) {
     e.preventDefault();
     this.zoomByFactor(2.0);
-  },
-  zoomByFactor: function(factor: number) {
+  }
+
+  zoomByFactor(factor: number) {
     var r = this.props.range;
     if (!r) return;
 
@@ -83,8 +93,9 @@ var Controls = React.createClass({
       start: iv.start,
       stop: iv.stop
     });
-  },
-  render: function(): any {
+  }
+
+  render(): any {
     var contigOptions = this.props.contigList
         ? this.props.contigList.map((contig, i) => <option key={i}>{contig}</option>)
         : null;
@@ -103,15 +114,17 @@ var Controls = React.createClass({
         </div>
       </form>
     );
-  },
-  componentDidUpdate: function(prevProps: Object) {
+  }
+
+  componentDidUpdate(prevProps: Object) {
     if (!_.isEqual(prevProps.range, this.props.range)) {
       this.updateRangeUI();
     }
-  },
-  componentDidMount: function() {
+  }
+
+  componentDidMount() {
     this.updateRangeUI();
   }
-});
+}
 
 module.exports = Controls;
