@@ -207,11 +207,12 @@ type State = {
 };
 
 
-class PileupTrack extends React.Component {
+class PileupTrack extends (React.Component : typeof ReactComponent) {
   props: VizProps & { source: AlignmentDataSource };
   state: State;
   cache: PileupCache;
   tiles: TiledCanvas;
+  static defaultOptions: { viewAsPairs: boolean };
 
   constructor(props: VizProps) {
     super(props);
@@ -385,17 +386,10 @@ class PileupTrack extends React.Component {
   }
 }
 
-PileupTrack.propTypes = {
-  range: types.GenomeRange.isRequired,
-  source: React.PropTypes.object.isRequired,
-  referenceSource: React.PropTypes.object.isRequired,
-  options: React.PropTypes.object
-};
 PileupTrack.displayName = 'pileup';
 PileupTrack.defaultOptions = {
   viewAsPairs: false
 };
-PileupTrack.renderPileup = renderPileup;  // exposed for testing
 
 
 module.exports = PileupTrack;

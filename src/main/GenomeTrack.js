@@ -19,7 +19,7 @@ var shallowEquals = require('shallow-equals'),
     style = require('./style');
 
 
-class GenomeTrack extends React.Component {
+class GenomeTrack extends (React.Component : typeof ReactComponent) {
   props: VizProps & {source: TwoBitSource};
   state: void;  // no state
 
