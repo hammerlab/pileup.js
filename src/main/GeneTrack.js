@@ -5,7 +5,8 @@
 'use strict';
 
 import type {Strand} from './Alignment';
-import type {Gene} from './BigBedDataSource';
+import type {Gene, BigBedSource} from './BigBedDataSource';
+import type {VizProps} from './VisualizationWrapper';
 
 var React = require('react'),
     ReactDOM = require('react-dom'),
@@ -68,21 +69,22 @@ function drawGeneName(ctx: CanvasRenderingContext2D,
   }
 }
 
-var GeneTrack = React.createClass({
-  displayName: 'genes',
-  propTypes: {
-    range: types.GenomeRange.isRequired,
-    source: React.PropTypes.object.isRequired,
-  },
-  getInitialState: function() {
-    return {
-      genes: ([]: Object[])  // TODO: import Gene type from BigBedDataSource
+class GeneTrack extends React.Component {
+  props: VizProps & { source: BigBedSource };
+  state: {genes: Gene[]};
+
+  constructor(props: VizProps) {
+    super(props);
+    this.state = {
+      genes: []
     };
-  },
-  render: function(): any {
+  }
+
+  render(): any {
     return <canvas />;
-  },
-  componentDidMount: function() {
+  }
+
+  componentDidMount() {
     // Visualize new reference data as it comes in from the network.
     this.props.source.on('newdata', () => {
       var range = this.props.range,
@@ -93,23 +95,25 @@ var GeneTrack = React.createClass({
     });
 
     this.updateVisualization();
-  },
+  }
 
-  getScale: function() {
+  getScale() {
     return d3utils.getTrackScale(this.props.range, this.props.width);
-  },
-  componentDidUpdate: function(prevProps: any, prevState: any) {
+  }
+
+  componentDidUpdate(prevProps: any, prevState: any) {
     if (!shallowEquals(prevProps, this.props) ||
         !shallowEquals(prevState, this.state)) {
       this.updateVisualization();
     }
-  },
-  updateVisualization: function() {
+  }
+
+  updateVisualization() {
     var canvas = ReactDOM.findDOMNode(this),
         {width, height} = this.props,
         genomeRange = this.props.range;
 
-    var range = genomeRange ? new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop) : null;
+    var range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop);
 
     // Hold off until height & width are known.
     if (width === 0) return;
@@ -166,6 +170,8 @@ var GeneTrack = React.createClass({
       ctx.popObject();
     });
   }
-});
+}
+
+GeneTrack.displayName = 'genes';
 
 module.exports = GeneTrack;
