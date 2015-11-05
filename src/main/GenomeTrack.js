@@ -5,11 +5,10 @@
 'use strict';
 
 import type {VizProps} from './VisualizationWrapper';
-import type {BigBedSource} from './BigBedDataSource';
+import type {TwoBitSource} from './TwoBitDataSource';
 
 var React = require('react'),
-    ReactDOM = require('react-dom'),
-    PureRenderMixin = require('react-addons-pure-render-mixin');
+    ReactDOM = require('react-dom');
 
 var shallowEquals = require('shallow-equals'),
     types = require('./react-types'),
@@ -19,9 +18,11 @@ var shallowEquals = require('shallow-equals'),
     DisplayMode = require('./DisplayMode'),
     style = require('./style');
 
-// props: VizProps & {source: BigBedSource};
 
 class GenomeTrack extends React.Component {
+  props: VizProps & {source: TwoBitSource};
+  state: void;  // no state
+
   render(): any {
     return <canvas />;
   }
@@ -113,13 +114,6 @@ class GenomeTrack extends React.Component {
   }
 }
 
-// This prevents updates if state & props have not changed.
-GenomeTrack.mixins = [PureRenderMixin];
 GenomeTrack.displayName = 'reference';
-
-GenomeTrack.propTypes = {
-  range: types.GenomeRange.isRequired,
-  source: React.PropTypes.object.isRequired,
-};
 
 module.exports = GenomeTrack;
