@@ -5,6 +5,7 @@
 
 
 import type {TwoBitSource} from './TwoBitDataSource';
+import type {VizWithOptions} from './types';
 
 var React = require('react'),
     ReactDOM = require('react-dom'),
@@ -21,7 +22,17 @@ export type VizProps = {
   options: any;
 };
 
-class VisualizationWrapper extends React.Component {
+type Props = {
+  range: ?GenomeRange;
+  visualization: VizWithOptions;
+  onRangeChange: (newRange: GenomeRange) => void;
+  referenceSource: TwoBitSource;
+  source: any;
+};
+
+class VisualizationWrapper extends (React.Component : typeof ReactComponent) {
+  props: Props;
+  state: {width: number; height: number};
   hasDragBeenInitialized: boolean;
 
   constructor(props: Object) {
@@ -104,14 +115,14 @@ class VisualizationWrapper extends React.Component {
   }
 
   render(): any {
-    var range = this.props.range;
-    var component = this.props.visualization.component;
+    const range = this.props.range;
+    const component = this.props.visualization.component;
     if (!range) {
       return <EmptyTrack className={component.displayName} />;
     }
 
     var el = React.createElement(component, ({
-      range: this.props.range,
+      range: range,
       source: this.props.source,
       referenceSource: this.props.referenceSource,
       width: this.state.width,
