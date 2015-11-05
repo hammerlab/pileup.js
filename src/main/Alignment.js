@@ -41,6 +41,6 @@ export type Alignment = {
 export type AlignmentDataSource = {
   rangeChanged: (newRange: GenomeRange) => void;
   getAlignmentsInRange: (range: ContigInterval<string>) => Alignment[];
-  on: (event: string, handler: Function) => void;
+  on: (event: string, handler: Function) => void;  // really => AlignmentDataSource
   off: (event: string) => void;
 };

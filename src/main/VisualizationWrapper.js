@@ -3,12 +3,23 @@
  */
 'use strict';
 
+
+import type {TwoBitSource} from './TwoBitDataSource';
+
 var React = require('react'),
     ReactDOM = require('react-dom'),
     types = require('./react-types'),
     d3utils = require('./d3utils'),
     _ = require('underscore'),
     d3 = require('../lib/minid3');
+
+export type VizProps = {
+  width: number;
+  height: number;
+  range: GenomeRange;
+  referenceSource: TwoBitSource;
+  options: any;
+};
 
 class VisualizationWrapper extends React.Component {
   hasDragBeenInitialized: boolean;
@@ -99,14 +110,14 @@ class VisualizationWrapper extends React.Component {
       return <EmptyTrack className={component.displayName} />;
     }
 
-    var el = React.createElement(component, {
+    var el = React.createElement(component, ({
       range: this.props.range,
       source: this.props.source,
       referenceSource: this.props.referenceSource,
       width: this.state.width,
       height: this.state.height,
       options: this.props.visualization.options
-    });
+    } : VizProps));
 
     return <div className='drag-wrapper'>{el}</div>;
   }
