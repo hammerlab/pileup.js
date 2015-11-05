@@ -9,7 +9,6 @@ import type {VizWithOptions} from './types';
 
 var React = require('react'),
     ReactDOM = require('react-dom'),
-    types = require('./react-types'),
     d3utils = require('./d3utils'),
     _ = require('underscore'),
     d3 = require('../lib/minid3');
@@ -30,7 +29,7 @@ type Props = {
   source: any;
 };
 
-class VisualizationWrapper extends (React.Component : typeof ReactComponent) {
+class VisualizationWrapper extends React.Component {
   props: Props;
   state: {width: number; height: number};
   hasDragBeenInitialized: boolean;
@@ -63,7 +62,8 @@ class VisualizationWrapper extends (React.Component : typeof ReactComponent) {
     if (this.props.range && !this.hasDragBeenInitialized) this.addDragInterface();
   }
 
-  getScale(): any {
+  getScale(): (num: number)=>number {
+    if (!this.props.range) return x => x;
     return d3utils.getTrackScale(this.props.range, this.state.width);
   }
 
@@ -135,16 +135,8 @@ class VisualizationWrapper extends (React.Component : typeof ReactComponent) {
 }
 VisualizationWrapper.displayName = 'VisualizationWrapper';
 
-VisualizationWrapper.propTypes = {
-  range: types.GenomeRange,
-  onRangeChange: React.PropTypes.func.isRequired,
-  source: React.PropTypes.object.isRequired,
-  referenceSource: React.PropTypes.object.isRequired,
-  visualization: React.PropTypes.object.isRequired,
-};
 
-
-class EmptyTrack extends (React.Component : typeof ReactComponent) {
+class EmptyTrack extends React.Component {
   props: {className: string};
   render() {
     var className = this.props.className + ' empty';

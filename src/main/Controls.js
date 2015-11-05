@@ -18,7 +18,7 @@ type Props = {
   onChange: (newRange: GenomeRange)=>void;
 };
 
-class Controls extends (React.Component : typeof ReactComponent) {
+class Controls extends React.Component {
   props: Props;
   state: void;  // no state
 

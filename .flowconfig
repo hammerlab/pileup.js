@@ -22,6 +22,7 @@
 .*node_modules/source-map.*
 .*node_modules/exorcist.*
 .*react/node_modules/fbjs.*
+.*/node_modules/react/.*
 .*coverage.*
 
 [include]
