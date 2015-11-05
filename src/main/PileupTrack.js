@@ -17,7 +17,6 @@ var React = require('react'),
     _ = require('underscore');
 
 var scale = require('./scale'),
-    types = require('./react-types'),
     d3utils = require('./d3utils'),
     {CigarOp} = require('./pileuputils'),
     ContigInterval = require('./ContigInterval'),

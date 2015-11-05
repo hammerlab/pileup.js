@@ -11,7 +11,6 @@ var React = require('react'),
     ReactDOM = require('react-dom');
 
 var shallowEquals = require('shallow-equals'),
-    types = require('./react-types'),
     canvasUtils = require('./canvas-utils'),
     dataCanvas = require('data-canvas'),
     d3utils = require('./d3utils'),
