@@ -201,15 +201,22 @@ function opacityForQuality(quality: number): number {
   return Math.min(1.0, alpha);
 }
 
+type NetworkStatus = {numRequests?: number, status?: string};
+type State = {
+  networkStatus: ?NetworkStatus;
+};
+
 
 class PileupTrack extends React.Component {
   props: VizProps & { source: AlignmentDataSource };
+  state: State;
   cache: PileupCache;
   tiles: TiledCanvas;
 
   constructor(props: VizProps) {
     super(props);
     this.state = {
+      networkStatus: null
     };
   }
 
@@ -245,12 +252,12 @@ class PileupTrack extends React.Component {
     );
   }
 
-  formatStatus(state: Object): string {
-    if (state.numRequests) {
-      var pluralS = state.numRequests > 1 ? 's' : '';
-      return `issued ${state.numRequests} request${pluralS}`;
-    } else if (state.status) {
-      return state.status;
+  formatStatus(status: NetworkStatus): string {
+    if (status.numRequests) {
+      var pluralS = status.numRequests > 1 ? 's' : '';
+      return `issued ${status.numRequests} request${pluralS}`;
+    } else if (status.status) {
+      return status.status;
     }
     throw 'invalid';
   }
