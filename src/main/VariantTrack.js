@@ -14,7 +14,6 @@ var React = require('react'),
 
 var d3utils = require('./d3utils'),
     shallowEquals = require('shallow-equals'),
-    types = require('./react-types'),
     ContigInterval = require('./ContigInterval'),
     canvasUtils = require('./canvas-utils'),
     dataCanvas = require('data-canvas'),

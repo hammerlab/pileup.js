@@ -13,8 +13,7 @@ var React = require('react'),
     _ = require('underscore'),
     shallowEquals = require('shallow-equals');
 
-var types = require('./react-types'),
-    bedtools = require('./bedtools'),
+var bedtools = require('./bedtools'),
     Interval = require('./Interval'),
     d3utils = require('./d3utils'),
     scale = require('./scale'),
