@@ -24,7 +24,7 @@ var _ = require('underscore'),
     VariantTrack = require('./VariantTrack'),
     Root = require('./Root');
 
-import type {Track, VisualizedTrack} from './types';
+import type {Track, VisualizedTrack, VizWithOptions} from './types';
 
 type GenomeRange = {
   contig: string;
@@ -106,9 +106,9 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
   };
 }
 
-type VizObject = ((options: ?Object) => {component: React.Component, options:?Object});
+type VizObject = ((options: ?Object) => VizWithOptions);
 
-function makeVizObject(component: React.Component): VizObject {
+function makeVizObject(component: ReactClass): VizObject {
   return options => {
     options = _.extend({}, component.defaultOptions, options);
     return {component, options};

@@ -10,13 +10,13 @@ import type {BasePair} from './pileuputils';
 import type {VisualAlignment, VisualGroup} from './PileupCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type * as Interval from './Interval';
+import type {VizProps} from './VisualizationWrapper';
 
 var React = require('react'),
     shallowEquals = require('shallow-equals'),
     _ = require('underscore');
 
 var scale = require('./scale'),
-    types = require('./react-types'),
     d3utils = require('./d3utils'),
     {CigarOp} = require('./pileuputils'),
     ContigInterval = require('./ContigInterval'),
@@ -200,14 +200,23 @@ function opacityForQuality(quality: number): number {
   return Math.min(1.0, alpha);
 }
 
+type NetworkStatus = {numRequests?: number, status?: string};
+type State = {
+  networkStatus: ?NetworkStatus;
+};
+
 
 class PileupTrack extends React.Component {
+  props: VizProps & { source: AlignmentDataSource };
+  state: State;
   cache: PileupCache;
   tiles: TiledCanvas;
+  static defaultOptions: { viewAsPairs: boolean };
 
-  constructor(props: Object) {
+  constructor(props: VizProps) {
     super(props);
     this.state = {
+      networkStatus: null
     };
   }
 
@@ -243,12 +252,12 @@ class PileupTrack extends React.Component {
     );
   }
 
-  formatStatus(state: Object): string {
-    if (state.numRequests) {
-      var pluralS = state.numRequests > 1 ? 's' : '';
-      return `issued ${state.numRequests} request${pluralS}`;
-    } else if (state.status) {
-      return state.status;
+  formatStatus(status: NetworkStatus): string {
+    if (status.numRequests) {
+      var pluralS = status.numRequests > 1 ? 's' : '';
+      return `issued ${status.numRequests} request${pluralS}`;
+    } else if (status.status) {
+      return status.status;
     }
     throw 'invalid';
   }
@@ -271,7 +280,8 @@ class PileupTrack extends React.Component {
     });
     this.props.source.on('networkprogress', e => {
       this.setState({networkStatus: e});
-    }).on('networkdone', e => {
+    });
+    this.props.source.on('networkdone', e => {
       this.setState({networkStatus: null});
     });
 
@@ -375,17 +385,10 @@ class PileupTrack extends React.Component {
   }
 }
 
-PileupTrack.propTypes = {
-  range: types.GenomeRange.isRequired,
-  source: React.PropTypes.object.isRequired,
-  referenceSource: React.PropTypes.object.isRequired,
-  options: React.PropTypes.object
-};
 PileupTrack.displayName = 'pileup';
 PileupTrack.defaultOptions = {
   viewAsPairs: false
 };
-PileupTrack.renderPileup = renderPileup;  // exposed for testing
 
 
 module.exports = PileupTrack;

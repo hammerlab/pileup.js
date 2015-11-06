@@ -60,7 +60,6 @@
     "q": "^1.1.2",
     "react": "^0.14.0",
     "react-dom": "^0.14.0",
-    "react-addons-pure-render-mixin": "^0.14.0",
     "shallow-equals": "0.0.0",
     "underscore": "^1.7.0"
   },

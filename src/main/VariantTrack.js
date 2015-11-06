@@ -7,49 +7,51 @@
 import type {VcfDataSource} from './VcfDataSource';
 import type {Variant} from './vcf';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
+import type {VizProps} from './VisualizationWrapper';
 
 var React = require('react'),
     ReactDOM = require('react-dom');
 
 var d3utils = require('./d3utils'),
     shallowEquals = require('shallow-equals'),
-    types = require('./react-types'),
     ContigInterval = require('./ContigInterval'),
     canvasUtils = require('./canvas-utils'),
     dataCanvas = require('data-canvas'),
     style = require('./style');
 
 
-var VariantTrack = React.createClass({
-  displayName: 'variants',
-  propTypes: {
-    range: types.GenomeRange.isRequired,
-    source: React.PropTypes.object.isRequired,
-  },
-  render: function(): any {
+class VariantTrack extends React.Component {
+  props: VizProps & {source: VcfDataSource};
+  state: void;  // no state
+
+  constructor(props: Object) {
+    super(props);
+  }
+
+  render(): any {
     return <canvas onClick={this.handleClick} />;
-  },
-  getVariantSource(): VcfDataSource {
-    return this.props.source;
-  },
-  componentDidMount: function() {
+  }
+
+  componentDidMount() {
     this.updateVisualization();
 
-    this.getVariantSource().on('newdata', () => {
+    this.props.source.on('newdata', () => {
       this.updateVisualization();
     });
-  },
-  getScale: function() {
+  }
+
+  getScale() {
     return d3utils.getTrackScale(this.props.range, this.props.width);
-  },
-  componentDidUpdate: function(prevProps: any, prevState: any) {
+  }
+
+  componentDidUpdate(prevProps: any, prevState: any) {
     if (!shallowEquals(prevProps, this.props) ||
         !shallowEquals(prevState, this.state)) {
       this.updateVisualization();
     }
-  },
+  }
 
-  updateVisualization: function() {
+  updateVisualization() {
     var canvas = ReactDOM.findDOMNode(this),
         {width, height} = this.props;
 
@@ -60,12 +62,12 @@ var VariantTrack = React.createClass({
     var ctx = canvasUtils.getContext(canvas);
     var dtx = dataCanvas.getDataContext(ctx);
     this.renderScene(dtx);
-  },
+  }
 
   renderScene(ctx: DataCanvasRenderingContext2D) {
     var range = this.props.range,
         interval = new ContigInterval(range.contig, range.start, range.stop),
-        variants = this.getVariantSource().getFeaturesInRange(interval),
+        variants = this.props.source.getFeaturesInRange(interval),
         scale = this.getScale(),
         height = this.props.height,
         y = height - style.VARIANT_HEIGHT - 1;
@@ -86,7 +88,7 @@ var VariantTrack = React.createClass({
     });
 
     ctx.restore();
-  },
+  }
 
   handleClick(reactEvent: any) {
     var ev = reactEvent.nativeEvent,
@@ -102,6 +104,8 @@ var VariantTrack = React.createClass({
       alert(JSON.stringify(variant));
     }
   }
-});
+}
+
+VariantTrack.displayName = 'variants';
 
 module.exports = VariantTrack;

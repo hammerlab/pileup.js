@@ -4,32 +4,38 @@
  */
 'use strict';
 
-import type {VisualizedTrack} from './types';
+import type {TwoBitSource} from './TwoBitDataSource';
+import type {VisualizedTrack, VizWithOptions} from './types';
 
 var React = require('react'),
     Controls = require('./Controls'),
     VisualizationWrapper = require('./VisualizationWrapper');
 
+type Props = {
+  referenceSource: TwoBitSource;
+  tracks: VisualizedTrack[];
+  initialRange: GenomeRange;
+};
 
-var Root = React.createClass({
-  propTypes: {
-    referenceSource: React.PropTypes.object.isRequired,
-    tracks: React.PropTypes.array.isRequired,
-    initialRange: React.PropTypes.object.isRequired
-  },
-  getInitialState: function() {
-    return {
+class Root extends React.Component {
+  props: Props;
+  state: {
+    contigList: string[];
+    range: ?GenomeRange;
+  };
+
+  constructor(props: Object) {
+    super(props);
+    this.state = {
       contigList: this.props.referenceSource.contigList(),
-      range: (null: ?GenomeRange)
+      range: null
     };
-  },
-  componentDidMount: function() {
-    // Note: flow is unable to infer this type through `this.propTypes`.
-    var referenceSource = this.props.referenceSource;
+  }
 
-    referenceSource.on('contigs', () => {
+  componentDidMount() {
+    this.props.referenceSource.on('contigs', () => {
       this.setState({
-        contigList: referenceSource.contigList(),
+        contigList: this.props.referenceSource.contigList(),
       });
     });
 
@@ -38,8 +44,9 @@ var Root = React.createClass({
     }
     // in case the contigs came in between getInitialState() and here.
     this.setState({contigList: this.props.referenceSource.contigList()});
-  },
-  handleRangeChange: function(newRange: GenomeRange) {
+  }
+
+  handleRangeChange(newRange: GenomeRange) {
     this.props.referenceSource.normalizeRange(newRange).then(range => {
       this.setState({range: range});
 
@@ -48,12 +55,13 @@ var Root = React.createClass({
         track.source.rangeChanged(range);
       });
     }).done();
-  },
+  }
+
   makeDivForTrack(key: string, track: VisualizedTrack): React.Element {
     var trackEl = (
         <VisualizationWrapper visualization={track.visualization}
             range={this.state.range}
-            onRangeChange={this.handleRangeChange}
+            onRangeChange={this.handleRangeChange.bind(this)}
             source={track.source}
             referenceSource={this.props.referenceSource}
           />);
@@ -70,8 +78,9 @@ var Root = React.createClass({
         </div>
       </div>
     );
-  },
-  render: function(): any {
+  }
+
+  render(): any {
     // TODO: use a better key than index.
     var trackEls = this.props.tracks.map((t, i) => this.makeDivForTrack(''+i, t));
     return (
@@ -83,13 +92,14 @@ var Root = React.createClass({
           <div className='track-content'>
             <Controls contigList={this.state.contigList}
                       range={this.state.range}
-                      onChange={this.handleRangeChange} />
+                      onChange={this.handleRangeChange.bind(this)} />
           </div>
         </div>
         {trackEls}
       </div>
     );
   }
-});
+}
+Root.displayName = 'Root';
 
 module.exports = Root;

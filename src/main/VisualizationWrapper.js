@@ -3,14 +3,35 @@
  */
 'use strict';
 
+
+import type {TwoBitSource} from './TwoBitDataSource';
+import type {VizWithOptions} from './types';
+
 var React = require('react'),
     ReactDOM = require('react-dom'),
-    types = require('./react-types'),
     d3utils = require('./d3utils'),
     _ = require('underscore'),
     d3 = require('../lib/minid3');
 
+export type VizProps = {
+  width: number;
+  height: number;
+  range: GenomeRange;
+  referenceSource: TwoBitSource;
+  options: any;
+};
+
+type Props = {
+  range: ?GenomeRange;
+  visualization: VizWithOptions;
+  onRangeChange: (newRange: GenomeRange) => void;
+  referenceSource: TwoBitSource;
+  source: any;
+};
+
 class VisualizationWrapper extends React.Component {
+  props: Props;
+  state: {width: number; height: number};
   hasDragBeenInitialized: boolean;
 
   constructor(props: Object) {
@@ -41,7 +62,8 @@ class VisualizationWrapper extends React.Component {
     if (this.props.range && !this.hasDragBeenInitialized) this.addDragInterface();
   }
 
-  getScale(): any {
+  getScale(): (num: number)=>number {
+    if (!this.props.range) return x => x;
     return d3utils.getTrackScale(this.props.range, this.state.width);
   }
 
@@ -93,40 +115,33 @@ class VisualizationWrapper extends React.Component {
   }
 
   render(): any {
-    var range = this.props.range;
-    var component = this.props.visualization.component;
+    const range = this.props.range;
+    const component = this.props.visualization.component;
     if (!range) {
       return <EmptyTrack className={component.displayName} />;
     }
 
-    var el = React.createElement(component, {
-      range: this.props.range,
+    var el = React.createElement(component, ({
+      range: range,
       source: this.props.source,
       referenceSource: this.props.referenceSource,
       width: this.state.width,
       height: this.state.height,
       options: this.props.visualization.options
-    });
+    } : VizProps));
 
     return <div className='drag-wrapper'>{el}</div>;
   }
 }
 VisualizationWrapper.displayName = 'VisualizationWrapper';
 
-VisualizationWrapper.propTypes = {
-  range: types.GenomeRange,
-  onRangeChange: React.PropTypes.func.isRequired,
-  source: React.PropTypes.object.isRequired,
-  referenceSource: React.PropTypes.object.isRequired,
-  visualization: React.PropTypes.object.isRequired,
-};
 
-
-var EmptyTrack = React.createClass({
-  render: function() {
+class EmptyTrack extends React.Component {
+  props: {className: string};
+  render() {
     var className = this.props.className + ' empty';
     return <div className={className}></div>;
   }
-});
+}
 
 module.exports = VisualizationWrapper;

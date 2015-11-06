@@ -4,16 +4,21 @@
  */
 'use strict';
 
+import type {VizProps} from './VisualizationWrapper';
+
 var React = require('react'),
     ReactDOM = require('react-dom'),
     EmptySource = require('./EmptySource'),
-    types = require('./react-types'),
     canvasUtils = require('./canvas-utils'),
     dataCanvas = require('data-canvas'),
     style = require('./style'),
     d3utils = require('./d3utils');
 
 class LocationTrack extends React.Component {
+  props: VizProps;
+  state: void;  // no state
+  static defaultSource: Object;
+
   constructor(props: Object) {
     super(props);
   }
@@ -73,9 +78,6 @@ class LocationTrack extends React.Component {
   }
 }
 
-LocationTrack.propTypes = {
-  range: types.GenomeRange.isRequired,
-};
 LocationTrack.displayName = 'location';
 LocationTrack.defaultSource = EmptySource.create();
 
