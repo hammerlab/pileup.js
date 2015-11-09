@@ -76,6 +76,7 @@
 }
 .menu-container {
   z-index: 1;
+  width: 250px;  /* not really 250px, but clears parent constraint */
 }
 .menu {
   border: 1px solid black;
@@ -83,6 +84,7 @@
   display: table;
   background: white;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  text-align: left;
 }
 .menu-header {
   font-weight: bold;

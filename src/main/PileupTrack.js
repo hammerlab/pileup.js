@@ -212,6 +212,7 @@ class PileupTrack extends React.Component {
   cache: PileupCache;
   tiles: TiledCanvas;
   static defaultOptions: { viewAsPairs: boolean };
+  static getOptionsMenu: (options: Object)=>any;
 
   constructor(props: VizProps) {
     super(props);
@@ -397,6 +398,16 @@ PileupTrack.displayName = 'pileup';
 PileupTrack.defaultOptions = {
   viewAsPairs: false
 };
+
+PileupTrack.getOptionsMenu = function(options: Object): any {
+  return [
+    {key: 'shade-quality', label: 'Shade base by quality'},
+    '-',
+    {key: 'view-pairs', label: 'View as pairs', checked: options.viewAsPairs},
+    '-',
+    {key: 'sort', label: 'Sort alignments'}
+  ];
+}
 
 
 module.exports = PileupTrack;
