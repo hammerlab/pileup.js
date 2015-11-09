@@ -106,7 +106,7 @@ class Root extends React.Component {
 
       var menuStyle = {
         position: 'absolute',
-        left: (gearX + gearW + 5) + 'px',
+        left: (gearX + gearW) + 'px',
         top: gearY + 'px'
       };
       var items = track.visualization.component.getOptionsMenu(track.visualization.options);

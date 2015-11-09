@@ -316,6 +316,10 @@ class PileupTrack extends React.Component {
       this.tiles = new PileupTileCache(this.cache);
       this.updateReads(ContigInterval.fromGenomeRange(this.props.range));
     }
+
+    if (oldOpts.sort != this.props.options.sort) {
+      this.handleSort();
+    }
   }
 
   // Load new reads into the visualization cache.
@@ -419,18 +423,21 @@ PileupTrack.defaultOptions = {
 
 PileupTrack.getOptionsMenu = function(options: Object): any {
   return [
-    {key: 'shade-quality', label: 'Shade base by quality'},
-    '-',
     {key: 'view-pairs', label: 'View as pairs', checked: options.viewAsPairs},
     '-',
     {key: 'sort', label: 'Sort alignments'}
   ];
 }
 
+var messageId = 1;
+
 PileupTrack.handleSelectOption = function(key: string, oldOptions: Object): Object {
   var opts = _.clone(oldOptions);
   if (key == 'view-pairs') {
     opts.viewAsPairs = !opts.viewAsPairs;
+    return opts;
+  } else if (key == 'sort') {
+    opts.sort = (messageId++);
     return opts;
   }
   return oldOptions;  // no change

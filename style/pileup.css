@@ -72,7 +72,11 @@
 
 .gear {
   margin-left: 0.5em;
-  font-size: 1.5em;
+  font-size: 2em;
+  color: #666;
+}
+.gear:hover {
+  color: black;
 }
 .menu-container {
   z-index: 1;
