@@ -95,7 +95,13 @@ class Root extends React.Component {
     var gearIcon = null,
         settingsMenu = null;
     if (track.visualization.component.getOptionsMenu) {
-      gearIcon = <span ref={'gear-' + key} className='gear' onClick={this.toggleSettingsMenu.bind(this, key)}>⚙</span>
+      gearIcon = (
+          <span ref={'gear-' + key}
+                className='gear'
+                onClick={this.toggleSettingsMenu.bind(this, key)}>
+            ⚙
+          </span>
+      );
     }
 
     if (this.state.settingsMenuKey == key) {

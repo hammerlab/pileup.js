@@ -427,7 +427,7 @@ PileupTrack.getOptionsMenu = function(options: Object): any {
     '-',
     {key: 'sort', label: 'Sort alignments'}
   ];
-}
+};
 
 var messageId = 1;
 
@@ -441,7 +441,7 @@ PileupTrack.handleSelectOption = function(key: string, oldOptions: Object): Obje
     return opts;
   }
   return oldOptions;  // no change
-}
+};
 
 
 module.exports = PileupTrack;

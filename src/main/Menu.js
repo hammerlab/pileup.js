@@ -13,6 +13,9 @@
  *
  * @flow
  */
+
+'use strict';
+
 var React = require('react');
 
 type MenuItem = {
@@ -61,7 +64,7 @@ class Menu extends React.Component<{}, Props, void> {
       <div className='menu'>
         {els}
       </div>
-    )
+    );
   }
 }
 
