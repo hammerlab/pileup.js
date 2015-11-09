@@ -71,6 +71,14 @@ class Root extends React.Component {
   handleSelectOption(trackKey: string, optionKey: string) {
     console.log(trackKey, optionKey);
     this.setState({settingsMenuKey: null});
+
+    var viz = this.props.tracks[Number(trackKey)].visualization;
+    var oldOpts = viz.options;
+    var newOpts = viz.component.handleSelectOption(optionKey, oldOpts);
+    viz.options = newOpts;
+    if (newOpts != oldOpts) {
+      this.forceUpdate();
+    }
   }
 
   makeDivForTrack(key: string, track: VisualizedTrack): React.Element {

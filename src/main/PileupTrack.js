@@ -213,6 +213,7 @@ class PileupTrack extends React.Component {
   tiles: TiledCanvas;
   static defaultOptions: { viewAsPairs: boolean };
   static getOptionsMenu: (options: Object)=>any;
+  static handleSelectOption: (key: string, oldOptions: Object)=> Object;
 
   constructor(props: VizProps) {
     super(props);
@@ -294,9 +295,26 @@ class PileupTrack extends React.Component {
   }
 
   componentDidUpdate(prevProps: any, prevState: any) {
+    var shouldUpdate = false;
+    if (this.props.options != prevProps.options) {
+      this.handleOptionsChange(prevProps.options, this.props.options);
+      shouldUpdate = true;
+    }
+
     if (!shallowEquals(this.props, prevProps) ||
-        !shallowEquals(this.state, prevState)) {
+        !shallowEquals(this.state, prevState) ||
+        shouldUpdate) {
       this.updateVisualization();
+    }
+  }
+
+  handleOptionsChange(oldOpts: Object) {
+    this.tiles.invalidateAll();
+
+    if (oldOpts.viewAsPairs != this.props.options.viewAsPairs) {
+      this.cache = new PileupCache(this.props.referenceSource, this.props.options.viewAsPairs);
+      this.tiles = new PileupTileCache(this.cache);
+      this.updateReads(ContigInterval.fromGenomeRange(this.props.range));
     }
   }
 
@@ -407,6 +425,15 @@ PileupTrack.getOptionsMenu = function(options: Object): any {
     '-',
     {key: 'sort', label: 'Sort alignments'}
   ];
+}
+
+PileupTrack.handleSelectOption = function(key: string, oldOptions: Object): Object {
+  var opts = _.clone(oldOptions);
+  if (key == 'view-pairs') {
+    opts.viewAsPairs = !opts.viewAsPairs;
+    return opts;
+  }
+  return oldOptions;  // no change
 }
 
 
