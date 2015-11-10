@@ -9,6 +9,7 @@ import type {VisualizedTrack, VizWithOptions} from './types';
 
 var React = require('react'),
     Controls = require('./Controls'),
+    Menu = require('./Menu'),
     VisualizationWrapper = require('./VisualizationWrapper');
 
 type Props = {
@@ -22,13 +23,15 @@ class Root extends React.Component {
   state: {
     contigList: string[];
     range: ?GenomeRange;
+    settingsMenuKey: ?string;
   };
 
   constructor(props: Object) {
     super(props);
     this.state = {
       contigList: this.props.referenceSource.contigList(),
-      range: null
+      range: null,
+      settingsMenuKey: null
     };
   }
 
@@ -57,6 +60,26 @@ class Root extends React.Component {
     }).done();
   }
 
+  toggleSettingsMenu(key: string, e: SyntheticEvent) {
+    if (this.state.settingsMenuKey == key) {
+      this.setState({settingsMenuKey: null});
+    } else {
+      this.setState({settingsMenuKey: key});
+    }
+  }
+  
+  handleSelectOption(trackKey: string, optionKey: string) {
+    this.setState({settingsMenuKey: null});
+
+    var viz = this.props.tracks[Number(trackKey)].visualization;
+    var oldOpts = viz.options;
+    var newOpts = viz.component.handleSelectOption(optionKey, oldOpts);
+    viz.options = newOpts;
+    if (newOpts != oldOpts) {
+      this.forceUpdate();
+    }
+  }
+
   makeDivForTrack(key: string, track: VisualizedTrack): React.Element {
     var trackEl = (
         <VisualizationWrapper visualization={track.visualization}
@@ -65,13 +88,49 @@ class Root extends React.Component {
             source={track.source}
             referenceSource={this.props.referenceSource}
           />);
+    
+    var trackName = track.track.name || '(track name)';
+
+    var gearIcon = null,
+        settingsMenu = null;
+    if (track.visualization.component.getOptionsMenu) {
+      gearIcon = (
+          <span ref={'gear-' + key}
+                className='gear'
+                onClick={this.toggleSettingsMenu.bind(this, key)}>
+            ⚙
+          </span>
+      );
+    }
+
+    if (this.state.settingsMenuKey == key) {
+      var gear = this.refs['gear-' + key],
+          gearX = gear.offsetLeft,
+          gearW = gear.offsetWidth,
+          gearY = gear.offsetTop;
+
+      var menuStyle = {
+        position: 'absolute',
+        left: (gearX + gearW) + 'px',
+        top: gearY + 'px'
+      };
+      var items = track.visualization.component.getOptionsMenu(track.visualization.options);
+      settingsMenu = (
+        <div className='menu-container' style={menuStyle}>
+          <Menu header={trackName} items={items} onSelect={this.handleSelectOption.bind(this, key)} />
+        </div>
+      );
+    }
 
     var className = ['track', track.visualization.component.displayName || '', track.track.cssClass || ''].join(' ');
 
     return (
       <div key={key} className={className}>
         <div className='track-label'>
-          <span>{track.track.name || '(track name)'}</span>
+          <span>{trackName}</span>
+          <br/>
+          {gearIcon}
+          {settingsMenu}
         </div>
         <div className='track-content'>
           {trackEl}
