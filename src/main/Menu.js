@@ -27,7 +27,7 @@ type MenuItem = {
 type Props = {
   header: string;
   items: Array<MenuItem|'-'>;
-  onSelect: (key: string)=>void;
+  onSelect: (key: string) => void;
 };
 
 class Menu extends React.Component<{}, Props, void> {

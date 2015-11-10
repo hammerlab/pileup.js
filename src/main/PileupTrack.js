@@ -212,8 +212,8 @@ class PileupTrack extends React.Component {
   cache: PileupCache;
   tiles: TiledCanvas;
   static defaultOptions: { viewAsPairs: boolean };
-  static getOptionsMenu: (options: Object)=>any;
-  static handleSelectOption: (key: string, oldOptions: Object)=> Object;
+  static getOptionsMenu: (options: Object) => any;
+  static handleSelectOption: (key: string, oldOptions: Object) => Object;
 
   constructor(props: VizProps) {
     super(props);
@@ -297,7 +297,7 @@ class PileupTrack extends React.Component {
   componentDidUpdate(prevProps: any, prevState: any) {
     var shouldUpdate = false;
     if (this.props.options != prevProps.options) {
-      this.handleOptionsChange(prevProps.options, this.props.options);
+      this.handleOptionsChange(prevProps.options);
       shouldUpdate = true;
     }
 

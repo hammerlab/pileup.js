@@ -69,7 +69,6 @@ class Root extends React.Component {
   }
   
   handleSelectOption(trackKey: string, optionKey: string) {
-    console.log(trackKey, optionKey);
     this.setState({settingsMenuKey: null});
 
     var viz = this.props.tracks[Number(trackKey)].visualization;
