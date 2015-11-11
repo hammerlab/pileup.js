@@ -36,6 +36,15 @@ export type VisualGroup = {
   alignments: VisualAlignment[];
 };
 
+// Insert sizes within this percentile range will be considered "normal".
+const MIN_OUTLIER_PERCENTILE = 0.5;
+const MAX_OUTLIER_PERCENTILE = 99.5;
+
+export type InsertStats = {
+  minOutlierSize: number;
+  maxOutlierSize: number;
+};
+
 // This class provides data management for the visualization, grouping paired
 // reads and managing the pileup.
 class PileupCache {
@@ -44,12 +53,14 @@ class PileupCache {
   refToPileup: {[key: string]: Array<Interval[]>};
   referenceSource: TwoBitSource;
   viewAsPairs: boolean;
+  _insertStats: ?InsertStats;
 
   constructor(referenceSource: TwoBitSource, viewAsPairs: boolean) {
     this.groups = {};
     this.refToPileup = {};
     this.referenceSource = referenceSource;
     this.viewAsPairs = viewAsPairs;
+    this._insertStats = null;
   }
 
   // read name would make a good key, but paired reads from different contigs
@@ -65,6 +76,7 @@ class PileupCache {
   // Load a new read into the visualization cache.
   // Calling this multiple times with the same read is a no-op.
   addAlignment(read: Alignment) {
+    this._insertStats = null;  // invalidate
     var key = this.groupKey(read),
         range = read.getInterval();
 
@@ -214,6 +226,19 @@ class PileupCache {
         g.row = oldToNew[g.row];
       }
     });
+  }
+
+  getInsertStats(): InsertStats {
+    if (this._insertStats) return this._insertStats;
+    var inserts = _.map(this.groups, g => g.insert ? g.insert.length() : -1)
+                   .filter(x => x !== -1);
+    const insertStats = {
+      minOutlierSize: utils.computePercentile(inserts, MIN_OUTLIER_PERCENTILE),
+      maxOutlierSize: utils.computePercentile(inserts, MAX_OUTLIER_PERCENTILE)
+    };
+
+    this._insertStats = insertStats;
+    return insertStats;
   }
 }
 

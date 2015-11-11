@@ -253,6 +253,26 @@ function flatMap<T, R>(array: T[], fn: (t: T)=>R[]): R[] {
   return _.flatten(array.map(fn), true /* shallow */);
 }
 
+/**
+ * Determine the percentile-th element of xs.
+ * percentile should be an integer from 1 to 99.
+ * This will sort the xs.
+ */
+function computePercentile(xs: number[], percentile: number): number {
+  if (xs.length === 0) return 0;  // placeholder value
+
+  xs.sort((a, b) => a - b);
+  var idx = (xs.length - 1) * percentile / 100,
+      lo = Math.floor(idx),
+      hi = Math.ceil(idx);
+
+  if (lo == hi) {
+    return xs[lo];
+  } else {
+    return xs[lo] * (idx - lo) + xs[hi] * (hi - idx);
+  }
+}
+
 module.exports = {
   tupleLessOrEqual,
   tupleRangeOverlaps,
@@ -265,5 +285,6 @@ module.exports = {
   parseRange,
   formatInterval,
   isChrMatch,
-  flatMap
+  flatMap,
+  computePercentile
 };
