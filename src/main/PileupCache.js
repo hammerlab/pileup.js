@@ -167,6 +167,18 @@ class PileupCache {
     return _.filter(this.groups, group => group.span.chrIntersects(range));
   }
 
+  // Determine the number of groups at a locus.
+  // Like getGroupsOverlapping(range).length > 0, but more efficient.
+  anyGroupsOverlapping(range: ContigInterval<string>): boolean {
+    for (var k in this.groups) {
+      var group = this.groups[k];
+      if (group.span.chrIntersects(range)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   // Re-sort the pileup so that reads overlapping the locus are on top.
   sortReadsAt(contig: string, position: number) {
     // Strategy: For each pileup row, determine whether it overlaps the locus.
