@@ -101,23 +101,10 @@ To typecheck the code, run
 
 For best results, use one of the flowtype editor integrations.
 
-### BioJS
-
-Alternatively you can use [BioJS sniper][sniper] for the demo:
-
-    npm install -g sniper # installs sniper globally
-
-Once installed, start sniper in the `pileup.js` folder:
-
-    sniper # and keep it running
-
-And browse to [http://localhost:9090/examples/playground](http://localhost:9090/examples/playground).
-
 ## License
 
 pileup.js is [Apache v2](/LICENSE) licensed.
 
-[sniper]: https://github.com/biojs/sniper
 [hs]: https://github.com/nodeapps/http-server
 [layout]: http://codepen.io/anon/pen/VLzbBe?editors=110
 [flexbox]: https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Flexible_boxes

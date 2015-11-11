@@ -1,0 +1,17 @@
+#pileup {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 20px;
+  bottom: 10px;
+}
+#stats {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+#jiggle {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
