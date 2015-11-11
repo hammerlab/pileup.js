@@ -31,7 +31,7 @@ var scale = require('./scale'),
 var READ_HEIGHT = 13;
 var READ_SPACING = 2;  // vertical pixels between reads
 
-var READ_STRAND_ARROW_WIDTH = 6;
+var READ_STRAND_ARROW_WIDTH = 5;
 
 // PhantomJS does not support setLineDash.
 // Node doesn't even know about the symbol.
@@ -80,26 +80,27 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
   function drawArrow(pos: number, refLength: number, top: number, direction: 'L' | 'R') {
     var left = scale(pos + 1),
         right = scale(pos + refLength + 1),
-        bottom = top + READ_HEIGHT;
+        bottom = top + READ_HEIGHT,
+        arrowSize = Math.min(READ_STRAND_ARROW_WIDTH, (right - left) / 6);
 
     ctx.beginPath();
     if (direction == 'R') {
       ctx.moveTo(left, top);
-      ctx.lineTo(right - READ_STRAND_ARROW_WIDTH, top);
+      ctx.lineTo(right - arrowSize, top);
       ctx.lineTo(right, (top + bottom) / 2);
-      ctx.lineTo(right - READ_STRAND_ARROW_WIDTH, bottom);
+      ctx.lineTo(right - arrowSize, bottom);
       ctx.lineTo(left, bottom);
     } else {
       ctx.moveTo(right, top);
-      ctx.lineTo(left + READ_STRAND_ARROW_WIDTH, top);
+      ctx.lineTo(left + arrowSize, top);
       ctx.lineTo(left, (top + bottom) / 2);
-      ctx.lineTo(left + READ_STRAND_ARROW_WIDTH, bottom);
+      ctx.lineTo(left + arrowSize, bottom);
       ctx.lineTo(right, bottom);
     }
     ctx.fill();
   }
 
-  function drawSegment(op, y) {
+  function drawSegment(op, y, vRead) {
     switch (op.op) {
       case CigarOp.MATCH:
         if (op.arrow) {
@@ -136,7 +137,7 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
     ctx.pushObject(vRead);
     vRead.ops.forEach(op => {
       if (isRendered(op)) {
-        drawSegment(op, y);
+        drawSegment(op, y, vRead);
       }
     });
     vRead.mismatches.forEach(bp => renderMismatch(bp, y));
