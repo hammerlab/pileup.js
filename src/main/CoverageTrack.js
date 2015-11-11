@@ -39,16 +39,13 @@ const SHOW_MISMATCHES = true;
 // reads supporting that mismatch.
 const MISMATCH_THRESHOLD = 1;
 
-// Color the reference base in the bar chart when the Variant Allele Fraction
-// exceeds this amount.
-const REF_COLOR_VAF_THRESHOLD = 0.2;
-
 /**
  * Extract summary statistics from the read data.
  */
 function extractSummaryStatistics(reads: Array<Alignment>,
                                   contig: string,
-                                  referenceSource: TwoBitSource) {
+                                  referenceSource: TwoBitSource,
+                                  vafColorThreshold: number) {
   var binCounts = ({}: {[key: number]: BinSummary});
 
   // This is written in an imperative style (instead of with _.groupBy)
@@ -93,7 +90,9 @@ function extractSummaryStatistics(reads: Array<Alignment>,
     var ref = referenceSource.getRangeAsString(
         {contig, start: position - 1, stop: position - 1});
     var mismatchCount = _.reduce(mismatches, (x, y) => x + y);
-    if (mismatchCount > REF_COLOR_VAF_THRESHOLD * count) {
+    var mostFrequentMismatch = _.max(mismatches);
+    if (mostFrequentMismatch > MISMATCH_THRESHOLD &&
+        mismatchCount > vafColorThreshold * count) {
       mismatches[ref] = count - mismatchCount;
     }
   });
@@ -222,6 +221,9 @@ type Props = {
   range: GenomeRange;
   source: AlignmentDataSource;
   referenceSource: TwoBitSource;
+  options: {
+    vafColorThreshold: number
+  }
 };
 
 type State = {
@@ -234,6 +236,7 @@ class CoverageTrack extends React.Component {
   props: Props;
   state: State;
   tiles: CoverageTiledCanvas;
+  static defaultOptions: Object;
 
   constructor(props: Props) {
     super(props);
@@ -256,7 +259,11 @@ class CoverageTrack extends React.Component {
     var updateState = () => {
       var ci = new ContigInterval(this.props.range.contig, 0, Number.MAX_VALUE),
           reads = this.props.source.getAlignmentsInRange(ci),
-          {binCounts, maxCoverage} = extractSummaryStatistics(reads, this.props.range.contig, this.props.referenceSource);
+          {binCounts, maxCoverage} = extractSummaryStatistics(
+              reads,
+              this.props.range.contig,
+              this.props.referenceSource,
+              this.props.options.vafColorThreshold);
 
       var padding = 10;  // TODO: move into style
       var yScale = scale.linear()
@@ -346,6 +353,13 @@ class CoverageTrack extends React.Component {
 }
 
 CoverageTrack.displayName = 'coverage';
+CoverageTrack.defaultOptions = {
+  // Color the reference base in the bar chart when the Variant Allele Fraction
+  // exceeds this amount. When there are >=2 agreeing mismatches, they are
+  // always rendered. But for mismatches below this threshold, the reference is
+  // not colored in the bar chart. This draws attention to high-VAF mismatches.
+  vafColorThreshold: 0.2
+};
 
 
 module.exports = CoverageTrack;
