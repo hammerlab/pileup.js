@@ -64,3 +64,5 @@ var sources = [
     name: 'Alignments'
   }
 ];
+
+var range = {contig: 'chr17', start: 7512284, stop: 7512644};
