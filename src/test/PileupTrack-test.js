@@ -198,4 +198,45 @@ describe('PileupTrack', function() {
       p.destroy();
     });
   });
+
+  it('should sort reads', function() {
+    var p = pileup.create(testDiv, {
+      range: {contig: 'chr17', start: 7500734, stop: 7500796},
+      tracks: [
+        {
+          data: pileup.formats.twoBit({
+            url: '/test-data/test.2bit'
+          }),
+          viz: pileup.viz.genome(),
+          isReference: true
+        },
+        {
+          data: pileup.formats.bam({
+            url: '/test-data/synth3.normal.17.7500000-7515000.bam',
+            indexUrl: '/test-data/synth3.normal.17.7500000-7515000.bam.bai'
+          }),
+          viz: pileup.viz.pileup({
+            viewAsPairs: false
+          })
+        }
+      ]
+    });
+
+    return waitFor(hasAlignments, 2000).then(() => {
+      var alignments = drawnObjectsWith(testDiv, '.pileup', x => x.span);
+      var center = (7500796 + 7500734) / 2;
+      expect(Math.floor(center)).to.equal(center);  // no rounding issues
+
+      var rowsAndSpans = alignments.map(x => [x.row, x.span.interval]);
+      var centerRows = _.uniq(
+          rowsAndSpans.filter(rowIv => rowIv[1].contains(center))
+                      .map(rowIv => rowIv[0]));
+
+      // The rows with alignments overlapping the center should be the first
+      // ones, e.g. 0, 1, 2, 3. Any gaps will make this comparison fail.
+      expect(_.max(centerRows)).to.equal(centerRows.length - 1);
+
+      p.destroy();
+    });
+  });
 });

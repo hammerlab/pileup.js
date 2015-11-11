@@ -324,9 +324,15 @@ class PileupTrack extends React.Component {
 
   // Load new reads into the visualization cache.
   updateReads(range: ContigInterval<string>) {
-    var source = (this.props.source : AlignmentDataSource);
-    source.getAlignmentsInRange(range)
-          .forEach(read => this.cache.addAlignment(read));
+    var anyBefore = this.cache.anyGroupsOverlapping(range);
+    this.props.source.getAlignmentsInRange(range)
+                     .forEach(read => this.cache.addAlignment(read));
+
+    if (!anyBefore && this.cache.anyGroupsOverlapping(range)) {
+      // If these are the first reads to be shown in the visible range,
+      // then sort them to highlight reads in the center.
+      this.handleSort();
+    }
   }
 
   // Update the visualization to reflect the cached reads &
