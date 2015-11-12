@@ -288,6 +288,7 @@ describe('PileupCache', function() {
   });
 
   it('should compute statistics on a BAM file', function() {
+    this.timeout(5000);
     var bam = new Bam(
         new RemoteFile('/test-data/synth4.tumor.1.4930000-4950000.bam'),
         new RemoteFile('/test-data/synth4.tumor.1.4930000-4950000.bam.bai'));
