@@ -155,7 +155,7 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
   function drawGroup(vGroup: VisualGroup) {
     ctx.save();
     if (insertStats && vGroup.insert) {
-      var len = vGroup.insert.length();
+      var len = vGroup.span.length();
       if (len < insertStats.minOutlierSize) {
         ctx.fillStyle = 'blue';
       } else if (len > insertStats.maxOutlierSize) {

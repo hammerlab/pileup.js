@@ -87,6 +87,20 @@ class GA4GHAlignment /* implements Alignment */ {
     };
   }
 
+  getInferredInsertSize(): number {
+    // TODO: SAM/BAM writes this explicitly. Does GA4GH really not?
+    var m = this.getMateProperties();
+    if (m && m.ref == this.ref) {
+      var start1 = this._interval.start(),
+          stop1 = this._interval.stop(),
+          start2 = m.pos,
+          stop2 = start2 + this.getSequence.length();
+      return Math.max(stop1, stop2) - Math.min(start1, start2);
+    } else {
+      return 0;
+    }
+  }
+
   // This is exposed as a static method to facilitate an optimization in GA4GHDataSource.
   static keyFromGA4GHResponse(alignment: Object): string {
     // this.alignment.id would be appealing here, but it's not actually unique!

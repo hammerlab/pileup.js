@@ -36,6 +36,7 @@ export type Alignment = {
   intersects(interval: ContigInterval<string>): boolean;
   getReferenceLength(): number;
   getMateProperties(): ?MateProperties;
+  getInferredInsertSize(): number;
 };
 
 export type AlignmentDataSource = {

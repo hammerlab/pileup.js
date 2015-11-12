@@ -39,6 +39,7 @@ export type VisualGroup = {
 // Insert sizes within this percentile range will be considered "normal".
 const MIN_OUTLIER_PERCENTILE = 0.5;
 const MAX_OUTLIER_PERCENTILE = 99.5;
+const MAX_INSERT_SIZE = 30000;  // ignore inserts larger than this in calculations
 
 export type InsertStats = {
   minOutlierSize: number;
@@ -230,8 +231,9 @@ class PileupCache {
 
   getInsertStats(): InsertStats {
     if (this._insertStats) return this._insertStats;
-    var inserts = _.map(this.groups, g => g.insert ? g.insert.length() : -1)
-                   .filter(x => x !== -1);
+    var inserts = _.map(this.groups,
+                        g => g.alignments[0].read.getInferredInsertSize())
+                   .filter(x => x < MAX_INSERT_SIZE);
     const insertStats = {
       minOutlierSize: utils.computePercentile(inserts, MIN_OUTLIER_PERCENTILE),
       maxOutlierSize: utils.computePercentile(inserts, MAX_OUTLIER_PERCENTILE)
@@ -245,6 +247,7 @@ class PileupCache {
 // Helper method for addRead.
 // Given 1-2 intervals, compute their span and insert (interval between them).
 // For one interval, these are both trivial.
+// TODO: what this calls an "insert" is not what most people mean by that.
 function spanAndInsert(intervals: ContigInterval<string>[]) {
   if (intervals.length == 1) {
     return {insert: null, span: intervals[0]};
