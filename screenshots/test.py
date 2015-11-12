@@ -53,3 +53,14 @@ class Pileup(Base):
     def wide(self, driver):
         pass
 
+
+class StructuralVariants(Base):
+    host = 'localhost:8080'
+    base_url = 'examples/structural-variants.html'
+    window_size = (1280, 768)
+
+    @url('')
+    @hide('#stats')
+    @waitforjs(PILEUP_RENDERED_JS)
+    def base(self, driver):
+        pass
