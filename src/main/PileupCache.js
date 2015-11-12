@@ -40,6 +40,7 @@ export type VisualGroup = {
 const MIN_OUTLIER_PERCENTILE = 0.5;
 const MAX_OUTLIER_PERCENTILE = 99.5;
 const MAX_INSERT_SIZE = 30000;  // ignore inserts larger than this in calculations
+const MIN_READS_FOR_OUTLIERS = 500;  // minimum reads for reliable stats
 
 export type InsertStats = {
   minOutlierSize: number;
@@ -234,9 +235,12 @@ class PileupCache {
     var inserts = _.map(this.groups,
                         g => g.alignments[0].read.getInferredInsertSize())
                    .filter(x => x < MAX_INSERT_SIZE);
-    const insertStats = {
+    const insertStats = inserts.length >= MIN_READS_FOR_OUTLIERS ? {
       minOutlierSize: utils.computePercentile(inserts, MIN_OUTLIER_PERCENTILE),
       maxOutlierSize: utils.computePercentile(inserts, MAX_OUTLIER_PERCENTILE)
+    } : {
+      minOutlierSize: 0,
+      maxOutlierSize: Infinity
     };
 
     this._insertStats = insertStats;
