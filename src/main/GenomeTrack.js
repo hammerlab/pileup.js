@@ -84,6 +84,7 @@ class GenomeTrack extends React.Component {
 
         ctx.save();
         ctx.pushObject({pos, letter});
+        if (!letter) continue
         ctx.fillStyle = style.BASE_COLORS[letter];
         if (showText) {
           // We only push objects in the text case as it involves creating a
