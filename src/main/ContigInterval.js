@@ -88,7 +88,7 @@ class ContigInterval<T: (number|string)> {
   }
 
   toGenomeRange(): GenomeRange {
-    if (!(this.contig instanceof String)) {
+    if (!(typeof this.contig === 'string' || this.contig instanceof String)) {
       throw 'Cannot convert numeric ContigInterval to GenomeRange';
     }
     return {

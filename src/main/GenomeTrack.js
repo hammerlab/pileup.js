@@ -106,7 +106,9 @@ class GenomeTrack extends React.Component {
   updateVisualization() {
     var canvas = ReactDOM.findDOMNode(this),
         {width, height, range} = this.props,
-        interval = ContigInterval.fromGenomeRange(this.props.range);
+    // The +/-1 ensures that partially-visible bases on the edge are rendered.
+    interval = new ContigInterval(range.contig, range.start - 1, range.stop + 1);
+    console.log(interval.toString());
 
     // Hold off until height & width are known.
     if (width === 0) return;
@@ -116,7 +118,7 @@ class GenomeTrack extends React.Component {
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     renderGenome(ctx, this.getScale(), interval,
-                 this.props.source.getRangeAsString(range));
+                 this.props.source.getRangeAsString(interval.toGenomeRange()));
 
   }
 }
