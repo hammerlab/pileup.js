@@ -31,7 +31,7 @@ var ContigInterval = require('./ContigInterval'),
 // additional network requests.
 var BASE_PAIRS_PER_FETCH = 10000;
 
-var MAX_BASE_PAIRS_TO_FETCH = 200000;
+var MAX_BASE_PAIRS_TO_FETCH = 100000;
 
 
 // Flow type for export.
@@ -76,14 +76,19 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
     console.log(`Fetching ${span} base pairs`);
     remoteSource.getFeaturesInRange(range.contig, range.start(), range.stop())
       .then(letters => {
+        if (!letters) return;
+        if (letters.length < range.length()) {
+          // Probably at EOF
+          range = new ContigInterval(range.contig,
+                                     range.start(),
+                                     range.start() + letters.length - 1);
+        }
         store.setRange(range, letters);
         coveredRanges.push(range);
         coveredRanges = ContigInterval.coalesce(coveredRanges);
-      })
-      .then(() => {
+      }).then(() => {
         o.trigger('newdata', range);
-      })
-      .done();
+      }).done();
   }
 
   // This either adds or removes a 'chr' as needed.

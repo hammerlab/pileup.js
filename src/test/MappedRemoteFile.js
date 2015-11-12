@@ -7,7 +7,9 @@
  *
  * Recommended usage:
  * - In your test, use RecordedRemoteFile with the real remote file.
- *   At the end of the test, console.log remoteFile.getRequests() and copy it.
+ *   At the end of the test, add:
+ *      console.log(JSON.stringify(remoteFile.getRequests()))
+ *   and copy the output to the clipboard.
  * - Generate a mapped file using scripts/generate_mapped_file.py:
  *   pbpaste | ./scripts/generate_mapped_file.py http://path/to/url
  * - Replace RecordedRemoteFile in the test with MappedRemoteFile.
