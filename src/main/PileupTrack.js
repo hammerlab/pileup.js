@@ -60,7 +60,9 @@ class PileupTiledCanvas extends TiledCanvas {
   render(ctx: DataCanvasRenderingContext2D,
          scale: (x: number)=>number,
          range: ContigInterval<string>) {
-    var vGroups = this.cache.getGroupsOverlapping(range);
+    var relaxedRange =
+        new ContigInterval(range.contig, range.start() - 1, range.stop() + 1);
+    var vGroups = this.cache.getGroupsOverlapping(relaxedRange);
     var insertStats = this.options.colorByInsert ? this.cache.getInsertStats() : null;
     renderPileup(ctx, scale, range, insertStats, vGroups);
   }
