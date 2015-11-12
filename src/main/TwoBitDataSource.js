@@ -29,9 +29,9 @@ var ContigInterval = require('./ContigInterval'),
 // Requests for 2bit ranges are expanded to begin & end at multiples of this
 // constant. Doing this means that panning typically won't require
 // additional network requests.
-var BASE_PAIRS_PER_FETCH = 1000;
+var BASE_PAIRS_PER_FETCH = 10000;
 
-var MAX_BASE_PAIRS_TO_FETCH = 2000;
+var MAX_BASE_PAIRS_TO_FETCH = 200000;
 
 
 // Flow type for export.
