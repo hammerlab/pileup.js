@@ -9,7 +9,9 @@ var expect = require('chai').expect;
 var _ = require('underscore');
 
 var PileupCache = require('../main/PileupCache'),
-    ContigInterval = require('../main/ContigInterval');
+    ContigInterval = require('../main/ContigInterval'),
+    Bam = require('../main/bam'),
+    RemoteFile = require('../main/RemoteFile');
 
 var numAlignments = 1;
 class TestAlignment /* implements Alignment */ {
@@ -44,6 +46,7 @@ class TestAlignment /* implements Alignment */ {
   intersects(interval: ContigInterval<string>): boolean {
     return interval.intersects(this.getInterval());
   }
+  getInferredInsertSize(): number { return 0; }
 }
 
 var nameCounter = 1;
@@ -282,6 +285,20 @@ describe('PileupCache', function() {
 
     cache.sortReadsAt('chr1', 325);  // x
     expect(rows()).to.deep.equal([2, 1, 0]);
+  });
+
+  it('should compute statistics on a BAM file', function() {
+    this.timeout(5000);
+    var bam = new Bam(
+        new RemoteFile('/test-data/synth4.tumor.1.4930000-4950000.bam'),
+        new RemoteFile('/test-data/synth4.tumor.1.4930000-4950000.bam.bai'));
+    return bam.getAlignmentsInRange(ci('chr1', 4930382, 4946898)).then(reads => {
+      expect(reads).to.have.length.above(1000);
+      var cache = makeCache(reads, true /* viewAsPairs */);
+      var stats = cache.getInsertStats();
+      expect(stats.minOutlierSize).to.be.within(1, 100);
+      expect(stats.maxOutlierSize).to.be.within(500, 600);
+    });
   });
 
   // TODO:

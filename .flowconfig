@@ -8,7 +8,6 @@
 .*node_modules/browserify.*
 .*node_modules/istanbul.*
 .*node_modules/watchify.*
-.*node_modules/sniper.*
 .*node_modules/jstransform.*
 .*node_modules/coveralls.*
 .*node_modules/http-server.*

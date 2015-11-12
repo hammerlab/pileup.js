@@ -101,6 +101,10 @@ class SamRead /* implements Alignment */ {
     return this._getJDataView().getUint16(14);
   }
 
+  getInferredInsertSize(): number {
+    return this._getJDataView().getUint16(28);
+  }
+
   getStrand(): Strand {
     return strandFlagToString(this.getFlag() & bamTypes.Flags.READ_STRAND);
   }

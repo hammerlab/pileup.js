@@ -7,7 +7,7 @@
 import type {Strand, Alignment, AlignmentDataSource} from './Alignment';
 import type {TwoBitSource} from './TwoBitDataSource';
 import type {BasePair} from './pileuputils';
-import type {VisualAlignment, VisualGroup} from './PileupCache';
+import type {VisualAlignment, VisualGroup, InsertStats} from './PileupCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type * as Interval from './Interval';
 import type {VizProps} from './VisualizationWrapper';
@@ -31,19 +31,25 @@ var scale = require('./scale'),
 var READ_HEIGHT = 13;
 var READ_SPACING = 2;  // vertical pixels between reads
 
-var READ_STRAND_ARROW_WIDTH = 6;
+var READ_STRAND_ARROW_WIDTH = 5;
 
 // PhantomJS does not support setLineDash.
 // Node doesn't even know about the symbol.
 var SUPPORTS_DASHES = typeof(CanvasRenderingContext2D) !== 'undefined' &&
                       !!CanvasRenderingContext2D.prototype.setLineDash;
 
-class PileupTileCache extends TiledCanvas {
+class PileupTiledCanvas extends TiledCanvas {
   cache: PileupCache;
+  options: Object;
 
-  constructor(cache: PileupCache) {
+  constructor(cache: PileupCache, options: Object) {
     super();
     this.cache = cache;
+    this.options = options;
+  }
+
+  update(newOptions: Object) {
+    this.options = newOptions;
   }
 
   heightForRef(ref: string): number {
@@ -55,7 +61,8 @@ class PileupTileCache extends TiledCanvas {
          scale: (x: number)=>number,
          range: ContigInterval<string>) {
     var vGroups = this.cache.getGroupsOverlapping(range);
-    renderPileup(ctx, scale, range, vGroups);
+    var insertStats = this.options.colorByInsert ? this.cache.getInsertStats() : null;
+    renderPileup(ctx, scale, range, insertStats, vGroups);
   }
 }
 
@@ -71,6 +78,7 @@ function isRendered(op) {
 function renderPileup(ctx: DataCanvasRenderingContext2D,
                       scale: (num: number) => number,
                       range: ContigInterval<string>,
+                      insertStats: ?InsertStats,
                       vGroups: VisualGroup[]) {
   // Should mismatched base pairs be shown as blocks of color or as letters?
   var pxPerLetter = scale(1) - scale(0),
@@ -80,26 +88,29 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
   function drawArrow(pos: number, refLength: number, top: number, direction: 'L' | 'R') {
     var left = scale(pos + 1),
         right = scale(pos + refLength + 1),
-        bottom = top + READ_HEIGHT;
+        bottom = top + READ_HEIGHT,
+        // Arrowheads become a distraction as you zoom out and the reads get
+        // shorter. They should never be more than 1/6 the read length.
+        arrowSize = Math.min(READ_STRAND_ARROW_WIDTH, (right - left) / 6);
 
     ctx.beginPath();
     if (direction == 'R') {
       ctx.moveTo(left, top);
-      ctx.lineTo(right - READ_STRAND_ARROW_WIDTH, top);
+      ctx.lineTo(right - arrowSize, top);
       ctx.lineTo(right, (top + bottom) / 2);
-      ctx.lineTo(right - READ_STRAND_ARROW_WIDTH, bottom);
+      ctx.lineTo(right - arrowSize, bottom);
       ctx.lineTo(left, bottom);
     } else {
       ctx.moveTo(right, top);
-      ctx.lineTo(left + READ_STRAND_ARROW_WIDTH, top);
+      ctx.lineTo(left + arrowSize, top);
       ctx.lineTo(left, (top + bottom) / 2);
-      ctx.lineTo(left + READ_STRAND_ARROW_WIDTH, bottom);
+      ctx.lineTo(left + arrowSize, bottom);
       ctx.lineTo(right, bottom);
     }
     ctx.fill();
   }
 
-  function drawSegment(op, y) {
+  function drawSegment(op, y, vRead) {
     switch (op.op) {
       case CigarOp.MATCH:
         if (op.arrow) {
@@ -136,7 +147,7 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
     ctx.pushObject(vRead);
     vRead.ops.forEach(op => {
       if (isRendered(op)) {
-        drawSegment(op, y);
+        drawSegment(op, y, vRead);
       }
     });
     vRead.mismatches.forEach(bp => renderMismatch(bp, y));
@@ -144,6 +155,19 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
   }
 
   function drawGroup(vGroup: VisualGroup) {
+    ctx.save();
+    if (insertStats && vGroup.insert) {
+      var len = vGroup.span.length();
+      if (len < insertStats.minOutlierSize) {
+        ctx.fillStyle = 'blue';
+      } else if (len > insertStats.maxOutlierSize) {
+        ctx.fillStyle = 'red';
+      } else {
+        ctx.fillStyle = style.ALIGNMENT_COLOR;
+      }
+    } else {
+      ctx.fillStyle = style.ALIGNMENT_COLOR;
+    }
     var y = yForRow(vGroup.row);
     ctx.pushObject(vGroup);
     vGroup.alignments.forEach(vRead => drawAlignment(vRead, y));
@@ -154,6 +178,7 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
       ctx.fillRect(x1, y + READ_HEIGHT / 2 - 0.5, x2 - x1, 1);
     }
     ctx.popObject();
+    ctx.restore();
   }
 
   function renderMismatch(bp: BasePair, y: number) {
@@ -175,7 +200,6 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
     ctx.popObject();
   }
 
-  ctx.fillStyle = style.ALIGNMENT_COLOR;
   ctx.font = style.TIGHT_TEXT_STYLE;
   vGroups.forEach(vGroup => drawGroup(vGroup));
 }
@@ -210,7 +234,7 @@ class PileupTrack extends React.Component {
   props: VizProps & { source: AlignmentDataSource };
   state: State;
   cache: PileupCache;
-  tiles: TiledCanvas;
+  tiles: PileupTiledCanvas;
   static defaultOptions: { viewAsPairs: boolean };
   static getOptionsMenu: (options: Object) => any;
   static handleSelectOption: (key: string, oldOptions: Object) => Object;
@@ -266,7 +290,7 @@ class PileupTrack extends React.Component {
 
   componentDidMount() {
     this.cache = new PileupCache(this.props.referenceSource, this.props.options.viewAsPairs);
-    this.tiles = new PileupTileCache(this.cache);
+    this.tiles = new PileupTiledCanvas(this.cache, this.props.options);
 
     this.props.source.on('newdata', range => {
       this.updateReads(range);
@@ -313,8 +337,12 @@ class PileupTrack extends React.Component {
 
     if (oldOpts.viewAsPairs != this.props.options.viewAsPairs) {
       this.cache = new PileupCache(this.props.referenceSource, this.props.options.viewAsPairs);
-      this.tiles = new PileupTileCache(this.cache);
+      this.tiles = new PileupTiledCanvas(this.cache, this.props.options);
       this.updateReads(ContigInterval.fromGenomeRange(this.props.range));
+    } else if (oldOpts.colorByInsert != this.props.options.colorByInsert) {
+      this.tiles.update(this.props.options);
+      this.tiles.invalidateAll();
+      this.updateVisualization();
     }
 
     if (oldOpts.sort != this.props.options.sort) {
@@ -413,7 +441,7 @@ class PileupTrack extends React.Component {
         // closer to the click coordinate, rather than the whole visible range.
         vGroups = this.cache.getGroupsOverlapping(range);
 
-    renderPileup(trackingCtx, scale, range, vGroups);
+    renderPileup(trackingCtx, scale, range, null, vGroups);
     var vRead = _.find(trackingCtx.hits[0], hit => hit.read);
     var alert = window.alert || console.log;
     if (vRead) {
@@ -424,12 +452,15 @@ class PileupTrack extends React.Component {
 
 PileupTrack.displayName = 'pileup';
 PileupTrack.defaultOptions = {
-  viewAsPairs: false
+  viewAsPairs: false,
+  colorByInsert: true
 };
 
 PileupTrack.getOptionsMenu = function(options: Object): any {
   return [
     {key: 'view-pairs', label: 'View as pairs', checked: options.viewAsPairs},
+    '-',
+    {key: 'color-insert', label: 'Color by insert size', checked: options.colorByInsert},
     '-',
     {key: 'sort', label: 'Sort alignments'}
   ];
@@ -441,6 +472,9 @@ PileupTrack.handleSelectOption = function(key: string, oldOptions: Object): Obje
   var opts = _.clone(oldOptions);
   if (key == 'view-pairs') {
     opts.viewAsPairs = !opts.viewAsPairs;
+    return opts;
+  } else if (key == 'color-insert') {
+    opts.colorByInsert = !opts.colorByInsert;
     return opts;
   } else if (key == 'sort') {
     opts.sort = (messageId++);

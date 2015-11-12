@@ -219,4 +219,19 @@ describe('utils', function() {
     expect(utils.flatMap([[1,2], [2,3]], a => a)).to.deep.equal([1, 2, 2, 3]);
     expect(utils.flatMap([[1,2], [2,3]], a => [a])).to.deep.equal([[1, 2], [2, 3]]);
   });
+
+  it('should compute percentiles', function() {
+    //            75  50   25
+    var xs = [7, 6, 5, 4, 3, 2, 1];
+    expect(utils.computePercentile(xs, 50)).to.equal(4);  // median
+    expect(utils.computePercentile(xs, 25)).to.equal(2.5);
+    expect(utils.computePercentile(xs, 75)).to.equal(5.5);
+
+    // javascript sorting is lexicographic by default.
+    expect(utils.computePercentile([9, 55, 456, 3210], 100)).to.equal(3210);
+
+    // pathological cases
+    expect(utils.computePercentile([1], 99)).to.equal(1);
+    expect(utils.computePercentile([], 99)).to.equal(0);
+  });
 });

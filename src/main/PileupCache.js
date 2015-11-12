@@ -36,6 +36,17 @@ export type VisualGroup = {
   alignments: VisualAlignment[];
 };
 
+// Insert sizes within this percentile range will be considered "normal".
+const MIN_OUTLIER_PERCENTILE = 0.5;
+const MAX_OUTLIER_PERCENTILE = 99.5;
+const MAX_INSERT_SIZE = 30000;  // ignore inserts larger than this in calculations
+const MIN_READS_FOR_OUTLIERS = 500;  // minimum reads for reliable stats
+
+export type InsertStats = {
+  minOutlierSize: number;
+  maxOutlierSize: number;
+};
+
 // This class provides data management for the visualization, grouping paired
 // reads and managing the pileup.
 class PileupCache {
@@ -44,12 +55,14 @@ class PileupCache {
   refToPileup: {[key: string]: Array<Interval[]>};
   referenceSource: TwoBitSource;
   viewAsPairs: boolean;
+  _insertStats: ?InsertStats;
 
   constructor(referenceSource: TwoBitSource, viewAsPairs: boolean) {
     this.groups = {};
     this.refToPileup = {};
     this.referenceSource = referenceSource;
     this.viewAsPairs = viewAsPairs;
+    this._insertStats = null;
   }
 
   // read name would make a good key, but paired reads from different contigs
@@ -65,6 +78,7 @@ class PileupCache {
   // Load a new read into the visualization cache.
   // Calling this multiple times with the same read is a no-op.
   addAlignment(read: Alignment) {
+    this._insertStats = null;  // invalidate
     var key = this.groupKey(read),
         range = read.getInterval();
 
@@ -215,11 +229,29 @@ class PileupCache {
       }
     });
   }
+
+  getInsertStats(): InsertStats {
+    if (this._insertStats) return this._insertStats;
+    var inserts = _.map(this.groups,
+                        g => g.alignments[0].read.getInferredInsertSize())
+                   .filter(x => x < MAX_INSERT_SIZE);
+    const insertStats = inserts.length >= MIN_READS_FOR_OUTLIERS ? {
+      minOutlierSize: utils.computePercentile(inserts, MIN_OUTLIER_PERCENTILE),
+      maxOutlierSize: utils.computePercentile(inserts, MAX_OUTLIER_PERCENTILE)
+    } : {
+      minOutlierSize: 0,
+      maxOutlierSize: Infinity
+    };
+
+    this._insertStats = insertStats;
+    return insertStats;
+  }
 }
 
 // Helper method for addRead.
 // Given 1-2 intervals, compute their span and insert (interval between them).
 // For one interval, these are both trivial.
+// TODO: what this calls an "insert" is not what most people mean by that.
 function spanAndInsert(intervals: ContigInterval<string>[]) {
   if (intervals.length == 1) {
     return {insert: null, span: intervals[0]};
