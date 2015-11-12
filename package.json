@@ -11,8 +11,7 @@
     "genomics",
     "sequencing",
     "reads",
-    "interactive",
-    "biojs"
+    "interactive"
   ],
   "main": "dist/main/pileup.js",
   "browser": "dist/main/pileup.js",

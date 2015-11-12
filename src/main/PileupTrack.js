@@ -89,6 +89,8 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
     var left = scale(pos + 1),
         right = scale(pos + refLength + 1),
         bottom = top + READ_HEIGHT,
+        // Arrowheads become a distraction as you zoom out and the reads get
+        // shorter. They should never be more than 1/6 the read length.
         arrowSize = Math.min(READ_STRAND_ARROW_WIDTH, (right - left) / 6);
 
     ctx.beginPath();
