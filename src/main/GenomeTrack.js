@@ -17,6 +17,7 @@ var canvasUtils = require('./canvas-utils'),
     dataCanvas = require('data-canvas'),
     d3utils = require('./d3utils'),
     DisplayMode = require('./DisplayMode'),
+    TiledCanvas = require('./TiledCanvas'),
     style = require('./style');
 
 
@@ -75,17 +76,55 @@ function renderGenome(ctx: DataCanvasRenderingContext2D,
 }
 
 
+class GenomeTiledCanvas extends TiledCanvas {
+  source: TwoBitSource;
+  height: number;
+
+  constructor(source: TwoBitSource, height: number) {
+    super();
+    this.source = source;
+    // workaround for an issue in PhantomJS where height always comes out to zero.
+    this.height = Math.max(1, height);
+  }
+
+  render(ctx: DataCanvasRenderingContext2D,
+         scale: (x: number)=>number,
+         range: ContigInterval<string>) {
+    // The +/-1 ensures that partially-visible bases on the edge are rendered.
+    var genomeRange = {
+      contig: range.contig,
+      start: range.start() - 1,
+      stop: range.stop() + 1
+    };
+    var basePairs = this.source.getRangeAsString(genomeRange);
+    renderGenome(ctx, scale, ContigInterval.fromGenomeRange(genomeRange), basePairs);
+  }
+
+  heightForRef(ref: string): number {
+    return this.height;
+  }
+
+  updateHeight(height: number) {
+    this.height = height;
+  }
+}
+
+
 class GenomeTrack extends React.Component {
   props: VizProps & {source: TwoBitSource};
   state: void;  // no state
+  tiles: GenomeTiledCanvas;
 
   render(): any {
     return <canvas />;
   }
 
   componentDidMount() {
+    this.tiles = new GenomeTiledCanvas(this.props.source, this.props.height);
+
     // Visualize new reference data as it comes in from the network.
     this.props.source.on('newdata', () => {
+      this.tiles.invalidateAll();
       this.updateVisualization();
     });
 
@@ -99,16 +138,17 @@ class GenomeTrack extends React.Component {
   componentDidUpdate(prevProps: any, prevState: any) {
     if (!shallowEquals(prevProps, this.props) ||
         !shallowEquals(prevState, this.state)) {
+      if (this.props.height != prevProps.height) {
+        this.tiles.updateHeight(this.props.height);
+        this.tiles.invalidateAll();
+      }
       this.updateVisualization();
     }
   }
 
   updateVisualization() {
     var canvas = ReactDOM.findDOMNode(this),
-        {width, height, range} = this.props,
-    // The +/-1 ensures that partially-visible bases on the edge are rendered.
-    interval = new ContigInterval(range.contig, range.start - 1, range.stop + 1);
-    console.log(interval.toString());
+        {width, height, range} = this.props;
 
     // Hold off until height & width are known.
     if (width === 0) return;
@@ -117,9 +157,7 @@ class GenomeTrack extends React.Component {
     var ctx = dataCanvas.getDataContext(canvasUtils.getContext(canvas));
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    renderGenome(ctx, this.getScale(), interval,
-                 this.props.source.getRangeAsString(interval.toGenomeRange()));
-
+    this.tiles.renderToScreen(ctx, ContigInterval.fromGenomeRange(range), this.getScale());
   }
 }
 
