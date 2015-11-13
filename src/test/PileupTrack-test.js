@@ -36,7 +36,7 @@ class FakeTwoBit extends TwoBit {
   getFeaturesInRange(contig: string, start: number, stop: number): Q.Promise<string> {
     expect(contig).to.equal('chr17');
     expect(start).to.equal(7500000);
-    expect(stop).to.equal(7501000);
+    expect(stop).to.equal(7510000);
     return this.deferred.promise;
   }
 
@@ -82,8 +82,9 @@ describe('PileupTrack', function() {
   });
 
   // Test data files
-  var twoBitFile = new MappedRemoteFile('/test-data/hg19.chr17.7500000-7501000.2bit.mapped',
-                            [[0, 16383], [691179834, 691183928], [694008946, 694009197]]),
+  var twoBitFile = new MappedRemoteFile(
+          '/test-data/hg19.2bit.mapped',
+          [[0, 16383], [691179834, 691183928], [694008946, 694011447]]),
       bamFile = new RemoteFile('/test-data/synth3.normal.17.7500000-7515000.bam'),
       bamIndexFile = new RemoteFile('/test-data/synth3.normal.17.7500000-7515000.bam.bai');
 
@@ -94,7 +95,7 @@ describe('PileupTrack', function() {
   before(function() {
     var twoBit = new TwoBit(twoBitFile),
         bam = new Bam(bamFile, bamIndexFile);
-    return twoBit.getFeaturesInRange('chr17', 7500000, 7501000).then(seq => {
+    return twoBit.getFeaturesInRange('chr17', 7500000, 7510000).then(seq => {
       reference = seq;
       return bam.getAlignmentsInRange(new ContigInterval('chr17', 7500734, 7500795));
     }).then(result => {

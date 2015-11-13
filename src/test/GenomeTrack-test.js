@@ -34,8 +34,9 @@ describe('GenomeTrack', function() {
     testDiv.style.width = '';
   });
 
-  var twoBitFile = new MappedRemoteFile('/test-data/hg19.chr17.7500000-7501000.2bit.mapped',
-                            [[0, 16383], [691179834, 691183928], [694008946, 694009197]]),
+  var twoBitFile = new MappedRemoteFile(
+          '/test-data/hg19.2bit.mapped',
+          [[0, 16383], [691179834, 691183928], [694008946, 694011447]]),
       referenceSource = TwoBitDataSource.createFromTwoBitFile(new TwoBit(twoBitFile));
 
   var {drawnObjects} = dataCanvas.RecordingContext;

@@ -17,26 +17,27 @@
 
 var Events = require('backbone').Events,
     Q = require('q'),
-    _ = require('underscore'),
+    _ = require('underscore');
+
+var ContigInterval = require('./ContigInterval'),
     TwoBit = require('./TwoBit'),
     RemoteFile = require('./RemoteFile'),
+    SequenceStore = require('./SequenceStore'),
     utils = require('./utils');
-
-var ContigInterval = require('./ContigInterval');
 
 
 // Requests for 2bit ranges are expanded to begin & end at multiples of this
 // constant. Doing this means that panning typically won't require
 // additional network requests.
-var BASE_PAIRS_PER_FETCH = 1000;
+var BASE_PAIRS_PER_FETCH = 10000;
 
-var MAX_BASE_PAIRS_TO_FETCH = 2000;
+var MAX_BASE_PAIRS_TO_FETCH = 100000;
 
 
 // Flow type for export.
 export type TwoBitSource = {
   rangeChanged: (newRange: GenomeRange) => void;
-  getRange: (range: GenomeRange) => {[key:string]: string};
+  getRange: (range: GenomeRange) => {[key:string]: ?string};
   getRangeAsString: (range: GenomeRange) => string;
   contigList: () => string[];
   normalizeRange: (range: GenomeRange) => Q.Promise<GenomeRange>;
@@ -59,18 +60,10 @@ function expandRange(range) {
 var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
   // Local cache of genomic data.
   var contigList = [];
-  var basePairs = {};  // contig -> locus -> letter
+  var store = new SequenceStore();
 
   // Ranges for which we have complete information -- no need to hit network.
   var coveredRanges: ContigInterval<string>[] = [];
-
-  function getBasePair(contig: string, position: number) {
-    return (basePairs[contig] && basePairs[contig][position]) || null;
-  }
-  function setBasePair(contig: string, position: number, letter: string) {
-    if (!basePairs[contig]) basePairs[contig] = {};
-    basePairs[contig][position] = letter;
-  }
 
   function fetch(range: ContigInterval) {
     var span = range.stop() - range.start();
@@ -83,16 +76,19 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
     console.log(`Fetching ${span} base pairs`);
     remoteSource.getFeaturesInRange(range.contig, range.start(), range.stop())
       .then(letters => {
-        for (var i = 0; i < letters.length; i++) {
-          setBasePair(range.contig, range.start() + i, letters[i]);
+        if (!letters) return;
+        if (letters.length < range.length()) {
+          // Probably at EOF
+          range = new ContigInterval(range.contig,
+                                     range.start(),
+                                     range.start() + letters.length - 1);
         }
+        store.setRange(range, letters);
         coveredRanges.push(range);
         coveredRanges = ContigInterval.coalesce(coveredRanges);
-      })
-      .then(() => {
+      }).then(() => {
         o.trigger('newdata', range);
-      })
-      .done();
+      }).done();
   }
 
   // This either adds or removes a 'chr' as needed.
@@ -116,25 +112,14 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
   }
 
   // Returns a {"chr12:123" -> "[ATCG]"} mapping for the range.
-  function getRange(inputRange: GenomeRange) {
-    var range = normalizeRangeSync(inputRange);
-    var span = range.stop - range.start;
-    if (span > MAX_BASE_PAIRS_TO_FETCH) {
-      return {};
-    }
-    return _.chain(_.range(range.start, range.stop + 1))
-        .map(x => [inputRange.contig + ':' + x, getBasePair(range.contig, x)])
-        .object()
-        .value();
+  function getRange(range: GenomeRange) {
+    return store.getAsObjects(ContigInterval.fromGenomeRange(range));
   }
 
   // Returns a string of base pairs for this range.
-  function getRangeAsString(inputRange: GenomeRange): string {
-    if (!inputRange) return '';
-    var range = normalizeRangeSync(inputRange);
-    return _.range(range.start, range.stop + 1)
-        .map(x => getBasePair(range.contig, x) || '.')
-        .join('');
+  function getRangeAsString(range: GenomeRange): string {
+    if (!range) return '';
+    return store.getAsString(ContigInterval.fromGenomeRange(range));
   }
 
   // Fetch the contig list immediately.
