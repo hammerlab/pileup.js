@@ -64,7 +64,7 @@ class PileupTiledCanvas extends TiledCanvas {
         new ContigInterval(range.contig, range.start() - 1, range.stop() + 1);
     var vGroups = this.cache.getGroupsOverlapping(relaxedRange);
     var insertStats = this.options.colorByInsert ? this.cache.getInsertStats() : null;
-    renderPileup(ctx, scale, range, insertStats, vGroups);
+    renderPileup(ctx, scale, relaxedRange, insertStats, vGroups);
   }
 }
 
