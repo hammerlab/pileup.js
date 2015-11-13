@@ -23,12 +23,12 @@ var canvasUtils = require('./canvas-utils'),
 
 function renderGenome(ctx: DataCanvasRenderingContext2D,
                       scale: (num: number) => number,
+                      height: number,
                       range: ContigInterval<string>,
                       basePairs: string) {
   var pxPerLetter = scale(1) - scale(0);
   var mode = DisplayMode.getDisplayMode(pxPerLetter);
   var showText = DisplayMode.isText(mode);
-  var height = ctx.canvas.height;
 
   if (mode != DisplayMode.HIDDEN) {
     ctx.textAlign = 'center';
@@ -97,7 +97,7 @@ class GenomeTiledCanvas extends TiledCanvas {
       stop: range.stop() + 1
     };
     var basePairs = this.source.getRangeAsString(genomeRange);
-    renderGenome(ctx, scale, ContigInterval.fromGenomeRange(genomeRange), basePairs);
+    renderGenome(ctx, scale, this.height, ContigInterval.fromGenomeRange(genomeRange), basePairs);
   }
 
   heightForRef(ref: string): number {

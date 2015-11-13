@@ -13,7 +13,8 @@ var scale = require('./scale'),
     Interval = require('./Interval'),
     canvasUtils = require('./canvas-utils'),
     dataCanvas = require('data-canvas'),
-    utils = require('./utils');
+    utils = require('./utils'),
+    d3utils = require('./d3utils');
 
 type Tile = {
   pixelsPerBase: number;
@@ -34,13 +35,12 @@ class TiledCanvas {
   }
 
   renderTile(tile: Tile) {
-    var range = tile.range;
-    var height = this.heightForRef(range.contig),
+    var range = tile.range,
+        height = this.heightForRef(range.contig),
         width = Math.round(tile.pixelsPerBase * range.length());
     // TODO: does it make sense to re-use canvases?
     tile.buffer = document.createElement('canvas');
-    tile.buffer.width = width;
-    tile.buffer.height = height;
+    d3utils.sizeCanvas(tile.buffer, width, height);
 
     // The far right edge of the tile is the start of the _next_ range's base
     // pair, not the start of the last one in this tile.
@@ -76,6 +76,7 @@ class TiledCanvas {
                  scale: (num: number) => number) {
     var pixelsPerBase = scale(1) - scale(0);
     var tilesAtRes = this.tileCache.filter(tile => Math.abs(tile.pixelsPerBase - pixelsPerBase) < EPSILON && range.chrOnContig(tile.range.contig));
+    var height = this.heightForRef(range.contig);
 
     var existingIntervals = tilesAtRes.map(tile => tile.range.interval);
     if (!range.interval.isCoveredBy(existingIntervals)) {
@@ -87,15 +88,14 @@ class TiledCanvas {
     tiles.forEach(tile => {
       var left = Math.round(scale(tile.range.start())),
           nextLeft = Math.round(scale(tile.range.stop() + 1)),
-          width = nextLeft - left,
-          height = tile.buffer.height;
+          width = nextLeft - left;
       // Drawing a 0px tall canvas throws in Firefox and PhantomJS.
-      if (height === 0) return;
+      if (tile.buffer.height === 0) return;
       // We can't just throw the images on the screen without scaling due to
       // rounding issues, which can result in 1px gaps or overdrawing.
       // We always have:
       //   width - tile.buffer.width \in {-1, 0, +1}
-      ctx.drawImage(tile.buffer, left, 0 , width, height);
+      ctx.drawImage(tile.buffer, 0, 0, tile.buffer.width, tile.buffer.height, left, 0, width, height);
 
       if (DEBUG_RENDER_TILE_EDGES) {
         ctx.save();
