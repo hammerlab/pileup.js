@@ -5,6 +5,9 @@ Interactive in-browser track viewer. [**Try a demo**][demo]!
 
 ![pileup.js screenshot](./pileup-screenshot.png)
 
+Showing a structural variant (large deletion):
+![pileup.js showing a large deletion](./pileup-large-deletion.png)
+
 ## Usage
 
 To use pileup.js in a project, install it via NPM:
