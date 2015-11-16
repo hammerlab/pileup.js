@@ -123,8 +123,8 @@ class GenomeTrack extends React.Component {
     this.tiles = new GenomeTiledCanvas(this.props.source, this.props.height);
 
     // Visualize new reference data as it comes in from the network.
-    this.props.source.on('newdata', () => {
-      this.tiles.invalidateAll();
+    this.props.source.on('newdata', range => {
+      this.tiles.invalidateRange(range);
       this.updateVisualization();
     });
 

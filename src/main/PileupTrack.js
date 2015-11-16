@@ -296,14 +296,12 @@ class PileupTrack extends React.Component {
 
     this.props.source.on('newdata', range => {
       this.updateReads(range);
-      // TODO: only invalidate tiles in the range
-      this.tiles.invalidateAll();
+      this.tiles.invalidateRange(range);
       this.updateVisualization();
     });
     this.props.referenceSource.on('newdata', range => {
       this.cache.updateMismatches(range);
-      // TODO: only invalidate tiles in the range
-      this.tiles.invalidateAll();
+      this.tiles.invalidateRange(range);
       this.updateVisualization();
     });
     this.props.source.on('networkprogress', e => {

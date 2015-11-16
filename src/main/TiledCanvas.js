@@ -111,6 +111,10 @@ class TiledCanvas {
     this.tileCache = [];
   }
 
+  invalidateRange(range: ContigInterval) {
+    this.tileCache = this.tileCache.filter(tile => !tile.range.chrIntersects(range));
+  }
+
   heightForRef(ref: string): number {
     throw 'Not implemented';
   }
