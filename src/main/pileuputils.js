@@ -131,7 +131,7 @@ type Op = {
   arrow: ?('L'|'R');
 }
 
-type OpInfo = {
+export type OpInfo = {
   ops: Op[],
   mismatches: BasePair[]
 }

@@ -63,7 +63,7 @@ describe('CoverageTrack', function() {
   var {drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
 
   var findCoverageBins = () => {
-    return drawnObjectsWith(testDiv, '.coverage', b => b.position && b.mismatches);
+    return drawnObjectsWith(testDiv, '.coverage', b => b.count);
   };
 
   var findMismatchBins = ():Array<any> => {
@@ -94,9 +94,10 @@ describe('CoverageTrack', function() {
       var visibleMismatches = findMismatchBins()
           .filter(bin => bin.position >= range.start && bin.position <= range.stop);
       expect(visibleMismatches).to.deep.equal(
-        [{position: 7500765, count: 22, base: 'T'},
-         {position: 7500765, count: 22, base: 'C'}]);
-      // TODO: IGV shows counts of 20 and 20 at this locus. Whither the two bases?
+        [{position: 7500765, count: 23, base: 'C'},
+         {position: 7500765, count: 22, base: 'T'}]);
+      // TODO: IGV shows counts of 20 and 20 at this locus. Whither the five reads?
+      // `samtools view` reports the full 45 reads at 17:7500765
     });
   });
 
