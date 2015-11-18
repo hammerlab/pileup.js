@@ -43,6 +43,9 @@
 .track-content > div {
   position: absolute; /* Gets the child of the flex-item to fill height 100% */
 }
+.track-content canvas {
+  display: block;
+}
 
 /* controls */
 .pileup-root > .controls {
