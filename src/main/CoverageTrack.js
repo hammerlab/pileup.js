@@ -8,6 +8,7 @@ import type {Alignment, AlignmentDataSource} from './Alignment';
 import type * as Interval from './Interval';
 import type {TwoBitSource} from './TwoBitDataSource';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
+import type {BinSummary} from './CoverageCache';
 
 var React = require('react'),
     scale = require('./scale'),
@@ -16,21 +17,10 @@ var React = require('react'),
     _ = require("underscore"),
     dataCanvas = require('data-canvas'),
     canvasUtils = require('./canvas-utils'),
-    {getOpInfo} = require('./pileuputils'),
+    CoverageCache = require('./CoverageCache'),
     TiledCanvas = require('./TiledCanvas'),
     style = require('./style'),
     ContigInterval = require('./ContigInterval');
-
-type BinSummary = {
-  count: number;
-  mismatches: {[key: string]: number};
-}
-
-type BinSummaryWithLocation = {
-  position: number;
-  count: number;
-  mismatches: {[key: string]: number};
-}
 
 // Basic setup (TODO: make this configurable by the user)
 const SHOW_MISMATCHES = true;
@@ -39,138 +29,86 @@ const SHOW_MISMATCHES = true;
 // reads supporting that mismatch.
 const MISMATCH_THRESHOLD = 1;
 
-/**
- * Extract summary statistics from the read data.
- */
-function extractSummaryStatistics(reads: Array<Alignment>,
-                                  contig: string,
-                                  referenceSource: TwoBitSource,
-                                  vafColorThreshold: number) {
-  var binCounts = ({}: {[key: number]: BinSummary});
-
-  // This is written in an imperative style (instead of with _.groupBy)
-  // as an optimization.
-  _.each(reads, read => {
-    var interval = read.getInterval();
-
-    var opInfo = getOpInfo(read, referenceSource);
-
-    var start = interval.start(),
-        stop = interval.stop();
-    for (var j = start; j <= stop; j++) {
-      if (!binCounts[j]) binCounts[j] = {count: 0, mismatches: {}};
-      binCounts[j].count += 1;
-    }
-
-    // Capture mismatches for future use
-    _.each(opInfo.mismatches, m => {
-      var binCount = binCounts[m.pos + 1];
-      if (binCount) {
-        var mismatches = binCount.mismatches;
-        mismatches[m.basePair] = 1 + (mismatches[m.basePair] || 0);
-      } else {
-        // do nothing, we don't info on this position yet
-      }
-    });
-  });
-  var maxCoverage = _.max(binCounts, bc => bc.count).count;
-
-  var posCounts = _.map(binCounts,
-                        (bc, position) => ({position: Number(position),
-                                            count: bc.count,
-                                            mismatches: bc.mismatches}));
-  var sortedPosCounts = _.sortBy(posCounts, bin => bin.position);
-
-  sortedPosCounts.forEach(({position, count, mismatches}) => {
-    if (_.isEmpty(mismatches)) return;
-
-    // If there's a high variant allele fraction at this locus, add the
-    // reference in as a "mismatch" as well. This makes the locus more visually
-    // distinct and gives a better indication of the proportion of base pairs.
-    var ref = referenceSource.getRangeAsString(
-        {contig, start: position - 1, stop: position - 1});
-    var mismatchCount = _.reduce(mismatches, (x, y) => x + y);
-    var mostFrequentMismatch = _.max(mismatches);
-    if (mostFrequentMismatch > MISMATCH_THRESHOLD &&
-        mismatchCount > vafColorThreshold * count) {
-      mismatches[ref] = count - mismatchCount;
-    }
-  });
-
-  return {binCounts: sortedPosCounts, maxCoverage};
-}
-
 
 class CoverageTiledCanvas extends TiledCanvas {
   height: number;
-  yScale: (count: number) => number;
-  binCounts: BinSummaryWithLocation[];
+  options: Object;
+  cache: CoverageCache;
 
-  constructor() {
+  constructor(cache: CoverageCache, height: number, options: Object) {
     super();
 
-    this.height = 0;
-    this.yScale = x => x;
-    this.binCounts = [];
+    this.cache = cache;
+    this.height = Math.max(1, height);
+    this.options = options;
   }
 
   heightForRef(ref: string): number {
     return this.height;
   }
 
-  update(height: number, yScale: (count: number) => number, binCounts: BinSummaryWithLocation[]) {
+  update(height: number, options: Object) {
     // workaround for an issue in PhantomJS where height always comes out to zero.
     this.height = Math.max(1, height);
-    this.yScale = yScale;
-    this.binCounts = binCounts;
+    this.options = options;
+  }
+
+  yScaleForRef(ref: string): (y: number) => number {
+    var maxCoverage = this.cache.maxCoverageForRef(ref);
+
+    var padding = 10;  // TODO: move into style
+    return scale.linear()
+      .domain([maxCoverage, 0])
+      .range([padding, this.height - padding])
+      .nice();
   }
 
   render(ctx: DataCanvasRenderingContext2D,
          xScale: (x: number)=>number,
          range: ContigInterval<string>) {
-    var bins = binsInRange(this.binCounts, range);
-    renderBars(ctx, xScale, this.yScale, bins);
+    var bins = this.cache.binsForRef(range.contig);
+    var yScale = this.yScaleForRef(range.contig);
+    var relaxedRange = new ContigInterval(
+        range.contig, range.start() - 1, range.stop() + 1);
+    renderBars(ctx, xScale, yScale, relaxedRange, bins, this.options);
   }
 }
 
-
-// TODO: what about matching contigs?
-function binsInRange(binCounts: BinSummaryWithLocation[],
-                     range: ContigInterval): BinSummaryWithLocation[] {
-  var start = range.start(),
-      stop = range.stop();
-  return binCounts.filter(
-      ({position}) => (position >= start - 1 && position <= stop + 1));
-}
 
 // Draw coverage bins & mismatches
 function renderBars(ctx: DataCanvasRenderingContext2D,
                     xScale: (num: number) => number,
                     yScale: (num: number) => number,
-                    bins: BinSummaryWithLocation[]) {
-  if (bins.length === 0) return;
+                    range: ContigInterval<string>,
+                    bins: {[key: number]: BinSummary},
+                    options: Object) {
+  if (_.isEmpty(bins)) return;
 
   var barWidth = xScale(1) - xScale(0);
   var showPadding = (barWidth > style.COVERAGE_MIN_BAR_WIDTH_FOR_GAP);
   var padding = showPadding ? 1 : 0;
 
-  var binPos = function(bin) {
+  var binPos = function(pos: number, count: number) {
     // Round to integer coordinates for crisp lines, without aliasing.
-    var barX1 = Math.round(xScale(bin.position)),
-        barX2 = Math.round(xScale(bin.position + 1)) - padding,
-        barY = Math.round(yScale(bin.count));
+    var barX1 = Math.round(xScale(1 + pos)),
+        barX2 = Math.round(xScale(2 + pos)) - padding,
+        barY = Math.round(yScale(count));
     return {barX1, barX2, barY};
   };
 
-  var mismatchBins = [];  // keep track of which ones have mismatches
+  var mismatchBins = ({} : {[key:number]: BinSummary});  // keep track of which ones have mismatches
   var vBasePosY = yScale(0);  // the very bottom of the canvas
+  var start = range.start(),
+      stop = range.stop();
+  let {barX1} = binPos(start, (start in bins) ? bins[start].count : 0);
   ctx.fillStyle = style.COVERAGE_BIN_COLOR;
   ctx.beginPath();
-  var {barX1} = binPos(bins[0]);
   ctx.moveTo(barX1, vBasePosY);
-  bins.forEach(bin => {
+  for (var pos = start; pos < stop; pos++) {
+    var bin = bins[pos];
+    if (!bin) continue;
     ctx.pushObject(bin);
-    var {barX1, barX2, barY} = binPos(bin);
+    let {barX1, barX2, barY} = binPos(pos, bin.count);
     ctx.lineTo(barX1, barY);
     ctx.lineTo(barX2, barY);
     if (showPadding) {
@@ -179,26 +117,42 @@ function renderBars(ctx: DataCanvasRenderingContext2D,
     }
 
     if (SHOW_MISMATCHES && !_.isEmpty(bin.mismatches)) {
-      mismatchBins.push(bin);
+      mismatchBins[pos] = bin;
     }
 
     ctx.popObject();
-  });
-  var {barX2} = binPos(bins[bins.length - 1]);
+  }
+  let {barX2} = binPos(stop, (stop in bins) ? bins[stop].count : 0);
   ctx.lineTo(barX2, vBasePosY);  // right edge of the right bar.
   ctx.closePath();
   ctx.fill();
 
-  mismatchBins.forEach(bin => {
-    var {barX1, barX2} = binPos(bin);
+  // Now render the mismatches
+  _.each(mismatchBins, (bin, pos) => {
+    if (!bin.mismatches) return;  // this is here for Flow; it can't really happen.
+    const mismatches = _.clone(bin.mismatches);
+    pos = Number(pos);  // object keys are strings, not numbers.
+
+    // If this is a high-frequency variant, add in the reference.
+    var mismatchCount = _.reduce(mismatches, (x, y) => x + y);
+    var mostFrequentMismatch = _.max(mismatches);
+    if (mostFrequentMismatch > MISMATCH_THRESHOLD &&
+        mismatchCount > options.vafColorThreshold * bin.count &&
+        mismatchCount < bin.count) {
+      if (bin.ref) {  // here for flow; can't realy happen
+        mismatches[bin.ref] = bin.count - mismatchCount;
+      }
+    }
+
+    let {barX1, barX2} = binPos(pos, bin.count);
     ctx.pushObject(bin);
     var countSoFar = 0;
-    _.chain(bin.mismatches)
+    _.chain(mismatches)
       .map((count, base) => ({count, base}))  // pull base into the object
       .filter(({count}) => count > MISMATCH_THRESHOLD)
       .sortBy(({count}) => -count)  // the most common mismatch at the bottom
       .each(({count, base}) => {
-        var misMatchObj = {position: bin.position, count, base};
+        var misMatchObj = {position: 1 + pos, count, base};
         ctx.pushObject(misMatchObj);  // for debugging and click-tracking
 
         ctx.fillStyle = style.BASE_COLORS[base];
@@ -226,25 +180,15 @@ type Props = {
   }
 };
 
-type State = {
-  reads: Alignment[];
-  binCounts: BinSummaryWithLocation[];
-  maxCoverage: number;
-};
-
 class CoverageTrack extends React.Component {
   props: Props;
-  state: State;
+  state: void;
+  cache: CoverageCache;
   tiles: CoverageTiledCanvas;
   static defaultOptions: Object;
 
   constructor(props: Props) {
     super(props);
-    this.state = {
-      reads: [],
-      binCounts: [],
-      maxCoverage: 0
-    };
   }
 
   render(): any {
@@ -256,39 +200,38 @@ class CoverageTrack extends React.Component {
   }
 
   componentDidMount() {
-    var updateState = () => {
-      var ci = new ContigInterval(this.props.range.contig, 0, Number.MAX_VALUE),
-          reads = this.props.source.getAlignmentsInRange(ci),
-          {binCounts, maxCoverage} = extractSummaryStatistics(
-              reads,
-              this.props.range.contig,
-              this.props.referenceSource,
-              this.props.options.vafColorThreshold);
+    this.cache = new CoverageCache(this.props.referenceSource);
+    this.tiles = new CoverageTiledCanvas(this.cache, this.props.height, this.props.options);
 
-      var padding = 10;  // TODO: move into style
-      var yScale = scale.linear()
-        .domain([maxCoverage, 0])
-        .range([padding, this.props.height - padding])
-        .nice();
+    this.props.source.on('newdata', range => {
+      var oldMax = this.cache.maxCoverageForRef(range.contig);
+      this.props.source.getAlignmentsInRange(range)
+                       .forEach(read => this.cache.addAlignment(read));
+      var newMax = this.cache.maxCoverageForRef(range.contig);
 
-      this.tiles.update(this.props.height, yScale, binCounts);
-      this.tiles.invalidateAll();
-      this.setState({
-        reads,
-        binCounts,
-        maxCoverage
-      });
-    };
+      if (oldMax != newMax) {
+        this.tiles.invalidateAll();
+      } else {
+        this.tiles.invalidateRange(range);
+      }
+      this.visualizeCoverage();
+    });
 
-    this.tiles = new CoverageTiledCanvas();
-    this.props.source.on('newdata', updateState);
-    this.props.referenceSource.on('newdata', updateState);
+    this.props.referenceSource.on('newdata', range => {
+      this.cache.updateMismatches(range);
+      this.tiles.invalidateRange(range);
+      this.visualizeCoverage();
+    });
   }
 
   componentDidUpdate(prevProps: any, prevState: any) {
     if (!shallowEquals(this.props, prevProps) ||
         !shallowEquals(this.state, prevState)) {
-      // TODO: check for a height change.
+      if (this.props.height != prevProps.height ||
+          this.props.options != prevProps.options) {
+        this.tiles.update(this.props.height, this.props.options);
+        this.tiles.invalidateAll();
+      }
       this.visualizeCoverage();
     }
   }
@@ -343,7 +286,7 @@ class CoverageTrack extends React.Component {
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    var yScale = this.tiles.yScale;
+    var yScale = this.tiles.yScaleForRef(range.contig);
 
     this.tiles.renderToScreen(ctx, range, this.getScale());
     this.renderTicks(ctx, yScale);
