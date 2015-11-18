@@ -15,6 +15,14 @@ describe('TwoBitDataSource', function() {
     return TwoBitDataSource.createFromTwoBitFile(tb);
   }
 
+  var origBasePairsToFetch;
+  beforeEach(function() {
+    origBasePairsToFetch = TwoBitDataSource.testBasePairsToFetch();
+  });
+  afterEach(function() {
+    TwoBitDataSource.testBasePairsToFetch(origBasePairsToFetch);
+  });
+
   it('should fetch contigs', function(done) {
     var source = getTestSource();
     source.on('contigs', contigs => {
@@ -134,5 +142,23 @@ describe('TwoBitDataSource', function() {
       done();
     });
     source.rangeChanged(chrRange);
+  });
+
+  it('should only report newly-fetched ranges', function(done) {
+    TwoBitDataSource.testBasePairsToFetch(10);
+    var initRange = {contig: 'chr22', start: 5, stop: 8},
+        secondRange = {contig: 'chr22', start: 8, stop: 15};
+    var source = getTestSource();
+    source.once('newdata', newRange => {
+      expect(newRange.toString()).to.equal('chr22:0-10');  // expanded range
+
+      source.once('newdata', newRange => {
+        // This expanded range excludes previously-fetched data.
+        expect(newRange.toString()).to.equal('chr22:11-20');
+        done();
+      });
+      source.rangeChanged(secondRange);
+    });
+    source.rangeChanged(initRange);
   });
 });

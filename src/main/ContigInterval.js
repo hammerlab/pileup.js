@@ -1,7 +1,8 @@
 /* @flow */
 'use strict';
 
-var Interval = require('./Interval');
+var Interval = require('./Interval'),
+    {flatMap} = require('./utils');
 
 /**
  * Class representing a closed interval on the genome: contig:start-stop.
@@ -75,6 +76,20 @@ class ContigInterval<T: (number|string)> {
             'chr' + this.contig === contig);
   }
 
+  clone(): ContigInterval<T> {
+    return new ContigInterval(this.contig, this.interval.start, this.interval.stop);
+  }
+
+  /**
+   * Similar to Interval.complementIntervals, but only considers those intervals
+   * on the same contig as this one.
+   */
+  complementIntervals(intervals: ContigInterval<T>[]): ContigInterval<T>[] {
+    return this.interval.complementIntervals(
+        flatMap(intervals, ci => ci.contig === this.contig ? [ci.interval] : []))
+        .map(iv => new ContigInterval(this.contig, iv.start, iv.stop));
+  }
+
   /*
   This method doesn't typecheck. See https://github.com/facebook/flow/issues/388
   isAfterInterval(other: ContigInterval): boolean {
@@ -123,6 +138,7 @@ class ContigInterval<T: (number|string)> {
 
       var lastR = rs[rs.length - 1];
       if (r.intersects(lastR) || r.isAdjacentTo(lastR)) {
+        lastR = rs[rs.length - 1] = lastR.clone();
         lastR.interval.stop = Math.max(r.interval.stop, lastR.interval.stop);
       } else {
         rs.push(r);

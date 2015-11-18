@@ -63,15 +63,13 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
   var store = new SequenceStore();
 
   // Ranges for which we have complete information -- no need to hit network.
-  var coveredRanges: ContigInterval<string>[] = [];
+  var coveredRanges = ([]: ContigInterval<string>[]);
 
   function fetch(range: ContigInterval) {
-    var span = range.stop() - range.start();
+    var span = range.length();
     if (span > MAX_BASE_PAIRS_TO_FETCH) {
       return Q.when();  // empty promise
     }
-
-    range = expandRange(range);
 
     console.log(`Fetching ${span} base pairs`);
     remoteSource.getFeaturesInRange(range.contig, range.start(), range.stop())
@@ -84,8 +82,6 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
                                      range.start() + letters.length - 1);
         }
         store.setRange(range, letters);
-        coveredRanges.push(range);
-        coveredRanges = ContigInterval.coalesce(coveredRanges);
       }).then(() => {
         o.trigger('newdata', range);
       }).done();
@@ -141,7 +137,14 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
           return;
         }
 
-        fetch(range);
+        range = expandRange(range);
+        var newRanges = range.complementIntervals(coveredRanges);
+        coveredRanges.push(range);
+        coveredRanges = ContigInterval.coalesce(coveredRanges);
+
+        for (var newRange of newRanges) {
+          fetch(newRange);
+        }
       }).done();
     },
     // The ranges passed to these methods are 0-based
@@ -170,7 +173,18 @@ function create(data: {url:string}): TwoBitSource {
   return createFromTwoBitFile(new TwoBit(new RemoteFile(url)));
 }
 
+// Getter/setter for base pairs per fetch.
+// This should only be used for testing.
+function testBasePairsToFetch(num?: number): any {
+  if (num) {
+    BASE_PAIRS_PER_FETCH = num;
+  } else {
+    return BASE_PAIRS_PER_FETCH;
+  }
+}
+
 module.exports = {
   create,
-  createFromTwoBitFile
+  createFromTwoBitFile,
+  testBasePairsToFetch
 };

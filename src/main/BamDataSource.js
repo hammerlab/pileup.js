@@ -78,18 +78,20 @@ function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
       }
 
       interval = expandRange(interval);
+      var newRanges = interval.complementIntervals(coveredRanges);
       coveredRanges.push(interval);
       coveredRanges = ContigInterval.coalesce(coveredRanges);
 
-      return remoteSource.getAlignmentsInRange(interval)
-        .progress(progressEvent => {
-          o.trigger('networkprogress', progressEvent);
-        })
-        .then(reads => {
-          reads.forEach(read => addRead(read));
-          o.trigger('networkdone');
-          o.trigger('newdata', interval);
-        });
+      return Q.all(newRanges.map(range =>
+          remoteSource.getAlignmentsInRange(range)
+            .progress(progressEvent => {
+              o.trigger('networkprogress', progressEvent);
+            })
+            .then(reads => {
+              reads.forEach(read => addRead(read));
+              o.trigger('networkdone');
+              o.trigger('newdata', range);
+            })));
     });
   }
 
@@ -111,6 +113,7 @@ function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
 
     // These are here to make Flow happy.
     on: () => {},
+    once: () => {},
     off: () => {},
     trigger: () => {}
   };
