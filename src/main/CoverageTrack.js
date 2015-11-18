@@ -159,7 +159,7 @@ function renderBars(ctx: DataCanvasRenderingContext2D,
         var y = yScale(countSoFar);
         ctx.fillRect(barX1,
                      y,
-                     barX2 - barX1,
+                     Math.max(1, barX2 - barX1),  // min width of 1px
                      yScale(countSoFar + count) - y);
         countSoFar += count;
 
