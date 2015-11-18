@@ -68,7 +68,6 @@ class CoverageTiledCanvas extends TiledCanvas {
          range: ContigInterval<string>) {
     var bins = this.cache.binsForRef(range.contig);
     var yScale = this.yScaleForRef(range.contig);
-    // console.log(this.cache.maxCoverageForRef(range.contig), bins);
     var relaxedRange = new ContigInterval(
         range.contig, range.start() - 1, range.stop() + 1);
     renderBars(ctx, xScale, yScale, relaxedRange, bins, this.options);
