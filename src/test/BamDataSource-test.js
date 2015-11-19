@@ -99,4 +99,18 @@ describe('BamDataSource', function() {
       stop: range.stop()
     });
   });
+
+  it('should only fetch new features', function(done) {
+    var source = getTestSource();
+    source.once('newdata', range => {
+      expect(range.toString()).to.equal('20:31512100-31512400');  // expanded range
+      source.once('newdata', range => {
+        expect(range.toString()).to.equal('20:31512000-31512099');  // only 100bp
+        done();
+      });
+      // This range is 100bp to the left of the previous one.
+      source.rangeChanged({contig: '20', start: 31512050, stop: 31512250});
+    });
+    source.rangeChanged({contig: '20', start: 31512150, stop: 31512350});
+  });
 });

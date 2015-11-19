@@ -140,6 +140,7 @@ function create(spec: GA4GHSpec): AlignmentDataSource {
 
     // These are here to make Flow happy.
     on: () => {},
+    once: () => {},
     off: () => {},
     trigger: () => {}
   };
