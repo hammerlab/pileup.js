@@ -192,7 +192,7 @@ class CoverageTrack extends React.Component {
   }
 
   render(): any {
-    return <canvas ref='canvas' />;
+    return <canvas ref='canvas' onClick={this.handleClick.bind(this)} />;
   }
 
   getScale() {
@@ -292,6 +292,36 @@ class CoverageTrack extends React.Component {
     this.renderTicks(ctx, yScale);
 
     ctx.restore();
+  }
+
+  handleClick(reactEvent: any) {
+    var ev = reactEvent.nativeEvent,
+        x = ev.offsetX;
+
+    // It's simple to figure out which position was clicked using the x-scale.
+    // No need to render the scene to determine what was clicked.
+    var range = ContigInterval.fromGenomeRange(this.props.range),
+        xScale = this.getScale(),
+        bins = this.cache.binsForRef(range.contig),
+        pos = Math.floor(xScale.invert(x)) - 1,
+        bin = bins[pos];
+
+    var alert = window.alert || console.log;
+    if (bin) {
+      var mmCount = bin.mismatches ? _.reduce(bin.mismatches, (a, b) => a + b) : 0;
+      var ref = bin.ref || this.props.referenceSource.getRangeAsString(
+          {contig: range.contig, start: pos, stop: pos});
+
+      // Construct a JSON object to show the user.
+      var messageObject = _.extend(
+        {
+          'position': range.contig + ':' + (1 + pos),
+          'read depth': bin.count
+        },
+        bin.mismatches);
+      messageObject[ref] = bin.count - mmCount;
+      alert(JSON.stringify(messageObject, null, '  '));
+    }
   }
 }
 
