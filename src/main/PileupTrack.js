@@ -393,6 +393,10 @@ class PileupTrack extends React.Component {
 
     // TODO: the center line should go above alignments, but below mismatches
     this.renderCenterLine(ctx, range, scale);
+
+    // This is a hack to mitigate #350
+    var el = d3utils.findParent(this.refs.canvas, 'track-content');
+    if (el) el.scrollLeft = 0;
   }
 
   // Draw the center line(s), which orient the user

@@ -69,8 +69,21 @@ function sizeCanvas(el: HTMLCanvasElement, width: number, height: number) {
   }
 }
 
+/**
+ * Find the closest parent with a given class name.
+ */
+function findParent(inEl: Element, className: string): ?Element {
+  var el = inEl;  // this is for Flow.
+  do {
+    if (el.classList.contains(className)) return el;
+    el = el.parentElement;
+  } while (el);
+  return null;
+}
+
 module.exports = {
   formatRange,
   getTrackScale,
-  sizeCanvas
+  sizeCanvas,
+  findParent
 };
