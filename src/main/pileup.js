@@ -133,7 +133,8 @@ var pileup = {
     scale:    makeVizObject(ScaleTrack),
     variants: makeVizObject(VariantTrack),
     pileup:   makeVizObject(PileupTrack)
-  }
+  },
+  version: '0.6.1'
 };
 
 module.exports = pileup;

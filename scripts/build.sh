@@ -31,8 +31,12 @@ browserify \
 # Create dist/pileup.js.map
 cat dist/pileup.js | exorcist --base . dist/pileup.js.map > /dev/null
 
+version=$(grep '"version": ' package.json | sed 's/.*: "//; s/".*//')
+header="/*! pileup v$version | (c) 2015 HammerLab | Apache-2.0 licensed */"
+
 # Create dist/pileup.js.min{,.map}
 uglifyjs --compress --mangle \
+  --preamble "$header" \
   --in-source-map dist/pileup.js.map \
   --source-map-include-sources \
   --source-map dist/pileup.min.js.map \
