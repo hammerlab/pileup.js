@@ -95,7 +95,9 @@ class TiledCanvas {
       // rounding issues, which can result in 1px gaps or overdrawing.
       // We always have:
       //   width - tile.buffer.width \in {-1, 0, +1}
-      ctx.drawImage(tile.buffer, 0, 0, tile.buffer.width, tile.buffer.height, left, 0, width, height);
+      ctx.drawImage(tile.buffer, 
+                    0, 0, tile.buffer.width, tile.buffer.height,
+                    left, 0, width, tile.buffer.height);
 
       if (DEBUG_RENDER_TILE_EDGES) {
         ctx.save();
