@@ -16,6 +16,15 @@ if (pos) {
   // use default range from, e.g. data.js
 }
 
+var colorByStrand = getParameterByName('colorByStrand');
+if (colorByStrand) {
+  sources.forEach(source => {
+    if (source.viz.options) {
+      source.viz.options.colorByStrand = true;
+    }
+  });
+}
+
 var p = pileup.create(document.getElementById('pileup'), {
   range: range,
   tracks: sources
