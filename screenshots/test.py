@@ -64,3 +64,9 @@ class StructuralVariants(Base):
     @waitforjs(PILEUP_RENDERED_JS)
     def base(self, driver):
         pass
+
+    @url('?pos=chr1:4,938,510-4,938,770&colorByStrand=1')
+    @hide('#stats')
+    @waitforjs(PILEUP_RENDERED_JS)
+    def strands(self, driver):
+        pass
