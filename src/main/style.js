@@ -30,6 +30,8 @@ module.exports = {
 
   // Pileup track
   ALIGNMENT_COLOR: '#c8c8c8',
+  ALIGNMENT_MINUS_STRAND_COLOR: 'rgb(176, 176, 236)',
+  ALIGNMENT_PLUS_STRAND_COLOR: 'rgb(236, 176, 176)',
   DELETE_COLOR: 'black',
   INSERT_COLOR: 'rgb(97, 0, 216)',
 
