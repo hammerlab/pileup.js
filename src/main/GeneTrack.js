@@ -24,14 +24,13 @@ var bedtools = require('./bedtools'),
 
 
 // Draw an arrow in the middle of the visible portion of range.
-// TODO: right-facing arrows!
 function drawArrow(ctx: CanvasRenderingContext2D,
                    clampedScale: (x: number)=>number,
                    range: Interval,
                    tipY: number,
                    strand: Strand) {
-  var x1 = clampedScale(range.start),
-      x2 = clampedScale(range.stop);
+  var x1 = clampedScale(1 + range.start),
+      x2 = clampedScale(1 + range.stop);
 
   // it's off-screen or there's not enough room to draw it legibly.
   if (x2 - x1 <= 2 * style.GENE_ARROW_SIZE) return;
@@ -56,7 +55,7 @@ function drawGeneName(ctx: CanvasRenderingContext2D,
                       gene: Gene,
                       textIntervals: Interval[]) {
   var p = gene.position,
-      centerX = 0.5 * (clampedScale(p.start()) + clampedScale(p.stop()));
+      centerX = 0.5 * (clampedScale(1 + p.start()) + clampedScale(1 + p.stop()));
   var name = gene.name || gene.id;
   var textWidth = ctx.measureText(name).width;
   var textInterval = new Interval(centerX - 0.5 * textWidth,
@@ -142,15 +141,15 @@ class GeneTrack extends React.Component {
       ctx.strokeStyle = style.GENE_COLOR;
       ctx.fillStyle = style.GENE_COLOR;
 
-      canvasUtils.drawLine(ctx, clampedScale(gene.position.start()), geneLineY + 0.5,
-                                clampedScale(gene.position.stop()), geneLineY + 0.5);
+      canvasUtils.drawLine(ctx, clampedScale(1 + gene.position.start()), geneLineY + 0.5,
+                                clampedScale(1 + gene.position.stop()), geneLineY + 0.5);
 
       // TODO: only compute all these intervals when data becomes available.
       var exons = bedtools.splitCodingExons(gene.exons, gene.codingRegion);
       exons.forEach(exon => {
-        ctx.fillRect(sc(exon.start),
+        ctx.fillRect(sc(1 + exon.start),
                      geneLineY - 3 * (exon.isCoding ? 2 : 1),
-                     sc(exon.stop + 1) - sc(exon.start),
+                     sc(exon.stop + 2) - sc(1 + exon.start),
                      6 * (exon.isCoding ? 2 : 1));
       });
 
