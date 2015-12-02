@@ -6,8 +6,8 @@
  */
 'use strict';
 
-import type * as RemoteFile from './RemoteFile';
-import type * as ContigInterval from './ContigInterval';
+import type RemoteFile from './RemoteFile';
+import type ContigInterval from './ContigInterval';
 import type {Chunk} from './types';
 
 var jBinary = require('jbinary'),

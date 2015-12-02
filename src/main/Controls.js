@@ -13,7 +13,7 @@ var utils = require('./utils'),
     Interval = require('./Interval');
 
 type Props = {
-  range: GenomeRange;
+  range: ?GenomeRange;
   contigList: string[];
   onChange: (newRange: GenomeRange)=>void;
 };

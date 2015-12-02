@@ -9,7 +9,7 @@ var Q = require('q'),
     _ = require('underscore'),
     jBinary = require('jbinary');
 
-import type * as RemoteFile from './RemoteFile';
+import type RemoteFile from './RemoteFile';
 
 var twoBitTypes = require('./formats/twoBitTypes');
 

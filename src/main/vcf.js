@@ -7,9 +7,9 @@
  */
 'use strict';
 
-import type * as ContigInterval from './ContigInterval';
-import type * as RemoteFile from './RemoteFile';
-import type * as Q from 'q';
+import type ContigInterval from './ContigInterval';
+import type RemoteFile from './RemoteFile';
+import type Q from 'q';
 
 export type Variant = {
   contig: string;

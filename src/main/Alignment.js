@@ -3,7 +3,7 @@
  * @flow
  */
 
-import type * as ContigInterval from './ContigInterval';
+import type ContigInterval from './ContigInterval';
 
 // "CIGAR" operations express how a sequence aligns to the reference: does it
 // have insertions? deletions? For more background, see the SAM/BAM paper.

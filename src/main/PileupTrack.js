@@ -9,7 +9,7 @@ import type {TwoBitSource} from './TwoBitDataSource';
 import type {BasePair} from './pileuputils';
 import type {VisualAlignment, VisualGroup, InsertStats} from './PileupCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
-import type * as Interval from './Interval';
+import type Interval from './Interval';
 import type {VizProps} from './VisualizationWrapper';
 
 var React = require('react'),

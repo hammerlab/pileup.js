@@ -5,7 +5,7 @@
  */
 'use strict';
 
-import type * as RemoteFile from './RemoteFile';
+import type RemoteFile from './RemoteFile';
 
 var jBinary = require('jbinary'),
     jDataView = require('jdataview'),

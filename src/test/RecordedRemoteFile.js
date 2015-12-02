@@ -5,7 +5,7 @@
 
 'use strict';
 
-import type * as Q from 'q';
+import type Q from 'q';
 
 var _ = require('underscore');
 

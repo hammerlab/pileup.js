@@ -8,7 +8,7 @@
 
 var expect = require('chai').expect;
 
-import type * as SamRead from '../main/SamRead';
+import type SamRead from '../main/SamRead';
 
 var pileup = require('../main/pileup'),
     TwoBit = require('../main/TwoBit'),

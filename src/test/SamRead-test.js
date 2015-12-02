@@ -1,8 +1,8 @@
 /* @flow */
 'use strict';
 
-import type * as Q from 'q';
-import type * as SamRead from '../main/SamRead';
+import type Q from 'q';
+import type SamRead from '../main/SamRead';
 
 var expect = require('chai').expect;
 
