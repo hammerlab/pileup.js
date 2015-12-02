@@ -11,7 +11,7 @@
 
 // Public API
 
-import type * as React from 'react';
+import type React from 'react';
 
 export type VizWithOptions = {
   component: ReactClass;
@@ -48,7 +48,7 @@ export type PartialGenomeRange = {
 
 // BAM/BAI parsing
 
-import type * as VirtualOffset from './VirtualOffset';
+import type VirtualOffset from './VirtualOffset';
 
 export type Chunk = {
   chunk_beg: VirtualOffset;

@@ -12,7 +12,7 @@
  */
 'use strict';
 
-import type * as VirtualOffset from './VirtualOffset';
+import type VirtualOffset from './VirtualOffset';
 import type {Strand, CigarOp, MateProperties} from './Alignment';
 
 var jDataView = require('jdataview'),

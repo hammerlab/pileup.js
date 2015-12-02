@@ -5,7 +5,7 @@
 'use strict';
 
 import type {Alignment, AlignmentDataSource} from './Alignment';
-import type * as Interval from './Interval';
+import type Interval from './Interval';
 import type {TwoBitSource} from './TwoBitDataSource';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {BinSummary} from './CoverageCache';

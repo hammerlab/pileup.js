@@ -5,7 +5,7 @@
 'use strict';
 
 import type {InflatedBlock, PartialGenomeRange} from './types';
-import type * as Q from 'q';
+import type Q from 'q';
 
 var pako = require('pako/lib/inflate'),
     _ = require('underscore');

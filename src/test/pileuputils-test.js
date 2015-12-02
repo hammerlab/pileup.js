@@ -13,7 +13,7 @@ var {pileup, addToPileup,  getOpInfo} = require('../main/pileuputils'),
     Bam = require('../main/bam'),
     RemoteFile = require('../main/RemoteFile');
 
-import type * as SamRead from '../main/SamRead';
+import type SamRead from '../main/SamRead';
 
 describe('pileuputils', function() {
   // This checks that pileup's guarantee is met.

@@ -30,7 +30,7 @@ type Props = {
   onSelect: (key: string) => void;
 };
 
-class Menu extends React.Component<{}, Props, void> {
+class Menu extends React.Component<void, Props, void> {
   props: Props;
 
   clickHandler(idx: number, e: SyntheticMouseEvent) {
