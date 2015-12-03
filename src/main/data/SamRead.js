@@ -13,13 +13,13 @@
 'use strict';
 
 import type VirtualOffset from './VirtualOffset';
-import type {Strand, CigarOp, MateProperties} from './Alignment';
+import type {Strand, CigarOp, MateProperties} from '../Alignment';
 
 import jDataView from 'jdataview';
 import jBinary from 'jbinary';
 import _ from 'underscore';
 import bamTypes from './formats/bamTypes';
-import ContigInterval from './ContigInterval';
+import ContigInterval from '../ContigInterval';
 
 // TODO: Make more extensive use of the jBinary specs.
 

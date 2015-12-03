@@ -13,7 +13,7 @@ import ReactDOM from 'react-dom';
 import _ from 'underscore';
 import shallowEquals from 'shallow-equals';
 
-import bedtools from '../bedtools';
+import bedtools from '../data/bedtools';
 import Interval from '../Interval';
 import d3utils from './d3utils';
 import scale from '../scale';

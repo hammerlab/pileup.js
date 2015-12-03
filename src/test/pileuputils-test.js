@@ -1,7 +1,7 @@
 /* @flow */
 'use strict';
 
-import type SamRead from '../main/SamRead';
+import type SamRead from '../main/data/SamRead';
 
 import {expect} from 'chai';
 import _ from 'underscore';
@@ -9,7 +9,7 @@ import _ from 'underscore';
 import {pileup, addToPileup,  getOpInfo} from '../main/viz/pileuputils';
 import Interval from '../main/Interval';
 import ContigInterval from '../main/ContigInterval';
-import Bam from '../main/bam';
+import Bam from '../main/data/bam';
 import RemoteFile from '../main/RemoteFile';
 
 describe('pileuputils', function() {

@@ -3,7 +3,7 @@
 
 import {expect} from 'chai';
 
-import BigBed from '../main/BigBed';
+import BigBed from '../main/data/BigBed';
 import BigBedDataSource from '../main/BigBedDataSource';
 import ContigInterval from '../main/ContigInterval';
 

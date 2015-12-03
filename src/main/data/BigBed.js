@@ -10,10 +10,10 @@ import _ from 'underscore';
 import jBinary from 'jbinary';
 import pako from 'pako/lib/inflate';  // for gzip inflation
 
-import RemoteFile from './RemoteFile';
-import Interval from './Interval';
-import ContigInterval from './ContigInterval';
-import utils from './utils.js';
+import RemoteFile from '../RemoteFile';
+import Interval from '../Interval';
+import ContigInterval from '../ContigInterval';
+import utils from '../utils';
 import bbi from './formats/bbi';
 
 

@@ -2,12 +2,12 @@
 'use strict';
 
 import type Q from 'q';
-import type SamRead from '../main/SamRead';
+import type SamRead from '../main/data/SamRead';
 
 import {expect} from 'chai';
 
 import RemoteFile from '../main/RemoteFile';
-import Bam from '../main/bam';
+import Bam from '../main/data/bam';
 import ContigInterval from '../main/ContigInterval';
 
 describe('SamRead', function() {

@@ -3,7 +3,7 @@
 
 import {expect, assert} from 'chai';
 
-import TwoBit from '../main/TwoBit';
+import TwoBit from '../main/data/TwoBit';
 import RemoteFile from '../main/RemoteFile';
 
 describe('TwoBit', function() {

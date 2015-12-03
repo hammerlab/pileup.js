@@ -4,8 +4,8 @@
 import {expect} from 'chai';
 
 import jBinary from 'jbinary';
-import bamTypes from '../main/formats/bamTypes';
-import VirtualOffset from '../main/VirtualOffset';
+import bamTypes from '../main/data/formats/bamTypes';
+import VirtualOffset from '../main/data/VirtualOffset';
 
 describe('VirtualOffset', function() {
   // These test that .fromBlob() is equivalent to jBinary.read('VirtualOffset').

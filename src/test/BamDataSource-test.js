@@ -3,7 +3,7 @@
 
 import {expect} from 'chai';
 
-import Bam from '../main/bam';
+import Bam from '../main/data/bam';
 import BamDataSource from '../main/BamDataSource';
 import ContigInterval from '../main/ContigInterval';
 import MappedRemoteFile from './MappedRemoteFile';

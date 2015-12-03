@@ -20,7 +20,7 @@ import _ from 'underscore';
 import {Events} from 'backbone';
 
 import ContigInterval from './ContigInterval';
-import TwoBit from './TwoBit';
+import TwoBit from './data/TwoBit';
 import RemoteFile from './RemoteFile';
 import SequenceStore from './SequenceStore';
 import utils from './utils';

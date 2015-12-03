@@ -7,8 +7,8 @@
  */
 'use strict';
 
-import type ContigInterval from './ContigInterval';
-import type RemoteFile from './RemoteFile';
+import type ContigInterval from '../ContigInterval';
+import type RemoteFile from '../RemoteFile';
 import type Q from 'q';
 
 export type Variant = {

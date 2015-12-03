@@ -3,7 +3,7 @@
 
 import {expect} from 'chai';
 
-import VcfFile from '../main/vcf';
+import VcfFile from '../main/data/vcf';
 import VcfDataSource from '../main/VcfDataSource';
 import ContigInterval from '../main/ContigInterval';
 import RemoteFile from '../main/RemoteFile';

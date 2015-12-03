@@ -5,7 +5,7 @@
  */
 'use strict';
 
-import type SamRead from '../main/SamRead';
+import type SamRead from '../main/data/SamRead';
 
 import {expect} from 'chai';
 
@@ -13,9 +13,9 @@ import Q from 'q';
 import _ from 'underscore';
 
 import pileup from '../main/pileup';
-import TwoBit from '../main/TwoBit';
+import TwoBit from '../main/data/TwoBit';
 import TwoBitDataSource from '../main/TwoBitDataSource';
-import Bam from '../main/bam';
+import Bam from '../main/data/bam';
 import BamDataSource from '../main/BamDataSource';
 import RemoteFile from '../main/RemoteFile';
 import MappedRemoteFile from './MappedRemoteFile';

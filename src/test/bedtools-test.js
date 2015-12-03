@@ -3,7 +3,7 @@
 
 import {expect} from 'chai';
 
-import bedtools from '../main/bedtools';
+import bedtools from '../main/data/bedtools';
 import Interval from '../main/Interval';
 
 describe('bedtools', function() {

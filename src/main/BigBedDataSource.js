@@ -9,7 +9,7 @@ import {Events} from 'backbone';
 
 import ContigInterval from './ContigInterval';
 import Interval from './Interval';
-import BigBed from './BigBed';
+import BigBed from './data/BigBed';
 
 
 export type Gene = {

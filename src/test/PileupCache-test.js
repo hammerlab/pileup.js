@@ -10,7 +10,7 @@ import _ from 'underscore';
 
 import PileupCache from '../main/viz/PileupCache';
 import ContigInterval from '../main/ContigInterval';
-import Bam from '../main/bam';
+import Bam from '../main/data/bam';
 import RemoteFile from '../main/RemoteFile';
 import {makeRead, makeReadPair, fakeSource} from './FakeAlignment';
 

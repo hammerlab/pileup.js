@@ -4,7 +4,7 @@
 import {expect} from 'chai';
 import Q from 'q';
 
-import TwoBit from '../main/TwoBit';
+import TwoBit from '../main/data/TwoBit';
 import TwoBitDataSource from '../main/TwoBitDataSource';
 import RemoteFile from '../main/RemoteFile';
 

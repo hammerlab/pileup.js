@@ -6,9 +6,9 @@
  */
 'use strict';
 
-import type RemoteFile from './RemoteFile';
-import type ContigInterval from './ContigInterval';
-import type {Chunk} from './types';
+import type RemoteFile from '../RemoteFile';
+import type ContigInterval from '../ContigInterval';
+import type {Chunk} from '../types';
 
 import jBinary from 'jbinary';
 import jDataView from 'jdataview';

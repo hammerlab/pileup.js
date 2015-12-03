@@ -6,7 +6,7 @@ import Q from 'q';
 import {Events} from 'backbone';
 
 import ContigInterval from './ContigInterval';
-import BamFile from './bam';
+import BamFile from './data/bam';
 import RemoteFile from './RemoteFile';
 
 import type {Alignment, AlignmentDataSource} from './Alignment';

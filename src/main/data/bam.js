@@ -5,8 +5,8 @@
  */
 'use strict';
 
-import type RemoteFile from './RemoteFile';
-import type {Chunk, InflatedBlock} from './types';
+import type RemoteFile from '../RemoteFile';
+import type {Chunk, InflatedBlock} from '../types';
 
 import jBinary from 'jbinary';
 import jDataView from 'jdataview';
@@ -14,9 +14,9 @@ import _ from 'underscore';
 import Q from 'q';
 
 import bamTypes from './formats/bamTypes';
-import utils from './utils';
+import utils from '../utils';
 import BaiFile from './bai';
-import ContigInterval from './ContigInterval';
+import ContigInterval from '../ContigInterval';
 import VirtualOffset from './VirtualOffset';
 import SamRead from './SamRead';
 

@@ -5,8 +5,8 @@ import {expect} from 'chai';
 
 import jBinary from 'jbinary';
 
-import BaiFile from '../main/bai';
-import bamTypes from '../main/formats/bamTypes';
+import BaiFile from '../main/data/bai';
+import bamTypes from '../main/data/formats/bamTypes';
 import ContigInterval from '../main/ContigInterval';
 import RemoteFile from '../main/RemoteFile';
 import RecordedRemoteFile from './RecordedRemoteFile';

@@ -2,7 +2,7 @@
 'use strict';
 
 import _ from 'underscore';
-import Interval from './Interval';
+import Interval from '../Interval';
 
 class CodingInterval extends Interval {
   isCoding: boolean;

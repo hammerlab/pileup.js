@@ -5,7 +5,7 @@
  */
 'use strict';
 
-import type {Variant} from './vcf';
+import type {Variant} from './data/vcf';
 
 import Events from 'backbone';
 import _ from 'underscore';
@@ -13,7 +13,7 @@ import Q from 'q';
 
 import ContigInterval from './ContigInterval';
 import RemoteFile from './RemoteFile';
-import VcfFile from './vcf';
+import VcfFile from './data/vcf';
 
 export type VcfDataSource = {
   rangeChanged: (newRange: GenomeRange) => void;

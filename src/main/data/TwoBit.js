@@ -5,7 +5,7 @@
  */
 'use strict';
 
-import type RemoteFile from './RemoteFile';
+import type RemoteFile from '../RemoteFile';
 
 import Q from 'q';
 import _ from 'underscore';
