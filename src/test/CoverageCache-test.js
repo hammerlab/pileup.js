@@ -8,7 +8,7 @@ import type {Alignment, CigarOp, MateProperties, Strand} from '../main/Alignment
 import {expect} from 'chai';
 import _ from 'underscore';
 
-import CoverageCache from '../main/CoverageCache';
+import CoverageCache from '../main/viz/CoverageCache';
 import ContigInterval from '../main/ContigInterval';
 import {makeRead, makeReadPair, fakeSource} from './FakeAlignment';
 

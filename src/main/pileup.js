@@ -19,13 +19,13 @@ import GA4GHDataSource from './GA4GHDataSource';
 import EmptySource from './EmptySource';
 
 // Visualizations
-import CoverageTrack from './CoverageTrack';
-import GenomeTrack from './GenomeTrack';
-import GeneTrack from './GeneTrack';
-import LocationTrack from './LocationTrack';
-import PileupTrack from './PileupTrack';
-import ScaleTrack from './ScaleTrack';
-import VariantTrack from './VariantTrack';
+import CoverageTrack from './viz/CoverageTrack';
+import GenomeTrack from './viz/GenomeTrack';
+import GeneTrack from './viz/GeneTrack';
+import LocationTrack from './viz/LocationTrack';
+import PileupTrack from './viz/PileupTrack';
+import ScaleTrack from './viz/ScaleTrack';
+import VariantTrack from './viz/VariantTrack';
 import Root from './Root';
 
 type GenomeRange = {

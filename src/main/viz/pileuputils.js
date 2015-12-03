@@ -1,9 +1,9 @@
 /** @flow */
 'use strict';
 
-import type SamRead from './SamRead';
-import type {Alignment, CigarSymbol} from './Alignment';
-import type Interval from './Interval';
+import type SamRead from '../SamRead';
+import type {Alignment, CigarSymbol} from '../Alignment';
+import type Interval from '../Interval';
 
 /**
  * Given a list of Intervals, return a parallel list of row numbers for each.

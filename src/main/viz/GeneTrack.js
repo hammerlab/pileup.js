@@ -4,23 +4,23 @@
  */
 'use strict';
 
-import type {Strand} from './Alignment';
-import type {Gene, BigBedSource} from './BigBedDataSource';
-import type {VizProps} from './VisualizationWrapper';
+import type {Strand} from '../Alignment';
+import type {Gene, BigBedSource} from '../BigBedDataSource';
+import type {VizProps} from '../VisualizationWrapper';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'underscore';
 import shallowEquals from 'shallow-equals';
 
-import bedtools from './bedtools';
-import Interval from './Interval';
+import bedtools from '../bedtools';
+import Interval from '../Interval';
 import d3utils from './d3utils';
-import scale from './scale';
-import ContigInterval from './ContigInterval';
+import scale from '../scale';
+import ContigInterval from '../ContigInterval';
 import canvasUtils from './canvas-utils';
 import dataCanvas from 'data-canvas';
-import style from './style';
+import style from '../style';
 
 
 // Draw an arrow in the middle of the visible portion of range.

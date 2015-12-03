@@ -4,28 +4,28 @@
  */
 'use strict';
 
-import type {Strand, Alignment, AlignmentDataSource} from './Alignment';
-import type {TwoBitSource} from './TwoBitDataSource';
+import type {Strand, Alignment, AlignmentDataSource} from '../Alignment';
+import type {TwoBitSource} from '../TwoBitDataSource';
 import type {BasePair} from './pileuputils';
 import type {VisualAlignment, VisualGroup, InsertStats} from './PileupCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
-import type Interval from './Interval';
-import type {VizProps} from './VisualizationWrapper';
+import type Interval from '../Interval';
+import type {VizProps} from '../VisualizationWrapper';
 
 import React from 'react';
 import shallowEquals from 'shallow-equals';
 import _ from 'underscore';
 
-import scale from './scale';
+import scale from '../scale';
 import d3utils from './d3utils';
 import {CigarOp} from './pileuputils';
-import ContigInterval from './ContigInterval';
+import ContigInterval from '../ContigInterval';
 import DisplayMode from './DisplayMode';
 import PileupCache from './PileupCache';
 import TiledCanvas from './TiledCanvas';
 import canvasUtils from './canvas-utils';
 import dataCanvas from 'data-canvas';
-import style from './style';
+import style from '../style';
 
 
 var READ_HEIGHT = 13;

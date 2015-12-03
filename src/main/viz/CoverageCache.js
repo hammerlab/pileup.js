@@ -7,14 +7,14 @@
  */
 'use strict';
 
-import type {Strand, Alignment, AlignmentDataSource} from './Alignment';
-import type {TwoBitSource} from './TwoBitDataSource';
+import type {Strand, Alignment, AlignmentDataSource} from '../Alignment';
+import type {TwoBitSource} from '../TwoBitDataSource';
 import type {BasePair, OpInfo} from './pileuputils';
-import type ContigInterval from '../main/ContigInterval';
-import type Interval from '../main/Interval';
+import type ContigInterval from '../ContigInterval';
+import type Interval from '../Interval';
 
 import {getOpInfo} from './pileuputils';
-import utils from './utils';
+import utils from '../utils';
 
 export type BinSummary = {
   count: number;

@@ -4,14 +4,14 @@
  */
 'use strict';
 
-import type {VizProps} from './VisualizationWrapper';
+import type {VizProps} from '../VisualizationWrapper';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import EmptySource from './EmptySource';
+import EmptySource from '../EmptySource';
 import canvasUtils from './canvas-utils';
 import dataCanvas from 'data-canvas';
-import style from './style';
+import style from '../style';
 import d3utils from './d3utils';
 
 class LocationTrack extends React.Component {

@@ -6,7 +6,7 @@ import type SamRead from '../main/SamRead';
 import {expect} from 'chai';
 import _ from 'underscore';
 
-import {pileup, addToPileup,  getOpInfo} from '../main/pileuputils';
+import {pileup, addToPileup,  getOpInfo} from '../main/viz/pileuputils';
 import Interval from '../main/Interval';
 import ContigInterval from '../main/ContigInterval';
 import Bam from '../main/bam';

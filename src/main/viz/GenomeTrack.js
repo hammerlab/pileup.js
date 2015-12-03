@@ -4,8 +4,8 @@
  */
 'use strict';
 
-import type {VizProps} from './VisualizationWrapper';
-import type {TwoBitSource} from './TwoBitDataSource';
+import type {VizProps} from '../VisualizationWrapper';
+import type {TwoBitSource} from '../TwoBitDataSource';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 
 import React from 'react';
@@ -13,12 +13,12 @@ import ReactDOM from 'react-dom';
 import shallowEquals from 'shallow-equals';
 
 import canvasUtils from './canvas-utils';
-import ContigInterval from './ContigInterval';
+import ContigInterval from '../ContigInterval';
 import dataCanvas from 'data-canvas';
 import d3utils from './d3utils';
 import DisplayMode from './DisplayMode';
 import TiledCanvas from './TiledCanvas';
-import style from './style';
+import style from '../style';
 
 
 function renderGenome(ctx: DataCanvasRenderingContext2D,

@@ -4,20 +4,20 @@
  */
 'use strict';
 
-import type {VcfDataSource} from './VcfDataSource';
-import type {Variant} from './vcf';
+import type {VcfDataSource} from '../VcfDataSource';
+import type {Variant} from '../vcf';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
-import type {VizProps} from './VisualizationWrapper';
+import type {VizProps} from '../VisualizationWrapper';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 
 import d3utils from './d3utils';
 import shallowEquals from 'shallow-equals';
-import ContigInterval from './ContigInterval';
+import ContigInterval from '../ContigInterval';
 import canvasUtils from './canvas-utils';
 import dataCanvas from 'data-canvas';
-import style from './style';
+import style from '../style';
 
 
 class VariantTrack extends React.Component {

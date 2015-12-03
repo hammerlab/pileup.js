@@ -4,14 +4,14 @@
  */
 'use strict';
 
-import type {Alignment, AlignmentDataSource} from './Alignment';
-import type Interval from './Interval';
-import type {TwoBitSource} from './TwoBitDataSource';
+import type {Alignment, AlignmentDataSource} from '../Alignment';
+import type Interval from '../Interval';
+import type {TwoBitSource} from '../TwoBitDataSource';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {BinSummary} from './CoverageCache';
 
 import React from 'react';
-import scale from './scale';
+import scale from '../scale';
 import shallowEquals from 'shallow-equals';
 import d3utils from './d3utils';
 import _ from 'underscore';
@@ -19,8 +19,8 @@ import dataCanvas from 'data-canvas';
 import canvasUtils from './canvas-utils';
 import CoverageCache from './CoverageCache';
 import TiledCanvas from './TiledCanvas';
-import style from './style';
-import ContigInterval from './ContigInterval';
+import style from '../style';
+import ContigInterval from '../ContigInterval';
 
 // Basic setup (TODO: make this configurable by the user)
 const SHOW_MISMATCHES = true;

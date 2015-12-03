@@ -4,7 +4,7 @@
  */
 'use strict';
 
-import scale from './scale';
+import scale from '../scale';
 
 // Subtype of GenomeRange
 type Range = {

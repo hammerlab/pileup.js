@@ -7,15 +7,15 @@
  */
 'use strict';
 
-import type {Strand, Alignment, AlignmentDataSource} from './Alignment';
-import type {TwoBitSource} from './TwoBitDataSource';
+import type {Strand, Alignment, AlignmentDataSource} from '../Alignment';
+import type {TwoBitSource} from '../TwoBitDataSource';
 import type {BasePair} from './pileuputils';
 
 import _ from 'underscore';
-import ContigInterval from './ContigInterval';
-import Interval from './Interval';
+import ContigInterval from '../ContigInterval';
+import Interval from '../Interval';
 import {addToPileup, getOpInfo} from './pileuputils';
-import utils from './utils';
+import utils from '../utils';
 
 // This bundles everything intrinsic to the alignment that we need to display
 // it, i.e. everything not dependend on scale/viewport.

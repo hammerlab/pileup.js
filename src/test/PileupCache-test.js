@@ -8,7 +8,7 @@ import type {Alignment, CigarOp, MateProperties, Strand} from '../main/Alignment
 import {expect} from 'chai';
 import _ from 'underscore';
 
-import PileupCache from '../main/PileupCache';
+import PileupCache from '../main/viz/PileupCache';
 import ContigInterval from '../main/ContigInterval';
 import Bam from '../main/bam';
 import RemoteFile from '../main/RemoteFile';

@@ -8,12 +8,12 @@ import type {DataCanvasRenderingContext2D} from 'data-canvas';
 
 import _ from 'underscore';
 
-import scale from './scale';
-import ContigInterval from './ContigInterval';
-import Interval from './Interval';
+import scale from '../scale';
+import ContigInterval from '../ContigInterval';
+import Interval from '../Interval';
 import canvasUtils from './canvas-utils';
 import dataCanvas from 'data-canvas';
-import utils from './utils';
+import utils from '../utils';
 import d3utils from './d3utils';
 
 type Tile = {
