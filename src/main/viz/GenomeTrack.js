@@ -5,7 +5,7 @@
 'use strict';
 
 import type {VizProps} from '../VisualizationWrapper';
-import type {TwoBitSource} from '../TwoBitDataSource';
+import type {TwoBitSource} from '../sources/TwoBitDataSource';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 
 import React from 'react';

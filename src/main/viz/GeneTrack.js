@@ -5,7 +5,7 @@
 'use strict';
 
 import type {Strand} from '../Alignment';
-import type {Gene, BigBedSource} from '../BigBedDataSource';
+import type {Gene, BigBedSource} from '../sources/BigBedDataSource';
 import type {VizProps} from '../VisualizationWrapper';
 
 import React from 'react';

@@ -5,13 +5,13 @@
  */
 'use strict';
 
-import type {Alignment, AlignmentDataSource} from './Alignment';
+import type {Alignment, AlignmentDataSource} from '../Alignment';
 
 import _ from 'underscore';
 import {Events} from 'backbone';
 
-import ContigInterval from './ContigInterval';
-import GA4GHAlignment from './GA4GHAlignment';
+import ContigInterval from '../ContigInterval';
+import GA4GHAlignment from '../GA4GHAlignment';
 
 var ALIGNMENTS_PER_REQUEST = 200;  // TODO: explain this choice.
 

@@ -4,7 +4,7 @@
  */
 'use strict';
 
-import type {VcfDataSource} from '../VcfDataSource';
+import type {VcfDataSource} from '../sources/VcfDataSource';
 import type {Variant} from '../data/vcf';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {VizProps} from '../VisualizationWrapper';

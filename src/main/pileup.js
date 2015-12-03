@@ -11,12 +11,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 // Data sources
-import TwoBitDataSource from './TwoBitDataSource';
-import BigBedDataSource from './BigBedDataSource';
-import VcfDataSource from './VcfDataSource';
-import BamDataSource from './BamDataSource';
-import GA4GHDataSource from './GA4GHDataSource';
-import EmptySource from './EmptySource';
+import TwoBitDataSource from './sources/TwoBitDataSource';
+import BigBedDataSource from './sources/BigBedDataSource';
+import VcfDataSource from './sources/VcfDataSource';
+import BamDataSource from './sources/BamDataSource';
+import GA4GHDataSource from './sources/GA4GHDataSource';
+import EmptySource from './sources/EmptySource';
 
 // Visualizations
 import CoverageTrack from './viz/CoverageTrack';

@@ -14,9 +14,9 @@ import _ from 'underscore';
 
 import pileup from '../main/pileup';
 import TwoBit from '../main/data/TwoBit';
-import TwoBitDataSource from '../main/TwoBitDataSource';
+import TwoBitDataSource from '../main/sources/TwoBitDataSource';
 import Bam from '../main/data/bam';
-import BamDataSource from '../main/BamDataSource';
+import BamDataSource from '../main/sources/BamDataSource';
 import RemoteFile from '../main/RemoteFile';
 import MappedRemoteFile from './MappedRemoteFile';
 import ContigInterval from '../main/ContigInterval';

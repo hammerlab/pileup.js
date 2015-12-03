@@ -1,15 +1,15 @@
 /* @flow */
 'use strict';
 
-import type {Strand} from './Alignment';
+import type {Strand} from '../Alignment';
 
 import _ from 'underscore';
 import Q from 'q';
 import {Events} from 'backbone';
 
-import ContigInterval from './ContigInterval';
-import Interval from './Interval';
-import BigBed from './data/BigBed';
+import ContigInterval from '../ContigInterval';
+import Interval from '../Interval';
+import BigBed from '../data/BigBed';
 
 
 export type Gene = {

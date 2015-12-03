@@ -6,7 +6,7 @@ import {expect} from 'chai';
 import sinon from 'sinon';
 
 import ContigInterval from '../main/ContigInterval';
-import GA4GHDataSource from '../main/GA4GHDataSource';
+import GA4GHDataSource from '../main/sources/GA4GHDataSource';
 import RemoteFile from '../main/RemoteFile';
     
 describe('GA4GHDataSource', function() {

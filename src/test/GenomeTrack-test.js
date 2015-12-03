@@ -13,7 +13,7 @@ import ReactTestUtils from 'react-addons-test-utils';
 
 import pileup from '../main/pileup';
 import TwoBit from '../main/data/TwoBit';
-import TwoBitDataSource from '../main/TwoBitDataSource';
+import TwoBitDataSource from '../main/sources/TwoBitDataSource';
 import dataCanvas from 'data-canvas';
 import MappedRemoteFile from './MappedRemoteFile';
 import {waitFor} from './async';

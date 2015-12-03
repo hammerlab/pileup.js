@@ -5,7 +5,7 @@
 'use strict';
 
 import type {Strand, Alignment, AlignmentDataSource} from '../Alignment';
-import type {TwoBitSource} from '../TwoBitDataSource';
+import type {TwoBitSource} from '../sources/TwoBitDataSource';
 import type {BasePair} from './pileuputils';
 import type {VisualAlignment, VisualGroup, InsertStats} from './PileupCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';

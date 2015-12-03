@@ -5,11 +5,11 @@ import _ from 'underscore';
 import Q from 'q';
 import {Events} from 'backbone';
 
-import ContigInterval from './ContigInterval';
-import BamFile from './data/bam';
-import RemoteFile from './RemoteFile';
+import ContigInterval from '../ContigInterval';
+import BamFile from '../data/bam';
+import RemoteFile from '../RemoteFile';
 
-import type {Alignment, AlignmentDataSource} from './Alignment';
+import type {Alignment, AlignmentDataSource} from '../Alignment';
 
 // Genome ranges are rounded to multiples of this for fetching.
 // This reduces network activity while fetching.

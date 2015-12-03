@@ -19,11 +19,11 @@ import Q from 'q';
 import _ from 'underscore';
 import {Events} from 'backbone';
 
-import ContigInterval from './ContigInterval';
-import TwoBit from './data/TwoBit';
-import RemoteFile from './RemoteFile';
-import SequenceStore from './SequenceStore';
-import utils from './utils';
+import ContigInterval from '../ContigInterval';
+import TwoBit from '../data/TwoBit';
+import RemoteFile from '../RemoteFile';
+import SequenceStore from '../SequenceStore';
+import utils from '../utils';
 
 
 // Requests for 2bit ranges are expanded to begin & end at multiples of this

@@ -4,7 +4,7 @@
 import {expect} from 'chai';
 
 import BigBed from '../main/data/BigBed';
-import BigBedDataSource from '../main/BigBedDataSource';
+import BigBedDataSource from '../main/sources/BigBedDataSource';
 import ContigInterval from '../main/ContigInterval';
 
 describe('BigBedDataSource', function() {

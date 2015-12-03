@@ -6,7 +6,7 @@
 
 import type {Alignment, AlignmentDataSource} from '../Alignment';
 import type Interval from '../Interval';
-import type {TwoBitSource} from '../TwoBitDataSource';
+import type {TwoBitSource} from '../sources/TwoBitDataSource';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {BinSummary} from './CoverageCache';
 

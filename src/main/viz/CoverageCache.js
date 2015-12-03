@@ -8,7 +8,7 @@
 'use strict';
 
 import type {Strand, Alignment, AlignmentDataSource} from '../Alignment';
-import type {TwoBitSource} from '../TwoBitDataSource';
+import type {TwoBitSource} from '../sources/TwoBitDataSource';
 import type {BasePair, OpInfo} from './pileuputils';
 import type ContigInterval from '../ContigInterval';
 import type Interval from '../Interval';
