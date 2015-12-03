@@ -6,20 +6,19 @@
 'use strict';
 
 import type RemoteFile from './RemoteFile';
-
-var jBinary = require('jbinary'),
-    jDataView = require('jdataview'),
-    _ = require('underscore'),
-    Q = require('q');
-
 import type {Chunk, InflatedBlock} from './types';
 
-var bamTypes = require('./formats/bamTypes'),
-    utils = require('./utils'),
-    BaiFile = require('./bai'),
-    ContigInterval = require('./ContigInterval'),
-    VirtualOffset = require('./VirtualOffset'),
-    SamRead = require('./SamRead');
+import jBinary from 'jbinary';
+import jDataView from 'jdataview';
+import _ from 'underscore';
+import Q from 'q';
+
+import bamTypes from './formats/bamTypes';
+import utils from './utils';
+import BaiFile from './bai';
+import ContigInterval from './ContigInterval';
+import VirtualOffset from './VirtualOffset';
+import SamRead from './SamRead';
 
 
 /**

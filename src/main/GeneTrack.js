@@ -8,19 +8,19 @@ import type {Strand} from './Alignment';
 import type {Gene, BigBedSource} from './BigBedDataSource';
 import type {VizProps} from './VisualizationWrapper';
 
-var React = require('react'),
-    ReactDOM = require('react-dom'),
-    _ = require('underscore'),
-    shallowEquals = require('shallow-equals');
+import React from 'react';
+import ReactDOM from 'react-dom';
+import _ from 'underscore';
+import shallowEquals from 'shallow-equals';
 
-var bedtools = require('./bedtools'),
-    Interval = require('./Interval'),
-    d3utils = require('./d3utils'),
-    scale = require('./scale'),
-    ContigInterval = require('./ContigInterval'),
-    canvasUtils = require('./canvas-utils'),
-    dataCanvas = require('data-canvas'),
-    style = require('./style');
+import bedtools from './bedtools';
+import Interval from './Interval';
+import d3utils from './d3utils';
+import scale from './scale';
+import ContigInterval from './ContigInterval';
+import canvasUtils from './canvas-utils';
+import dataCanvas from 'data-canvas';
+import style from './style';
 
 
 // Draw an arrow in the middle of the visible portion of range.

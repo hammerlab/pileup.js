@@ -4,27 +4,29 @@
  */
 'use strict';
 
-var _ = require('underscore'),
-    React = require('react'),
-    ReactDOM = require('react-dom'),
-    // Data sources
-    TwoBitDataSource = require('./TwoBitDataSource'),
-    BigBedDataSource = require('./BigBedDataSource'),
-    VcfDataSource = require('./VcfDataSource'),
-    BamDataSource = require('./BamDataSource'),
-    GA4GHDataSource = require('./GA4GHDataSource'),
-    EmptySource = require('./EmptySource'),
-    // Visualizations
-    CoverageTrack = require('./CoverageTrack'),
-    GenomeTrack = require('./GenomeTrack'),
-    GeneTrack = require('./GeneTrack'),
-    LocationTrack = require('./LocationTrack'),
-    PileupTrack = require('./PileupTrack'),
-    ScaleTrack = require('./ScaleTrack'),
-    VariantTrack = require('./VariantTrack'),
-    Root = require('./Root');
-
 import type {Track, VisualizedTrack, VizWithOptions} from './types';
+
+import _ from 'underscore';
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+// Data sources
+import TwoBitDataSource from './TwoBitDataSource';
+import BigBedDataSource from './BigBedDataSource';
+import VcfDataSource from './VcfDataSource';
+import BamDataSource from './BamDataSource';
+import GA4GHDataSource from './GA4GHDataSource';
+import EmptySource from './EmptySource';
+
+// Visualizations
+import CoverageTrack from './CoverageTrack';
+import GenomeTrack from './GenomeTrack';
+import GeneTrack from './GeneTrack';
+import LocationTrack from './LocationTrack';
+import PileupTrack from './PileupTrack';
+import ScaleTrack from './ScaleTrack';
+import VariantTrack from './VariantTrack';
+import Root from './Root';
 
 type GenomeRange = {
   contig: string;

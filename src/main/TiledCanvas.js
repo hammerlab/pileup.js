@@ -6,15 +6,15 @@
 
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 
-var _ = require('underscore');
+import _ from 'underscore';
 
-var scale = require('./scale'),
-    ContigInterval = require('./ContigInterval'),
-    Interval = require('./Interval'),
-    canvasUtils = require('./canvas-utils'),
-    dataCanvas = require('data-canvas'),
-    utils = require('./utils'),
-    d3utils = require('./d3utils');
+import scale from './scale';
+import ContigInterval from './ContigInterval';
+import Interval from './Interval';
+import canvasUtils from './canvas-utils';
+import dataCanvas from 'data-canvas';
+import utils from './utils';
+import d3utils from './d3utils';
 
 type Tile = {
   pixelsPerBase: number;

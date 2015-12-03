@@ -7,10 +7,10 @@
 import type {TwoBitSource} from './TwoBitDataSource';
 import type {VisualizedTrack, VizWithOptions} from './types';
 
-var React = require('react'),
-    Controls = require('./Controls'),
-    Menu = require('./Menu'),
-    VisualizationWrapper = require('./VisualizationWrapper');
+import React from 'react';
+import Controls from './Controls';
+import Menu from './Menu';
+import VisualizationWrapper from './VisualizationWrapper';
 
 type Props = {
   referenceSource: TwoBitSource;

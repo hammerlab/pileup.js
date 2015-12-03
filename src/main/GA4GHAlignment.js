@@ -7,8 +7,8 @@
 
 import type {CigarOp, MateProperties, Strand} from './Alignment';
 
-var ContigInterval = require('./ContigInterval'),
-    SamRead = require('./SamRead');
+import ContigInterval from './ContigInterval';
+import SamRead from './SamRead';
 
 // See https://github.com/ga4gh/schemas/blob/v0.5.1/src/main/resources/avro/common.avdl
 var OP_MAP = {

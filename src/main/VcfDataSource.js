@@ -5,15 +5,15 @@
  */
 'use strict';
 
-var Events = require('backbone').Events,
-    _ = require('underscore'),
-    Q = require('q');
-
-var ContigInterval = require('./ContigInterval'),
-    RemoteFile = require('./RemoteFile'),
-    VcfFile = require('./vcf');
-
 import type {Variant} from './vcf';
+
+import Events from 'backbone';
+import _ from 'underscore';
+import Q from 'q';
+
+import ContigInterval from './ContigInterval';
+import RemoteFile from './RemoteFile';
+import VcfFile from './vcf';
 
 export type VcfDataSource = {
   rangeChanged: (newRange: GenomeRange) => void;

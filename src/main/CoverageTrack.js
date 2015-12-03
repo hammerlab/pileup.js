@@ -10,17 +10,17 @@ import type {TwoBitSource} from './TwoBitDataSource';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {BinSummary} from './CoverageCache';
 
-var React = require('react'),
-    scale = require('./scale'),
-    shallowEquals = require('shallow-equals'),
-    d3utils = require('./d3utils'),
-    _ = require("underscore"),
-    dataCanvas = require('data-canvas'),
-    canvasUtils = require('./canvas-utils'),
-    CoverageCache = require('./CoverageCache'),
-    TiledCanvas = require('./TiledCanvas'),
-    style = require('./style'),
-    ContigInterval = require('./ContigInterval');
+import React from 'react';
+import scale from './scale';
+import shallowEquals from 'shallow-equals';
+import d3utils from './d3utils';
+import _ from 'underscore';
+import dataCanvas from 'data-canvas';
+import canvasUtils from './canvas-utils';
+import CoverageCache from './CoverageCache';
+import TiledCanvas from './TiledCanvas';
+import style from './style';
+import ContigInterval from './ContigInterval';
 
 // Basic setup (TODO: make this configurable by the user)
 const SHOW_MISMATCHES = true;

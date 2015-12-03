@@ -4,7 +4,7 @@
  */
 'use strict';
 
-var scale = require('./scale');
+import scale from './scale';
 
 // Subtype of GenomeRange
 type Range = {

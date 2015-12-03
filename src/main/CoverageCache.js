@@ -13,8 +13,8 @@ import type {BasePair, OpInfo} from './pileuputils';
 import type ContigInterval from '../main/ContigInterval';
 import type Interval from '../main/Interval';
 
-var {getOpInfo} = require('./pileuputils'),
-    utils = require('./utils');
+import {getOpInfo} from './pileuputils';
+import utils from './utils';
 
 export type BinSummary = {
   count: number;

@@ -4,7 +4,7 @@
  */
 'use strict';
 
-var jBinary = require('jbinary');
+import jBinary from 'jbinary';
 
 // Read a jBinary type at an offset in the buffer specified by another field.
 function typeAtOffset(baseType: any, offsetFieldName: string) {

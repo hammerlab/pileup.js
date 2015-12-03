@@ -9,15 +9,15 @@ import type {Variant} from './vcf';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {VizProps} from './VisualizationWrapper';
 
-var React = require('react'),
-    ReactDOM = require('react-dom');
+import React from 'react';
+import ReactDOM from 'react-dom';
 
-var d3utils = require('./d3utils'),
-    shallowEquals = require('shallow-equals'),
-    ContigInterval = require('./ContigInterval'),
-    canvasUtils = require('./canvas-utils'),
-    dataCanvas = require('data-canvas'),
-    style = require('./style');
+import d3utils from './d3utils';
+import shallowEquals from 'shallow-equals';
+import ContigInterval from './ContigInterval';
+import canvasUtils from './canvas-utils';
+import dataCanvas from 'data-canvas';
+import style from './style';
 
 
 class VariantTrack extends React.Component {

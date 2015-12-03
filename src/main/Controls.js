@@ -6,11 +6,11 @@
 
 import type {PartialGenomeRange} from './types';
 
-var React = require('react'),
-    _ = require('underscore');
+import React from 'react';
+import _ from 'underscore';
 
-var utils = require('./utils'),
-    Interval = require('./Interval');
+import utils from './utils';
+import Interval from './Interval';
 
 type Props = {
   range: ?GenomeRange;

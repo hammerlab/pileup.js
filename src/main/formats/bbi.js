@@ -6,7 +6,7 @@
 
 'use strict';
 
-var {typeAtOffset} = require('./helpers');
+import {typeAtOffset} from './helpers';
 
 var TYPE_SET = {
   'jBinary.littleEndian': true,
