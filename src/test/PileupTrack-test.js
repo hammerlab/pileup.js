@@ -5,23 +5,23 @@
  */
 'use strict';
 
-var expect = require('chai').expect;
-
-var Q = require('q'),
-    _ = require('underscore');
-
 import type SamRead from '../main/SamRead';
 
-var pileup = require('../main/pileup'),
-    TwoBit = require('../main/TwoBit'),
-    TwoBitDataSource = require('../main/TwoBitDataSource'),
-    Bam = require('../main/bam'),
-    BamDataSource = require('../main/BamDataSource'),
-    RemoteFile = require('../main/RemoteFile'),
-    MappedRemoteFile = require('./MappedRemoteFile'),
-    ContigInterval = require('../main/ContigInterval'),
-    {waitFor} = require('./async'),
-    dataCanvas = require('data-canvas');
+import {expect} from 'chai';
+
+import Q from 'q';
+import _ from 'underscore';
+
+import pileup from '../main/pileup';
+import TwoBit from '../main/TwoBit';
+import TwoBitDataSource from '../main/TwoBitDataSource';
+import Bam from '../main/bam';
+import BamDataSource from '../main/BamDataSource';
+import RemoteFile from '../main/RemoteFile';
+import MappedRemoteFile from './MappedRemoteFile';
+import ContigInterval from '../main/ContigInterval';
+import {waitFor} from './async';
+import dataCanvas from 'data-canvas';
 
 
 // This is like TwoBit, but allows a controlled release of sequence data.

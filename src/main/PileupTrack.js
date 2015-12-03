@@ -12,20 +12,20 @@ import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type Interval from './Interval';
 import type {VizProps} from './VisualizationWrapper';
 
-var React = require('react'),
-    shallowEquals = require('shallow-equals'),
-    _ = require('underscore');
+import React from 'react';
+import shallowEquals from 'shallow-equals';
+import _ from 'underscore';
 
-var scale = require('./scale'),
-    d3utils = require('./d3utils'),
-    {CigarOp} = require('./pileuputils'),
-    ContigInterval = require('./ContigInterval'),
-    DisplayMode = require('./DisplayMode'),
-    PileupCache = require('./PileupCache'),
-    TiledCanvas = require('./TiledCanvas'),
-    canvasUtils = require('./canvas-utils'),
-    dataCanvas = require('data-canvas'),
-    style = require('./style');
+import scale from './scale';
+import d3utils from './d3utils';
+import {CigarOp} from './pileuputils';
+import ContigInterval from './ContigInterval';
+import DisplayMode from './DisplayMode';
+import PileupCache from './PileupCache';
+import TiledCanvas from './TiledCanvas';
+import canvasUtils from './canvas-utils';
+import dataCanvas from 'data-canvas';
+import style from './style';
 
 
 var READ_HEIGHT = 13;

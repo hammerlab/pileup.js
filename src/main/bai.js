@@ -10,12 +10,12 @@ import type RemoteFile from './RemoteFile';
 import type ContigInterval from './ContigInterval';
 import type {Chunk} from './types';
 
-var jBinary = require('jbinary'),
-    jDataView = require('jdataview'),
-    _ = require('underscore'),
-    Q = require('q'),
-    bamTypes = require('./formats/bamTypes'),
-    VirtualOffset = require('./VirtualOffset');
+import jBinary from 'jbinary';
+import jDataView from 'jdataview';
+import _ from 'underscore';
+import Q from 'q';
+import bamTypes from './formats/bamTypes';
+import VirtualOffset from './VirtualOffset';
 
 
 // In the event that index chunks aren't available from an external source, it

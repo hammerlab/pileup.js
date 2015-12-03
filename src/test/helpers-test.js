@@ -1,10 +1,10 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var jBinary = require('jbinary');
-var helpers = require('../main/formats/helpers');
+import jBinary from 'jbinary';
+import helpers from '../main/formats/helpers';
 
 describe('jBinary Helpers', function() {
   it('should read sized blocks', function() {

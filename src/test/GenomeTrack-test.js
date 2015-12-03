@@ -7,16 +7,16 @@
 
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var ReactTestUtils = require('react-addons-test-utils');
+import ReactTestUtils from 'react-addons-test-utils';
 
-var pileup = require('../main/pileup'),
-    TwoBit = require('../main/TwoBit'),
-    TwoBitDataSource = require('../main/TwoBitDataSource'),
-    dataCanvas = require('data-canvas'),
-    MappedRemoteFile = require('./MappedRemoteFile'),
-    {waitFor} = require('./async');
+import pileup from '../main/pileup';
+import TwoBit from '../main/TwoBit';
+import TwoBitDataSource from '../main/TwoBitDataSource';
+import dataCanvas from 'data-canvas';
+import MappedRemoteFile from './MappedRemoteFile';
+import {waitFor} from './async';
 
 describe('GenomeTrack', function() {
   var testDiv = document.getElementById('testdiv');

@@ -5,7 +5,7 @@
  */
 'use strict';
 
-var Q = require('q');
+import Q from 'q';
 
 type Chunk = {
   start: number;

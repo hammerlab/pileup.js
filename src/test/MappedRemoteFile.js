@@ -18,10 +18,10 @@
  */
 'use strict';
 
-var Q = require('q');
+import Q from 'q';
 
-var RemoteFile = require('../main/RemoteFile'),
-    Interval = require('../main/Interval');
+import RemoteFile from '../main/RemoteFile';
+import Interval from '../main/Interval';
 
 class MappedRemoteFile extends RemoteFile {
   maps: Array<Interval>;

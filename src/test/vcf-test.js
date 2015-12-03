@@ -1,11 +1,11 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var VcfFile = require('../main/vcf'),
-    ContigInterval = require('../main/ContigInterval'),
-    RemoteFile = require('../main/RemoteFile');
+import VcfFile from '../main/vcf';
+import ContigInterval from '../main/ContigInterval';
+import RemoteFile from '../main/RemoteFile';
 
 describe('VCF', function() {
   it('should respond to queries', function() {

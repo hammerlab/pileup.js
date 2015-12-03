@@ -8,17 +8,17 @@ import type {VizProps} from './VisualizationWrapper';
 import type {TwoBitSource} from './TwoBitDataSource';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 
-var React = require('react'),
-    ReactDOM = require('react-dom'),
-    shallowEquals = require('shallow-equals');
+import React from 'react';
+import ReactDOM from 'react-dom';
+import shallowEquals from 'shallow-equals';
 
-var canvasUtils = require('./canvas-utils'),
-    ContigInterval = require('./ContigInterval'),
-    dataCanvas = require('data-canvas'),
-    d3utils = require('./d3utils'),
-    DisplayMode = require('./DisplayMode'),
-    TiledCanvas = require('./TiledCanvas'),
-    style = require('./style');
+import canvasUtils from './canvas-utils';
+import ContigInterval from './ContigInterval';
+import dataCanvas from 'data-canvas';
+import d3utils from './d3utils';
+import DisplayMode from './DisplayMode';
+import TiledCanvas from './TiledCanvas';
+import style from './style';
 
 
 function renderGenome(ctx: DataCanvasRenderingContext2D,

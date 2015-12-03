@@ -1,13 +1,13 @@
 /* @flow */
 'use strict';
 
-var Events = require('backbone').Events,
-    _ = require('underscore'),
-    Q = require('q');
+import _ from 'underscore';
+import Q from 'q';
+import {Events} from 'backbone';
 
-var ContigInterval = require('./ContigInterval'),
-    BamFile = require('./bam'),
-    RemoteFile = require('./RemoteFile');
+import ContigInterval from './ContigInterval';
+import BamFile from './bam';
+import RemoteFile from './RemoteFile';
 
 import type {Alignment, AlignmentDataSource} from './Alignment';
 

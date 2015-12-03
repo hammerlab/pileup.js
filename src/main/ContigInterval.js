@@ -1,8 +1,8 @@
 /* @flow */
 'use strict';
 
-var Interval = require('./Interval'),
-    {flatMap} = require('./utils');
+import Interval from './Interval';
+import {flatMap} from './utils';
 
 /**
  * Class representing a closed interval on the genome: contig:start-stop.

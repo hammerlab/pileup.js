@@ -1,11 +1,11 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var BigBed = require('../main/BigBed'),
-    BigBedDataSource = require('../main/BigBedDataSource'),
-    ContigInterval = require('../main/ContigInterval');
+import BigBed from '../main/BigBed';
+import BigBedDataSource from '../main/BigBedDataSource';
+import ContigInterval from '../main/ContigInterval';
 
 describe('BigBedDataSource', function() {
   function getTestSource() {

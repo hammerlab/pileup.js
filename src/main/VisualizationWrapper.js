@@ -7,11 +7,11 @@
 import type {TwoBitSource} from './TwoBitDataSource';
 import type {VizWithOptions} from './types';
 
-var React = require('react'),
-    ReactDOM = require('react-dom'),
-    d3utils = require('./d3utils'),
-    _ = require('underscore'),
-    d3 = require('../lib/minid3');
+import React from 'react';
+import ReactDOM from 'react-dom';
+import d3utils from './d3utils';
+import _ from 'underscore';
+import d3 from '../lib/minid3';
 
 export type VizProps = {
   width: number;

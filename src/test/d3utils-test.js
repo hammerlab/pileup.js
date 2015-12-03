@@ -1,7 +1,7 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
+var {expect} = require('chai');
 var d3utils = require('../main/d3utils');
 
 describe('d3utils', function() {

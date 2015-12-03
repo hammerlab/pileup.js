@@ -1,8 +1,8 @@
 /* @flow */
 'use strict';
 
-var _ = require('underscore');
-var Interval = require('./Interval');
+import _ from 'underscore';
+import Interval from './Interval';
 
 class CodingInterval extends Interval {
   isCoding: boolean;

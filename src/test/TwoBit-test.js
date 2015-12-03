@@ -1,12 +1,10 @@
 /* @flow */
 'use strict';
 
-var chai = require('chai');
-var expect = chai.expect;
-var assert = chai.assert;
+import {expect, assert} from 'chai';
 
-var TwoBit = require('../main/TwoBit'),
-    RemoteFile = require('../main/RemoteFile');
+import TwoBit from '../main/TwoBit';
+import RemoteFile from '../main/RemoteFile';
 
 describe('TwoBit', function() {
   function getTestTwoBit() {

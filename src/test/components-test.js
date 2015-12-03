@@ -1,14 +1,14 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var _ = require('underscore'),
-    dataCanvas = require('data-canvas');
+import _ from 'underscore';
+import dataCanvas from 'data-canvas';
 
-var pileup = require('../main/pileup'),
-    ContigInterval = require('../main/ContigInterval'),
-    {waitFor} = require('./async');
+import pileup from '../main/pileup';
+import ContigInterval from '../main/ContigInterval';
+import {waitFor} from './async';
     
 describe('pileup', function() {
   var tracks = [

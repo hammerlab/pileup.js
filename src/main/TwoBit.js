@@ -5,13 +5,13 @@
  */
 'use strict';
 
-var Q = require('q'),
-    _ = require('underscore'),
-    jBinary = require('jbinary');
-
 import type RemoteFile from './RemoteFile';
 
-var twoBitTypes = require('./formats/twoBitTypes');
+import Q from 'q';
+import _ from 'underscore';
+import jBinary from 'jbinary';
+
+import twoBitTypes from './formats/twoBitTypes';
 
 var BASE_PAIRS = [
   'T',  // 0=00

@@ -15,15 +15,15 @@
  */
 'use strict';
 
-var Events = require('backbone').Events,
-    Q = require('q'),
-    _ = require('underscore');
+import Q from 'q';
+import _ from 'underscore';
+import {Events} from 'backbone';
 
-var ContigInterval = require('./ContigInterval'),
-    TwoBit = require('./TwoBit'),
-    RemoteFile = require('./RemoteFile'),
-    SequenceStore = require('./SequenceStore'),
-    utils = require('./utils');
+import ContigInterval from './ContigInterval';
+import TwoBit from './TwoBit';
+import RemoteFile from './RemoteFile';
+import SequenceStore from './SequenceStore';
+import utils from './utils';
 
 
 // Requests for 2bit ranges are expanded to begin & end at multiples of this

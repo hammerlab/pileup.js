@@ -21,6 +21,8 @@
 .*node_modules/source-map.*
 .*node_modules/exorcist.*
 .*react/node_modules/fbjs.*
+.*fbjs/.*
+.*node_modules/npmconf.*
 .*/node_modules/react/.*
 .*coverage.*
 

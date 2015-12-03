@@ -1,11 +1,12 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var Q = require('q');
-var BigBed = require('../main/BigBed');
-var ContigInterval = require('../main/ContigInterval');
+import Q from 'q';
+
+import BigBed from '../main/BigBed';
+import ContigInterval from '../main/ContigInterval';
 
 describe('BigBed', function() {
   function getTestBigBed() {

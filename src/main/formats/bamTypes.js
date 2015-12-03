@@ -6,11 +6,11 @@
 
 'use strict';
 
-var jBinary = require('jbinary');
-var _ = require('underscore');
-var VirtualOffset = require('../VirtualOffset');
+import jBinary from 'jbinary';
+import _ from 'underscore';
 
-var {nullString, uint64native} = require('./helpers');
+import VirtualOffset from '../VirtualOffset';
+import {nullString, uint64native} from './helpers';
 
 var SEQUENCE_VALUES = ['=', 'A', 'C', 'M', 'G', 'R', 'S', 'V', 'T', 'W', 'Y', 'H', 'K', 'D', 'B', 'N'];
 var CIGAR_OPS = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X'];

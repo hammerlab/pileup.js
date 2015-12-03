@@ -7,10 +7,10 @@
 import type {InflatedBlock, PartialGenomeRange} from './types';
 import type Q from 'q';
 
-var pako = require('pako/lib/inflate'),
-    _ = require('underscore');
+import pako from 'pako/lib/inflate';
+import _ from 'underscore';
 
-var Interval = require('./Interval');
+import Interval from './Interval';
 
 // Compare two tuples of equal length. Is t1 <= t2?
 // TODO: make this tupleLessOrEqual<T> -- it works with strings or booleans, too.

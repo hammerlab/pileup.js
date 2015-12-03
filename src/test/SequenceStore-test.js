@@ -1,7 +1,7 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
 import SequenceStore from '../main/SequenceStore';
 import ContigInterval from '../main/ContigInterval';

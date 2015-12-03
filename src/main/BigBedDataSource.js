@@ -3,14 +3,13 @@
 
 import type {Strand} from './Alignment';
 
-var Events = require('backbone').Events,
-    _ = require('underscore'),
-    Q = require('q');
+import _ from 'underscore';
+import Q from 'q';
+import {Events} from 'backbone';
 
-
-var ContigInterval = require('./ContigInterval'),
-    Interval = require('./Interval'),
-    BigBed = require('./BigBed');
+import ContigInterval from './ContigInterval';
+import Interval from './Interval';
+import BigBed from './BigBed';
 
 
 export type Gene = {

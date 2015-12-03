@@ -1,12 +1,12 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
-var Q = require('q');
+import {expect} from 'chai';
+import Q from 'q';
 
-var TwoBit = require('../main/TwoBit'),
-    TwoBitDataSource = require('../main/TwoBitDataSource'),
-    RemoteFile = require('../main/RemoteFile');
+import TwoBit from '../main/TwoBit';
+import TwoBitDataSource from '../main/TwoBitDataSource';
+import RemoteFile from '../main/RemoteFile';
 
 describe('TwoBitDataSource', function() {
   function getTestSource() {

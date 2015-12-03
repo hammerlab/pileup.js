@@ -4,11 +4,11 @@
 import type Q from 'q';
 import type SamRead from '../main/SamRead';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var RemoteFile = require('../main/RemoteFile'),
-    Bam = require('../main/bam'),
-    ContigInterval = require('../main/ContigInterval');
+import RemoteFile from '../main/RemoteFile';
+import Bam from '../main/bam';
+import ContigInterval from '../main/ContigInterval';
 
 describe('SamRead', function() {
 

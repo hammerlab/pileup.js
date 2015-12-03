@@ -4,7 +4,7 @@
  */
 'use strict';
 
-var Q = require('q');
+import Q from 'q';
 
 var WAIT_FOR_POLL_INTERVAL_MS = 100;
 
