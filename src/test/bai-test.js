@@ -1,15 +1,15 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var jBinary = require('jbinary');
+import jBinary from 'jbinary';
 
-var BaiFile = require('../main/bai'),
-    bamTypes = require('../main/formats/bamTypes'),
-    ContigInterval = require('../main/ContigInterval'),
-    RemoteFile = require('../main/RemoteFile'),
-    RecordedRemoteFile = require('./RecordedRemoteFile');
+import BaiFile from '../main/bai';
+import bamTypes from '../main/formats/bamTypes';
+import ContigInterval from '../main/ContigInterval';
+import RemoteFile from '../main/RemoteFile';
+import RecordedRemoteFile from './RecordedRemoteFile';
 
 function chunkToString(chunk) {
   return `${chunk.chunk_beg}-${chunk.chunk_end}`;

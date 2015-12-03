@@ -5,12 +5,12 @@
 
 import type {Alignment, CigarOp, MateProperties, Strand} from '../main/Alignment';
 
-var expect = require('chai').expect;
-var _ = require('underscore');
+import {expect} from 'chai';
+import _ from 'underscore';
 
-var CoverageCache = require('../main/CoverageCache'),
-    ContigInterval = require('../main/ContigInterval'),
-    {makeRead, makeReadPair, fakeSource} = require('./FakeAlignment');
+import CoverageCache from '../main/CoverageCache';
+import ContigInterval from '../main/ContigInterval';
+import {makeRead, makeReadPair, fakeSource} from './FakeAlignment';
 
 describe('CoverageCache', function() {
   function ci(chr: string, start: number, end:number) {

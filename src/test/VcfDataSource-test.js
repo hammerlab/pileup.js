@@ -1,12 +1,12 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var VcfFile = require('../main/vcf'),
-    VcfDataSource = require('../main/VcfDataSource'),
-    ContigInterval = require('../main/ContigInterval'),
-    RemoteFile = require('../main/RemoteFile');
+import VcfFile from '../main/vcf';
+import VcfDataSource from '../main/VcfDataSource';
+import ContigInterval from '../main/ContigInterval';
+import RemoteFile from '../main/RemoteFile';
 
 describe('VcfDataSource', function() {
   function getTestSource() {

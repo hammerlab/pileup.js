@@ -1,9 +1,9 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var Interval = require('../main/Interval');
+import Interval from '../main/Interval';
 
 describe('Interval', function() {
   it('should have start/stop/length', function() {

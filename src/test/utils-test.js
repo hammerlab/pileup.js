@@ -1,13 +1,13 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var pako = require('pako'),
-    jBinary = require('jbinary');
+import pako from 'pako';
+import jBinary from 'jbinary';
 
-var utils = require('../main/utils'),
-    Interval = require('../main/Interval');
+import utils from '../main/utils';
+import Interval from '../main/Interval';
 
 describe('utils', function() {
   describe('tupleLessOrEqual', function() {

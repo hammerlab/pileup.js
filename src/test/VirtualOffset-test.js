@@ -1,11 +1,11 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var jBinary = require('jbinary'),
-    bamTypes = require('../main/formats/bamTypes'),
-    VirtualOffset = require('../main/VirtualOffset');
+import jBinary from 'jbinary';
+import bamTypes from '../main/formats/bamTypes';
+import VirtualOffset from '../main/VirtualOffset';
 
 describe('VirtualOffset', function() {
   // These test that .fromBlob() is equivalent to jBinary.read('VirtualOffset').

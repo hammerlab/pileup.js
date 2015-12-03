@@ -7,10 +7,10 @@
 
 import type Q from 'q';
 
-var _ = require('underscore');
+import _ from 'underscore';
 
-var RemoteFile = require('../main/RemoteFile'),
-    Interval = require('../main/Interval');
+import RemoteFile from '../main/RemoteFile';
+import Interval from '../main/Interval';
 
 class RecordedRemoteFile extends RemoteFile {
   requests: Array<Interval>;

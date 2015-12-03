@@ -1,11 +1,11 @@
 /** @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var GA4GHAlignment = require('../main/GA4GHAlignment'),
-    RemoteFile = require('../main/RemoteFile'),
-    Bam = require('../main/bam');
+import GA4GHAlignment from '../main/GA4GHAlignment';
+import RemoteFile from '../main/RemoteFile';
+import Bam from '../main/bam';
 
 describe('GA4GHAlignment', function() {
   var sampleAlignments = [];

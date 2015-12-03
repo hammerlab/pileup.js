@@ -1,13 +1,13 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var Bam = require('../main/bam'),
-    ContigInterval = require('../main/ContigInterval'),
-    RemoteFile = require('../main/RemoteFile'),
-    MappedRemoteFile = require('./MappedRemoteFile'),
-    VirtualOffset = require('../main/VirtualOffset');
+import Bam from '../main/bam';
+import ContigInterval from '../main/ContigInterval';
+import RemoteFile from '../main/RemoteFile';
+import MappedRemoteFile from './MappedRemoteFile';
+import VirtualOffset from '../main/VirtualOffset';
 
 describe('BAM', function() {
   it('should parse BAM files', function() {

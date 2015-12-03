@@ -1,12 +1,12 @@
 /** @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var _ = require('underscore');
+import _ from 'underscore';
 
-var Interval = require('../main/Interval'),
-    TiledCanvas = require('../main/TiledCanvas');
+import Interval from '../main/Interval';
+import TiledCanvas from '../main/TiledCanvas';
 
 describe('TiledCanvas', function() {
   describe('getNewTileRanges', function() {

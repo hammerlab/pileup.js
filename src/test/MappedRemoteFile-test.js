@@ -1,12 +1,12 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var jBinary = require('jbinary'),
-    Q = require('q');
+import jBinary from 'jbinary';
+import Q from 'q';
 
-var MappedRemoteFile = require('./MappedRemoteFile');
+import MappedRemoteFile from './MappedRemoteFile';
 
 describe('MappedRemoteFile', function() {
   function bufferToText(buf) {

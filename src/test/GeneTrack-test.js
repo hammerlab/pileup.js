@@ -7,11 +7,11 @@
 
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var pileup = require('../main/pileup'),
-    dataCanvas = require('data-canvas'),
-    {waitFor} = require('./async');
+import pileup from '../main/pileup';
+import dataCanvas from 'data-canvas';
+import {waitFor} from './async';
 
 describe('GeneTrack', function() {
   var testDiv = document.getElementById('testdiv');

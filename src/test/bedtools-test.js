@@ -1,10 +1,10 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var bedtools = require('../main/bedtools'),
-    Interval = require('../main/Interval');
+import bedtools from '../main/bedtools';
+import Interval from '../main/Interval';
 
 describe('bedtools', function() {
   describe('splitCodingExons', function() {

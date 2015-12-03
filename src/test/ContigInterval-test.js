@@ -1,9 +1,9 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var ContigInterval = require('../main/ContigInterval');
+import ContigInterval from '../main/ContigInterval';
 
 describe('ContigInterval', function() {
   it('should have basic accessors', function() {

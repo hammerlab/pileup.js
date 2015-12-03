@@ -1,19 +1,16 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
-
-require('chai').config.truncateThreshold = 0; // disable truncating
-
-var _ = require('underscore');
-
-var {pileup, addToPileup,  getOpInfo} = require('../main/pileuputils'),
-    Interval = require('../main/Interval'),
-    ContigInterval = require('../main/ContigInterval'),
-    Bam = require('../main/bam'),
-    RemoteFile = require('../main/RemoteFile');
-
 import type SamRead from '../main/SamRead';
+
+import {expect} from 'chai';
+import _ from 'underscore';
+
+import {pileup, addToPileup,  getOpInfo} from '../main/pileuputils';
+import Interval from '../main/Interval';
+import ContigInterval from '../main/ContigInterval';
+import Bam from '../main/bam';
+import RemoteFile from '../main/RemoteFile';
 
 describe('pileuputils', function() {
   // This checks that pileup's guarantee is met.

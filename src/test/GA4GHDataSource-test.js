@@ -1,13 +1,13 @@
 /** @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var sinon = require('sinon');
+import sinon from 'sinon';
 
-var ContigInterval = require('../main/ContigInterval'),
-    GA4GHDataSource = require('../main/GA4GHDataSource'),
-    RemoteFile = require('../main/RemoteFile');
+import ContigInterval from '../main/ContigInterval';
+import GA4GHDataSource from '../main/GA4GHDataSource';
+import RemoteFile from '../main/RemoteFile';
     
 describe('GA4GHDataSource', function() {
   var server: any = null, response;

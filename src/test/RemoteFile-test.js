@@ -1,11 +1,11 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var jBinary = require('jbinary');
+import jBinary from 'jbinary';
 
-var RemoteFile = require('../main/RemoteFile');
+import RemoteFile from '../main/RemoteFile';
 
 describe('RemoteFile', () => {
   function bufferToText(buf) {

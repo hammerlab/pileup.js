@@ -5,14 +5,14 @@
 
 import type {Alignment, CigarOp, MateProperties, Strand} from '../main/Alignment';
 
-var expect = require('chai').expect;
-var _ = require('underscore');
+import {expect} from 'chai';
+import _ from 'underscore';
 
-var PileupCache = require('../main/PileupCache'),
-    ContigInterval = require('../main/ContigInterval'),
-    Bam = require('../main/bam'),
-    RemoteFile = require('../main/RemoteFile'),
-    {makeRead, makeReadPair, fakeSource} = require('./FakeAlignment');
+import PileupCache from '../main/PileupCache';
+import ContigInterval from '../main/ContigInterval';
+import Bam from '../main/bam';
+import RemoteFile from '../main/RemoteFile';
+import {makeRead, makeReadPair, fakeSource} from './FakeAlignment';
 
 
 describe('PileupCache', function() {

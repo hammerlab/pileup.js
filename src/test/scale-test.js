@@ -1,8 +1,9 @@
 /** @flow */
 'use strict';
 
-var expect = require('chai').expect;
-var scale = require('../main/scale');
+import {expect} from 'chai';
+
+import scale from '../main/scale';
 
 describe('scale', function() {
   it('should define a linear scale', function() {

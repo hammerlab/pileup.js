@@ -1,12 +1,12 @@
 /* @flow */
 'use strict';
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 
-var Bam = require('../main/bam'),
-    BamDataSource = require('../main/BamDataSource'),
-    ContigInterval = require('../main/ContigInterval'),
-    MappedRemoteFile = require('./MappedRemoteFile');
+import Bam from '../main/bam';
+import BamDataSource from '../main/BamDataSource';
+import ContigInterval from '../main/ContigInterval';
+import MappedRemoteFile from './MappedRemoteFile';
 
 describe('BamDataSource', function() {
   function getTestSource() {

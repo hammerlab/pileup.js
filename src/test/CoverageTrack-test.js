@@ -6,16 +6,16 @@
  */
 'use strict';
 
-var expect = require('chai').expect;
-
 import type SamRead from '../main/SamRead';
 
-var pileup = require('../main/pileup'),
-    TwoBit = require('../main/TwoBit'),
-    TwoBitDataSource = require('../main/TwoBitDataSource'),
-    MappedRemoteFile = require('./MappedRemoteFile'),
-    dataCanvas = require('data-canvas'),
-    {waitFor} = require('./async');
+import {expect} from 'chai';
+
+import pileup from '../main/pileup';
+import TwoBit from '../main/TwoBit';
+import TwoBitDataSource from '../main/TwoBitDataSource';
+import MappedRemoteFile from './MappedRemoteFile';
+import dataCanvas from 'data-canvas';
+import {waitFor} from './async';
 
 describe('CoverageTrack', function() {
   var testDiv = document.getElementById('testdiv');
