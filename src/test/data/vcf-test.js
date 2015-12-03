@@ -3,9 +3,9 @@
 
 import {expect} from 'chai';
 
-import VcfFile from '../main/data/vcf';
-import ContigInterval from '../main/ContigInterval';
-import RemoteFile from '../main/RemoteFile';
+import VcfFile from '../../main/data/vcf';
+import ContigInterval from '../../main/ContigInterval';
+import RemoteFile from '../../main/RemoteFile';
 
 describe('VCF', function() {
   it('should respond to queries', function() {

@@ -5,8 +5,8 @@ import {expect} from 'chai';
 
 import Q from 'q';
 
-import BigBed from '../main/data/BigBed';
-import ContigInterval from '../main/ContigInterval';
+import BigBed from '../../main/data/BigBed';
+import ContigInterval from '../../main/ContigInterval';
 
 describe('BigBed', function() {
   function getTestBigBed() {

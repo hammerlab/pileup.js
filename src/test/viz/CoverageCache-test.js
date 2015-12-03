@@ -3,14 +3,14 @@
  */
 'use strict';
 
-import type {Alignment, CigarOp, MateProperties, Strand} from '../main/Alignment';
+import type {Alignment, CigarOp, MateProperties, Strand} from '../../main/Alignment';
 
 import {expect} from 'chai';
 import _ from 'underscore';
 
-import CoverageCache from '../main/viz/CoverageCache';
-import ContigInterval from '../main/ContigInterval';
-import {makeRead, makeReadPair, fakeSource} from './FakeAlignment';
+import CoverageCache from '../../main/viz/CoverageCache';
+import ContigInterval from '../../main/ContigInterval';
+import {makeRead, makeReadPair, fakeSource} from '../FakeAlignment';
 
 describe('CoverageCache', function() {
   function ci(chr: string, start: number, end:number) {

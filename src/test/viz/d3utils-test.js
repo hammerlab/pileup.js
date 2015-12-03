@@ -2,7 +2,7 @@
 'use strict';
 
 var {expect} = require('chai');
-var d3utils = require('../main/viz/d3utils');
+var d3utils = require('../../main/viz/d3utils');
 
 describe('d3utils', function() {
   describe('formatRange', function() {

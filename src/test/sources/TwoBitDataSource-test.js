@@ -4,9 +4,9 @@
 import {expect} from 'chai';
 import Q from 'q';
 
-import TwoBit from '../main/data/TwoBit';
-import TwoBitDataSource from '../main/sources/TwoBitDataSource';
-import RemoteFile from '../main/RemoteFile';
+import TwoBit from '../../main/data/TwoBit';
+import TwoBitDataSource from '../../main/sources/TwoBitDataSource';
+import RemoteFile from '../../main/RemoteFile';
 
 describe('TwoBitDataSource', function() {
   function getTestSource() {

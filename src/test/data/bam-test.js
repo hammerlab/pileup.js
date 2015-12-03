@@ -3,11 +3,11 @@
 
 import {expect} from 'chai';
 
-import Bam from '../main/data/bam';
-import ContigInterval from '../main/ContigInterval';
-import RemoteFile from '../main/RemoteFile';
-import MappedRemoteFile from './MappedRemoteFile';
-import VirtualOffset from '../main/data/VirtualOffset';
+import Bam from '../../main/data/bam';
+import ContigInterval from '../../main/ContigInterval';
+import RemoteFile from '../../main/RemoteFile';
+import MappedRemoteFile from '../MappedRemoteFile';
+import VirtualOffset from '../../main/data/VirtualOffset';
 
 describe('BAM', function() {
   it('should parse BAM files', function() {

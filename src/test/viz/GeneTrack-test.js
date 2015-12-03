@@ -9,9 +9,9 @@
 
 import {expect} from 'chai';
 
-import pileup from '../main/pileup';
+import pileup from '../../main/pileup';
 import dataCanvas from 'data-canvas';
-import {waitFor} from './async';
+import {waitFor} from '../async';
 
 describe('GeneTrack', function() {
   var testDiv = document.getElementById('testdiv');

@@ -3,10 +3,10 @@
 
 import {expect} from 'chai';
 
-import Bam from '../main/data/bam';
-import BamDataSource from '../main/sources/BamDataSource';
-import ContigInterval from '../main/ContigInterval';
-import MappedRemoteFile from './MappedRemoteFile';
+import Bam from '../../main/data/bam';
+import BamDataSource from '../../main/sources/BamDataSource';
+import ContigInterval from '../../main/ContigInterval';
+import MappedRemoteFile from '../MappedRemoteFile';
 
 describe('BamDataSource', function() {
   function getTestSource() {

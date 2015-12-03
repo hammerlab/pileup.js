@@ -5,11 +5,11 @@ import {expect} from 'chai';
 
 import jBinary from 'jbinary';
 
-import BaiFile from '../main/data/bai';
-import bamTypes from '../main/data/formats/bamTypes';
-import ContigInterval from '../main/ContigInterval';
-import RemoteFile from '../main/RemoteFile';
-import RecordedRemoteFile from './RecordedRemoteFile';
+import BaiFile from '../../main/data/bai';
+import bamTypes from '../../main/data/formats/bamTypes';
+import ContigInterval from '../../main/ContigInterval';
+import RemoteFile from '../../main/RemoteFile';
+import RecordedRemoteFile from '../RecordedRemoteFile';
 
 function chunkToString(chunk) {
   return `${chunk.chunk_beg}-${chunk.chunk_end}`;

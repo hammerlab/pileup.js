@@ -3,8 +3,8 @@
 
 import {expect} from 'chai';
 
-import bedtools from '../main/data/bedtools';
-import Interval from '../main/Interval';
+import bedtools from '../../main/data/bedtools';
+import Interval from '../../main/Interval';
 
 describe('bedtools', function() {
   describe('splitCodingExons', function() {

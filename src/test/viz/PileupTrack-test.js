@@ -5,22 +5,22 @@
  */
 'use strict';
 
-import type SamRead from '../main/data/SamRead';
+import type SamRead from '../../main/data/SamRead';
 
 import {expect} from 'chai';
 
 import Q from 'q';
 import _ from 'underscore';
 
-import pileup from '../main/pileup';
-import TwoBit from '../main/data/TwoBit';
-import TwoBitDataSource from '../main/sources/TwoBitDataSource';
-import Bam from '../main/data/bam';
-import BamDataSource from '../main/sources/BamDataSource';
-import RemoteFile from '../main/RemoteFile';
-import MappedRemoteFile from './MappedRemoteFile';
-import ContigInterval from '../main/ContigInterval';
-import {waitFor} from './async';
+import pileup from '../../main/pileup';
+import TwoBit from '../../main/data/TwoBit';
+import TwoBitDataSource from '../../main/sources/TwoBitDataSource';
+import Bam from '../../main/data/bam';
+import BamDataSource from '../../main/sources/BamDataSource';
+import RemoteFile from '../../main/RemoteFile';
+import MappedRemoteFile from '../MappedRemoteFile';
+import ContigInterval from '../../main/ContigInterval';
+import {waitFor} from '../async';
 import dataCanvas from 'data-canvas';
 
 

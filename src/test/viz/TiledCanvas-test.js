@@ -5,8 +5,8 @@ import {expect} from 'chai';
 
 import _ from 'underscore';
 
-import Interval from '../main/Interval';
-import TiledCanvas from '../main/viz/TiledCanvas';
+import Interval from '../../main/Interval';
+import TiledCanvas from '../../main/viz/TiledCanvas';
 
 describe('TiledCanvas', function() {
   describe('getNewTileRanges', function() {
