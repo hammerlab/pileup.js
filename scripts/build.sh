@@ -6,6 +6,7 @@ set -o errexit
 # Transpile individual files. This is useful if another module,
 # e.g. cycledash, wants to require('pileup').
 # The dist/test files are required for code coverage
+mkdir -p dist/test/{data,source,viz}
 babel src --retain-lines --ignore src/lib --out-dir dist
 cp -r src/lib dist/
 
@@ -15,7 +16,7 @@ browserify \
   -t [ babelify --ignore src/lib ] \
   --debug \
   -o dist/tests.js \
-  src/test/*.js
+  $(find src/test -name '*.js')
 
 # Create dist/pileup.js
 browserify \
