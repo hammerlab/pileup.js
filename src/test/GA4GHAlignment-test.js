@@ -5,7 +5,7 @@ import {expect} from 'chai';
 
 import GA4GHAlignment from '../main/GA4GHAlignment';
 import RemoteFile from '../main/RemoteFile';
-import Bam from '../main/bam';
+import Bam from '../main/data/bam';
 
 describe('GA4GHAlignment', function() {
   var sampleAlignments = [];

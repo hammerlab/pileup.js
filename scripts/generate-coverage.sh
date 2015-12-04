@@ -13,7 +13,7 @@ cp -r dist/test coverage/test  # test code needn't be covered
 cp -r dist/lib coverage/lib
 
 # Build a combined file for running the tests in-browser
-browserify coverage/**/*.js -o coverage/tests.js
+browserify $(find coverage -name '*.js') -o coverage/tests.js
 
 # Run http-server and save its PID for cleanup
 http-server > /dev/null &

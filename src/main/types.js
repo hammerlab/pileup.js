@@ -48,7 +48,7 @@ export type PartialGenomeRange = {
 
 // BAM/BAI parsing
 
-import type VirtualOffset from './VirtualOffset';
+import type VirtualOffset from './data/VirtualOffset';
 
 export type Chunk = {
   chunk_beg: VirtualOffset;

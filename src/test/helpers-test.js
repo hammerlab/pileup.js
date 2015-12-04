@@ -4,7 +4,7 @@
 import {expect} from 'chai';
 
 import jBinary from 'jbinary';
-import helpers from '../main/formats/helpers';
+import helpers from '../main/data/formats/helpers';
 
 describe('jBinary Helpers', function() {
   it('should read sized blocks', function() {

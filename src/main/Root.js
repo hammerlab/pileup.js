@@ -4,7 +4,7 @@
  */
 'use strict';
 
-import type {TwoBitSource} from './TwoBitDataSource';
+import type {TwoBitSource} from './sources/TwoBitDataSource';
 import type {VisualizedTrack, VizWithOptions} from './types';
 
 import React from 'react';
