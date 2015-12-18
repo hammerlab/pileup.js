@@ -136,8 +136,8 @@ class VisualizationWrapper extends React.Component {
 VisualizationWrapper.displayName = 'VisualizationWrapper';
 
 
-class EmptyTrack extends React.Component {
-  props: {className: string};
+type EmptyTrackProps = {className: string};
+class EmptyTrack extends React.Component<void, EmptyTrackProps, void> {
   render() {
     var className = this.props.className + ' empty';
     return <div className={className}></div>;

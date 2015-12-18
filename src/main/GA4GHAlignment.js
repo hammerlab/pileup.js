@@ -94,7 +94,7 @@ class GA4GHAlignment /* implements Alignment */ {
       var start1 = this._interval.start(),
           stop1 = this._interval.stop(),
           start2 = m.pos,
-          stop2 = start2 + this.getSequence.length();
+          stop2 = start2 + this.getSequence().length;
       return Math.max(stop1, stop2) - Math.min(start1, start2);
     } else {
       return 0;

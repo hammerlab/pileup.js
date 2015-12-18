@@ -7,7 +7,7 @@
 import jBinary from 'jbinary';
 
 // Read a jBinary type at an offset in the buffer specified by another field.
-function typeAtOffset(baseType: any, offsetFieldName: string) {
+function typeAtOffset(baseType: any, offsetFieldName: string): any {
   return jBinary.Template({
       baseType: baseType,
       read: function(context) {

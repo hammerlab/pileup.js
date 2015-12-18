@@ -12,6 +12,8 @@ type Range = {
   stop: number;
 };
 
+export type Scale = (num: number) => number;
+
 /**
  * Shared x-axis scaling logic for tracks
  */

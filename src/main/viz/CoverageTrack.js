@@ -9,6 +9,7 @@ import type Interval from '../Interval';
 import type {TwoBitSource} from '../sources/TwoBitDataSource';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {BinSummary} from './CoverageCache';
+import type {Scale} from './d3utils';
 
 import React from 'react';
 import scale from '../scale';
@@ -195,7 +196,7 @@ class CoverageTrack extends React.Component {
     return <canvas ref='canvas' onClick={this.handleClick.bind(this)} />;
   }
 
-  getScale() {
+  getScale(): Scale {
     return d3utils.getTrackScale(this.props.range, this.props.width);
   }
 

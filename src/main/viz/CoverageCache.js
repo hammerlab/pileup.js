@@ -116,7 +116,7 @@ class CoverageCache {
   }
 
   // Returns whichever form of the ref ("chr17", "17") has been seen.
-  _canonicalRef(ref: string) {
+  _canonicalRef(ref: string): string {
     if (this.refToCounts[ref]) return ref;
     var alt = utils.altContigName(ref);
     if (this.refToCounts[alt]) return alt;
