@@ -7,6 +7,7 @@
 import type {Strand} from '../Alignment';
 import type {Gene, BigBedSource} from '../sources/BigBedDataSource';
 import type {VizProps} from '../VisualizationWrapper';
+import type {Scale} from './d3utils';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -95,7 +96,7 @@ class GeneTrack extends React.Component {
     this.updateVisualization();
   }
 
-  getScale() {
+  getScale(): Scale {
     return d3utils.getTrackScale(this.props.range, this.props.width);
   }
 

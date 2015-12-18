@@ -71,7 +71,7 @@
     "coveralls": "2.10.x",
     "envify": "^3.4.0",
     "exorcist": "^0.4.0",
-    "flow-bin": "^0.19.0",
+    "flow-bin": "^0.20.0",
     "http-server": "^0.8.0",
     "istanbul": "^0.3.17",
     "jsxhint": "git://github.com/strml/JSXHint.git",

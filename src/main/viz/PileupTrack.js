@@ -11,6 +11,7 @@ import type {VisualAlignment, VisualGroup, InsertStats} from './PileupCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type Interval from '../Interval';
 import type {VizProps} from '../VisualizationWrapper';
+import type {Scale} from './d3utils';
 
 import React from 'react';
 import shallowEquals from 'shallow-equals';
@@ -322,7 +323,7 @@ class PileupTrack extends React.Component {
     this.updateVisualization();
   }
 
-  getScale() {
+  getScale(): Scale {
     return d3utils.getTrackScale(this.props.range, this.props.width);
   }
 

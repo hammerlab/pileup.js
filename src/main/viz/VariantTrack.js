@@ -8,6 +8,7 @@ import type {VcfDataSource} from '../sources/VcfDataSource';
 import type {Variant} from '../data/vcf';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {VizProps} from '../VisualizationWrapper';
+import type {Scale} from './d3utils';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -40,7 +41,7 @@ class VariantTrack extends React.Component {
     });
   }
 
-  getScale() {
+  getScale(): Scale {
     return d3utils.getTrackScale(this.props.range, this.props.width);
   }
 

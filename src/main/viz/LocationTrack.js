@@ -5,6 +5,7 @@
 'use strict';
 
 import type {VizProps} from '../VisualizationWrapper';
+import type {Scale} from './d3utils';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -23,7 +24,7 @@ class LocationTrack extends React.Component {
     super(props);
   }
 
-  getScale() {
+  getScale(): Scale {
     return d3utils.getTrackScale(this.props.range, this.props.width);
   }
 
