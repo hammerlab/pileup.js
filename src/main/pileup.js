@@ -136,7 +136,7 @@ var pileup = {
     variants: makeVizObject(VariantTrack),
     pileup:   makeVizObject(PileupTrack)
   },
-  version: '0.6.2'
+  version: '0.6.3'
 };
 
 module.exports = pileup;
