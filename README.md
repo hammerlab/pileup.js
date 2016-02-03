@@ -129,6 +129,8 @@ For best results, use one of the flowtype editor integrations.
 
 See [DESIGN.md](/DESIGN.md).
 
+If you're looking for ideas, see [ROADMAP.md](/ROADMAP.md)
+
 ## License
 
 pileup.js is [Apache v2](/LICENSE) licensed.
