@@ -75,6 +75,11 @@ pileup.js has a few ways of representing genomic coordinates and ranges:
 * `GenomeRange` This is a JSON-compatible object, `{contig, start, stop}`.
   It is used in the public API and in some places in the React component tree.
 
+Generally `Interval` and `ContigInterval` should be used internally within
+pileup.js. Because the `ContigInterval` class is not part of the public API,
+it's better for coordinates to be consumed and provided to users as
+`GenomeRange`s, e.g. for `getRange` and `setRange`.
+
 ## Examples
 
 Here's how you might fetch some reads using the `BAM` data class:
