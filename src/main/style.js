@@ -5,6 +5,8 @@
  * @flow
  */
 
+"use strict";
+
 module.exports = {
   // Colors for individual base pairs
   BASE_COLORS: {

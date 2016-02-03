@@ -3,6 +3,9 @@
  *
  * @flow
  */
+
+"use strict";
+
 class Interval {
   start: number;
   stop: number;

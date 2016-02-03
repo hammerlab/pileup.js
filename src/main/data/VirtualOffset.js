@@ -7,6 +7,8 @@
  * @flow
  */
 
+"use strict";
+
 class VirtualOffset {
   coffset: number;
   uoffset: number;
