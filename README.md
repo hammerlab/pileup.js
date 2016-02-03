@@ -131,6 +131,15 @@ See [DESIGN.md](/DESIGN.md).
 
 If you're looking for ideas, see [ROADMAP.md](/ROADMAP.md)
 
+## Releases
+
+To cut a new release:
+
+- Update `version` in both `package.json` and `pileup.js`. Commit this change.
+- Run `scripts/publish.sh`
+- Run `npm publish`
+- Push to github and tag a release there. Add release notes.
+
 ## License
 
 pileup.js is [Apache v2](/LICENSE) licensed.
