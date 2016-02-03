@@ -2,7 +2,10 @@
  [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/hammerlab/pileup.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) 
 
 # pileup.js
-Interactive in-browser track viewer. [**Try a demo**][demo]!
+pileup.js is an interactive in-browser track viewer. [**Try a demo**][demo]!
+
+It is built from the ground up to take advantage of the modern JavaScript
+ecosystem, e.g. ES2015, static type analysis, React.js and Promises. Read more about the motivations behind pileup.js in our [paper][biorxiv].
 
 ![pileup.js screenshot](./pileup-screenshot.png)
 
@@ -63,6 +66,23 @@ pileup track, you could use this CSS:
 
 To style multiple tracks of the same type, you can use the `cssClass` property.
 
+## API
+
+The pileup object returned by `pileup.create` has these methods:
+
+* `setRange`: Update the visible range in the pileup. This takes a
+  `GenomeRange` object, e.g. `{contig: "chr17", start: 123, stop: 456}`. The
+  coordinates are 1-based and the range is inclusive on both ends.
+* `getRange`: Returns the currently-visible range. This is a `GenomeRange`
+  object (see description in `setRange`).
+* `destroy`: Tears down the pileup and releases references to allow proper
+  garbage collection.
+
+If you want to change the set of tracks in a pileup, tear it down and create a
+new one. The caches are stored on the individual source and visualization
+objects so, as long as you reuse these, the `destroy` / `create` cycle is
+relatively cheap and will not incur extra trips to the network.
+
 ## Development
 
 ## Basic Setup
@@ -105,6 +125,12 @@ To typecheck the code, run
 
 For best results, use one of the flowtype editor integrations.
 
+## Design
+
+See [DESIGN.md](/DESIGN.md).
+
+If you're looking for ideas, see [ROADMAP.md](/ROADMAP.md)
+
 ## License
 
 pileup.js is [Apache v2](/LICENSE) licensed.
@@ -113,3 +139,4 @@ pileup.js is [Apache v2](/LICENSE) licensed.
 [layout]: http://codepen.io/anon/pen/VLzbBe?editors=110
 [flexbox]: https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Flexible_boxes
 [demo]: http://www.hammerlab.org/pileup/
+[biorxiv]: http://biorxiv.org/content/early/2016/01/26/036962
