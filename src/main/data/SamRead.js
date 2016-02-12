@@ -12,7 +12,8 @@
  */
 'use strict';
 
-import type VirtualOffset from './VirtualOffset';
+//import type VirtualOffset from './VirtualOffset';
+import VirtualOffset from './VirtualOffset';
 import type {Strand, CigarOp, MateProperties} from '../Alignment';
 
 import jDataView from 'jdataview';
@@ -29,6 +30,7 @@ var CIGAR_OPS = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X'];
 var SEQUENCE_VALUES = ['=', 'A', 'C', 'M', 'G', 'R', 'S', 'V',
                        'T', 'W', 'Y', 'H', 'K', 'D', 'B', 'N'];
 
+var uoffset = 0;
 
 function strandFlagToString(reverseStrand: number): Strand {
   return reverseStrand ? '-' : '+';
@@ -61,16 +63,39 @@ class SamRead /* implements Alignment */ {
    */
   constructor(buffer: ArrayBuffer, offset: VirtualOffset, ref: string) {
     this.buffer = buffer;
-    this.offset = offset;
+
+    if (offset) {
+      this.offset = offset;
+    }
+    else {
+      this.fromText = true;
+      this.offset = new VirtualOffset(0, uoffset++);
+    }
+    this.buffer = buffer;
 
     // Go ahead and parse a few fields immediately.
-    var jv = this._getJDataView();
-    this.refID = jv.getInt32(0);
-    this.ref = ref;
-    this.pos = jv.getInt32(4);
-    this.l_seq = jv.getInt32(16);
-    this.cigarOps = this._getCigarOps();
-    this.name = this._getName();
+    if (offset) {
+      var jv = this._getJDataView();
+      this.refID = jv.getInt32(0);
+      this.ref = ref;
+      this.pos = jv.getInt32(4);
+      this.l_seq = jv.getInt32(16);
+      this.cigarOps = this._getCigarOps();
+      this.name = this._getName();
+    }
+    else {
+      var fields = buffer.split('\t');
+      this.flag = parseInt(fields[1], 10);
+      this.ref = fields[2];
+      this.refID = parseInt(ref, 10) - 1;
+      this.name = fields[0];
+      this.pos = parseInt(fields[3], 10);
+      this.cigarString = fields[5];
+      this.cigarOps = this._getCigarOpsFromText(fields[5]);
+      this._seq = fields[9];
+      this.l_seq = this._seq.length;
+      this._qual = fields[10];
+    }
   }
 
   toString(): string {
@@ -98,7 +123,12 @@ class SamRead /* implements Alignment */ {
   }
 
   getFlag(): number {
-    return this._getJDataView().getUint16(14);
+    if (this.fromText) {
+      return this.flag;
+    }
+    else {
+      return this._getJDataView().getUint16(14);
+    }
   }
 
   getInferredInsertSize(): number {
@@ -111,9 +141,15 @@ class SamRead /* implements Alignment */ {
 
   // TODO: get rid of this; move all methods into SamRead.
   getFull(): Object {
+    var full;
     if (this._full) return this._full;
-    var jb = new jBinary(this.buffer, bamTypes.TYPE_SET);
-    var full = jb.read(bamTypes.ThickAlignment, 0);
+    if (this.fromText) {
+      full = this.buffer;
+    }
+    else {
+      var jb = new jBinary(this.buffer, bamTypes.TYPE_SET);
+      full = jb.read(bamTypes.ThickAlignment, 0);
+    }
     this._full = full;
     return full;
   }
@@ -146,24 +182,62 @@ class SamRead /* implements Alignment */ {
     return cigar_ops;
   }
 
+  _getCigarOpsFromText(cigar): CigarOp[] {
+    var cigar_ops = [];
+    cigar.replace(/([0-9]+)([MIDNSHPX=])/g, function (match, length, op) {
+      cigar_ops.push({
+        op: op,
+        length: parseInt(length, 10)
+      });
+      return '';
+    });
+
+    return cigar_ops;
+  }
+
   /**
    * Returns per-base quality scores from 0-255.
    */
   getQualityScores(): number[] {
-    var jv = this._getJDataView(),
-        l_read_name = jv.getUint8(8),
-        n_cigar_op = jv.getUint16(12),
-        l_seq = jv.getInt32(16),
-        pos = 32 + l_read_name + 4 * n_cigar_op + Math.ceil(l_seq / 2);
-    return jv.getBytes(l_seq, pos, true /* little endian */, true /* toArray */);
+    var self = this;
+    if (this.fromText) {
+      return (function () {
+        var i, list = [];
+
+        for (i = 0; i < self.l_seq; i++) {
+          list.push(self._qual.charAt(i) - 33);
+        }
+        return list;
+      }());
+    }
+    else {
+      return (function () {
+        var jv = self._getJDataView(),
+          l_read_name = jv.getUint8(8),
+          n_cigar_op = jv.getUint16(12),
+          l_seq = jv.getInt32(16),
+          pos = 32 + l_read_name + 4 * n_cigar_op + Math.ceil(l_seq / 2);
+        return jv.getBytes(l_seq, pos, true /* little endian */, true /* toArray */);
+      }());
+    }
   }
 
   getCigarString(): string {
-    return makeCigarString(this.getFull().cigar);
+    if (this.fromText) {
+      return this.cigarString;
+    }
+    else {
+      return makeCigarString(this.getFull().cigar);
+    }
   }
 
   getQualPhred(): string {
-    return makeAsciiPhred(this.getQualityScores());
+    if (this.fromText) {
+      return this._qual;
+    }
+    else {
+      return makeAsciiPhred(this.getQualityScores());
+    }
   }
 
   getSequence(): string {
@@ -213,14 +287,26 @@ class SamRead /* implements Alignment */ {
 
   debugString(): string {
     var f = this.getFull();
+    var seq;
+    var tags;
+    if (this.fromText) {
+      seq = this._seq;
+      tags = this.buffer.split("\t").slice(11).join("\n");
+    }
+    else {
+      seq = f.seq;
+      tags = JSON.stringify(f.auxiliary, null, '  ');
+    }
+  console.log(this);
+  console.log(f);
 
     return `Name: ${this.name}
 FLAG: ${this.getFlag()}
 Position: ${this.getInterval()}
 CIGAR: ${this.getCigarString()}
-Sequence: ${f.seq}
+Sequence: ${seq}
 Quality:  ${this.getQualPhred()}
-Tags: ${JSON.stringify(f.auxiliary, null, '  ')}
+Tags: ${tags};
     `;
   }
 
@@ -242,6 +328,7 @@ Tags: ${JSON.stringify(f.auxiliary, null, '  ')}
 
 // Convert a structured Cigar object into the string format we all love.
 function makeCigarString(cigarOps: Array<{op:string; length:number}>) {
+  console.log(this);
   return cigarOps.map(({op, length}) => length + op).join('');
 }
 

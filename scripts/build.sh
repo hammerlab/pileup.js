@@ -19,11 +19,11 @@ browserify \
   $(find src/test -name '*.js')
 
 # Create dist/pileup.js
+#  -g uglifyify \
 browserify \
   -v \
   -t [ babelify --ignore src/lib ] \
   -g [ envify --NODE_ENV production ] \
-  -g uglifyify \
   src/main/pileup.js \
   --debug \
   -o dist/pileup.js \

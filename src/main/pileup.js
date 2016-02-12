@@ -15,6 +15,7 @@ import TwoBitDataSource from './sources/TwoBitDataSource';
 import BigBedDataSource from './sources/BigBedDataSource';
 import VcfDataSource from './sources/VcfDataSource';
 import BamDataSource from './sources/BamDataSource';
+import SamViewDataSource from './sources/SamViewDataSource';
 import GA4GHDataSource from './sources/GA4GHDataSource';
 import EmptySource from './sources/EmptySource';
 
@@ -121,6 +122,7 @@ var pileup = {
   create: create,
   formats: {
     bam: BamDataSource.create,
+    reads: SamViewDataSource.create,
     ga4gh: GA4GHDataSource.create,
     vcf: VcfDataSource.create,
     twoBit: TwoBitDataSource.create,
@@ -136,7 +138,7 @@ var pileup = {
     variants: makeVizObject(VariantTrack),
     pileup:   makeVizObject(PileupTrack)
   },
-  version: '0.6.3'
+  version: '0.6.2'
 };
 
 module.exports = pileup;

@@ -28,7 +28,7 @@ import SamRead from './SamRead';
 function isAlignmentInRange(read: SamRead,
                             idxRange: ContigInterval<number>,
                             contained: boolean): boolean {
-  // TODO: Use cigar.getReferenceLength() instead of l_seq, like htsjdk. 
+  // TODO: Use cigar.getReferenceLength() instead of l_seq, like htsjdk.
   var readRange = new ContigInterval(read.refID, read.pos, read.pos + read.l_seq - 1);
   if (contained) {
     return idxRange.containsInterval(readRange);
@@ -192,7 +192,7 @@ function fetchAlignments(remoteFile: RemoteFile,
   return deferred.promise;
 }
 
- 
+
 class Bam {
   index: ?BaiFile;
   header: Q.Promise<Object>;
@@ -204,6 +204,7 @@ class Bam {
               indexChunks?: Object) {
     this.remoteFile = remoteFile;
     this.index = remoteIndexFile ? new BaiFile(remoteIndexFile, indexChunks) : null;
+
     this.hasIndexChunks = !!indexChunks;
 
     var sizePromise = this.index ? this.index.getHeaderSize() : Q.when(2 * 65535);
