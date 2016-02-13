@@ -1,5 +1,16 @@
+# A fork of [pileup.js](https://github.com/hammerlab/pileup.js.git) with SamViewDataSource
+
+The original version has the data source that connects directly to BAM files and decodes them. It does not work too well with large BAMs and it is sensitive to the way they are compressed and indexed.
+
+SamViewDataSource is a hack to allow rendering small pileups for illustrative purposes, rather than for serious navigation. The idea is to be able to include snippets of short alignments in web-based documentation, referring to absolute paths of BAM files on the host filesystem. Access is by `samtools view` via CGI.
+
+For details, see `SamViewDataSource-test.js` and `scripts/reads.cgi`
+
+--------------
+Original documentation:
+
 [![Build Status](https://travis-ci.org/hammerlab/pileup.js.svg?branch=travis-flow)](https://travis-ci.org/hammerlab/pileup.js) [![Coverage Status](https://coveralls.io/repos/hammerlab/pileup.js/badge.svg?branch=master)](https://coveralls.io/r/hammerlab/pileup.js?branch=master) [![NPM version](http://img.shields.io/npm/v/pileup.svg)](https://www.npmjs.org/package/pileup) [![Dependency Status](https://david-dm.org/hammerlab/pileup.js.svg?theme=shields.io)](https://david-dm.org/hammerlab/pileup.js) [![devDependency Status](https://david-dm.org/hammerlab/pileup.js/dev-status.svg?theme=shields.io)](https://david-dm.org/hammerlab/pileup.js#info=devDependencies) [![DOI](https://zenodo.org/badge/8220/hammerlab/pileup.js.svg)](https://zenodo.org/badge/latestdoi/8220/hammerlab/pileup.js)
- [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/hammerlab/pileup.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) 
+ [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/hammerlab/pileup.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 # pileup.js
 pileup.js is an interactive in-browser track viewer. [**Try a demo**][demo]!
