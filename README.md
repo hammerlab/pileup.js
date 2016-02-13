@@ -4,7 +4,7 @@ The original version has the data source that connects directly to BAM files and
 
 SamViewDataSource is a hack to allow rendering small pileups for illustrative purposes, rather than for serious navigation. The idea is to be able to include snippets of short alignments in web-based documentation, referring to absolute paths of BAM files on the host filesystem. Access is by `samtools view` via CGI.
 
-For details, see `SamViewDataSource-test.js` and `scripts/reads.cgi`
+For details, see [`SamViewDataSource-test.js`](https://github.com/selkovjr/pileup.js/blob/master/src/test/sources/SamViewDataSource-test.js) and [`scripts/reads.cgi`](https://github.com/selkovjr/pileup.js/blob/master/scripts/reads.cgi)
 
 --------------
 Original documentation:
