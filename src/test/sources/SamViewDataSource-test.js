@@ -3,11 +3,12 @@
 
 import {expect} from 'chai';
 
+import ContigInterval from '../../main/ContigInterval';
 import SamViewDataSource from '../../main/sources/SamViewDataSource';
 
 describe('SamViewDataSource', function() {
   function getTestSource() {
-    var url = "http://rnd10/~selkovjr/vcfcomp/interface/reads.cgi?coords=<range>;bam=/rhome/selkovjr/pipeline-NA12878/tmap-realign/out/328330:IonXpress_001_sorted.bam";
+    var url = "http://localhost:8082/scripts/reads.cgi?coords=<range>;bam=test-data/synth3.normal.17.7500000-7515000.bam";
     return SamViewDataSource.create({'url': url});
   }
 
@@ -15,17 +16,16 @@ describe('SamViewDataSource', function() {
     this.timeout(5000);
     var source = getTestSource();
 
-    // This range matches the "large, dense" test in bam-test.js
-    var reads = source.getAlignmentsInRange(); // ignore range
+    var range = new ContigInterval('17', 7499910, 7499999);
+    var reads = source.getAlignmentsInRange(range);
     expect(reads).to.deep.equal([]);
 
     source.on('newdata', () => {
-      console.log('newdata');
-      var reads = source.getAlignmentsInRange(); // range is ignored
-      console.log(['reads', reads]);
-      expect(reads).to.have.length(1112);
-      expect(reads[0].toString()).to.equal('20:31511251-31511351');
-      expect(reads[1111].toString()).to.equal('20:31514171-31514271');
+
+      var reads = source.getAlignmentsInRange(range);
+      expect(reads).to.have.length(51);
+      expect(reads[0].toString()).to.equal('17:7499902-7500002');
+      expect(reads[50].toString()).to.equal('17:7499998-7500098');
       done();
     });
     source.rangeChanged({

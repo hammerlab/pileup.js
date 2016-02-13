@@ -6,8 +6,11 @@ set -o errexit
 # Run http-server and save its PID
 http-server -p 8081 > /dev/null &
 SERVER_PID=$!
+scripts/cgi-server.py > /dev/null &
+CGI_SERVER_PID=$!
+
 function finish() {
-  kill -TERM $SERVER_PID
+  kill -TERM $SERVER_PID $CGI_SERVER_PID
 }
 trap finish EXIT
 

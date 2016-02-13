@@ -82,14 +82,16 @@ function create(spec: SamSpec): AlignmentDataSource {
             if (request.status === 200) {
               var lines = request.responseText.split('\n');
               for (var i = 1; i < lines.length; i++) {
-                addRead(new SamRead(lines[i]));
+                if (lines[i]) {
+                  addRead(new SamRead(lines[i]));
+                }
               }
               deferred.resolve(request.responseText);
               o.trigger('networkdone');
               //o.trigger('newdata', new ContigInterval(range.contig, range.start, range.stop));
               o.trigger('newdata', range);
             } else {
-              deferred.reject("HTTP " + request.status + " for " + path);
+              deferred.reject("HTTP " + request.status + " for " + url);
             }
           }
         };
