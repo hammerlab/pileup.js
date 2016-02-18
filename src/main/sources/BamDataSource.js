@@ -53,7 +53,7 @@ function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
   }
 
   function fetch(range: GenomeRange) {
-    var refsPromise = !_.isEmpty(contigNames) ? Q.when() : 
+    var refsPromise = !_.isEmpty(contigNames) ? Q.when() :
         remoteSource.header.then(saveContigMapping);
 
     // For BAMs without index chunks, we need to fetch the entire BAI file

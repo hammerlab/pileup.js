@@ -61,7 +61,6 @@ function create(spec: SamSpec): AlignmentDataSource {
       // Check if this interval is already in the cache.
       // If not, immediately "cover" it to prevent duplicate requests.
       if (interval.isCoveredBy(coveredRanges)) {
-        console.log('covered');
         return Q.when();
       }
 
@@ -71,7 +70,6 @@ function create(spec: SamSpec): AlignmentDataSource {
       coveredRanges = ContigInterval.coalesce(coveredRanges);
 
       return Q.all(newRanges.map(range => {
-        console.log('fetch url:', url);
         var request = new XMLHttpRequest();
         request.open("GET", url, true);
         o.trigger('networkprogress', {

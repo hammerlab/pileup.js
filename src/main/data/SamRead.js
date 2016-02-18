@@ -112,7 +112,12 @@ class SamRead /* implements Alignment */ {
    * Returns an identifier which is unique within the BAM file.
    */
   getKey(): string {
-    return this.offset.toString();
+    if (this.fromText) {
+      return this.name;
+    }
+    else {
+      return this.offset.toString();
+    }
   }
 
   _getName(): string {
@@ -297,8 +302,6 @@ class SamRead /* implements Alignment */ {
       seq = f.seq;
       tags = JSON.stringify(f.auxiliary, null, '  ');
     }
-  console.log(this);
-  console.log(f);
 
     return `Name: ${this.name}
 FLAG: ${this.getFlag()}
@@ -328,7 +331,6 @@ Tags: ${tags};
 
 // Convert a structured Cigar object into the string format we all love.
 function makeCigarString(cigarOps: Array<{op:string; length:number}>) {
-  console.log(this);
   return cigarOps.map(({op, length}) => length + op).join('');
 }
 
