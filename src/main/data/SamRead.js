@@ -89,7 +89,7 @@ class SamRead /* implements Alignment */ {
       this.ref = fields[2];
       this.refID = parseInt(ref, 10) - 1;
       this.name = fields[0];
-      this.pos = parseInt(fields[3], 10);
+      this.pos = parseInt(fields[3], 10) - 1;
       this.cigarString = fields[5];
       this.cigarOps = this._getCigarOpsFromText(fields[5]);
       this._seq = fields[9];
