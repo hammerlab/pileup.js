@@ -67,7 +67,7 @@ class LocationTrack extends React.Component {
 
     ctx.fillStyle = style.LOC_FONT_COLOR;
     ctx.font = style.LOC_FONT_STYLE;
-    ctx.fillText(midPoint.toLocaleString() + ' bp',
+    ctx.fillText(midPoint.toLocaleString(), //  + ' bp',
                  rightLineX + style.LOC_TICK_LENGTH + style.LOC_TEXT_PADDING,
                  midY + style.LOC_TEXT_Y_OFFSET);
 

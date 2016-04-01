@@ -225,7 +225,7 @@ var MIN_Q = 5,  // these are Phred-scaled scores
     MAX_Q = 20,
     Q_SCALE = scale.linear()
                    .domain([MIN_Q, MAX_Q])
-                   .range([0.1, 0.9])
+                   .range([0.6, 0.9])
                    .clamp(true);  // clamp output to [0.1, 0.9]
 function opacityForQuality(quality: number): number {
   var alpha = Q_SCALE(quality);
