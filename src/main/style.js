@@ -18,7 +18,7 @@ module.exports = {
 
   // Styles for base pairs which are rendered as letters
   LOOSE_TEXT_STYLE: `24px 'Helvetica Neue', Helvetica, Arial, sans-serif`,
-  TIGHT_TEXT_STYLE: `bold 12px 'Helvetica Neue', Helvetica, Arial, sans-serif`,
+  TIGHT_TEXT_STYLE: `bold 10px 'Helvetica Neue', Helvetica, Arial, sans-serif`,
 
   // Gene track
   GENE_ARROW_SIZE: 4,
@@ -30,8 +30,10 @@ module.exports = {
 
   // Pileup track
   ALIGNMENT_COLOR: '#c8c8c8',
-  ALIGNMENT_MINUS_STRAND_COLOR: 'rgb(176, 176, 236)',
-  ALIGNMENT_PLUS_STRAND_COLOR: 'rgb(236, 176, 176)',
+  //ALIGNMENT_MINUS_STRAND_COLOR: 'rgb(176, 176, 236)',
+  ALIGNMENT_MINUS_STRAND_COLOR: 'rgb(207, 204, 243)',
+  //ALIGNMENT_PLUS_STRAND_COLOR: 'rgb(236, 176, 176)',
+  ALIGNMENT_PLUS_STRAND_COLOR: 'rgb(241, 212, 214)',
   DELETE_COLOR: 'black',
   INSERT_COLOR: 'rgb(97, 0, 216)',
 

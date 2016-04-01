@@ -29,8 +29,8 @@ import dataCanvas from 'data-canvas';
 import style from '../style';
 
 
-var READ_HEIGHT = 13;
-var READ_SPACING = 2;  // vertical pixels between reads
+var READ_HEIGHT = 11;
+var READ_SPACING = 1;  // vertical pixels between reads
 
 var READ_STRAND_ARROW_WIDTH = 5;
 
