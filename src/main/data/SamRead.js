@@ -313,6 +313,37 @@ Tags: ${tags};
     `;
   }
 
+  htmlString(): string {
+    var f = this.getFull();
+    var seq;
+    var tags;
+    var buf;
+    if (this.fromText) {
+      seq = this._seq;
+      tags = this.buffer.split("\t").slice(11);
+    }
+    else {
+      seq = f.seq;
+      tags = f.auxiliary;
+    }
+
+    buf = `${this.name} ${this.getInterval()} ${this.getCigarString()}`;
+    buf += '<table>';
+    buf += '<tr><td class="modal-content-tag">Flag</td><td class="modal-content-value">' + this.getFlag() + '</td></tr>';
+    buf += '<tr><td class="modal-content-tag">Length</td><td class="modal-content-value">' + seq.length + '</td></tr>';
+    buf += '<tr><td class="modal-content-tag">Sequence</td><td class="modal-content-value">' + seq + '</td></tr>';
+    buf += '<tr><td class="modal-content-tag">Quality</td><td class="modal-content-value">' + this.getQualPhred() + '</td></tr>';
+
+    tags.forEach(function(tag) {
+      var t = tag.split(':');
+      buf += `<tr><td class="modal-content-tag">${t[0]}:${t[1]}</td><td class="modal-content-value">` + t[2] + '</td></tr>';
+    });
+
+    buf += '</table>';
+
+    return buf;
+  }
+
   static referenceLengthFromOps(ops: CigarOp[]): number {
     var refLength = 0;
     ops.forEach(({op, length}) => {
