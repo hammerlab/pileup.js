@@ -27,6 +27,7 @@ import LocationTrack from './viz/LocationTrack';
 import PileupTrack from './viz/PileupTrack';
 import ScaleTrack from './viz/ScaleTrack';
 import VariantTrack from './viz/VariantTrack';
+import BlacklistTrack from './viz/VariantTrack';
 import Root from './Root';
 
 type GenomeRange = {
@@ -130,13 +131,14 @@ var pileup = {
     empty: EmptySource.create
   },
   viz: {
-    coverage: makeVizObject(CoverageTrack),
-    genome:   makeVizObject(GenomeTrack),
-    genes:    makeVizObject(GeneTrack),
-    location: makeVizObject(LocationTrack),
-    scale:    makeVizObject(ScaleTrack),
-    variants: makeVizObject(VariantTrack),
-    pileup:   makeVizObject(PileupTrack)
+    coverage:  makeVizObject(CoverageTrack),
+    genome:    makeVizObject(GenomeTrack),
+    genes:     makeVizObject(GeneTrack),
+    location:  makeVizObject(LocationTrack),
+    scale:     makeVizObject(ScaleTrack),
+    variants:  makeVizObject(VariantTrack),
+    blacklist: makeVizObject(BlacklistTrack),
+    pileup:    makeVizObject(PileupTrack)
   },
   version: '0.6.2'
 };
