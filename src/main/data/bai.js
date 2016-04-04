@@ -40,9 +40,7 @@ function computeIndexChunks(buffer) {
     if (n_intv) {
       var offset = VirtualOffset.fromBlob(view.getBytes(8), 0),
           coffset = offset.coffset + (offset.uoffset ? 65536 : 0);
-      if (coffset) {
-        minBlockIndex = Math.min(coffset, minBlockIndex);
-      }
+      minBlockIndex = coffset ? Math.min(coffset, minBlockIndex) : 65536;
       view.skip((n_intv - 1) * 8);
     }
   }
@@ -206,7 +204,7 @@ class BaiFile {
     this.remoteFile = remoteFile;
     if (indexChunks) {
       this.immediate = Q.when(new ImmediateBaiFile(null, remoteFile, indexChunks));
-    } else { 
+    } else {
       this.immediate = remoteFile.getAll().then(buf => {
         return new ImmediateBaiFile(buf, remoteFile, indexChunks);
       });
