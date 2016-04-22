@@ -79,7 +79,7 @@ function create(spec: SamSpec): AlignmentDataSource {
           if (request.readyState === 4) {
             if (request.status === 200) {
               var lines = request.responseText.split('\n');
-              for (var i = 1; i < lines.length; i++) {
+              for (var i = 0; i < lines.length; i++) {
                 if (lines[i]) {
                   addRead(new SamRead(lines[i]));
                 }
