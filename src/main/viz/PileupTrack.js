@@ -459,7 +459,7 @@ class PileupTrack extends React.Component {
     var alert = window.alert || console.log;
     if (vRead) {
       if (pileup.readDataModal) {
-        pileup.readDataModal.open(vRead.read.htmlString());
+        pileup.readDataModal.open(vRead.read);
       }
       else {
         alert(vRead.read.debugString());
