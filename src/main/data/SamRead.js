@@ -342,7 +342,7 @@ Tags: ${tags};
     });
 
     buf += '</table>';
-    buf += '<pre id="modal-flowgram" />';
+    buf += '<pre id="modal-flowgram-data" />';
 
     return buf;
   }

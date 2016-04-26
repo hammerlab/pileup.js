@@ -67,7 +67,7 @@ class Root extends React.Component {
       this.setState({settingsMenuKey: key});
     }
   }
-  
+
   handleSelectOption(trackKey: string, optionKey: string) {
     this.setState({settingsMenuKey: null});
 
@@ -88,7 +88,7 @@ class Root extends React.Component {
             source={track.source}
             referenceSource={this.props.referenceSource}
           />);
-    
+
     var trackName = track.track.name || '(track name)';
 
     var gearIcon = null,

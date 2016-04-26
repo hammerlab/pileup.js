@@ -401,7 +401,12 @@ class PileupTrack extends React.Component {
     this.tiles.renderToScreen(ctx, range, scale);
 
     // TODO: the center line should go above alignments, but below mismatches
-    this.renderCenterLine(ctx, range, scale);
+    if (p.mark) {
+      this.renderMark(ctx, p.mark, scale);
+    }
+    else {
+      this.renderCenterLine(ctx, range, scale);
+    }
 
     // This is a hack to mitigate #350
     var el = d3utils.findParent(this.refs.canvas, 'track-content');
@@ -409,13 +414,16 @@ class PileupTrack extends React.Component {
   }
 
   // Draw the center line(s), which orient the user
-  renderCenterLine(ctx: CanvasRenderingContext2D,
-                   range: ContigInterval<string>,
-                   scale: (num: number) => number) {
-    var midPoint = Math.floor((range.stop() + range.start()) / 2),
-        rightLineX = Math.ceil(scale(midPoint + 1)),
-        leftLineX = Math.floor(scale(midPoint)),
-        height = ctx.canvas.height;
+  renderMark(
+    ctx: CanvasRenderingContext2D,
+    mark: number,
+    scale: (num: number) => number
+  ) {
+    var
+      rightLineX = Math.ceil(scale(mark + 1)),
+      leftLineX = Math.floor(scale(mark)),
+      height = ctx.canvas.height;
+
     ctx.save();
     ctx.lineWidth = 1;
     if (SUPPORTS_DASHES) {
@@ -430,6 +438,15 @@ class PileupTrack extends React.Component {
       canvasUtils.drawLine(ctx, rightLineX - 0.5, 0, rightLineX - 0.5, height);
     }
     ctx.restore();
+  }
+
+  renderCenterLine(
+    ctx: CanvasRenderingContext2D,
+    range: ContigInterval<string>,
+    scale: (num: number) => number
+  ) {
+    var midPoint = Math.floor((range.stop() + range.start()) / 2);
+    this.renderMark(ctx, midPoint, scale);
   }
 
   handleSort() {
