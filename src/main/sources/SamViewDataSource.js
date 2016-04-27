@@ -86,9 +86,17 @@ function create(spec: SamSpec): AlignmentDataSource {
               }
               deferred.resolve(request.responseText);
               o.trigger('networkdone');
-              //o.trigger('newdata', new ContigInterval(range.contig, range.start, range.stop));
               o.trigger('newdata', range);
-            } else {
+            }
+            else if (request.status === 201) {
+              o.trigger('networkerror', {
+                error: true,
+                status: 'error in reads.cgi',
+                message: request.responseText
+              });
+            }
+            else {
+              console.log('here');
               deferred.reject("HTTP " + request.status + " for " + url);
             }
           }

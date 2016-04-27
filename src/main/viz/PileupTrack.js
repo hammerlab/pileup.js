@@ -268,12 +268,22 @@ class PileupTrack extends React.Component {
 
     var statusEl = null,
         networkStatus = this.state.networkStatus;
+
     if (networkStatus) {
-      var message = this.formatStatus(networkStatus);
+      var message;
+      var message_class;
+      if (networkStatus.error) {
+        message = this.formatStatus(networkStatus);
+        message_class = 'network-status-error-message';
+      }
+      else {
+        message = 'Loading alignments… (' + this.formatStatus(networkStatus) + ')';
+        message_class = 'network-status-message';
+      }
       statusEl = (
-        <div ref='status' className='network-status'>
-          <div className='network-status-message'>
-            Loading alignments… ({message})
+        <div ref="status" className="network-status">
+          <div className={message_class}>
+            {message}
           </div>
         </div>
       );
@@ -293,7 +303,20 @@ class PileupTrack extends React.Component {
     if (status.numRequests) {
       var pluralS = status.numRequests > 1 ? 's' : '';
       return `issued ${status.numRequests} request${pluralS}`;
-    } else if (status.status) {
+    }
+    else if (status.status) {
+      if (status.error) {
+        return (
+          <div>
+            <div>
+            {status.satus}
+            </div>
+            <div>
+            {status.message}
+            </div>
+          </div>
+        );
+      }
       return status.status;
     }
     throw 'invalid';
@@ -318,6 +341,9 @@ class PileupTrack extends React.Component {
     });
     this.props.source.on('networkdone', e => {
       this.setState({networkStatus: null});
+    });
+    this.props.source.on('networkerror', e => {
+      this.setState({networkStatus: e});
     });
 
     this.updateVisualization();

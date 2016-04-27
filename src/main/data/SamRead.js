@@ -336,7 +336,7 @@ Tags: ${tags};
 
     tags.forEach(function(tag) {
       var t = tag.split(':');
-      if (t[0] === 'AS' || t[0] === 'MD' || t[0] === 'NM' || t[0] === 'XM' || t[0] === 'ZP' || t[0] === 'ZM') {
+      if (t[0] === 'AS' || t[0] === 'MD' || t[0] === 'NM' || t[0] === 'XM' || t[0] === 'ZA'  || t[0] === 'ZP' || t[0] === 'ZM') {
         buf += '<tr><td class="modal-content-tag">' + t[0] + ':' + t[1] + '</td><td class="modal-content-value">' + t[2] + '</td></tr>';
       }
     });
