@@ -501,8 +501,8 @@ class PileupTrack extends React.Component {
     var vRead = _.find(trackingCtx.hits[0], hit => hit.read);
     var alert = window.alert || console.log;
     if (vRead) {
-      if (pileup.readDataModal) {
-        pileup.readDataModal.open(vRead.read);
+      if (pileup.readDataPanel) {
+        pileup.readDataPanel.open(vRead.read);
       }
       else {
         alert(vRead.read.debugString());

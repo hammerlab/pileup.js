@@ -329,20 +329,19 @@ Tags: ${tags};
 
     buf = `${this.name} ${this.getInterval()} ${this.getCigarString()}`;
     buf += '<table>';
-    buf += '<tr><td class="modal-content-tag">Flag</td><td class="modal-content-value">' + this.getFlag() + '</td></tr>';
-    buf += '<tr><td class="modal-content-tag">Length</td><td class="modal-content-value">' + seq.length + '</td></tr>';
-    buf += '<tr><td class="modal-content-tag">Sequence</td><td class="modal-content-value">' + seq + '</td></tr>';
-    buf += '<tr><td class="modal-content-tag">Quality</td><td class="modal-content-value">' + this.getQualPhred() + '</td></tr>';
+    buf += '<tr><td class="read-data-tag">Flag</td><td class="read-data-value">' + this.getFlag() + '</td></tr>';
+    buf += '<tr><td class="read-data-tag">Length</td><td class="read-data-value">' + seq.length + '</td></tr>';
+    buf += '<tr><td class="read-data-tag">Sequence</td><td class="read-data-value">' + seq + '</td></tr>';
+    buf += '<tr><td class="read-data-tag">Quality</td><td class="read-data-value">' + this.getQualPhred() + '</td></tr>';
 
     tags.forEach(function(tag) {
       var t = tag.split(':');
       if (t[0] === 'AS' || t[0] === 'MD' || t[0] === 'NM' || t[0] === 'XM' || t[0] === 'ZA'  || t[0] === 'ZP' || t[0] === 'ZM') {
-        buf += '<tr><td class="modal-content-tag">' + t[0] + ':' + t[1] + '</td><td class="modal-content-value">' + t[2] + '</td></tr>';
+        buf += '<tr><td class="read-data-tag">' + t[0] + ':' + t[1] + '</td><td class="read-data-value">' + t[2] + '</td></tr>';
       }
     });
 
     buf += '</table>';
-    buf += '<pre id="modal-flowgram-data" />';
 
     return buf;
   }
