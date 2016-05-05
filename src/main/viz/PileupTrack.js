@@ -293,7 +293,7 @@ class PileupTrack extends React.Component {
       <div>
         {statusEl}
         <div ref='container' style={containerStyles}>
-          <canvas ref='canvas' onClick={this.handleClick.bind(this)} />
+          <canvas ref='canvas' onClick={this.handleClick.bind(this)} onMouseMove={this.handleMouseMove.bind(this)}/>
         </div>
       </div>
     );
@@ -428,7 +428,7 @@ class PileupTrack extends React.Component {
 
     // TODO: the center line should go above alignments, but below mismatches
     if (p.mark) {
-      this.renderMark(ctx, p.mark, scale);
+      this.renderMark(ctx, true, p.mark, scale);
     }
     else {
       this.renderCenterLine(ctx, range, scale);
@@ -442,6 +442,7 @@ class PileupTrack extends React.Component {
   // Draw the center line(s), which orient the user
   renderMark(
     ctx: CanvasRenderingContext2D,
+    marker: boolean,
     mark: number,
     scale: (num: number) => number
   ) {
@@ -452,9 +453,17 @@ class PileupTrack extends React.Component {
 
     ctx.save();
     ctx.lineWidth = 1;
-    if (SUPPORTS_DASHES) {
+    if (SUPPORTS_DASHES && !marker) {
       ctx.setLineDash([5, 5]);
     }
+
+    if (marker) {
+      ctx.strokeStyle = 'rgba(200, 100, 100, 0.4)';
+    }
+    else {
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+    }
+
     if (rightLineX - leftLineX < 3) {
       // If the lines are very close, then just draw a center line.
       var midX = Math.round((leftLineX + rightLineX) / 2);
@@ -466,16 +475,16 @@ class PileupTrack extends React.Component {
     ctx.restore();
   }
 
-  renderCenterLine(
+  renderCenterLine (
     ctx: CanvasRenderingContext2D,
     range: ContigInterval<string>,
     scale: (num: number) => number
   ) {
     var midPoint = Math.floor((range.stop() + range.start()) / 2);
-    this.renderMark(ctx, midPoint, scale);
+    this.renderMark(ctx, false, midPoint, scale);
   }
 
-  handleSort() {
+  handleSort () {
     var {start, stop} = this.props.range,
         middle = (start + stop) / 2;
     this.cache.sortReadsAt(this.props.range.contig, middle);
@@ -483,7 +492,7 @@ class PileupTrack extends React.Component {
     this.updateVisualization();
   }
 
-  handleClick(reactEvent: any) {
+  handleClick (reactEvent: any) {
     var ev = reactEvent.nativeEvent,
         x = ev.offsetX,
         y = ev.offsetY;
@@ -506,6 +515,21 @@ class PileupTrack extends React.Component {
       }
       else {
         alert(vRead.read.debugString());
+      }
+    }
+  }
+
+  handleMouseMove (reactEvent: any) {
+    var ev = reactEvent.nativeEvent,
+        x = ev.offsetX,
+        scale = this.getScale(),
+        pos;
+
+    if (p.flowgram) {
+      pos = Math.floor(scale.invert(x));
+      if (!(this.mouseX && this.mouseX === pos)) {
+        p.flowgram.updateCursor(pos);
+        this.mouseX = pos;
       }
     }
   }

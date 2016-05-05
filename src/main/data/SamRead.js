@@ -313,39 +313,6 @@ Tags: ${tags};
     `;
   }
 
-  htmlString(): string {
-    var f = this.getFull();
-    var seq;
-    var tags;
-    var buf;
-    if (this.fromText) {
-      seq = this._seq;
-      tags = this.buffer.split("\t").slice(11);
-    }
-    else {
-      seq = f.seq;
-      tags = f.auxiliary;
-    }
-
-    buf = `${this.name} ${this.getInterval()} ${this.getCigarString()}`;
-    buf += '<table>';
-    buf += '<tr><td class="read-data-tag">Flag</td><td class="read-data-value">' + this.getFlag() + '</td></tr>';
-    buf += '<tr><td class="read-data-tag">Length</td><td class="read-data-value">' + seq.length + '</td></tr>';
-    buf += '<tr><td class="read-data-tag">Sequence</td><td class="read-data-value">' + seq + '</td></tr>';
-    buf += '<tr><td class="read-data-tag">Quality</td><td class="read-data-value">' + this.getQualPhred() + '</td></tr>';
-
-    tags.forEach(function(tag) {
-      var t = tag.split(':');
-      if (t[0] === 'AS' || t[0] === 'MD' || t[0] === 'NM' || t[0] === 'XM' || t[0] === 'ZA'  || t[0] === 'ZP' || t[0] === 'ZM') {
-        buf += '<tr><td class="read-data-tag">' + t[0] + ':' + t[1] + '</td><td class="read-data-value">' + t[2] + '</td></tr>';
-      }
-    });
-
-    buf += '</table>';
-
-    return buf;
-  }
-
   static referenceLengthFromOps(ops: CigarOp[]): number {
     var refLength = 0;
     ops.forEach(({op, length}) => {
