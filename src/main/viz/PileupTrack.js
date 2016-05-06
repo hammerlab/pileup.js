@@ -528,7 +528,7 @@ class PileupTrack extends React.Component {
     if (p.flowgram) {
       pos = Math.floor(scale.invert(x));
       if (!(this.mouseX && this.mouseX === pos)) {
-        p.flowgram.updateCursor(pos);
+        p.flowgram.updateCursor(pos - 1);
         this.mouseX = pos;
       }
     }
