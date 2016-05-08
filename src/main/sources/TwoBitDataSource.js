@@ -71,7 +71,6 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
       return Q.when();  // empty promise
     }
 
-    console.log(`Fetching ${span} base pairs`);
     remoteSource.getFeaturesInRange(range.contig, range.start(), range.stop())
       .then(letters => {
         if (!letters) return;
