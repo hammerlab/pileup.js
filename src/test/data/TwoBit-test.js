@@ -46,5 +46,10 @@ describe('TwoBit', function() {
         });
   });
 
+  it('should parse huge headers', function() {
+    new TwoBit(new RemoteFile('/test-data/susScr3-head.2bit'));
+    // shouldn't throw an exception
+  });
+
   // TODO: masked regions
 });
