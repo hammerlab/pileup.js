@@ -20,6 +20,18 @@ var BASE_PAIRS = [
   'G'   // 3=11
 ];
 
+/**
+  The following chunk sizes are optimized against
+  the human reference genome (hg19.2bit). Assuming that
+  pileup.js is mostly being used for human genome,
+  increasing the following numbers might cause nonnecessary
+  network traffic and might also break our unit tests
+  that make use of mapped 2bit files.
+*/
+var FIRST_HEADER_CHUNKSIZE = 16 * 1024,  // 16 KB
+    FIRST_SEQUENCE_CHUNKSIZE = (4 * 1024) - 1,  // ~ 4KB
+    MAX_CHUNKSIZE = 1024 * 1024;  // 1 MB
+
 type FileIndexEntry = {
   name: string;
   offset: number;
@@ -125,6 +137,66 @@ function markUnknownDNA(basePairs: Array<string>, dnaStartIndex: number, sequenc
 }
 
 
+/**
+ * An umbrella error type to describe issues with parsing an
+ * incomplete chunk of data with JBinary's read. If this is being
+ * raised, we either need to ask for more data (a bigger chunk) or
+ * report to the user that there might be a problem with the 2bit
+ * file, specifically with its header.
+ */
+function IncompleteChunkError(message) {
+    this.name = "IncompleteChunkError";
+    this.message = (message || "");
+}
+IncompleteChunkError.prototype = Error.prototype;
+
+/**
+ * Wraps a parsing attempt, captures errors related to
+ * incomplete data and re-throws a specialized error:
+ * IncompleteChunkError. Otherwise, whatever other error
+ * is being raised gets escalated.
+ */
+function parseWithException(parseFunc: Function) {
+  try {
+    return parseFunc();
+  } catch(error) {
+    // Chrome-like browsers: RangeError; phantomjs: DOMException
+    if (error.name == "RangeError" || error.name == "INDEX_SIZE_ERR") {
+        console.log(`Error name: ${error.name}`);
+        throw new IncompleteChunkError(error);
+    } else {
+      throw error;
+    }
+  }
+}
+
+/**
+ * Try getting a bigger chunk of the remote file
+ * until the Incomplete Chunk Error is resolved. This is useful when we need to
+ * parse the header, but when we don't know the size of the header up front.
+ * If the intial request returns an incomplete header and hence the
+ * parsing fails, we next try doubling the requested size.
+ * The size of the request is capped with `untilSize` so that
+ * we don't start asking for MBs of data for no use.
+ * Instead we we throw an error if we reach the cap,
+ * potentially meaning a corrupted 2bit file.
+*/
+function retryRemoteGet(remoteFile: RemoteFile, start: number, size: number, untilSize: number, promisedFunc: Function) {
+  return remoteFile.getBytes(start, size).then(promisedFunc).catch(error => {
+    if(error.name == "IncompleteChunkError") {
+      // Do not attempt to download more than `untilSize`
+      if(size > untilSize) {
+        throw `Couldn't parse the header ` +
+              `from the first ${size} bytes of the file. ` +
+              `Corrupted 2bit file?`;
+      }
+      return retryRemoteGet(remoteFile, start, size*2, untilSize, promisedFunc);
+    } else {
+      throw error;
+    }
+  });
+}
+
 class TwoBit {
   remoteFile: RemoteFile;
   header: Q.Promise<TwoBitHeader>;
@@ -133,10 +205,15 @@ class TwoBit {
     this.remoteFile = remoteFile;
     var deferredHeader = Q.defer();
     this.header = deferredHeader.promise;
-
-    // TODO: if 16k is insufficient, fetch the right amount.
-    this.remoteFile.getBytes(0, 16*1024).then(function(buffer) {
-        var header = parseHeader(buffer);
+    retryRemoteGet(
+      this.remoteFile,
+      0,  // Beginning of the file
+      FIRST_HEADER_CHUNKSIZE,
+      MAX_CHUNKSIZE,
+      buffer => {
+        var header = parseWithException(() => {
+          return parseHeader(buffer);
+        });
         deferredHeader.resolve(header);
       }).done();
   }
@@ -178,9 +255,17 @@ class TwoBit {
       }
       var seq = maybeSeq;  // for flow, see facebook/flow#266
 
-      // TODO: if 4k is insufficient, fetch the right amount.
-      return this.remoteFile.getBytes(seq.offset, 4095).then(
-          buf => parseSequenceRecord(buf, seq.offset));
+      return retryRemoteGet(
+        this.remoteFile,
+        seq.offset,
+        FIRST_SEQUENCE_CHUNKSIZE,
+        MAX_CHUNKSIZE,
+        buffer => {
+          return parseWithException(() => {
+            return parseSequenceRecord(buffer, seq.offset);
+          });
+        }
+      );
     });
   }
 }

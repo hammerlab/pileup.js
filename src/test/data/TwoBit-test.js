@@ -46,5 +46,13 @@ describe('TwoBit', function() {
         });
   });
 
+  it('should parse huge headers', function() {
+    var twoBit = new TwoBit(new RemoteFile('/test-data/susScr3-head.2bit'));
+    // shouldn't throw an exception
+    return twoBit.header.then(header => {
+      expect(header.sequenceCount).to.equal(4583);
+    });
+  });
+
   // TODO: masked regions
 });
