@@ -136,9 +136,43 @@ function markUnknownDNA(basePairs: Array<string>, dnaStartIndex: number, sequenc
   return basePairs;
 }
 
+
+/**
+ * An umbrella error type to describe issues with parsing an
+ * incomplete chunk of data with JBinary's read. If this is being
+ * raised, we either need to ask for more data (a bigger chunk) or
+ * report to the user that there might be a problem with the 2bit
+ * file, specifically with its header.
+ */
+function IncompleteChunkError(message) {
+    this.name = "IncompleteChunkError";
+    this.message = (message || "");
+}
+IncompleteChunkError.prototype = Error.prototype;
+
+/**
+ * Wraps a parsing attempt, captures errors related to
+ * incomplete data and re-throws a specialized error:
+ * IncompleteChunkError. Otherwise, whatever other error
+ * is being raised gets escalated.
+ */
+function parseWithException(parseFunc: Function) {
+  try {
+    return parseFunc();
+  } catch(error) {
+    // Chrome-like browsers: RangeError; phantomjs: DOMException
+    if (error.name == "RangeError" || error.name == "INDEX_SIZE_ERR") {
+        console.log(`Error name: ${error.name}`);
+        throw new IncompleteChunkError(error);
+    } else {
+      throw error;
+    }
+  }
+}
+
 /**
  * Try getting a bigger chunk of the remote file
- * until the Range Error is resolved. This is useful when we need to
+ * until the Incomplete Chunk Error is resolved. This is useful when we need to
  * parse the header, but when we don't know the size of the header up front.
  * If the intial request returns an incomplete header and hence the
  * parsing fails, we next try doubling the requested size.
@@ -149,7 +183,7 @@ function markUnknownDNA(basePairs: Array<string>, dnaStartIndex: number, sequenc
 */
 function retryRemoteGet(remoteFile: RemoteFile, start: number, size: number, untilSize: number, promisedFunc: Function) {
   return remoteFile.getBytes(start, size).then(promisedFunc).catch(error => {
-    if(error.constructor == RangeError) {
+    if(error.name == "IncompleteChunkError") {
       // Do not attempt to download more than `untilSize`
       if(size > untilSize) {
         throw `Couldn't parse the header ` +
@@ -177,7 +211,9 @@ class TwoBit {
       FIRST_HEADER_CHUNKSIZE,
       MAX_CHUNKSIZE,
       buffer => {
-        var header = parseHeader(buffer);
+        var header = parseWithException(() => {
+          return parseHeader(buffer);
+        });
         deferredHeader.resolve(header);
       }).done();
   }
@@ -224,7 +260,11 @@ class TwoBit {
         seq.offset,
         FIRST_SEQUENCE_CHUNKSIZE,
         MAX_CHUNKSIZE,
-        buffer => { return parseSequenceRecord(buffer, seq.offset); }
+        buffer => {
+          return parseWithException(() => {
+            return parseSequenceRecord(buffer, seq.offset);
+          });
+        }
       );
     });
   }
