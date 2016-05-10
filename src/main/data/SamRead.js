@@ -98,6 +98,10 @@ class SamRead /* implements Alignment */ {
     }
   }
 
+  isReverse(): boolean {
+    return (this.flag & 16) === 16;
+  }
+
   toString(): string {
     var stop = this.pos + this.l_seq;
     return `${this.ref}:${1+this.pos}-${stop}`;
