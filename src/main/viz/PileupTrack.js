@@ -34,6 +34,8 @@ var READ_SPACING = 1;  // vertical pixels between reads
 
 var READ_STRAND_ARROW_WIDTH = 5;
 
+var READ_CLICKED = null;
+
 // PhantomJS does not support setLineDash.
 // Node doesn't even know about the symbol.
 var SUPPORTS_DASHES = typeof(CanvasRenderingContext2D) !== 'undefined' &&
@@ -151,9 +153,16 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
     ctx.pushObject(vRead);
     ctx.save();
     if (colorByStrand) {
-      ctx.fillStyle = vRead.strand == '+' ?
+      if (READ_CLICKED && vRead.read.name === READ_CLICKED) {
+        ctx.fillStyle = vRead.strand == '+' ?
+          d3.rgb(style.ALIGNMENT_PLUS_STRAND_COLOR).darker(0.2).toString() :
+          d3.rgb(style.ALIGNMENT_MINUS_STRAND_COLOR).darker(0.2).toString();
+      }
+      else {
+        ctx.fillStyle = vRead.strand == '+' ?
           style.ALIGNMENT_PLUS_STRAND_COLOR :
           style.ALIGNMENT_MINUS_STRAND_COLOR;
+      }
     }
     vRead.ops.forEach(op => {
       if (isRendered(op)) {
@@ -430,9 +439,7 @@ class PileupTrack extends React.Component {
     if (p.mark) {
       this.renderMark(ctx, true, p.mark, scale);
     }
-    else {
-      this.renderCenterLine(ctx, range, scale);
-    }
+    this.renderCenterLine(ctx, range, scale);
 
     // This is a hack to mitigate #350
     var el = d3utils.findParent(this.refs.canvas, 'track-content');
@@ -482,6 +489,11 @@ class PileupTrack extends React.Component {
   ) {
     var midPoint = Math.floor((range.stop() + range.start()) / 2);
     this.renderMark(ctx, false, midPoint, scale);
+
+    // Update the flowgram widget
+    if (p.flowgram) {
+      p.flowgram.updateFrame(midPoint - 1);
+    }
   }
 
   handleSort () {
@@ -501,6 +513,7 @@ class PileupTrack extends React.Component {
 
     var genomeRange = this.props.range,
         range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop),
+        midPoint = Math.floor((range.stop() + range.start()) / 2),
         scale = this.getScale(),
         // If click-tracking gets slow, this range could be narrowed to one
         // closer to the click coordinate, rather than the whole visible range.
@@ -510,8 +523,11 @@ class PileupTrack extends React.Component {
     var vRead = _.find(trackingCtx.hits[0], hit => hit.read);
     var alert = window.alert || console.log;
     if (vRead) {
+      READ_CLICKED = vRead.read.name;
+      this.tiles.invalidateAll();
+      this.updateVisualization();
       if (pileup.readDataPanel) {
-        pileup.readDataPanel.open(vRead.read);
+        pileup.readDataPanel.open(vRead.read, midPoint - 1, Math.floor(scale.invert(x)) - 1);
       }
       else {
         alert(vRead.read.debugString());
