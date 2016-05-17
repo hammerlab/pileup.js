@@ -153,7 +153,7 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
     ctx.pushObject(vRead);
     ctx.save();
     if (colorByStrand) {
-      if (READ_CLICKED && vRead.read.name === READ_CLICKED) {
+      if (READ_CLICKED && vRead.read.name === READ_CLICKED.read.name) {
         ctx.fillStyle = vRead.strand == '+' ?
           d3.rgb(style.ALIGNMENT_PLUS_STRAND_COLOR).darker(0.2).toString() :
           d3.rgb(style.ALIGNMENT_MINUS_STRAND_COLOR).darker(0.2).toString();
@@ -523,9 +523,13 @@ class PileupTrack extends React.Component {
     var vRead = _.find(trackingCtx.hits[0], hit => hit.read);
     var alert = window.alert || console.log;
     if (vRead) {
-      READ_CLICKED = vRead.read.name;
+      vRead.n = Math.floor(y / (READ_HEIGHT + READ_SPACING));
+      READ_CLICKED = vRead;
       this.tiles.invalidateAll();
       this.updateVisualization();
+      window.setTimeout(() => {
+        this.handleMouseMove({nativeEvent: {offsetX: x, offsetY: y}}); // to update the cursor
+      }, 200); // rendering the cursor early will lead to it getting overwritten by udateVisualization()
       if (pileup.readDataPanel) {
         pileup.readDataPanel.open(vRead.read, midPoint - 1, Math.floor(scale.invert(x)) - 1);
       }
@@ -538,11 +542,38 @@ class PileupTrack extends React.Component {
   handleMouseMove (reactEvent: any) {
     var ev = reactEvent.nativeEvent,
         x = ev.offsetX,
+        y = ev.offsetY,
         scale = this.getScale(),
-        pos;
+        pos = Math.floor(scale.invert(x)),
+        ctx = canvasUtils.getContext(this.refs.canvas),
+        pxPerLetter = scale(1) - scale(0),
+        genomeRange,
+        range;
+
+    if (READ_CLICKED) {
+      function renderCursor(pos: number, y: number) {
+        var
+          interval = READ_CLICKED.read.getInterval().interval,
+          pxPerLetter = scale(1) - scale(0);
+
+        if (pos >= interval.start && pos <= interval.stop) {
+          ctx.save();
+          ctx.strokeStyle = 'black';
+          ctx.lineWidth = '1px';
+          // The 0.5 hack makes it render exactly 1 pixel thick
+          ctx.strokeRect(Math.round(scale(1 + pos)) + 0.5, y - 0.5, Math.round(pxPerLetter - 1), READ_HEIGHT + 1);
+          ctx.restore();
+        }
+      }
+
+      genomeRange = this.props.range;
+      range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop);
+      this.tiles.invalidateRange(range);
+      this.updateVisualization();
+      renderCursor(pos - 1, READ_CLICKED.n * (READ_HEIGHT + READ_SPACING));
+    }
 
     if (p.flowgram) {
-      pos = Math.floor(scale.invert(x));
       if (!(this.mouseX && this.mouseX === pos)) {
         p.flowgram.updateCursor(pos - 1);
         this.mouseX = pos;
