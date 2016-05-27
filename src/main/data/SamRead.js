@@ -84,17 +84,19 @@ class SamRead /* implements Alignment */ {
       this.name = this._getName();
     }
     else {
-      var fields = buffer.split('\t');
-      this.flag = parseInt(fields[1], 10);
-      this.ref = fields[2];
-      this.refID = parseInt(ref, 10) - 1;
-      this.name = fields[0];
-      this.pos = parseInt(fields[3], 10) - 1;
-      this.cigarString = fields[5];
-      this.cigarOps = this._getCigarOpsFromText(fields[5]);
-      this._seq = fields[9];
-      this.l_seq = this._seq.length;
-      this._qual = fields[10];
+      var f = buffer.split('\t');
+      Object.assign(this, {
+        flag: parseInt(f[1], 10),
+        ref: f[2],
+        refID: parseInt(f[2].match(/(\d+)$/)[0], 10) - 1,
+        name: f[0],
+        pos: parseInt(f[3], 10) - 1,
+        cigarString: f[5],
+        cigarOps: this._getCigarOpsFromText(f[5]),
+        _seq: f[9],
+        l_seq: f[9].length,
+        _qual: f[10],
+      });
     }
   }
 

@@ -34,7 +34,9 @@ var READ_SPACING = 1;  // vertical pixels between reads
 
 var READ_STRAND_ARROW_WIDTH = 5;
 
-var READ_CLICKED = null;
+var SELECTED_READ = null;
+
+var pileup_render_event = new CustomEvent("pileup rendered");
 
 // PhantomJS does not support setLineDash.
 // Node doesn't even know about the symbol.
@@ -153,10 +155,10 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
     ctx.pushObject(vRead);
     ctx.save();
     if (colorByStrand) {
-      if (READ_CLICKED && vRead.read.name === READ_CLICKED.read.name) {
+      if (SELECTED_READ && vRead.read.name === SELECTED_READ.read.name) {
         ctx.fillStyle = vRead.strand == '+' ?
-          d3.rgb(style.ALIGNMENT_PLUS_STRAND_COLOR).darker(0.2).toString() :
-          d3.rgb(style.ALIGNMENT_MINUS_STRAND_COLOR).darker(0.2).toString();
+          d3.rgb(style.ALIGNMENT_PLUS_STRAND_COLOR).darker(0.3).toString() :
+          d3.rgb(style.ALIGNMENT_MINUS_STRAND_COLOR).darker(0.3).toString();
       }
       else {
         ctx.fillStyle = vRead.strand == '+' ?
@@ -222,6 +224,8 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
 
   ctx.font = style.TIGHT_TEXT_STYLE;
   vGroups.forEach(vGroup => drawGroup(vGroup));
+
+  document.dispatchEvent(pileup_render_event);
 }
 
 
@@ -264,6 +268,7 @@ class PileupTrack extends React.Component {
     this.state = {
       networkStatus: null
     };
+    pileup.pileupTrack = this;
   }
 
   render(): any {
@@ -302,7 +307,7 @@ class PileupTrack extends React.Component {
       <div>
         {statusEl}
         <div ref='container' style={containerStyles}>
-          <canvas ref='canvas' onClick={this.handleClick.bind(this)} onMouseMove={this.handleMouseMove.bind(this)}/>
+          <canvas ref='canvas' id='pileup-canvas' onClick={this.handleClick.bind(this)} onMouseMove={this.handleMouseMove.bind(this)}/>
         </div>
       </div>
     );
@@ -496,6 +501,92 @@ class PileupTrack extends React.Component {
     }
   }
 
+  renderCursor(pos: number, y: number) {
+    var
+      ctx = canvasUtils.getContext(this.refs.canvas),
+      interval = SELECTED_READ.read.getInterval().interval,
+      scale = this.getScale(),
+      pxPerLetter = scale(1) - scale(0);
+
+    if (pos >= interval.start && pos <= interval.stop) {
+      ctx.save();
+      ctx.strokeStyle = 'black';
+      ctx.lineWidth = '1px';
+      // The 0.5 hack makes it render exactly 1 pixel thick
+      ctx.strokeRect(Math.round(scale(1 + pos)) + 0.5, y - 0.5, Math.round(pxPerLetter - 1), READ_HEIGHT + 1);
+      ctx.restore();
+    }
+  }
+
+  scrollTo (n: number) {
+    var row;
+    if (n > 5) {
+      row = n - 5;
+    }
+    else {
+      row = 0;
+    }
+    this.refs.canvas.parentNode.parentNode.parentNode.parentNode.scrollTop = yForRow(row);
+  }
+
+  find (name: string) {
+    var
+      self = this,
+      genomeRange = this.props.range,
+      range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop),
+      midPoint = Math.floor((range.start() + range.stop()) / 2),
+      vGroups = this.cache.getGroupsOverlapping(range),
+      hit, start, end, cursor_x, alignment_center_x,
+      alignmentCenter,
+      scale = this.getScale(),
+      pxPerLetter = scale(1) - scale(0),
+      row;
+
+    vGroups.some(function (read) {
+      if (read.key === name) {
+        hit = read;
+        return true;
+      }
+    });
+
+    if (hit) {
+      alignmentCenter = Math.floor((hit.span.start() + hit.span.stop()) / 2);
+      alignment_center_x = pxPerLetter * (alignmentCenter - range.start());
+
+      SELECTED_READ = hit.alignments[0];
+      SELECTED_READ.n = hit.row;
+      this.tiles.invalidateAll();
+      this.updateVisualization();
+
+      if (p.mark) {
+        console.log('moving to ' + p.mark);
+        cursor_x = Math.floor(pxPerLetter * (p.mark - 1 - range.interval.start));
+      }
+      else {
+        cursor_x = alignment_center_x;
+      }
+
+      if (pileup.readDataPanel) {
+        pileup.readDataPanel.open(SELECTED_READ.read, midPoint, Math.round(scale.invert(cursor_x)));
+        this.scrollTo(hit.row);
+      }
+
+      console.log('cursor_x', cursor_x, 'canvas center', alignment_center_x, 'mark', p.mark);
+      // Simulate mouse movement to get the cursors rendered
+      setTimeout(function () { // delay to avoid updateVisualization() erasing the pileup cursor
+        self.handleMouseMove({
+          nativeEvent: {
+            offsetX: cursor_x + 1,
+            offsetY: yForRow(hit.row)
+          }
+        });
+      }, 200);
+
+      return hit;
+    }
+    return null;
+  }
+
   handleSort () {
     var {start, stop} = this.props.range,
         middle = (start + stop) / 2;
@@ -523,14 +614,15 @@ class PileupTrack extends React.Component {
     var vRead = _.find(trackingCtx.hits[0], hit => hit.read);
     var alert = window.alert || console.log;
     if (vRead) {
-      vRead.n = Math.floor(y / (READ_HEIGHT + READ_SPACING));
-      READ_CLICKED = vRead;
+      vRead.n = Math.floor(y / yForRow(1));
+      SELECTED_READ = vRead;
       this.tiles.invalidateAll();
       this.updateVisualization();
       window.setTimeout(() => {
         this.handleMouseMove({nativeEvent: {offsetX: x, offsetY: y}}); // to update the cursor
       }, 200); // rendering the cursor early will lead to it getting overwritten by udateVisualization()
       if (pileup.readDataPanel) {
+        this.scrollTo(vRead.n);
         pileup.readDataPanel.open(vRead.read, midPoint - 1, Math.floor(scale.invert(x)) - 1);
       }
       else {
@@ -550,32 +642,17 @@ class PileupTrack extends React.Component {
         genomeRange,
         range;
 
-    if (READ_CLICKED) {
-      function renderCursor(pos: number, y: number) {
-        var
-          interval = READ_CLICKED.read.getInterval().interval,
-          pxPerLetter = scale(1) - scale(0);
-
-        if (pos >= interval.start && pos <= interval.stop) {
-          ctx.save();
-          ctx.strokeStyle = 'black';
-          ctx.lineWidth = '1px';
-          // The 0.5 hack makes it render exactly 1 pixel thick
-          ctx.strokeRect(Math.round(scale(1 + pos)) + 0.5, y - 0.5, Math.round(pxPerLetter - 1), READ_HEIGHT + 1);
-          ctx.restore();
-        }
-      }
-
+    if (SELECTED_READ) {
       genomeRange = this.props.range;
       range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop);
       this.tiles.invalidateRange(range);
       this.updateVisualization();
-      renderCursor(pos - 1, READ_CLICKED.n * (READ_HEIGHT + READ_SPACING));
+      this.renderCursor(pos - 1, yForRow(SELECTED_READ.n));
     }
 
     if (p.flowgram) {
       if (!(this.mouseX && this.mouseX === pos)) {
-        p.flowgram.updateCursor(pos - 1);
+        p.flowgram.refToCursors(pos - 1, true); // true -> check interval
         this.mouseX = pos;
       }
     }
