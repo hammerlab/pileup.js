@@ -33,6 +33,7 @@ class VisualizationWrapper extends React.Component {
   props: Props;
   state: {width: number; height: number};
   hasDragBeenInitialized: boolean;
+	onResizeListener;
 
   constructor(props: Object) {
     super(props);
@@ -52,7 +53,10 @@ class VisualizationWrapper extends React.Component {
   }
 
   componentDidMount(): any {
-    window.addEventListener('resize', () => this.updateSize());
+		//local copy of the listener, so we can remove it
+		//when pileup is destroyed
+		this.onResizeListener = () => this.updateSize();
+    window.addEventListener('resize', this.onResizeListener);
     this.updateSize();
 
     if (this.props.range && !this.hasDragBeenInitialized) this.addDragInterface();
@@ -61,6 +65,10 @@ class VisualizationWrapper extends React.Component {
   componentDidUpdate(): any {
     if (this.props.range && !this.hasDragBeenInitialized) this.addDragInterface();
   }
+
+	componentWillUnmount(): any {
+		window.removeEventListener('resize', this.onResizeListener);
+	}
 
   getScale(): (num: number)=>number {
     if (!this.props.range) return x => x;
