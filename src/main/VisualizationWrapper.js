@@ -33,7 +33,7 @@ class VisualizationWrapper extends React.Component {
   props: Props;
   state: {width: number; height: number};
   hasDragBeenInitialized: boolean;
-	onResizeListener;
+	onResizeListener: Object;	//listener that handles window.onresize event
 
   constructor(props: Object) {
     super(props);
