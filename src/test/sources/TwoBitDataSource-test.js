@@ -31,11 +31,18 @@ describe('TwoBitDataSource', function() {
     });
   });
 
+	/**
+	 * Test case that visualize situation when we set range very big
+	 * (in millions) and afterwards we set the range to small subrange
+	 * of the huge range. The huge range shouldn't be fetched from
+	 * 2bit file. But due to //github.com/hammerlab/pileup.js/issues/416
+	 * every small request from the big range wasn't handled properly 
+	 * afterwardfs.
+	 * 
+	 */
   it('should fetch base pairs (bug 416)', function(done) {
     var source = getTestSource();
-		//this range shouldn't be fetched because is huge (but due to bug: 
-		// https://github.com/hammerlab/pileup.js/issues/416
-		// everyt small request from the big range wasn't handled properly afterwardfs
+		//this range shouldn't be fetched because is huge 
 		var hugeRange= {contig: 'chr22', start: 0, stop: 114529884};
 
 		//small range that due to bug wasn't properly handled
@@ -55,7 +62,7 @@ describe('TwoBitDataSource', function() {
 		//try to fetch huge chunk of data (should be skipped)
     source.rangeChanged(hugeRange);
 
-		//and now try to fetch small chunk (should be fetched and proper newdata event should be dispatched
+		//and now try to fetch small chunk (should be fetched and proper newdata event should be dispatched)
     source.rangeChanged(smallSubRange);
   });
 
