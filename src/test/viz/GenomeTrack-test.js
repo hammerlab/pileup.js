@@ -50,7 +50,7 @@ describe('GenomeTrack', function() {
 	var referenceTrackLoaded = () => {
 		//this can be done in a preatier way
 		return testDiv.querySelector('canvas') !== null ;
-	}
+	};
 
   it('should tolerate non-chr ranges', function() {
     var p = pileup.create(testDiv, {
