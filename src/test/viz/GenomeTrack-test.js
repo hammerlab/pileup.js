@@ -47,6 +47,11 @@ describe('GenomeTrack', function() {
           drawnObjects(testDiv, '.reference').length > 0;
     };
 
+  var referenceTrackLoaded = () => {
+    //this can be done in a preatier way
+    return testDiv.querySelector('canvas') !== null ;
+  };
+
   it('should tolerate non-chr ranges', function() {
     var p = pileup.create(testDiv, {
       range: {contig: '17', start: 7500730, stop: 7500790},
@@ -81,6 +86,44 @@ describe('GenomeTrack', function() {
     // note: this isn't really true, but it makes flow happy
     return ((els: any): HTMLInputElement[]);
   };
+
+  /**
+   * Test case show situation when we zoom in from very global view
+   * (range span is milions of nucleotides) into very narrow view
+   * (tens of nucleotides).
+   */
+  it('should zoom from huge zoom out', function() {
+    
+    var p = pileup.create(testDiv, {
+      range: { contig: '17', start: 0, stop: 114529884 },
+      tracks: [{
+        data: referenceSource,
+        viz: pileup.viz.genome(),
+        isReference: true
+       }
+    ]
+    });
+
+    expect(testDiv.querySelectorAll('.zoom-controls')).to.have.length(1);
+
+    var buttons = testDiv.querySelectorAll('.controls button');
+    var [goBtn, minusBtn, plusBtn] = buttons;
+    var [locationTxt] = getInputs('.controls input[type="text"]');
+    expect(goBtn.textContent).to.equal('Go');
+    expect(minusBtn.className).to.equal('btn-zoom-out');
+    expect(plusBtn.className).to.equal('btn-zoom-in');
+
+    return waitFor(referenceTrackLoaded, 2000).then(() => {
+      //in global view we shouldn't see reference track
+      expect(hasReference()).to.be.false;
+      p.setRange({contig: '17', start: 7500725, stop: 7500775});
+    }).delay(300).then(() => {
+      //after zoom in we should see reference track
+      expect(hasReference()).to.be.true;
+      expect(locationTxt.value).to.equal('7,500,725-7,500,775');
+      p.destroy();
+    });
+  });
 
   it('should zoom in and out', function() {
     var p = pileup.create(testDiv, {
