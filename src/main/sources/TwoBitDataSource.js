@@ -68,8 +68,14 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
   function fetch(range: ContigInterval) {
     var span = range.length();
     if (span > MAX_BASE_PAIRS_TO_FETCH) {
+			//informa that we won't fetch the data
+      o.trigger('newdatarefused', range);
       return Q.when();  // empty promise
     }
+		//now we cam add region to covered regions 
+		//doing it earlier will provide inconsistency
+    coveredRanges.push(range);
+    coveredRanges = ContigInterval.coalesce(coveredRanges);
 
     remoteSource.getFeaturesInRange(range.contig, range.start(), range.stop())
       .then(letters => {
@@ -138,8 +144,6 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
 
         range = expandRange(range);
         var newRanges = range.complementIntervals(coveredRanges);
-        coveredRanges.push(range);
-        coveredRanges = ContigInterval.coalesce(coveredRanges);
 
         for (var newRange of newRanges) {
           fetch(newRange);
