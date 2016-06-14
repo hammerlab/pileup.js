@@ -6,6 +6,7 @@
 'use strict';
 
 import Q from 'q';
+import AbstractFile from './AbstractFile';
 
 type Chunk = {
   start: number;
@@ -15,13 +16,14 @@ type Chunk = {
 }
 
 
-class RemoteFile {
+class RemoteFile extends AbstractFile{
   url: string;
   fileLength: number;
   chunks: Array<Chunk>;  // regions of file that have already been loaded.
   numNetworkRequests: number;  // track this for debugging/testing
 
   constructor(url: string) {
+    super();
     this.url = url;
     this.fileLength = -1;  // unknown
     this.chunks = [];

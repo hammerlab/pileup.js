@@ -13,6 +13,7 @@ import Q from 'q';
 
 import ContigInterval from '../ContigInterval';
 import RemoteFile from '../RemoteFile';
+import LocalStringFile from '../LocalStringFile';
 import VcfFile from '../data/vcf';
 
 export type VcfDataSource = {
@@ -91,13 +92,16 @@ function createFromVcfFile(remoteSource: VcfFile): VcfDataSource {
   return o;
 }
 
-function create(data: {url:string}): VcfDataSource {
+function create(data: Object): VcfDataSource {
   var url = data.url;
-  if (!url) {
-    throw new Error(`Missing URL from track: ${JSON.stringify(data)}`);
+  var content = data.content;
+  if (url!=null) {
+    return createFromVcfFile(new VcfFile(new RemoteFile(url)));
   }
-
-  return createFromVcfFile(new VcfFile(new RemoteFile(url)));
+  if (content!=null) {
+    return createFromVcfFile(new VcfFile(new LocalStringFile(content)));
+  }
+  throw new Error(`Missing URL from track: ${JSON.stringify(data)}`);
 }
 
 module.exports = {
