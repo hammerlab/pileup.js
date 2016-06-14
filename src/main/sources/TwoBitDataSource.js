@@ -68,12 +68,12 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
   function fetch(range: ContigInterval) {
     var span = range.length();
     if (span > MAX_BASE_PAIRS_TO_FETCH) {
-			//inform that we won't fetch the data
+      //inform that we won't fetch the data
       o.trigger('newdatarefused', range);
       return Q.when();  // empty promise
     }
-		//now we can add region to covered regions 
-		//doing it earlier would provide inconsistency
+    //now we can add region to covered regions 
+    //doing it earlier would provide inconsistency
     coveredRanges.push(range);
     coveredRanges = ContigInterval.coalesce(coveredRanges);
 
