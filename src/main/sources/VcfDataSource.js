@@ -95,10 +95,10 @@ function createFromVcfFile(remoteSource: VcfFile): VcfDataSource {
 function create(data: Object): VcfDataSource {
   var url = data.url;
   var content = data.content;
-  if (url!=null) {
+  if (url!==null && url!== undefined) {
     return createFromVcfFile(new VcfFile(new RemoteFile(url)));
   }
-  if (content!=null) {
+  if (content!==null && content!== undefined) {
     return createFromVcfFile(new VcfFile(new LocalStringFile(content)));
   }
   throw new Error(`Missing URL from track: ${JSON.stringify(data)}`);

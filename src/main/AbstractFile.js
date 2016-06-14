@@ -10,7 +10,6 @@
 
 import Q from 'q';
 
-
 class AbstractFile {
   constructor() {
     //how to prevent instantation of this class???
