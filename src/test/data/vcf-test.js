@@ -8,8 +8,6 @@ import ContigInterval from '../../main/ContigInterval';
 import RemoteFile from '../../main/RemoteFile';
 import LocalStringFile from '../../main/LocalStringFile';
 
-var fs = require('fs');
-
 describe('VCF', function() {
   it('should respond to queries', function() {
     var vcf = new VcfFile(new RemoteFile('/test-data/snv.vcf'));
