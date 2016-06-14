@@ -8,7 +8,7 @@
  */
 'use strict';
 
-import Q from 'q';
+//import Q from 'q';
 
 class AbstractFile {
   constructor() {
@@ -19,23 +19,23 @@ class AbstractFile {
 //    }
   }
 
-  getBytes(start: number, length: number): Q.Promise<ArrayBuffer> {
+  getBytes(start: number, length: number):Object {//: Q.Promise<ArrayBuffer> {
     throw new TypeError("Method getBytes is not implemented");
   }
 
   // Read the entire file -- not recommended for large files!
-  getAll(): Q.Promise<ArrayBuffer> {
+  getAll():Object {//: Q.Promise<ArrayBuffer> {
     throw new TypeError("Method getAll is not implemented");
   }
 
   // Reads the entire file as a string (not an ArrayBuffer).
   // This does not use the cache.
-  getAllString(): Q.Promise<string> {
+  getAllString():Object {//: Q.Promise<string> {
     throw new TypeError("Method getAllString is not implemented");
   }
 
   // Returns a promise for the number of bytes in the remote file.
-  getSize(): Q.Promise<number> {
+  getSize():Object {//: Q.Promise<number> {
     throw new TypeError("Method getSize is not implemented");
   }
 }
