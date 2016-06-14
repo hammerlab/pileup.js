@@ -6,26 +6,43 @@ import {expect} from 'chai';
 import VcfFile from '../../main/data/vcf';
 import ContigInterval from '../../main/ContigInterval';
 import RemoteFile from '../../main/RemoteFile';
+import LocalStringFile from '../../main/LocalStringFile';
 
 describe('VCF', function() {
-  it('should respond to queries', function() {
-    var vcf = new VcfFile(new RemoteFile('/test-data/snv.vcf'));
-    var range = new ContigInterval('20', 63799, 69094);
-    return vcf.getFeaturesInRange(range).then(features => {
-      expect(features).to.have.length(6);
+  describe('should respond to queries', function() {
+    var testQueries = (vcf) => {
+      var range = new ContigInterval('20', 63799, 69094);
+      return vcf.getFeaturesInRange(range).then(features => {
+        expect(features).to.have.length(6);
 
-      var v0 = features[0],
-          v5 = features[5];
+        var v0 = features[0],
+            v5 = features[5];
 
-      expect(v0.contig).to.equal('20');
-      expect(v0.position).to.equal(63799);
-      expect(v0.ref).to.equal('C');
-      expect(v0.alt).to.equal('T');
+        expect(v0.contig).to.equal('20');
+        expect(v0.position).to.equal(63799);
+        expect(v0.ref).to.equal('C');
+        expect(v0.alt).to.equal('T');
 
-      expect(v5.contig).to.equal('20');
-      expect(v5.position).to.equal(69094);
-      expect(v5.ref).to.equal('G');
-      expect(v5.alt).to.equal('A');
+        expect(v5.contig).to.equal('20');
+        expect(v5.position).to.equal(69094);
+        expect(v5.ref).to.equal('G');
+        expect(v5.alt).to.equal('A');
+      });
+    };
+
+    var remoteFile = new RemoteFile('/test-data/snv.vcf');
+
+    it('remote file', function() {
+      var vcf = new VcfFile(remoteFile);
+      testQueries(vcf);
+    });
+
+    it('local file from string', function() {
+      return remoteFile.getAllString().then(content => {
+        var localFile = new LocalStringFile(content);
+        var vcf = new VcfFile(localFile);
+        testQueries(vcf);
+      });
     });
   });
 

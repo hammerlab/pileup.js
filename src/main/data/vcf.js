@@ -8,7 +8,7 @@
 'use strict';
 
 import type ContigInterval from '../ContigInterval';
-import type RemoteFile from '../RemoteFile';
+import type AbstractFile from '../AbstractFile';
 import type Q from 'q';
 
 export type Variant = {
@@ -146,10 +146,10 @@ class ImmediateVcfFile {
 
 
 class VcfFile {
-  remoteFile: RemoteFile;
+  remoteFile: AbstractFile;
   immediate: Q.Promise<ImmediateVcfFile>;
 
-  constructor(remoteFile: RemoteFile) {
+  constructor(remoteFile: AbstractFile) {
     this.remoteFile = remoteFile;
 
     this.immediate = this.remoteFile.getAllString().then(txt => {
