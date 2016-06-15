@@ -2,7 +2,7 @@
  * AbstractFile is an abstract representation of a file. There are two implementation:
  * 1. RemoteFile  - representation of a file on a remote server which can be
  * fetched in chunks, e.g. using a Range request.
- * 2. LoclaStringFile is a representation of a file that was created from input string. 
+ * 2. LocalStringFile is a representation of a file that was created from input string. 
  * Used for testing and small input files.
  * @flow
  */

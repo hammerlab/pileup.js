@@ -104,6 +104,17 @@ function create(data: Object): VcfDataSource {
   throw new Error(`Missing URL from track: ${JSON.stringify(data)}`);
 }
 
+function create(data: {url?: string, content?: string}): VcfDataSource {
+  var {url, content} = data;
+	if (url) {
+	  return createFromVcfFile(new VcfFile(new RemoteFile(url)));
+	} else if (content) {
+	  return createFromVcfFile(new VcfFile(new LocalStringFile(content)));
+	}
+	// If no URL or content is passed, fail
+	 throw new Error(`Missing URL or content from track: ${JSON.stringify(data)}`);
+}
+
 module.exports = {
   create,
   createFromVcfFile
