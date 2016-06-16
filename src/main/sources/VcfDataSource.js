@@ -92,27 +92,15 @@ function createFromVcfFile(remoteSource: VcfFile): VcfDataSource {
   return o;
 }
 
-function create(data: Object): VcfDataSource {
-  var url = data.url;
-  var content = data.content;
-  if (url!==null && url!== undefined) {
-    return createFromVcfFile(new VcfFile(new RemoteFile(url)));
-  }
-  if (content!==null && content!== undefined) {
-    return createFromVcfFile(new VcfFile(new LocalStringFile(content)));
-  }
-  throw new Error(`Missing URL from track: ${JSON.stringify(data)}`);
-}
-
 function create(data: {url?: string, content?: string}): VcfDataSource {
   var {url, content} = data;
-	if (url) {
-	  return createFromVcfFile(new VcfFile(new RemoteFile(url)));
-	} else if (content) {
-	  return createFromVcfFile(new VcfFile(new LocalStringFile(content)));
-	}
-	// If no URL or content is passed, fail
-	 throw new Error(`Missing URL or content from track: ${JSON.stringify(data)}`);
+  if (url) {
+    return createFromVcfFile(new VcfFile(new RemoteFile(url)));
+  } else if (content) {
+    return createFromVcfFile(new VcfFile(new LocalStringFile(content)));
+  }
+  // If no URL or content is passed, fail
+  throw new Error(`Missing URL or content from track: ${JSON.stringify(data)}`);
 }
 
 module.exports = {
