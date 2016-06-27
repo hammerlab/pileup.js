@@ -94,7 +94,7 @@ class Root extends React.Component {
             onRangeChange={this.handleRangeChange.bind(this)}
             source={track.source}
             referenceSource={this.props.referenceSource}
-            ref = {(c) => return this.trackReactElements[intKey]=c}
+            ref = {(c) => {this.trackReactElements[intKey]=c}}
           />);
     
     var trackName = track.track.name || '(track name)';
