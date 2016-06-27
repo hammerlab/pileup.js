@@ -31,7 +31,7 @@ type Props = {
 
 class VisualizationWrapper extends React.Component {
   props: Props;
-  state: {width: number; height: number};
+  state: {width: number; height: number; updateSize: boolean};
   hasDragBeenInitialized: boolean;
   onResizeListener: Object;  //listener that handles window.onresize event
 
@@ -39,6 +39,7 @@ class VisualizationWrapper extends React.Component {
     super(props);
     this.hasDragBeenInitialized = false;
     this.state = {
+      updateSize: false,
       width: 0,
       height: 0
     };
@@ -47,6 +48,7 @@ class VisualizationWrapper extends React.Component {
   updateSize(): any {
     var parentDiv = ReactDOM.findDOMNode(this).parentNode;
     this.setState({
+      updateSize: false,
       width: parentDiv.offsetWidth,
       height: parentDiv.offsetHeight
     });
@@ -119,6 +121,12 @@ class VisualizationWrapper extends React.Component {
   handleClick(): any {
     if (d3.event.defaultPrevented) {
       d3.event.stopPropagation();
+    }
+  }
+
+  componentWillUpdate(nextProps:Props, nextState: Object) {
+    if (nextState.updateSize) {
+      this.updateSize();
     }
   }
 
