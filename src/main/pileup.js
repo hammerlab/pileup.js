@@ -108,7 +108,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
     var config = { attributes: true, childList: true, characterData: true, subtree: true };
 
     // start observing document
-    observer.observe(document, config)
+    observer.observe(document, config);
   }
 
   return {
@@ -137,7 +137,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
       vizTracks = null;
 
       // disconnect observer if it was created
-      if (observer!=null) {
+      if (observer !== null && observer !== undefined) {
         observer.disconnect();
       }
     }
