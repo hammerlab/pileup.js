@@ -50,6 +50,10 @@ class Root extends React.Component {
   }
 
   handleRangeChange(newRange: GenomeRange) {
+    // Do not propigate negative ranges
+    if (newRange.start < 0) {
+      return;
+    }
     this.props.referenceSource.normalizeRange(newRange).then(range => {
       this.setState({range: range});
 
@@ -67,7 +71,7 @@ class Root extends React.Component {
       this.setState({settingsMenuKey: key});
     }
   }
-  
+
   handleSelectOption(trackKey: string, optionKey: string) {
     this.setState({settingsMenuKey: null});
 
@@ -88,7 +92,7 @@ class Root extends React.Component {
             source={track.source}
             referenceSource={this.props.referenceSource}
           />);
-    
+
     var trackName = track.track.name || '(track name)';
 
     var gearIcon = null,
