@@ -13,7 +13,7 @@ var TYPE_SET = {
 
   'Header': {
     _magic: ['const', 'uint32', 0x8789F2EB, true],
-    version: ['const', 'uint16', 4, true],
+    version: 'uint16',
     zoomLevels: 'uint16',
     chromosomeTreeOffset: 'uint64',
     unzoomedDataOffset: 'uint64',
