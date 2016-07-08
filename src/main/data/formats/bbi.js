@@ -98,20 +98,25 @@ var TYPE_SET = {
     isLeaf: 'uint8',  // 1 = yes, 0 = no
     _reserved: 'uint8',
     count: 'uint16',
-    contents: ['array', ['if', 'isLeaf', {
-      startChromIx: 'uint32',
-      startBase: 'uint32',
-      endChromIx: 'uint32',
-      endBase: 'uint32',
-      offset: 'uint64',
-      size: 'uint64'
-    }, {
-      startChromIx: 'uint32',
-      startBase: 'uint32',
-      endChromIx: 'uint32',
-      endBase: 'uint32',
-      offset: 'uint64',
-    }], 'count']
+    contents: [
+      'array', [
+        'if', 'isLeaf', {
+          startChromIx: 'uint32',
+          startBase: 'uint32',
+          endChromIx: 'uint32',
+          endBase: 'uint32',
+          offset: 'uint64',
+          size: 'uint64'
+        }, {
+          startChromIx: 'uint32',
+          startBase: 'uint32',
+          endChromIx: 'uint32',
+          endBase: 'uint32',
+          offset: 'uint64',
+        }
+      ],
+      'count'
+    ]
   },
 
   'BedEntry': {
