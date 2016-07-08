@@ -31,9 +31,9 @@ function parseCirTree(buffer) {
 }
 
 // Extract a map from contig name --> contig ID from the bigBed header.
-function generateContigMap(twoBitHeader): {[key:string]: number} {
+function generateContigMap(header): {[key:string]: number} {
   // Just assume it's a flat "tree" for now.
-  var nodes = twoBitHeader.chromosomeTree.nodes.contents;
+  var nodes = header.chromosomeTree.nodes.contents;
   if (!nodes) {
     throw 'Invalid chromosome tree';
   }
