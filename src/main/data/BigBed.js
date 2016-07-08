@@ -53,13 +53,21 @@ function reverseContigMap(contigMap: {[key:string]: number}): Array<string> {
 }
 
 
-function extractFeaturesFromBlock(buffer, dataRange, block): ChrIdBedRow[] {
+function extractFeaturesFromBlock(buffer, dataRange, block, isCompressed): ChrIdBedRow[] {
   var blockOffset = block.offset - dataRange.start,
       blockLimit = blockOffset + block.size,
-      // TODO: where does the +2 come from? (I copied it from dalliance)
-      blockBuffer = buffer.slice(blockOffset + 2, blockLimit);
-  // TODO: only inflate if necessary
-  var inflatedBuffer = pako.inflateRaw(new Uint8Array(blockBuffer));
+
+      blockBuffer =
+        // NOTE: "+ 2" skips over two bytes of gzip header (0x8b1f), which pako.inflateRaw will not handle.
+        buffer.slice(
+          blockOffset + (isCompressed ? 2 : 0),
+          blockLimit
+        );
+
+  var inflatedBuffer =
+    isCompressed ?
+      pako.inflateRaw(new Uint8Array(blockBuffer)) :
+      blockBuffer;
 
   var jb = new jBinary(inflatedBuffer, bbi.TYPE_SET);
   // TODO: parse only one BedEntry at a time & use an iterator.
@@ -173,10 +181,11 @@ class ImmediateBigBed {
     var byteRange = Interval.boundingInterval(
         blocks.map(n => new Interval(+n.offset, n.offset+n.size)));
 
+    var isCompressed = (this.header.uncompressBufSize > 0);
     return this.remoteFile.getBytes(byteRange.start, byteRange.length())
         .then(buffer => {
           return blocks.map(block => {
-            var beds = extractFeaturesFromBlock(buffer, byteRange, block);
+            var beds = extractFeaturesFromBlock(buffer, byteRange, block, isCompressed);
             if (block.startChromIx != block.endChromIx) {
               throw `Can't handle blocks which span chromosomes!`;
             }

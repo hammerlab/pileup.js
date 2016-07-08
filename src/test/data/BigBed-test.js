@@ -13,6 +13,10 @@ describe('BigBed', function() {
     return new BigBed('/test-data/itemRgb.bb');   // See test-data/README.md
   }
 
+  function getUncompressedTestBigBed() {
+    return new BigBed('/test-data/simple17unc.bb');   // See test-data/README.md
+  }
+
   it('should extract features in a range', function() {
     var bb = getTestBigBed();
 
@@ -41,6 +45,28 @@ describe('BigBed', function() {
           expect(rest1[2]).to.equal('-');
           expect(rest1[5]).to.equal('255,62,150');
         });
+  });
+
+  it('should extract features from an uncompressed BigBed', function () {
+    var bb = getUncompressedTestBigBed();
+
+    return bb.getFeaturesInRange('chr17', 60000, 270000)
+      .then(features => {
+        // Here's what these three lines in the file look like:
+        // chr17	62296	202576
+        // chr17	62296	202576
+        // chr17	260433	264713
+        expect(features).to.have.length(3);
+        expect(features[0].contig).to.equal('chr17');
+        expect(features[0].start).to.equal(62296);
+        expect(features[0].stop).to.equal(202576);
+        expect(features[1].contig).to.equal('chr17');
+        expect(features[1].start).to.equal(62296);
+        expect(features[1].stop).to.equal(202576);
+        expect(features[2].contig).to.equal('chr17');
+        expect(features[2].start).to.equal(260433);
+        expect(features[2].stop).to.equal(264713);
+      });
   });
 
   it('should have inclusive ranges', function() {
