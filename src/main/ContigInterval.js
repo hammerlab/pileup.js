@@ -26,6 +26,9 @@ class ContigInterval<T: (number|string)> {
   stop(): number {
     return this.interval.stop;
   }
+  end(): number {
+    return this.interval.end;
+  }
   length(): number {
     return this.interval.length();
   }

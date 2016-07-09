@@ -4,13 +4,13 @@
  */
 'use strict';
 
-import type {Alignment, AlignmentDataSource} from '../Alignment';
-import type Interval from '../Interval';
+import type {AlignmentDataSource} from '../Alignment';
 import type {TwoBitSource} from '../sources/TwoBitDataSource';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {BinSummary} from './CoverageCache';
 import type {Scale} from './d3utils';
 
+import CoverageTiledCanvas from './CoverageTiledCanvas';
 import React from 'react';
 import scale from '../scale';
 import shallowEquals from 'shallow-equals';
@@ -19,7 +19,6 @@ import _ from 'underscore';
 import dataCanvas from 'data-canvas';
 import canvasUtils from './canvas-utils';
 import CoverageCache from './CoverageCache';
-import TiledCanvas from './TiledCanvas';
 import style from '../style';
 import ContigInterval from '../ContigInterval';
 
@@ -29,51 +28,6 @@ const SHOW_MISMATCHES = true;
 // Only show mismatch information when there are more than this many
 // reads supporting that mismatch.
 const MISMATCH_THRESHOLD = 1;
-
-
-class CoverageTiledCanvas extends TiledCanvas {
-  height: number;
-  options: Object;
-  cache: CoverageCache;
-
-  constructor(cache: CoverageCache, height: number, options: Object) {
-    super();
-
-    this.cache = cache;
-    this.height = Math.max(1, height);
-    this.options = options;
-  }
-
-  heightForRef(ref: string): number {
-    return this.height;
-  }
-
-  update(height: number, options: Object) {
-    // workaround for an issue in PhantomJS where height always comes out to zero.
-    this.height = Math.max(1, height);
-    this.options = options;
-  }
-
-  yScaleForRef(ref: string): (y: number) => number {
-    var maxCoverage = this.cache.maxCoverageForRef(ref);
-
-    var padding = 10;  // TODO: move into style
-    return scale.linear()
-      .domain([maxCoverage, 0])
-      .range([padding, this.height - padding])
-      .nice();
-  }
-
-  render(ctx: DataCanvasRenderingContext2D,
-         xScale: (x: number)=>number,
-         range: ContigInterval<string>) {
-    var bins = this.cache.binsForRef(range.contig);
-    var yScale = this.yScaleForRef(range.contig);
-    var relaxedRange = new ContigInterval(
-        range.contig, range.start() - 1, range.stop() + 1);
-    renderBars(ctx, xScale, yScale, relaxedRange, bins, this.options);
-  }
-}
 
 
 // Draw coverage bins & mismatches
