@@ -99,9 +99,8 @@ var TYPE_SET = {
     _reserved: 'uint8',
     count: 'uint16',
     contents: [
-      'array', [
-        'if', 'isLeaf', 'LeafData', 'NonLeafData'
-      ],
+      'array',
+      [ 'if', 'isLeaf', 'LeafData', 'NonLeafData' ],
       'count'
     ]
   },
@@ -120,7 +119,53 @@ var TYPE_SET = {
     startBase: 'uint32',
     endChromIx: 'uint32',
     endBase: 'uint32',
-    offset: 'uint64',
+    offset: 'uint64'
+  },
+
+  'WigData': {
+    'chrId': 'uint32',
+    'start': 'uint32',
+    'stop': 'uint32',
+    'step': 'uint32',
+    'span': 'uint32',
+    'tpe': 'uint8',
+    'reserved': 'uint8',
+    'count': 'uint16',
+    'data': [
+      'array',
+      [
+        'if',
+        (ctx) => { return ctx.tpe == 1; },
+        'WigFixedData',
+        [
+          'if',
+          (ctx) => { return ctx.tpe == 2; },
+          'WigVarData',
+          [
+            'if',
+            (ctx) => { return ctx.tpe == 3; },
+            'WigBedGraphData',
+            'WigBedGraphData'  // TODO(ryan): should be an error…
+          ]
+        ]
+      ],
+      'count'
+    ]
+  },
+  
+  'WigFixedData': {
+    'value': 'float32'
+  },
+
+  'WigVarData': {
+    'start': 'uint32',
+    'value': 'float32'
+  },
+
+  'WigBedGraphData': {
+    'start': 'uint32',
+    'end': 'uint32',
+    'value': 'float32'
   },
 
   'BedEntry': {

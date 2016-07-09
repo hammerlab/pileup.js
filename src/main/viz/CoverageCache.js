@@ -7,11 +7,12 @@
  */
 'use strict';
 
-import type {Strand, Alignment, AlignmentDataSource} from '../Alignment';
+import type {Alignment} from '../Alignment';
 import type {TwoBitSource} from '../sources/TwoBitDataSource';
 import type {BasePair, OpInfo} from './pileuputils';
 import type ContigInterval from '../ContigInterval';
 import type Interval from '../Interval';
+import DepthCache from './DepthCache';
 
 import {getOpInfo} from './pileuputils';
 import utils from '../utils';
@@ -25,7 +26,7 @@ export type BinSummary = {
 
 // This class provides data management for the visualization, grouping paired
 // reads and managing the pileup.
-class CoverageCache {
+class CoverageCache extends DepthCache {
   // maps groupKey to VisualGroup
   reads: {[key: string]: Alignment};
   // ref --> position --> BinSummary
@@ -34,6 +35,7 @@ class CoverageCache {
   referenceSource: TwoBitSource;
 
   constructor(referenceSource: TwoBitSource) {
+    super();
     this.reads = {};
     this.refToCounts = {};
     this.refToMaxCoverage = {};
@@ -78,6 +80,7 @@ class CoverageCache {
         range = read.getInterval(),
         start = range.start(),
         stop = range.stop();
+
     for (var pos = start; pos <= stop; pos++) {
       let c = counts[pos];
       if (!c) {
@@ -86,6 +89,7 @@ class CoverageCache {
       c.count += 1;
       if (c.count > max) max = c.count;
     }
+
     for (var mm of opInfo.mismatches) {
       var bin = counts[mm.pos];
       var mismatches;

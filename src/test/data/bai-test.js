@@ -64,7 +64,7 @@ describe('BAI', function() {
 
       var requests = remoteFile.requests;
       expect(requests).to.have.length(1);
-      expect(requests[0].toString()).to.equal('[8, 144]');
+      expect(requests[0].toString()).to.equal('[8, 145)');
     });
   });
 
