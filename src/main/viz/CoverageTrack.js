@@ -7,12 +7,10 @@
 import type {AlignmentDataSource} from '../Alignment';
 import type {TwoBitSource} from '../sources/TwoBitDataSource';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
-import type {BinSummary} from './CoverageCache';
 import type {Scale} from './d3utils';
 
 import CoverageTiledCanvas from './CoverageTiledCanvas';
 import React from 'react';
-import scale from '../scale';
 import shallowEquals from 'shallow-equals';
 import d3utils from './d3utils';
 import _ from 'underscore';
@@ -21,108 +19,6 @@ import canvasUtils from './canvas-utils';
 import CoverageCache from './CoverageCache';
 import style from '../style';
 import ContigInterval from '../ContigInterval';
-
-// Basic setup (TODO: make this configurable by the user)
-const SHOW_MISMATCHES = true;
-
-// Only show mismatch information when there are more than this many
-// reads supporting that mismatch.
-const MISMATCH_THRESHOLD = 1;
-
-
-// Draw coverage bins & mismatches
-function renderBars(ctx: DataCanvasRenderingContext2D,
-                    xScale: (num: number) => number,
-                    yScale: (num: number) => number,
-                    range: ContigInterval<string>,
-                    bins: {[key: number]: BinSummary},
-                    options: Object) {
-  if (_.isEmpty(bins)) return;
-
-  var barWidth = xScale(1) - xScale(0);
-  var showPadding = (barWidth > style.COVERAGE_MIN_BAR_WIDTH_FOR_GAP);
-  var padding = showPadding ? 1 : 0;
-
-  var binPos = function(pos: number, count: number) {
-    // Round to integer coordinates for crisp lines, without aliasing.
-    var barX1 = Math.round(xScale(1 + pos)),
-        barX2 = Math.round(xScale(2 + pos)) - padding,
-        barY = Math.round(yScale(count));
-    return {barX1, barX2, barY};
-  };
-
-  var mismatchBins = ({} : {[key:number]: BinSummary});  // keep track of which ones have mismatches
-  var vBasePosY = yScale(0);  // the very bottom of the canvas
-  var start = range.start(),
-      stop = range.stop();
-  let {barX1} = binPos(start, (start in bins) ? bins[start].count : 0);
-  ctx.fillStyle = style.COVERAGE_BIN_COLOR;
-  ctx.beginPath();
-  ctx.moveTo(barX1, vBasePosY);
-  for (var pos = start; pos < stop; pos++) {
-    var bin = bins[pos];
-    if (!bin) continue;
-    ctx.pushObject(bin);
-    let {barX1, barX2, barY} = binPos(pos, bin.count);
-    ctx.lineTo(barX1, barY);
-    ctx.lineTo(barX2, barY);
-    if (showPadding) {
-      ctx.lineTo(barX2, vBasePosY);
-      ctx.lineTo(barX2 + 1, vBasePosY);
-    }
-
-    if (SHOW_MISMATCHES && !_.isEmpty(bin.mismatches)) {
-      mismatchBins[pos] = bin;
-    }
-
-    ctx.popObject();
-  }
-  let {barX2} = binPos(stop, (stop in bins) ? bins[stop].count : 0);
-  ctx.lineTo(barX2, vBasePosY);  // right edge of the right bar.
-  ctx.closePath();
-  ctx.fill();
-
-  // Now render the mismatches
-  _.each(mismatchBins, (bin, pos) => {
-    if (!bin.mismatches) return;  // this is here for Flow; it can't really happen.
-    const mismatches = _.clone(bin.mismatches);
-    pos = Number(pos);  // object keys are strings, not numbers.
-
-    // If this is a high-frequency variant, add in the reference.
-    var mismatchCount = _.reduce(mismatches, (x, y) => x + y);
-    var mostFrequentMismatch = _.max(mismatches);
-    if (mostFrequentMismatch > MISMATCH_THRESHOLD &&
-        mismatchCount > options.vafColorThreshold * bin.count &&
-        mismatchCount < bin.count) {
-      if (bin.ref) {  // here for flow; can't realy happen
-        mismatches[bin.ref] = bin.count - mismatchCount;
-      }
-    }
-
-    let {barX1, barX2} = binPos(pos, bin.count);
-    ctx.pushObject(bin);
-    var countSoFar = 0;
-    _.chain(mismatches)
-      .map((count, base) => ({count, base}))  // pull base into the object
-      .filter(({count}) => count > MISMATCH_THRESHOLD)
-      .sortBy(({count}) => -count)  // the most common mismatch at the bottom
-      .each(({count, base}) => {
-        var misMatchObj = {position: 1 + pos, count, base};
-        ctx.pushObject(misMatchObj);  // for debugging and click-tracking
-
-        ctx.fillStyle = style.BASE_COLORS[base];
-        var y = yScale(countSoFar);
-        ctx.fillRect(barX1,
-                     y,
-                     Math.max(1, barX2 - barX1),  // min width of 1px
-                     yScale(countSoFar + count) - y);
-        countSoFar += count;
-
-        ctx.popObject();
-      });
-    ctx.popObject();
-  });
-}
 
 type Props = {
   width: number;

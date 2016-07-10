@@ -122,9 +122,9 @@ class Interval {
 
     var start = intervals[0].start;
     var stop = intervals[0].stop;
-    intervals.slice(1).forEach(function({curStart, curStop}) {
-      start = Math.max(curStart, start);
-      stop = Math.min(curStop, stop);
+    intervals.slice(1).forEach(iv => {
+      start = Math.max(iv.start, start);
+      stop = Math.min(iv.stop, stop);
     });
     return new Interval(start, stop);
   }
@@ -137,9 +137,9 @@ class Interval {
 
     var start = intervals[0].start;
     var stop = intervals[0].stop;
-    intervals.slice(1).forEach(function({curStart, curStop}) {
-      start = Math.min(curStart, start);
-      stop = Math.max(curStop, stop);
+    intervals.slice(1).forEach(iv => {
+      start = Math.min(iv.start, start);
+      stop = Math.max(iv.stop, stop);
     });
     return new Interval(start, stop);
   }

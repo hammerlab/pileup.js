@@ -31,7 +31,8 @@
     "flow": "flow status",
     "flow-check": "flow check",
     "coverage": "./scripts/generate-coverage.sh",
-    "build": "./scripts/build.sh"
+    "build": "./scripts/build.sh",
+    "babel": "./scripts/babel.sh"
   },
   "author": "Dan Vanderkam",
   "contributors": [

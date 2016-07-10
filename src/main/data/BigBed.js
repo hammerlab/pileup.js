@@ -6,13 +6,9 @@
 'use strict';
 
 import Q from 'q';
-import _ from 'underscore';
-import jBinary from 'jbinary';
 
 import ImmediateBigBed from './ImmediateBigBed';
-import RemoteFile from '../RemoteFile';
 import ContigInterval from '../ContigInterval';
-import bbi from './formats/bbi';
 import BigBedWig from './BigBedWig';
 
 type BedRow = {
@@ -43,22 +39,6 @@ class BigBed extends BigBedWig {
    * This will kick off several async requests for portions of the file.
    */
   constructor(url: string) {
-    // this.remoteFile = new RemoteFile(url);
-    // this.header = this.remoteFile.getBytes(0, 64*1024).then(parseHeader);
-    // this.contigMap = this.header.then(generateContigMap);
-    //
-    // // Next: fetch the block index and parse out the "CIR" tree.
-    // this.cirTree = this.header.then(header => {
-    //   // zoomHeaders[0].dataOffset is the next entry in the file.
-    //   // We assume the "cirTree" section goes all the way to that point.
-    //   // Lacking zoom headers, assume it's 4k.
-    //   // TODO: fetch more than 4k if necessary
-    //   var start = header.unzoomedIndexOffset,
-    //       zoomHeader = header.zoomHeaders[0],
-    //       length = zoomHeader ? zoomHeader.dataOffset - start : 4096;
-    //   return this.remoteFile.getBytes(start, length).then(parseCirTree);
-    // });
-
     super(url);
 
     this.immediate = Q.all([this.header, this.cirTree, this.contigMap])
@@ -77,10 +57,10 @@ class BigBed extends BigBedWig {
    * bigBed format files are half-open (inclusive at the start, exclusive at
    * the end).
    */
-  // getFeaturesInRange(contig: string, start: number, stop: number): Q.Promise<Array<BedRow>> {
-  //   var range = new ContigInterval(contig, start, stop);
-  //   return this.immediate.then(im => im.getFeaturesInRange(range));
-  // }
+  getFeaturesInRange(contig: string, start: number, stop: number): Q.Promise<Array<BedRow>> {
+    var range = new ContigInterval(contig, start, stop);
+    return this.immediate.then(im => im.getFeaturesInRange(range));
+  }
 
   /**
    * Returns all features in blocks overlapping the given range.

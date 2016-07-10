@@ -9,11 +9,13 @@ import Q from 'q';
 import _ from 'underscore';
 import jBinary from 'jbinary';
 
+import LocalFile from '../LocalFile';
 import ImmediateBigBed from './ImmediateBigBed';
 import RemoteFile from '../RemoteFile';
 import ContigInterval from '../ContigInterval';
 import bbi from './formats/bbi';
 import ImmediateBigBedWig from './ImmediateBigBedWig';
+import urlUtils from 'url';
 
 function parseHeader(buffer) {
   // TODO: check Endianness using magic. Possibly use jDataView.littleEndian
@@ -62,6 +64,7 @@ class BigBedWig<I: ImmediateBigBedWig> {
   cirTree: Q.Promise<any>;
   contigMap: Q.Promise<{[key:string]: number}>;
   immediate: Q.Promise<I>;
+  zoomIndices: Q.Promise<Array<any>>;
 
   /**
    * Prepare to request features from a remote bigBed file.
@@ -69,7 +72,14 @@ class BigBedWig<I: ImmediateBigBedWig> {
    * This will kick off several async requests for portions of the file.
    */
   constructor(url: string) {
-    this.remoteFile = new RemoteFile(url);
+
+    // var parsedUrl = urlUtils.parse(url);
+    // if (parsedUrl.protocol && parsedUrl.protocol != 'file') {
+      this.remoteFile = new RemoteFile(url);
+    // } else {
+    //   this.remoteFile = new LocalFile(url);
+    // }
+
     this.header = this.remoteFile.getBytes(0, 64*1024).then(parseHeader);
     this.contigMap = this.header.then(generateContigMap);
 
@@ -85,10 +95,24 @@ class BigBedWig<I: ImmediateBigBedWig> {
       return this.remoteFile.getBytes(start, length).then(parseCirTree);
     });
 
-    this.immediate = Q.all([this.header, this.cirTree, this.contigMap])
-      .then(([header, cirTree, contigMap]) => {
+    this.zoomIndices =
+      this.header.then(header => {
+        header.zoomHeaders.map((zoomHeader, idx) => {
+          var byteRangeStart = zoomHeader.indexOffset;
+          var byteRangeEnd = 
+            (idx + 1 < header.zoomLevels.length) ? 
+              header.zoomLevels[idx + 1].dataOffset :
+              this.remoteFile.getSize()
+            ;
+          
+          return this.remoteFile.getBytes(byteRangeStart, byteRangeEnd - byteRangeStart)
+        });
+      });
+
+    this.immediate = Q.all([this.header, this.cirTree, this.contigMap, this.zoomIndices])
+      .then(([header, cirTree, contigMap, zoomIndices]) => {
         var cm: {[key:string]: number} = contigMap;
-        return new ImmediateBigBed(this.remoteFile, header, cirTree, cm);
+        return new ImmediateBigBed(this.remoteFile, header, cirTree, cm, zoomIndices);
       });
 
     // Bubble up errors

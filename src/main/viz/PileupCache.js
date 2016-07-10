@@ -256,7 +256,7 @@ function spanAndInsert(intervals: ContigInterval<string>[]) {
   if (intervals.length == 1) {
     return {insert: null, span: intervals[0]};
   } else if (intervals.length !=2) {
-    throw `Called spanAndInsert with ${intervals.length} \notin [1, 2]`;
+      throw `Called spanAndInsert with ${intervals.length} \notin {1, 2}`;
   }
 
   if (!intervals[0].chrOnContig(intervals[1].contig)) {

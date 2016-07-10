@@ -6,11 +6,15 @@
 'use strict';
 
 import Q from 'q';
+import _ from 'underscore';
 import pako from 'pako/lib/inflate';  // for gzip inflation
+import jBinary from 'jbinary';
 
 import Interval from '../Interval';
 import ContigInterval from '../ContigInterval';
 import ImmediateBigBedWig from './ImmediateBigBedWig';
+import utils from '../utils';
+import bbi from './formats/bbi';
 
 type ChrIdBedRow = {
   chrId: number;
@@ -61,22 +65,48 @@ class ImmediateBigBed extends ImmediateBigBedWig {
 
   // Fetch the relevant blocks from the bigBed file and extract the features
   // which overlap the given range.
-  // getFeaturesInRange(range: ContigInterval<string>): Q.Promise<BedRow[]> {
-  //   var contigRange = this._getChrIdInterval(range);
-  //   return this._fetchFeaturesByBlock(contigRange)
-  //     .then(bedsByBlock => {
-  //       var beds = _.flatten(bedsByBlock.map(b => b.rows));
-  //
-  //       beds = beds.filter(function(bed) {
-  //         // Note: BED intervals are explicitly half-open.
-  //         // The "- 1" converts them to closed intervals for ContigInterval.
-  //         var bedInterval = new ContigInterval(bed.chrId, bed.start, bed.stop - 1);
-  //         return contigRange.intersects(bedInterval);
-  //       });
-  //
-  //       return this._attachContigToBedRows(beds);
-  //     });
-  // }
+  getFeaturesInRange(range: ContigInterval<string>): Q.Promise<BedRow[]> {
+    var contigRange = this._getChrIdInterval(range);
+    return this._fetchFeaturesByBlock(contigRange)
+      .then(bedsByBlock => {
+        var beds = _.flatten(bedsByBlock.map(b => b.rows));
+  
+        beds = beds.filter(function(bed) {
+          // Note: BED intervals are explicitly half-open.
+          // The "- 1" converts them to closed intervals for ContigInterval.
+          var bedInterval = new ContigInterval(bed.chrId, bed.start, bed.stop - 1);
+          return contigRange.intersects(bedInterval);
+        });
+  
+        return this._attachContigToBedRows(beds);
+      });
+  }
+
+  // Find all blocks containing features which intersect with contigRange.
+  _findOverlappingBlocks(range: ContigInterval<number>) {
+
+    var matchingBlocks = [];
+
+    var tupleRange = [
+      [range.contig, range.start()],
+      [range.contig, range.stop()]
+    ];
+
+    // TODO: do a recursive search through the index tree. Currently assumes the tree is just one root node.
+    this.cirTree.blocks.contents.forEach(node => {
+      var nodeRange =
+        [
+          [node.startChromIx, node.startBase],
+          [node.endChromIx, node.endBase]
+        ];
+
+      if (utils.tupleRangeOverlaps(nodeRange, tupleRange)) {
+        matchingBlocks.push(node);
+      }
+    });
+
+    return matchingBlocks;
+  }
 
   // Internal function for fetching features by block.
   _fetchFeaturesByBlock(range: ContigInterval<number>): Q.Promise<ChrIdBedBlock[]> {
@@ -90,11 +120,10 @@ class ImmediateBigBed extends ImmediateBigBedWig {
     var byteRange = Interval.boundingInterval(
       blocks.map(n => new Interval(+n.offset, n.offset+n.size)));
 
-    var isCompressed = (this.header.uncompressBufSize > 0);
     return this.remoteFile.getBytes(byteRange.start, byteRange.length())
       .then(buffer => {
         return blocks.map(block => {
-          var beds = extractFeaturesFromBlock(buffer, byteRange, block, isCompressed);
+          var beds = extractFeaturesFromBlock(buffer, byteRange, block, this.isCompressed);
           if (block.startChromIx != block.endChromIx) {
             throw `Can't handle blocks which span chromosomes!`;
           }

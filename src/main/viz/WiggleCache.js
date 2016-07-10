@@ -14,10 +14,15 @@ import type {BinSummary} from './CoverageCache';
 
 import utils from '../utils';
 
-export type DepthCache = {
-  maxCoverageForRef(ref: string): number;
-  binsForRef(ref: string): {[key: number]: BinSummary};
-};
+class DepthCache {
+  maxCoverageForRef(ref: string): number {
+    throw Error("not implemented");
+  }
+
+  binsForRef(ref: string): {[key: number]: BinSummary} {
+    throw Error("not implemented");
+  }
+}
 
 // This class provides data management for the visualization, grouping paired
 // reads and managing the pileup.
@@ -29,6 +34,7 @@ class WiggleCache extends DepthCache {
   refToMaxCoverage: {[key: string]: number};
 
   constructor() {
+    super();
     this.posCounts = {};
     this.refToMaxCoverage = {};
   }
@@ -60,4 +66,4 @@ class WiggleCache extends DepthCache {
   }
 }
 
-module.exports = CoverageCache;
+module.exports = {WiggleCache, DepthCache};

@@ -7,12 +7,12 @@
  */
 'use strict';
 
-import type {Strand, Alignment, AlignmentDataSource} from '../Alignment';
+import type {Alignment} from '../Alignment';
 import type {TwoBitSource} from '../sources/TwoBitDataSource';
 import type {BasePair, OpInfo} from './pileuputils';
 import type ContigInterval from '../ContigInterval';
 import type Interval from '../Interval';
-import type {DepthCache} from './WiggleCache';
+import {DepthCache} from './WiggleCache';
 
 import {getOpInfo} from './pileuputils';
 import utils from '../utils';
@@ -35,6 +35,7 @@ class CoverageCache extends DepthCache {
   referenceSource: TwoBitSource;
 
   constructor(referenceSource: TwoBitSource) {
+    super();
     this.reads = {};
     this.refToCounts = {};
     this.refToMaxCoverage = {};
