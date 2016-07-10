@@ -9,7 +9,6 @@ import Q from 'q';
 
 import ImmediateBigBed from './ImmediateBigBed';
 import ContigInterval from '../ContigInterval';
-
 import BigBedWig from './BigBedWig';
 
 type BedRow = {
@@ -35,7 +34,6 @@ class BigBed extends BigBedWig {
    * This will kick off several async requests for portions of the file.
    */
   constructor(url: string) {
-
     super(url);
 
     this.immediate = Q.all([this.header, this.cirTree, this.contigMap])

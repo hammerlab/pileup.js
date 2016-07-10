@@ -121,6 +121,22 @@ var TYPE_SET = {
     endBase: 'uint32',
     offset: 'uint64'
   },
+  
+  'ZoomLevel': {
+    'count': 'uint32',
+    'data': [ 'array', 'ZoomData', 'count' ]
+  },
+
+  'ZoomData': {
+    'chrId': 'uint32',
+    'start': 'uint32',
+    'end': 'uint32',
+    'validCount': 'uint32',
+    'minVal': 'uint32',
+    'maxVal': 'uint32',
+    'sum': 'uint32',
+    'sumSqs': 'uint32'
+  },
 
   'WigData': {
     'chrId': 'uint32',

@@ -1,12 +1,13 @@
 
+import _ from 'underscore';
+
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import ContigInterval from '../ContigInterval';
 import TiledCanvas from './TiledCanvas';
 import scale from '../scale';
 import type {BinSummary} from './CoverageCache';
-
-import _ from 'underscore';
 import style from '../style';
+import DepthCache from './DepthCache';
 
 // Basic setup (TODO: make this configurable by the user)
 const SHOW_MISMATCHES = true;
@@ -62,6 +63,7 @@ function renderBars(ctx: DataCanvasRenderingContext2D,
 
     ctx.popObject();
   }
+
   let {barX2} = binPos(stop, (stop in bins) ? bins[stop].count : 0);
   ctx.lineTo(barX2, vBasePosY);  // right edge of the right bar.
   ctx.closePath();

@@ -57,4 +57,4 @@ class WiggleCache extends DepthCache {
   }
 }
 
-module.exports = CoverageCache;
+module.exports = {WiggleCache, DepthCache};

@@ -2,7 +2,6 @@
 import _ from 'underscore';
 
 import ContigInterval from '../ContigInterval';
-import utils from '../utils';
 
 // Generate the reverse map from contig ID --> contig name.
 function reverseContigMap(contigMap: {[key:string]: number}): Array<string> {
@@ -19,13 +18,27 @@ class ImmediateBigBedWig {
   cirTree: Object;
   contigMap: {[key:string]: number};
   chrIdToContig: string[];
+  zoomIndices: Array<Object>;
+  zoomBases: Array<number>;
+  zoomIndexMap: map<number, Object>;
+  isCompressed: boolean;
+  blockCache: map<number, Object>;
 
-  constructor(remoteFile, header, cirTree, contigMap: {[key:string]: number}) {
+  constructor(remoteFile, header, cirTree, contigMap: {[key:string]: number}, zoomIndices: Array<Object>) {
     this.remoteFile = remoteFile;
     this.header = header;
     this.cirTree = cirTree;
     this.contigMap = contigMap;
     this.chrIdToContig = reverseContigMap(contigMap);
+    this.zoomIndices = zoomIndices || [];
+    this.zoomBases = [1];
+    this.zoomIndexMap = {};
+    this.zoomIndices.forEach(zoomIndex => {
+      this.zoomBases.push(zoomIndex.reductionLevel);
+      this.zoomIndexMap[zoomIndex.reductionLevel] = zoomIndex;
+    });
+    this.isCompressed = (this.header.uncompressBufSize > 0);
+    this.blockCache = {};
   }
 
   // Map contig name to contig ID. Leading "chr" is optional. Throws on failure.
@@ -54,28 +67,6 @@ class ImmediateBigBedWig {
       stop: bed.stop,
       rest: bed.rest
     }));
-  }
-
-  // Find all blocks containing features which intersect with contigRange.
-  _findOverlappingBlocks(range: ContigInterval<number>) {
-    // Do a recursive search through the index tree
-    var matchingBlocks = [];
-    var tupleRange = [[range.contig, range.start()],
-      [range.contig, range.stop()]];
-    var find = function(node) {
-      if (node.contents) {
-        node.contents.forEach(find);
-      } else {
-        var nodeRange = [[node.startChromIx, node.startBase],
-          [node.endChromIx, node.endBase]];
-        if (utils.tupleRangeOverlaps(nodeRange, tupleRange)) {
-          matchingBlocks.push(node);
-        }
-      }
-    };
-    find(this.cirTree.blocks);
-
-    return matchingBlocks;
   }
 }
 
