@@ -100,23 +100,27 @@ var TYPE_SET = {
     count: 'uint16',
     contents: [
       'array', [
-        'if', 'isLeaf', {
-          startChromIx: 'uint32',
-          startBase: 'uint32',
-          endChromIx: 'uint32',
-          endBase: 'uint32',
-          offset: 'uint64',
-          size: 'uint64'
-        }, {
-          startChromIx: 'uint32',
-          startBase: 'uint32',
-          endChromIx: 'uint32',
-          endBase: 'uint32',
-          offset: 'uint64',
-        }
+        'if', 'isLeaf', 'LeafData', 'NonLeafData'
       ],
       'count'
     ]
+  },
+
+  'LeafData': {
+    startChromIx: 'uint32',
+    startBase: 'uint32',
+    endChromIx: 'uint32',
+    endBase: 'uint32',
+    offset: 'uint64',
+    size: 'uint64'
+  },
+
+  'NonLeafData': {
+    startChromIx: 'uint32',
+    startBase: 'uint32',
+    endChromIx: 'uint32',
+    endBase: 'uint32',
+    offset: 'uint64',
   },
 
   'BedEntry': {

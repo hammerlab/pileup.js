@@ -53,7 +53,10 @@ function reverseContigMap(contigMap: {[key:string]: number}): Array<string> {
 }
 
 
-function extractFeaturesFromBlock(buffer, dataRange, block, isCompressed): ChrIdBedRow[] {
+function extractFeaturesFromBlock(buffer: ArrayBuffer,
+                                  dataRange: Interval,
+                                  block: LeafData,
+                                  isCompressed: boolean): ChrIdBedRow[] {
   var blockOffset = block.offset - dataRange.start,
       blockLimit = blockOffset + block.size,
 
@@ -102,6 +105,16 @@ type ChrIdBedBlock = {
   rows: ChrIdBedRow[];
 }
 
+// A copy of LeafData from bbi.js.
+type LeafData = {
+  startChromIx: number;
+  startBase: number;
+  endChromIx: number;
+  endBase: number;
+  offset: number;
+  size: number;
+}
+
 // This (internal) version of the BigBed class has no promises for headers,
 // only immediate data. This greatly simplifies writing methods on it.
 class ImmediateBigBed {
@@ -148,7 +161,7 @@ class ImmediateBigBed {
   }
 
   // Find all blocks containing features which intersect with contigRange.
-  findOverlappingBlocks(range: ContigInterval<number>) {
+  findOverlappingBlocks(range: ContigInterval<number>): Array<LeafData> {
     // Do a recursive search through the index tree
     var matchingBlocks = [];
     var tupleRange = [[range.contig, range.start()],
@@ -157,8 +170,12 @@ class ImmediateBigBed {
       if (node.contents) {
         node.contents.forEach(find);
       } else {
-        var nodeRange = [[node.startChromIx, node.startBase],
-                         [node.endChromIx, node.endBase]];
+        var nodeRange =
+          [
+            [node.startChromIx, node.startBase],
+            [node.endChromIx, node.endBase]
+          ];
+
         if (utils.tupleRangeOverlaps(nodeRange, tupleRange)) {
           matchingBlocks.push(node);
         }
