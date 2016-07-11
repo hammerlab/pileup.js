@@ -2,7 +2,6 @@ This directory contains many small data files used in testing.
 
 This file documents how they were generated.
 
-
 #### test.2bit
 
 This is a small subset of the hg19 reference genome. It contains small swaths
@@ -46,6 +45,12 @@ This is a subset of `ensembl.chr17.bb`, shifted to match the coordinates in
     bigBedToBed ensGene.bb ensGene.bed
     grep '^chr17\t' ensGene.bed | grep TP53 | perl -pe 's/(75\d{4,})/$1-7512444/ge' > /tmp/tp53.shifted.bed
     bedToBigBed -type=bed12+2 /tmp/tp53.shifted.bed <(echo "chr17 78774742") test-data/tp53.shifted.bb
+
+#### simple17*.{bed,bb}
+
+- `simple17.bed`: the first 10 features from chr17 of ensGene.bb, and only including the first 3 columns.
+- `simple17.bb`: `simple17.bed` as a BigBed with compressed data: `bedToBigBed -type=bed3 simple17.bed <(echo "chr17 78774742") simple17.bb`.
+- `simple17.bb`: `simple17.bed` as a BigBed with uncompressed data: `bedToBigBed -type=bed3 -unc simple17.bed <(echo "chr17 78774742") simple17unc.bb`.
 
 #### test_input_1*
 

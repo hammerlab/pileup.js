@@ -13,7 +13,7 @@ var TYPE_SET = {
 
   'Header': {
     _magic: ['const', 'uint32', 0x8789F2EB, true],
-    version: ['const', 'uint16', 4, true],
+    version: 'uint16',
     zoomLevels: 'uint16',
     chromosomeTreeOffset: 'uint64',
     unzoomedDataOffset: 'uint64',
@@ -98,20 +98,29 @@ var TYPE_SET = {
     isLeaf: 'uint8',  // 1 = yes, 0 = no
     _reserved: 'uint8',
     count: 'uint16',
-    contents: ['array', ['if', 'isLeaf', {
-      startChromIx: 'uint32',
-      startBase: 'uint32',
-      endChromIx: 'uint32',
-      endBase: 'uint32',
-      offset: 'uint64',
-      size: 'uint64'
-    }, {
-      startChromIx: 'uint32',
-      startBase: 'uint32',
-      endChromIx: 'uint32',
-      endBase: 'uint32',
-      offset: 'uint64',
-    }], 'count']
+    contents: [
+      'array', [
+        'if', 'isLeaf', 'LeafData', 'NonLeafData'
+      ],
+      'count'
+    ]
+  },
+
+  'LeafData': {
+    startChromIx: 'uint32',
+    startBase: 'uint32',
+    endChromIx: 'uint32',
+    endBase: 'uint32',
+    offset: 'uint64',
+    size: 'uint64'
+  },
+
+  'NonLeafData': {
+    startChromIx: 'uint32',
+    startBase: 'uint32',
+    endChromIx: 'uint32',
+    endBase: 'uint32',
+    offset: 'uint64',
   },
 
   'BedEntry': {

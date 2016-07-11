@@ -31,9 +31,9 @@ function parseCirTree(buffer) {
 }
 
 // Extract a map from contig name --> contig ID from the bigBed header.
-function generateContigMap(twoBitHeader): {[key:string]: number} {
+function generateContigMap(header): {[key:string]: number} {
   // Just assume it's a flat "tree" for now.
-  var nodes = twoBitHeader.chromosomeTree.nodes.contents;
+  var nodes = header.chromosomeTree.nodes.contents;
   if (!nodes) {
     throw 'Invalid chromosome tree';
   }
@@ -53,13 +53,24 @@ function reverseContigMap(contigMap: {[key:string]: number}): Array<string> {
 }
 
 
-function extractFeaturesFromBlock(buffer, dataRange, block): ChrIdBedRow[] {
+function extractFeaturesFromBlock(buffer: ArrayBuffer,
+                                  dataRange: Interval,
+                                  block: LeafData,
+                                  isCompressed: boolean): ChrIdBedRow[] {
   var blockOffset = block.offset - dataRange.start,
       blockLimit = blockOffset + block.size,
-      // TODO: where does the +2 come from? (I copied it from dalliance)
-      blockBuffer = buffer.slice(blockOffset + 2, blockLimit);
-  // TODO: only inflate if necessary
-  var inflatedBuffer = pako.inflateRaw(new Uint8Array(blockBuffer));
+
+      blockBuffer =
+        // NOTE: "+ 2" skips over two bytes of gzip header (0x8b1f), which pako.inflateRaw will not handle.
+        buffer.slice(
+          blockOffset + (isCompressed ? 2 : 0),
+          blockLimit
+        );
+
+  var inflatedBuffer =
+    isCompressed ?
+      pako.inflateRaw(new Uint8Array(blockBuffer)) :
+      blockBuffer;
 
   var jb = new jBinary(inflatedBuffer, bbi.TYPE_SET);
   // TODO: parse only one BedEntry at a time & use an iterator.
@@ -92,6 +103,16 @@ type BedBlock = {
 type ChrIdBedBlock = {
   range: ContigInterval<number>;
   rows: ChrIdBedRow[];
+}
+
+// A copy of LeafData from bbi.js.
+type LeafData = {
+  startChromIx: number;
+  startBase: number;
+  endChromIx: number;
+  endBase: number;
+  offset: number;
+  size: number;
 }
 
 // This (internal) version of the BigBed class has no promises for headers,
@@ -140,7 +161,7 @@ class ImmediateBigBed {
   }
 
   // Find all blocks containing features which intersect with contigRange.
-  findOverlappingBlocks(range: ContigInterval<number>) {
+  findOverlappingBlocks(range: ContigInterval<number>): Array<LeafData> {
     // Do a recursive search through the index tree
     var matchingBlocks = [];
     var tupleRange = [[range.contig, range.start()],
@@ -149,8 +170,12 @@ class ImmediateBigBed {
       if (node.contents) {
         node.contents.forEach(find);
       } else {
-        var nodeRange = [[node.startChromIx, node.startBase],
-                         [node.endChromIx, node.endBase]];
+        var nodeRange =
+          [
+            [node.startChromIx, node.startBase],
+            [node.endChromIx, node.endBase]
+          ];
+
         if (utils.tupleRangeOverlaps(nodeRange, tupleRange)) {
           matchingBlocks.push(node);
         }
@@ -173,10 +198,11 @@ class ImmediateBigBed {
     var byteRange = Interval.boundingInterval(
         blocks.map(n => new Interval(+n.offset, n.offset+n.size)));
 
+    var isCompressed = (this.header.uncompressBufSize > 0);
     return this.remoteFile.getBytes(byteRange.start, byteRange.length())
         .then(buffer => {
           return blocks.map(block => {
-            var beds = extractFeaturesFromBlock(buffer, byteRange, block);
+            var beds = extractFeaturesFromBlock(buffer, byteRange, block, isCompressed);
             if (block.startChromIx != block.endChromIx) {
               throw `Can't handle blocks which span chromosomes!`;
             }
