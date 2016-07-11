@@ -10,6 +10,7 @@ import Q from 'q';
 import ImmediateBigBed from './ImmediateBigBed';
 import ContigInterval from '../ContigInterval';
 import BigBedWig from './BigBedWig';
+import bbi from './formats/bbi';
 
 type BedRow = {
   // Half-open interval for the BED row.
@@ -51,6 +52,10 @@ class BigBed extends BigBedWig {
     this.immediate.done();
   }
 
+  typeSet() {
+    return bbi.TYPE_SET(true);
+  }
+  
   /**
    * Returns all BED entries which overlap the range.
    * Note: while the requested range is inclusive on both ends, ranges in

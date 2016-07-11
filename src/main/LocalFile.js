@@ -7,7 +7,7 @@
 import Q from 'q';
 import AbstractFile from './AbstractFile';
 var fs = require('fs');
-console.log(fs);
+//console.log(fs);
 
 class LocalFile extends AbstractFile {
   fileLength: number;

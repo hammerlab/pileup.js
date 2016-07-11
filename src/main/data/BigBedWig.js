@@ -13,22 +13,8 @@ import LocalFile from '../LocalFile';
 import ImmediateBigBed from './ImmediateBigBed';
 import RemoteFile from '../RemoteFile';
 import ContigInterval from '../ContigInterval';
-import bbi from './formats/bbi';
 import ImmediateBigBedWig from './ImmediateBigBedWig';
 import urlUtils from 'url';
-
-function parseHeader(buffer) {
-  // TODO: check Endianness using magic. Possibly use jDataView.littleEndian
-  // to flip the endianness for jBinary consumption.
-  // NB: dalliance doesn't support big endian formats.
-  return new jBinary(buffer, bbi.TYPE_SET).read('Header');
-}
-
-// The "CIR" tree contains a mapping from sequence -> block offsets.
-// It stands for "Chromosome Index R tree"
-function parseCirTree(buffer) {
-  return new jBinary(buffer, bbi.TYPE_SET).read('CirTree');
-}
 
 // Extract a map from contig name --> contig ID from the bigBed header.
 function generateContigMap(header): {[key:string]: number} {
@@ -65,7 +51,7 @@ class BigBedWig<I: ImmediateBigBedWig> {
   contigMap: Q.Promise<{[key:string]: number}>;
   immediate: Q.Promise<I>;
   zoomIndices: Q.Promise<Array<any>>;
-
+  
   /**
    * Prepare to request features from a remote bigBed file.
    * The remote source must support HTTP Range headers.
@@ -73,14 +59,14 @@ class BigBedWig<I: ImmediateBigBedWig> {
    */
   constructor(url: string) {
 
-    // var parsedUrl = urlUtils.parse(url);
-    // if (parsedUrl.protocol && parsedUrl.protocol != 'file') {
+    var parsedUrl = urlUtils.parse(url);
+    if (parsedUrl.protocol && parsedUrl.protocol != 'file') {
       this.remoteFile = new RemoteFile(url);
-    // } else {
-    //   this.remoteFile = new LocalFile(url);
-    // }
+    } else {
+      this.remoteFile = new LocalFile(url);
+    }
 
-    this.header = this.remoteFile.getBytes(0, 64*1024).then(parseHeader);
+    this.header = this.remoteFile.getBytes(0, 64*1024).then(this.parseHeader);
     this.contigMap = this.header.then(generateContigMap);
 
     // Next: fetch the block index and parse out the "CIR" tree.
@@ -92,7 +78,7 @@ class BigBedWig<I: ImmediateBigBedWig> {
       var start = header.unzoomedIndexOffset,
         zoomHeader = header.zoomHeaders[0],
         length = zoomHeader ? zoomHeader.dataOffset - start : 4096;
-      return this.remoteFile.getBytes(start, length).then(parseCirTree);
+      return this.remoteFile.getBytes(start, length).then(this.parseCirTree);
     });
 
     this.zoomIndices =
@@ -118,6 +104,24 @@ class BigBedWig<I: ImmediateBigBedWig> {
     // Bubble up errors
     this.immediate.done();
   }
+
+  typeSet() {
+    throw new Error("not implemented");
+  }
+  
+  parseHeader(buffer) {
+    // TODO: check Endianness using magic. Possibly use jDataView.littleEndian
+    // to flip the endianness for jBinary consumption.
+    // NB: dalliance doesn't support big endian formats.
+    return new jBinary(buffer, this.typeSet()).read('Header');
+  }
+
+  // The "CIR" tree contains a mapping from sequence -> block offsets.
+  // It stands for "Chromosome Index R tree"
+  parseCirTree(buffer) {
+    return new jBinary(buffer, this.typeSet()).read('CirTree');
+  }
+
 
   /**
    * Returns all BED entries which overlap the range.

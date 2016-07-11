@@ -9,8 +9,9 @@ import Q from 'q';
 
 import ContigInterval from '../ContigInterval';
 import BigBedWig from './BigBedWig';
+import bbi from './formats/bbi';
 
-type Bucket = {
+export type Bucket = {
   chrId: string;
   start: number;
   end: number;
@@ -36,16 +37,9 @@ class BigWig extends BigBedWig {
     this.immediate.done();
   }
 
-  /**
-   * Returns all BED entries which overlap the range.
-   * Note: while the requested range is inclusive on both ends, ranges in
-   * bigBed format files are half-open (inclusive at the start, exclusive at
-   * the end).
-   */
-  // getFeaturesInRange(contig: string, start: number, stop: number): Q.Promise<Array<BedRow>> {
-  //   var range = new ContigInterval(contig, start, stop);
-  //   return this.immediate.then(im => im.getFeaturesInRange(range));
-  // }
+  typeSet() {
+    return bbi.TYPE_SET(false);
+  }
 
   /**
    * Returns all features in blocks overlapping the given range.
@@ -61,4 +55,4 @@ class BigWig extends BigBedWig {
   }
 }
 
-module.exports = {BigWig, Bucket};
+module.exports.BigWig = BigWig;

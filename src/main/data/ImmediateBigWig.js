@@ -81,7 +81,7 @@ class ImmediateBigWig extends ImmediateBigBedWig {
     return matchingBlocks;
   }
 
-  getBuckets(range:ContigInterval<string>, numBuckets:number): Q.Promise<Array<Bucket>> {
+  getBuckets(range:ContigInterval<string>, numBuckets: number): Q.Promise<Array<Bucket>> {
     return Q.when([]);
   }
 }
