@@ -59,7 +59,8 @@
     "react": "^0.14.0",
     "react-dom": "^0.14.0",
     "shallow-equals": "0.0.0",
-    "underscore": "^1.7.0"
+    "underscore": "^1.7.0",
+    "memory-cache": "0.1.6"
   },
   "devDependencies": {
     "arraybuffer-slice": "^0.1.2",
