@@ -92,7 +92,7 @@ function create(data: {url:string}): BigWigSource {
     throw new Error(`Missing URL from track: ${JSON.stringify(data)}`);
   }
 
-  return createFromBigWigFile(new BigBed(url));
+  return createFromBigWigFile(BigWig.load(url));
 }
 
 module.exports = {

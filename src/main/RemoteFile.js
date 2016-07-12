@@ -35,6 +35,10 @@ class RemoteFile extends AbstractFile{
       return Q.reject(`Requested <0 bytes (${length}) from ${this.url}`);
     }
 
+    if (start.lo) {
+      start = start.lo;
+    }
+
     // If the remote file length is known, clamp the request to fit within it.
     var stop = start + length - 1;
     if (this.fileLength != -1) {

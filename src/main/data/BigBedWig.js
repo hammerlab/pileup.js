@@ -9,25 +9,17 @@ import Q from 'q';
 import _ from 'underscore';
 import jBinary from 'jbinary';
 
-import LocalFile from '../LocalFile';
-import ImmediateBigBed from './ImmediateBigBed';
 import RemoteFile from '../RemoteFile';
 import ContigInterval from '../ContigInterval';
-import bbi from './formats/bbi';
-import ImmediateBigBedWig from './ImmediateBigBedWig';
-import urlUtils from 'url';
+import {CirTree} from './formats/bbi';
 
-function parseHeader(buffer) {
-  // TODO: check Endianness using magic. Possibly use jDataView.littleEndian
-  // to flip the endianness for jBinary consumption.
-  // NB: dalliance doesn't support big endian formats.
-  return new jBinary(buffer, bbi.TYPE_SET).read('Header');
-}
-
-// The "CIR" tree contains a mapping from sequence -> block offsets.
-// It stands for "Chromosome Index R tree"
-function parseCirTree(buffer) {
-  return new jBinary(buffer, bbi.TYPE_SET).read('CirTree');
+// Generate the reverse map from contig ID --> contig name.
+function reverseContigMap(contigMap: {[key:string]: number}): Array<string> {
+  var ary = [];
+  _.each(contigMap, (index, name) => {
+    ary[index] = name;
+  });
+  return ary;
 }
 
 // Extract a map from contig name --> contig ID from the bigBed header.
@@ -43,44 +35,25 @@ function generateContigMap(header): {[key:string]: number} {
   }));
 }
 
-type BedRow = {
-  // Half-open interval for the BED row.
-  contig: string;
-  start: number;
-  stop: number;
-  // Remaining fields in the BED row (typically tab-delimited)
-  rest: string;
-}
-
-// All features found in range.
-type BedBlock = {
-  range: ContigInterval<string>;
-  rows: BedRow[];
-}
-
-class BigBedWig<I: ImmediateBigBedWig> {
+class BigBedWig {
   remoteFile: RemoteFile;
-  header: Q.Promise<any>;
-  cirTree: Q.Promise<any>;
-  contigMap: Q.Promise<{[key:string]: number}>;
-  immediate: Q.Promise<I>;
-  zoomIndices: Q.Promise<Array<any>>;
+  header: Object;
+  cirTree: Object;
+  contigMap: {[key:string]: number};
+  chrIdToContig: string[];
+  isCompressed: boolean;
+  blockCache: map<number, Object>;
 
-  /**
-   * Prepare to request features from a remote bigBed file.
-   * The remote source must support HTTP Range headers.
-   * This will kick off several async requests for portions of the file.
-   */
-  constructor(url: string) {
+  static load(url: string, type_set) {
+    this.remoteFile = new RemoteFile(url);
 
-    // var parsedUrl = urlUtils.parse(url);
-    // if (parsedUrl.protocol && parsedUrl.protocol != 'file') {
-      this.remoteFile = new RemoteFile(url);
-    // } else {
-    //   this.remoteFile = new LocalFile(url);
-    // }
+    this.header = this.remoteFile.getBytes(0, 64*1024).then(buffer => {
+      // TODO: check Endianness using magic. Possibly use jDataView.littleEndian
+      // to flip the endianness for jBinary consumption.
+      // NB: dalliance doesn't support big endian formats.
+      return new jBinary(buffer, type_set).read('Header');
+    });
 
-    this.header = this.remoteFile.getBytes(0, 64*1024).then(parseHeader);
     this.contigMap = this.header.then(generateContigMap);
 
     // Next: fetch the block index and parse out the "CIR" tree.
@@ -90,55 +63,62 @@ class BigBedWig<I: ImmediateBigBedWig> {
       // Lacking zoom headers, assume it's 4k.
       // TODO: fetch more than 4k if necessary
       var start = header.unzoomedIndexOffset,
-        zoomHeader = header.zoomHeaders[0],
+        zoomHeader = header.zoomHeaders && header.zoomHeaders[0],
         length = zoomHeader ? zoomHeader.dataOffset - start : 4096;
-      return this.remoteFile.getBytes(start, length).then(parseCirTree);
+
+      return this.remoteFile.getBytes(start, length).then(buffer => {
+        return new jBinary(buffer, CirTree).read('CirTree');
+      });
     });
 
-    this.zoomIndices =
-      this.header.then(header => {
-        header.zoomHeaders.map((zoomHeader, idx) => {
-          var byteRangeStart = zoomHeader.indexOffset;
-          var byteRangeEnd = 
-            (idx + 1 < header.zoomLevels.length) ? 
-              header.zoomLevels[idx + 1].dataOffset :
-              this.remoteFile.getSize()
-            ;
-          
-          return this.remoteFile.getBytes(byteRangeStart, byteRangeEnd - byteRangeStart)
-        });
-      });
-
-    this.immediate = Q.all([this.header, this.cirTree, this.contigMap, this.zoomIndices])
-      .then(([header, cirTree, contigMap, zoomIndices]) => {
-        var cm: {[key:string]: number} = contigMap;
-        return new ImmediateBigBed(this.remoteFile, header, cirTree, cm, zoomIndices);
-      });
+    var immediate = Q.all([ Q.when(this.remoteFile), this.header, this.cirTree, this.contigMap ]);
 
     // Bubble up errors
-    this.immediate.done();
+    immediate.done();
+
+    return immediate;
   }
 
-  /**
-   * Returns all BED entries which overlap the range.
-   * Note: while the requested range is inclusive on both ends, ranges in
-   * bigBed format files are half-open (inclusive at the start, exclusive at
-   * the end).
-   */
-  // getFeaturesInRange(contig: string, start: number, stop: number): Q.Promise<Array<BedRow>> {
-  //   var range = new ContigInterval(contig, start, stop);
-  //   return this.immediate.then(im => im.getFeaturesInRange(range));
-  // }
+  constructor(remoteFile, header, cirTree, contigMap: {[key:string]: number}) {
+    if (!header) {
+      throw new Error("empty BigBed/Wig header; did you try to instantiate it directly instead of using .load()?")
+    }
+    this.remoteFile = remoteFile;
+    this.header = header;
+    this.cirTree = cirTree;
+    this.contigMap = contigMap;
+    this.chrIdToContig = reverseContigMap(contigMap);
+    this.isCompressed = (this.header.uncompressBufSize > 0);
+    this.blockCache = {};
+  }
 
-  /**
-   * Returns all features in blocks overlapping the given range.
-   * Because these features must all be fetched, decompressed and parsed
-   * anyway, this can be helpful for upstream caching.
-   */
-  // getFeatureBlocksOverlapping(range: ContigInterval<string>): Q.Promise<Array<BedBlock>> {
-  //   return this.immediate.then(im => im.getFeatureBlocksOverlapping(range));
-  // }
+  // Map contig name to contig ID. Leading "chr" is optional. Throws on failure.
+  _getContigId(contig: string): number {
+    if (contig in this.contigMap) return this.contigMap[contig];
+    var chr = 'chr' + contig;
+    if (chr in this.contigMap) return this.contigMap[chr];
+    throw `Invalid contig ${contig}`;
+  }
+
+  _getChrIdInterval(range: ContigInterval<string>): ContigInterval<number> {
+    return new ContigInterval(
+      this._getContigId(range.contig), range.start(), range.stop());
+  }
+
+  _getContigInterval(range: ContigInterval<number>): ContigInterval<string> {
+    return new ContigInterval(
+      this.chrIdToContig[range.contig], range.start(), range.stop());
+  }
+
+  // Bed entries have a chromosome ID. This converts that to a contig string.
+  _attachContigToBedRows(beds: ChrIdBedRow[]): BedRow[] {
+    return beds.map(bed => ({
+      contig: this.chrIdToContig[bed.chrId],
+      start: bed.start,
+      stop: bed.stop,
+      rest: bed.rest
+    }));
+  }
 }
 
-//module.exports = {BigBed, parseHeader, parseCirTree};
 module.exports = BigBedWig;

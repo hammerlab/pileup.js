@@ -90,7 +90,7 @@ function createFromBigBedFile(remoteSource: BigBed): BigBedSource {
     coveredRanges.push(interval);
     coveredRanges = ContigInterval.coalesce(coveredRanges);
 
-    return remoteSource.getFeatureBlocksOverlapping(interval).then(featureBlocks => {
+    return remoteSource.then(bb => bb.getFeatureBlocksOverlapping(interval)).then(featureBlocks => {
       featureBlocks.forEach(fb => {
         coveredRanges.push(fb.range);
         coveredRanges = ContigInterval.coalesce(coveredRanges);
@@ -124,7 +124,7 @@ function create(data: {url:string}): BigBedSource {
     throw new Error(`Missing URL from track: ${JSON.stringify(data)}`);
   }
 
-  return createFromBigBedFile(new BigBed(url));
+  return createFromBigBedFile(BigBed.load(url));
 }
 
 module.exports = {
