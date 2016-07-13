@@ -1,3 +1,7 @@
+/**
+ * @flow
+ */
+'use strict';
 
 import BigWig from '../data/BigWig';
 import ContigInterval from '../ContigInterval';

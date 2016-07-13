@@ -1,4 +1,6 @@
-
+/**
+ * @flow
+ */
 'use strict';
 
 import type {BinSummary} from './CoverageCache';

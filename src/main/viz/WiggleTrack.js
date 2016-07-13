@@ -1,3 +1,7 @@
+/**
+ * @flow
+ */
+'use strict';
 
 import WiggleCache from './WiggleCache';
 import BigWigSource from '../sources/BigWigDataSource';
