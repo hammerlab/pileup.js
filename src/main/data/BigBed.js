@@ -8,13 +8,12 @@
 import Q from 'q';
 import _ from 'underscore';
 import pako from 'pako/lib/inflate';  // for gzip inflation
-import jBinary from 'jbinary';
 
 import Interval from '../Interval';
 import ContigInterval from '../ContigInterval';
-import BigBedWig from './BigBedWig';
+import {BigBedWig, parse} from './BigBedWig';
 import utils from '../utils';
-import {BigBedTypeSet, BedBlockTypeSet} from './formats/bbi';
+import {BigBedHeader, BedBlockTypeSet} from './formats/bbi';
 
 type BedRow = {
   // Half-open interval for the BED row.
@@ -72,18 +71,19 @@ function extractFeaturesFromBlock(buffer: ArrayBuffer,
       pako.inflateRaw(new Uint8Array(blockBuffer)) :
       blockBuffer;
 
-  var jb = new jBinary(inflatedBuffer, BedBlockTypeSet);
   // TODO: parse only one Entry at a time from Block, use an iterator.
-  return jb.read('Block');
+  return parse(inflatedBuffer, BedBlockTypeSet, 'Block');
 }
 
 class BigBed extends BigBedWig {
 
   static load(url: string): BigBed {
-    return BigBedWig.load(url, BigBedTypeSet).then(([ remoteFile, header, cirTree, contigMap ]) => {
+    var { remoteFile, immediate } = BigBedWig.load(url, BigBedHeader);
+    var bb = immediate.then(([ header, cirTree, contigMap ]) => {
       var cm: {[key:string]: number} = contigMap;
       return new BigBed(remoteFile, header, cirTree, cm);
     });
+    return { remoteFile, bb };
   }
 
   /**
@@ -115,7 +115,7 @@ class BigBed extends BigBedWig {
     return this._fetchFeaturesByBlock(contigRange)
       .then(bedsByBlock => {
         var beds = _.flatten(bedsByBlock.map(b => b.rows));
-        
+
         beds = beds.filter(function(bed) {
           // Note: BED intervals are explicitly half-open.
           // The "- 1" converts them to closed intervals for ContigInterval.

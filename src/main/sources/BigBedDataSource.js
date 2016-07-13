@@ -55,7 +55,7 @@ function parseBedFeature(f): Gene {
 }
 
 
-function createFromBigBedFile(remoteSource: BigBed): BigBedSource {
+function createFromBigBedFile(bb: BigBed): BigBedSource {
   // Collection of genes that have already been loaded.
   var genes: {[key:string]: Gene} = {};
 
@@ -90,7 +90,7 @@ function createFromBigBedFile(remoteSource: BigBed): BigBedSource {
     coveredRanges.push(interval);
     coveredRanges = ContigInterval.coalesce(coveredRanges);
 
-    return remoteSource.then(bb => bb.getFeatureBlocksOverlapping(interval)).then(featureBlocks => {
+    return bb.then(bb => bb.getFeatureBlocksOverlapping(interval)).then(featureBlocks => {
       featureBlocks.forEach(fb => {
         coveredRanges.push(fb.range);
         coveredRanges = ContigInterval.coalesce(coveredRanges);
@@ -124,7 +124,7 @@ function create(data: {url:string}): BigBedSource {
     throw new Error(`Missing URL from track: ${JSON.stringify(data)}`);
   }
 
-  return createFromBigBedFile(BigBed.load(url));
+  return createFromBigBedFile(BigBed.load(url).bb);
 }
 
 module.exports = {

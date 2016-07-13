@@ -33,8 +33,9 @@ class BigWig extends BigBedWig {
   zoomIndexMap: map<number, Object>;
 
   static load(url: string): BigWig {
-    return BigBedWig.load(url, BigWigTypeSet)
-      .then(([ remoteFile, header, cirTree, contigMap ]) => {
+    var { remoteFile, immediate } = BigBedWig.load(url, BigWigTypeSet);
+    immediate
+      .then(([ header, cirTree, contigMap ]) => {
         var zoomIndices =
           header.then(header => {
             header.zoomHeaders.map((zoomHeader, idx) => {
@@ -49,8 +50,8 @@ class BigWig extends BigBedWig {
             });
           });
 
-        return [remoteFile, header, cirTree, contigMap, zoomIndices];
-      }).then(([ remoteFile, header, cirTree, contigMap, zoomIndices ]) => {
+        return [ header, cirTree, contigMap, zoomIndices ];
+      }).then(([ header, cirTree, contigMap, zoomIndices ]) => {
         var cm: {[key:string]: number} = contigMap;
         return new BigWig(remoteFile, header, cirTree, cm, zoomIndices);
       });

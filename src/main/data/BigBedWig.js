@@ -11,7 +11,7 @@ import jBinary from 'jbinary';
 
 import RemoteFile from '../RemoteFile';
 import ContigInterval from '../ContigInterval';
-import {CirTree} from './formats/bbi';
+import {ChromTree, CirTree} from './formats/bbi';
 
 // Generate the reverse map from contig ID --> contig name.
 function reverseContigMap(contigMap: {[key:string]: number}): Array<string> {
@@ -22,17 +22,12 @@ function reverseContigMap(contigMap: {[key:string]: number}): Array<string> {
   return ary;
 }
 
-// Extract a map from contig name --> contig ID from the bigBed header.
-function generateContigMap(header): {[key:string]: number} {
-  // Just assume it's a flat "tree" for now.
-  var nodes = header.chromosomeTree.nodes.contents;
-  if (!nodes) {
-    throw 'Invalid chromosome tree';
+function parse(buffer, type_set, key) {
+  if (!key) {
+    type_set = { 'jBinary.littleEndian': true, t: type_set };
+    key = 't';
   }
-  return _.object(nodes.map(function({id, key}) {
-    // remove trailing nulls from the key string
-    return [key.replace(/\0.*/, ''), id];
-  }));
+  return new jBinary(buffer, type_set).read(key);
 }
 
 class BigBedWig {
@@ -44,39 +39,51 @@ class BigBedWig {
   isCompressed: boolean;
   blockCache: map<number, Object>;
 
-  static load(url: string, type_set) {
-    this.remoteFile = new RemoteFile(url);
+  static load(url: string, header_format) {
+    var remoteFile = new RemoteFile(url);
 
-    this.header = this.remoteFile.getBytes(0, 64*1024).then(buffer => {
-      // TODO: check Endianness using magic. Possibly use jDataView.littleEndian
-      // to flip the endianness for jBinary consumption.
-      // NB: dalliance doesn't support big endian formats.
-      return new jBinary(buffer, type_set).read('Header');
-    });
+    var header =
+      remoteFile.getBytes(0, 64*1024).then(buffer => {
+        // TODO: check Endianness using magic.
+        // NB: dalliance doesn't support big endian formats.
+        return parse(buffer, header_format);
+      });
 
-    this.contigMap = this.header.then(generateContigMap);
+    var contigMap =
+      header.then(header => {
+        return remoteFile.getBytes(header.chromosomeTreeOffset, 4096).then(buffer => {
+          var chromTree = parse(buffer, ChromTree);
+
+          // Just assume it's a flat "tree" for now.
+          var nodes = chromTree.root.contents;
+          if (!nodes) {
+            throw 'Invalid chromosome tree';
+          }
+
+          return _.object(nodes.map(function({id, key}) {
+            // remove trailing nulls from the key string
+            return [key.replace(/\0.*/, ''), id];
+          }));
+        });
+      });
 
     // Next: fetch the block index and parse out the "CIR" tree.
-    this.cirTree = this.header.then(header => {
-      // zoomHeaders[0].dataOffset is the next entry in the file.
-      // We assume the "cirTree" section goes all the way to that point.
-      // Lacking zoom headers, assume it's 4k.
+    var cirTree = header.then(header => {
       // TODO: fetch more than 4k if necessary
       var start = header.unzoomedIndexOffset,
-        zoomHeader = header.zoomHeaders && header.zoomHeaders[0],
-        length = zoomHeader ? zoomHeader.dataOffset - start : 4096;
+        length = 4096;
 
-      return this.remoteFile.getBytes(start, length).then(buffer => {
-        return new jBinary(buffer, CirTree).read('CirTree');
+      return remoteFile.getBytes(start, length).then(buffer => {
+        return parse(buffer, CirTree, 'CirTree');
       });
     });
 
-    var immediate = Q.all([ Q.when(this.remoteFile), this.header, this.cirTree, this.contigMap ]);
+    var immediate = Q.all([ header, cirTree, contigMap ]);
 
-    // Bubble up errors
+    // Bubble up errors.
     immediate.done();
 
-    return immediate;
+    return { remoteFile, immediate };
   }
 
   constructor(remoteFile, header, cirTree, contigMap: {[key:string]: number}) {
@@ -121,4 +128,7 @@ class BigBedWig {
   }
 }
 
-module.exports = BigBedWig;
+module.exports = {
+  BigBedWig,
+  parse
+};

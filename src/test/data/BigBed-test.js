@@ -17,9 +17,14 @@ describe('BigBed', function() {
     return BigBed.load('/test-data/simple17unc.bb');   // See test-data/README.md
   }
 
+  var { remoteFile, bb } = getTestBigBed();
+
+  function getFeaturesInRange(chr, start, end) {
+    return bb.then(bb => bb.getFeaturesInRange(chr, start, end))
+  }
+
   it('should extract features in a range', function() {
-    var bb = getTestBigBed();
-    return bb.then(bb => bb.getFeaturesInRange('chrX', 151077036, 151078532))
+    return getFeaturesInRange('chrX', 151077036, 151078532)
         .then(features => {
 
           expect(features).to.deep.equal([
@@ -40,7 +45,7 @@ describe('BigBed', function() {
   });
 
   it('should extract features from an uncompressed BigBed', function () {
-    var bb = getUncompressedTestBigBed();
+    var { remoteFile, bb } = getUncompressedTestBigBed();
 
     return bb.then(bb => bb.getFeaturesInRange('chr17', 60000, 270000))
       .then(features => {
@@ -64,31 +69,25 @@ describe('BigBed', function() {
     // chrX 151094536 151095703 PeachPuff
     var red = [151071196, 151072362];  // note: stop is inclusive
 
-    var bb = getTestBigBed();
+    // var bb = getTestBigBed();
     var expectN = n => features => {
         expect(features).to.have.length(n);
       };
 
     return Q.all([
         // request for precisely one row from the file.
-        bb.then(bb => bb.getFeaturesInRange('chrX', red[0], red[1]))
-            .then(expectN(1)),
+        getFeaturesInRange('chrX', red[0], red[1]).then(expectN(1)),
         // the additional base in the range hits another row.
-        bb.then(bb => bb.getFeaturesInRange('chrX', red[0], 1 + red[1]))
-            .then(expectN(2)),
+        getFeaturesInRange('chrX', red[0], 1 + red[1]).then(expectN(2)),
         // this overlaps exactly one base pair of the first feature.
-        bb.then(bb => bb.getFeaturesInRange('chrX', red[0] - 1000, red[0]))
-            .then(expectN(1)),
+        getFeaturesInRange('chrX', red[0] - 1000, red[0]).then(expectN(1)),
         // but this range ends one base pair before it.
-        bb.then(bb => bb.getFeaturesInRange('chrX', red[0] - 1000, red[0] - 1))
-            .then(expectN(0))
+        getFeaturesInRange('chrX', red[0] - 1000, red[0] - 1).then(expectN(0))
     ]);
   });
 
   it('should add "chr" to contig names', function() {
-    var bb = getTestBigBed();
-
-    return bb.then(bb => bb.getFeaturesInRange('X', 151077036, 151078532))
+    return getFeaturesInRange('X', 151077036, 151078532)
         .then(features => {
           // (same as 'should extract features in a range' test)
           expect(features).to.have.length(2);
@@ -98,34 +97,31 @@ describe('BigBed', function() {
   });
 
   it('should cache requests in a block', function() {
-    var bb = getTestBigBed(),
-        remote = bb.remoteFile;
-    return bb.then(bb => bb.getFeaturesInRange('X', 151077036, 151078532)).then(() => {
+
+    return getFeaturesInRange('X', 151077036, 151078532).then(() => {
       // cache has been warmed up -- flush it to get a deterministic test.
-      // remote.clearCache();
-      // remote.numNetworkRequests = 0;
+      remoteFile.clearCache();
+      remoteFile.numNetworkRequests = 0;
 
       // This should generate one new request.
-      return bb.then(bb => bb.getFeaturesInRange('X', 151077036, 151078532));
+      return getFeaturesInRange('X', 151077036, 151078532);
     }).then(features => {
       expect(features).to.have.length(2);
-      // expect(remote.numNetworkRequests).to.equal(1);
-      return bb.then(bb => bb.getFeaturesInRange('X', 151071196, 151072362));
+      expect(remoteFile.numNetworkRequests).to.equal(1);
+      return getFeaturesInRange('X', 151071196, 151072362);
     }).then(features => {
       // Another request in the same block should not generate a new request.
       expect(features).to.have.length(1);
-      // expect(remote.numNetworkRequests).to.equal(1);
-      return bb.then(bb => bb.getFeaturesInRange('Y', 50, 51));
+      expect(remoteFile.numNetworkRequests).to.equal(1);
+      return getFeaturesInRange('Y', 50, 51);
     }).then(features => {
       // But a request from another block (the 'Y' block) should.
       expect(features).to.have.length(1);
-      // expect(remote.numNetworkRequests).to.equal(2);
+      expect(remoteFile.numNetworkRequests).to.equal(2);
     });
   });
 
   it('should fetch full blocks', function() {
-    var bb = getTestBigBed();
-
     var range = new ContigInterval('X', 151077036, 151078532);
     return bb.then(bb => bb.getFeatureBlocksOverlapping(range))
         .then(blockFeatures => {
@@ -139,5 +135,4 @@ describe('BigBed', function() {
 
   // Things left to test:
   // - getFeatures which crosses a block boundary
-  // - uncompressed bigBed file.
 });
