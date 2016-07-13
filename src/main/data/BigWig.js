@@ -9,6 +9,7 @@ import Interval from '../Interval';
 import ContigInterval from '../ContigInterval';
 import BigBedWig from './BigBedWig';
 import {BigWigTypeSet} from './formats/bbi';
+import utils from '../utils';
 
 // type WigBlock = {
 //   chrId: number;
@@ -49,7 +50,7 @@ class BigWig extends BigBedWig {
                     remoteFile.getSize()
                 ;
 
-              return remoteFile.getBytes(byteRangeStart, byteRangeEnd - byteRangeStart)
+              return remoteFile.getBytes(byteRangeStart, byteRangeEnd - byteRangeStart);
             });
           });
 
@@ -87,7 +88,7 @@ class BigWig extends BigBedWig {
     return this.remoteFile.getBytes(byteRange.start, byteRange.length())
       .then(buffer => {
         return blocks.map(block => {
-          var beds = extractFeaturesFromBlock(buffer, byteRange, block, this.isCompressed);
+          var beds = [];//extractFeaturesFromBlock(buffer, byteRange, block, this.isCompressed);
           if (block.startChromIx != block.endChromIx) {
             throw `Can't handle blocks which span chromosomes!`;
           }

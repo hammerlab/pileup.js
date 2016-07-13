@@ -8,8 +8,6 @@
 
 import _ from 'underscore';
 
-import {typeAtOffset} from './helpers';
-
 var BigBedHeader = {
   _magic: [ 'const', 'uint32', 0x8789F2EB, true ],
   version: 'uint16',

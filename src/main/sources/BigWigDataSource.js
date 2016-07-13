@@ -3,6 +3,10 @@
  */
 'use strict';
 
+import Q from 'q';
+import _ from 'underscore';
+import {Events} from 'backbone';
+
 import BigWig from '../data/BigWig';
 import ContigInterval from '../ContigInterval';
 
@@ -32,11 +36,11 @@ function createFromBigWigFile(bigwig: BigWig): BigWigSource {
     for (var pos = start; pos < end; pos += basesPerBucket) {
 
     }
-    _.each(genes, gene => {
-      if (range.intersects(gene.position)) {
-        results.push(gene);
-      }
-    });
+    // _.each(genes, gene => {
+    //   if (range.intersects(gene.position)) {
+    //     results.push(gene);
+    //   }
+    // });
     return results;
   }
 

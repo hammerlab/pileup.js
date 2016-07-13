@@ -6,20 +6,6 @@
 
 import jBinary from 'jbinary';
 
-// Read a jBinary type at an offset in the buffer specified by another field.
-function typeAtOffset(baseType: any, offsetFieldName: string): any {
-  return jBinary.Template({
-      baseType: baseType,
-      read: function(context) {
-        if (+context[offsetFieldName] === 0) {
-          return null;
-        } else {
-          return this.binary.read(this.baseType, +context[offsetFieldName]);
-        }
-      }
-    });
-}
-
 // A block of fixed length containing some other type.
 // TODO: write this using 'binary' type (like nullString).
 var sizedBlock = jBinary.Type({
@@ -111,4 +97,4 @@ var lazyArray = jBinary.Type({
   }
 });
 
-module.exports = {typeAtOffset, sizedBlock, nullString, uint64native, lazyArray};
+module.exports = { sizedBlock, nullString, uint64native, lazyArray };

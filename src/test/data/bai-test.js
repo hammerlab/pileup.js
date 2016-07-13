@@ -10,7 +10,6 @@ import bamTypes from '../../main/data/formats/bamTypes';
 import ContigInterval from '../../main/ContigInterval';
 import RemoteFile from '../../main/RemoteFile';
 import RecordedRemoteFile from '../RecordedRemoteFile';
-import LocalFile from '../../main/LocalFile';
 
 function chunkToString(chunk) {
   return `${chunk.chunk_beg}-${chunk.chunk_end}`;

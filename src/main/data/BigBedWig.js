@@ -88,7 +88,7 @@ class BigBedWig {
 
   constructor(remoteFile, header, cirTree, contigMap: {[key:string]: number}) {
     if (!header) {
-      throw new Error("empty BigBed/Wig header; did you try to instantiate it directly instead of using .load()?")
+      throw new Error("empty BigBed/Wig header; did you try to instantiate it directly instead of using .load()?");
     }
     this.remoteFile = remoteFile;
     this.header = header;

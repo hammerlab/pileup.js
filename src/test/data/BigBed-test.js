@@ -20,7 +20,7 @@ describe('BigBed', function() {
   var { remoteFile, bb } = getTestBigBed();
 
   function getFeaturesInRange(chr, start, end) {
-    return bb.then(bb => bb.getFeaturesInRange(chr, start, end))
+    return bb.then(bb => bb.getFeaturesInRange(chr, start, end));
   }
 
   it('should extract features in a range', function() {
@@ -45,7 +45,7 @@ describe('BigBed', function() {
   });
 
   it('should extract features from an uncompressed BigBed', function () {
-    var { remoteFile, bb } = getUncompressedTestBigBed();
+    var { bb } = getUncompressedTestBigBed();
 
     return bb.then(bb => bb.getFeaturesInRange('chr17', 60000, 270000))
       .then(features => {

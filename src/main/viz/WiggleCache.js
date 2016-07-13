@@ -35,7 +35,7 @@ class WiggleCache extends DepthCache {
       this.posCounts[ref] = {};
     var refCounts = this.posCounts[ref];
     if (!refCounts[start]) {
-      refCounts[start] = {}
+      refCounts[start] = {};
     }
     var refStart = refCounts[start];
     if (refStart[end] && refStart[end] != value) {

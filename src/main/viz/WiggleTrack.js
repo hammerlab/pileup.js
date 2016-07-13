@@ -3,9 +3,18 @@
  */
 'use strict';
 
+import _ from 'underscore';
+import React from 'react';
+import d3utils from './d3utils';
+import dataCanvas from 'data-canvas';
+import shallowEquals from 'shallow-equals';
+import style from '../style';
+
 import WiggleCache from './WiggleCache';
 import BigWigSource from '../sources/BigWigDataSource';
 import ContigInterval from '../ContigInterval';
+import CoverageTiledCanvas from './CoverageTiledCanvas';
+import canvasUtils from './canvas-utils';
 
 type Props = {
   width: number;

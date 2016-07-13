@@ -25,7 +25,7 @@ class Interval {
   }
 
   isEmpty(): bool {
-    return this.length() == 0
+    return this.length() === 0;
   }
 
   intersect(other: Interval): Interval {
@@ -172,7 +172,7 @@ class Interval {
     }
 
     if (baseIdx === undefined) {
-      baseIdx = bases.length - 1
+      baseIdx = bases.length - 1;
     }
     
     if (baseIdx < 0) {
