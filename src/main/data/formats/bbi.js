@@ -11,7 +11,7 @@ import _ from 'underscore';
 var BigBedHeader = {
   _magic: [ 'const', 'uint32', 0x8789F2EB, true ],
   version: 'uint16',
-  zoomLevels: ['const', 'uint16', 0 ],
+  numZoomLevels: ['const', 'uint16', 0 ],
   chromosomeTreeOffset: 'uint64',
   unzoomedDataOffset: 'uint64',
   unzoomedIndexOffset: 'uint64',
@@ -30,79 +30,79 @@ var BigBedHeader = {
 };
 
 var BigWigHeader = _.extend({}, BigBedHeader);
-BigWigHeader.magic = [ 'const', 'uint32', 0x888FFC26, true ];
-BigWigHeader.zoomLevels = 'uint16';
+BigWigHeader._magic = [ 'const', 'uint32', 0x888FFC26, true ];
+BigWigHeader.numZoomLevels = 'uint16';
 BigWigHeader.fieldCount = [ 'const', 'uint16', 0, true ];
 BigWigHeader.definedFieldCount = [ 'const', 'uint16', 0, true ];
-BigWigHeader.autoSqlOffset = [ 'const', 'uint64', 0, true ];
+BigWigHeader.autoSqlOffset = [ 'const', 'uint64', 0 ];
 
-var CirTree = {
+var RTreeLeafData = {
+  startChromIx: 'uint32',
+  startBase: 'uint32',
+  endChromIx: 'uint32',
+  endBase: 'uint32',
+  offset: 'uint64',
+  size: 'uint64'
+};
 
-  // The "CIR" tree contains a mapping from sequence -> block offsets; it stands for "Chromosome Index R tree".
-  CirTree: {
-    _magic: [ 'const', 'uint32', 0x2468ACE0, true ],
-    blockSize: 'uint32',
-    itemCount: 'uint64',
-    startChromIx: 'uint32',
-    startBase: 'uint32',
-    endChromIx: 'uint32',
-    endBase: 'uint32',
-    fileSize: 'uint64',
-    itemsPerSlot: 'uint32',
-    _reserved: ['skip', 4],
-    blocks: 'CirNode'
-  },
+var RTreeNonLeafData = {
+  startChromIx: 'uint32',
+  startBase: 'uint32',
+  endChromIx: 'uint32',
+  endBase: 'uint32',
+  offset: 'uint64'
+};
 
-  CirNode: {
-    isLeaf: 'uint8',  // 1 = yes, 0 = no
-    _reserved: 'uint8',
-    count: 'uint16',
-    contents: [
-      'array',
-      [ 'if', 'isLeaf', 'LeafData', 'NonLeafData' ],
-      'count'
-    ]
-  },
+var RTreeNode = {
+  isLeaf: 'uint8',  // 1 = yes, 0 = no
+  _reserved: 'uint8',
+  count: 'uint16',
+  childPointers: [
+    'array',
+    [ 'if', 'isLeaf', RTreeLeafData, RTreeNonLeafData ],
+    'count'
+  ]
+};
 
-  LeafData: {
-    startChromIx: 'uint32',
-    startBase: 'uint32',
-    endChromIx: 'uint32',
-    endBase: 'uint32',
-    offset: 'uint64',
-    size: 'uint64'
-  },
+var RTree = {
+  _magic: [ 'const', 'uint32', 0x2468ACE0, true ],
+  branchingFactor: 'uint32',
+  numDataBlocks: 'uint64',
+  startChromIx: 'uint32',
+  startBase: 'uint32',
+  endChromIx: 'uint32',
+  endBase: 'uint32',
+  dataEndOffset: 'uint64',
+  numItemsPerDataBlock: 'uint32',
+  _reserved: ['skip', 4],
+  root: RTreeNode
+};
 
-  NonLeafData: {
-    startChromIx: 'uint32',
-    startBase: 'uint32',
-    endChromIx: 'uint32',
-    endBase: 'uint32',
-    offset: 'uint64'
-  },
+var ChromTreeLeafData = {
+  key: [ 'string', 'keySize' ],
+
+  // Note: bigBed allows more general values; this is what Ensembl uses.
+  // value: ['string', 'valSize']
+  id: 'uint32',
+  size: 'uint32'
+};
+
+var ChromTreeNonLeafData = {
+  key: [ 'string', 'keySize' ],
+  offset: 'uint64'
 };
 
 var ChromTreeNode = {
   isLeaf: 'uint8',  // 1 = yes, 0 = no
   _reserved: 'uint8',
   count: 'uint16',
-  contents: [
+  childPointers: [
     'array',
     [
       'if',
       'isLeaf',
-      {
-        key: [ 'string', 'keySize' ],
-        
-        // Note: bigBed allows more general values; this is what Ensembl uses.
-        // value: ['string', 'valSize']
-        id: 'uint32',
-        size: 'uint32'
-      },
-      {
-        key: [ 'string', 'keySize' ],
-        offset: 'uint64'
-      }
+      ChromTreeLeafData,
+      ChromTreeNonLeafData
     ],
     'count'
   ]
@@ -149,7 +149,7 @@ var BedBlockTypeSet = {
 var ZoomHeader = {
   reductionLevel: 'uint32',
     _reserved: 'uint32',
-    dataOffset: 'uint64',
+    countOffset: 'uint64',
     indexOffset: 'uint64'
 };
 
@@ -224,7 +224,8 @@ module.exports = {
   BigWigData,
   BedBlockTypeSet,
   ChromTree,
-  CirTree,
+  RTree,
+  RTreeNode,
   TotalSummary,
   ZoomData,
   ZoomHeader
@@ -234,5 +235,3 @@ module.exports = {
 _.map(module.exports, (v, k) => {
   v['jBinary.littleEndian'] = true;
 });
-
-console.log("bbi:", module.exports);

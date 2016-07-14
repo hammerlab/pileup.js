@@ -79,9 +79,10 @@ class BigBed extends BigBedWig {
 
   static load(url: string): BigBed {
     var { remoteFile, immediate } = BigBedWig.load(url, BigBedHeader);
-    var bb = immediate.then(([ header, cirTree, contigMap ]) => {
+
+    var bb = immediate.then(([ header, index, contigMap ]) => {
       var cm: {[key:string]: number} = contigMap;
-      return new BigBed(remoteFile, header, cirTree, cm);
+      return new BigBed(remoteFile, header, index, cm);
     });
     return { remoteFile, bb };
   }
@@ -133,16 +134,16 @@ class BigBed extends BigBedWig {
     var matchingBlocks = [];
 
     var tupleRange = [
-      [range.contig, range.start()],
-      [range.contig, range.stop()]
+      [ range.contig, range.start() ],
+      [ range.contig, range.stop() ]
     ];
 
     // TODO: do a recursive search through the index tree. Currently assumes the tree is just one root node.
-    this.cirTree.blocks.contents.forEach(node => {
+    this.index.root.dataPointers.forEach(node => {
       var nodeRange =
         [
-          [node.startChromIx, node.startBase],
-          [node.endChromIx, node.endBase]
+          [ node.startChromIx, node.startBase ],
+          [ node.endChromIx, node.endBase ]
         ];
 
       if (utils.tupleRangeOverlaps(nodeRange, tupleRange)) {

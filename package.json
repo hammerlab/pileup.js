@@ -69,6 +69,7 @@
     "babelify": "^6.3.0",
     "browserify": "^10.2.4",
     "chai": "^2.0.0",
+    "chai-subset": "^1.2.2",
     "coveralls": "2.10.x",
     "envify": "^3.4.0",
     "exorcist": "^0.4.0",

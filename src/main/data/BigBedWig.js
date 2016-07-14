@@ -11,7 +11,7 @@ import jBinary from 'jbinary';
 
 import RemoteFile from '../RemoteFile';
 import ContigInterval from '../ContigInterval';
-import {ChromTree, CirTree} from './formats/bbi';
+import {ChromTree, RTree, RTreeNode} from './formats/bbi';
 
 // Generate the reverse map from contig ID --> contig name.
 function reverseContigMap(contigMap: {[key:string]: number}): Array<string> {
@@ -22,7 +22,56 @@ function reverseContigMap(contigMap: {[key:string]: number}): Array<string> {
   return ary;
 }
 
+function denormalizeRTreeChildren(remoteFile, node, branchingFactor) {
+  if (!node.isLeaf) {
+    var childPointers = node.childPointers;
+    var childrenStart = childPointers[0].offset;
+    var lastChildLength = Math.max(64 * 1024, (branchingFactor * 32 + 4) * childPointers.length);
+    var childrenEnd = childrenStart + lastChildLength;
+    //console.log("parsing non-leaf node: %O, children: [%O,%O) (%O)", node, childrenStart, childrenEnd, lastChildLength);
+    return remoteFile.getSize()
+      .then(size => Math.min(size - 1, childrenEnd) - childrenStart)
+      .then(length => remoteFile.getBytes(childrenStart, length))
+      .then(childrenBuf => new jBinary(childrenBuf, { 'jBinary.littleEndian': true, 'node': RTreeNode }))
+      .then(jb =>
+        Q.all(
+          childPointers.map(childPointer => {
+            jb.seek(childPointer.offset - childrenStart);
+            return denormalizeRTreeChildren(remoteFile, jb.read('node'), branchingFactor);
+          })
+        )
+      )
+      .then(parsedChildren => {
+        node.children = parsedChildren;
+        // console.log("processed non-leaf node:", node);
+        return node;
+      });
+  } else {
+    node.dataPointers = node.childPointers;
+    delete node.childPointers;
+    // console.log("processed leaf node:", node);
+    return Q.when(node);
+  }
+}
+
+function parseRTree(remoteFile, start, end) {
+  // TODO: fetch more than 64k if necessary
+  end = end || (start + 64 * 1024);
+  return remoteFile
+    .getBytes(start, end - start)
+    .then(buf => {
+      return parse(buf, RTree);
+    })
+    .then(rTree => {
+      return denormalizeRTreeChildren(remoteFile, rTree.root, rTree.branchingFactor)
+        .then(root => {
+          return rTree;
+        });
+    });
+}
+
 function parse(buffer, type_set, key) {
+  if (!type_set) throw new Error("bad type_set: " + type_set);
   if (!key) {
     type_set = { 'jBinary.littleEndian': true, t: type_set };
     key = 't';
@@ -33,7 +82,7 @@ function parse(buffer, type_set, key) {
 class BigBedWig {
   remoteFile: RemoteFile;
   header: Object;
-  cirTree: Object;
+  index: Object;
   contigMap: {[key:string]: number};
   chrIdToContig: string[];
   isCompressed: boolean;
@@ -55,30 +104,22 @@ class BigBedWig {
           var chromTree = parse(buffer, ChromTree);
 
           // Just assume it's a flat "tree" for now.
-          var nodes = chromTree.root.contents;
-          if (!nodes) {
+          var childPointers = chromTree.root.childPointers;
+          if (!childPointers) {
             throw 'Invalid chromosome tree';
           }
 
-          return _.object(nodes.map(function({id, key}) {
+          return _.object(childPointers.map(function({id, key}) {
             // remove trailing nulls from the key string
-            return [key.replace(/\0.*/, ''), id];
+            return [ key.replace(/\0.*/, ''), id ];
           }));
         });
       });
 
-    // Next: fetch the block index and parse out the "CIR" tree.
-    var cirTree = header.then(header => {
-      // TODO: fetch more than 4k if necessary
-      var start = header.unzoomedIndexOffset,
-        length = 4096;
+    // Next: fetch the block index and parse out the R-tree index.
+    var index = header.then(header => parseRTree(remoteFile, header.unzoomedIndexOffset));
 
-      return remoteFile.getBytes(start, length).then(buffer => {
-        return parse(buffer, CirTree, 'CirTree');
-      });
-    });
-
-    var immediate = Q.all([ header, cirTree, contigMap ]);
+    var immediate = Q.all([ header, index, contigMap ]);
 
     // Bubble up errors.
     immediate.done();
@@ -86,13 +127,13 @@ class BigBedWig {
     return { remoteFile, immediate };
   }
 
-  constructor(remoteFile, header, cirTree, contigMap: {[key:string]: number}) {
+  constructor(remoteFile, header, index, contigMap: {[key:string]: number}) {
     if (!header) {
       throw new Error("empty BigBed/Wig header; did you try to instantiate it directly instead of using .load()?");
     }
     this.remoteFile = remoteFile;
     this.header = header;
-    this.cirTree = cirTree;
+    this.index = index;
     this.contigMap = contigMap;
     this.chrIdToContig = reverseContigMap(contigMap);
     this.isCompressed = (this.header.uncompressBufSize > 0);
@@ -130,5 +171,6 @@ class BigBedWig {
 
 module.exports = {
   BigBedWig,
-  parse
+  parse,
+  parseRTree
 };

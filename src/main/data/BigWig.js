@@ -7,8 +7,8 @@ import Q from 'q';
 
 import Interval from '../Interval';
 import ContigInterval from '../ContigInterval';
-import BigBedWig from './BigBedWig';
-import {BigWigTypeSet} from './formats/bbi';
+import {BigBedWig, parse, parseRTree} from './BigBedWig';
+import {BigWigHeader, RTree, ZoomHeader} from './formats/bbi';
 import utils from '../utils';
 
 // type WigBlock = {
@@ -21,7 +21,7 @@ import utils from '../utils';
 //   count: number;
 // }
 
-export type Bucket = {
+type Bucket = {
   chrId: string;
   start: number;
   end: number;
@@ -37,33 +37,48 @@ class BigWig extends BigBedWig {
   zoomIndexMap: map<number, Object>;
 
   static load(url: string): BigWig {
-    var { remoteFile, immediate } = BigBedWig.load(url, BigWigTypeSet);
-    immediate
-      .then(([ header, cirTree, contigMap ]) => {
-        var zoomIndices =
-          header.then(header => {
-            header.zoomHeaders.map((zoomHeader, idx) => {
-              var byteRangeStart = zoomHeader.indexOffset;
-              var byteRangeEnd =
-                  (idx + 1 < header.zoomLevels.length) ?
-                    header.zoomLevels[idx + 1].dataOffset :
-                    remoteFile.getSize()
-                ;
+    var { remoteFile, immediate } = BigBedWig.load(url, BigWigHeader);
+    var bw =
+      immediate
+        .then(([ header, index, contigMap ]) => {
+          var numZoomLevels = header.numZoomLevels;
 
-              return remoteFile.getBytes(byteRangeStart, byteRangeEnd - byteRangeStart);
-            });
-          });
+          return remoteFile
+            .getBytes(64, 64 + 24 * numZoomLevels)
+            .then(buf => parse(buf, [ 'array', ZoomHeader, numZoomLevels ]))
+            .then(zoomHeaders => {
+              var zoomIndices =
+                Q.all(
+                  zoomHeaders
+                    .map((zoomHeader, idx) => {
+                      var byteRangeStart = zoomHeader.indexOffset;
+                      var byteRangeEnd =
+                        (idx + 1 < numZoomLevels) ?
+                          Q.when(zoomHeaders[idx + 1].countOffset) :
+                          remoteFile.getSize()
+                        ;
 
-        return [ header, cirTree, contigMap, zoomIndices ];
-      }).then(([ header, cirTree, contigMap, zoomIndices ]) => {
-        var cm: {[key:string]: number} = contigMap;
-        return new BigWig(remoteFile, header, cirTree, cm, zoomIndices);
-      });
+                      return byteRangeEnd.then(byteRangeEnd => parseRTree(remoteFile, byteRangeStart, byteRangeEnd));
+                    })
+                );
+
+              zoomIndices.done();
+              return zoomIndices;
+            })
+            .then(zoomIndices => [ header, index, contigMap, zoomIndices ]);
+        })
+        .then(([ header, index, contigMap, zoomIndices ]) => {
+          var cm: {[key:string]: number} = contigMap;
+          return new BigWig(remoteFile, header, index, cm, zoomIndices);
+        });
+
+    return { remoteFile, bw };
   }
 
-  constructor(remoteFile, header, cirTree, contigMap:{[key:string]: number}, zoomIndices: Object[]) {
-    super(remoteFile, header, cirTree, contigMap);
+  constructor(remoteFile, header, index, contigMap:{[key:string]: number}, zoomIndices: Object[]) {
+    super(remoteFile, header, index, contigMap);
 
+    console.log("BigWig: %s:", remoteFile.url, header, index, contigMap, zoomIndices);
     this.zoomIndices = zoomIndices || [];
     this.zoomBases = [1];
     this.zoomIndexMap = {};
@@ -107,16 +122,16 @@ class BigWig extends BigBedWig {
     var matchingBlocks = [];
 
     var tupleRange = [
-      [range.contig, range.start()],
-      [range.contig, range.stop()]
+      [ range.contig, range.start() ],
+      [ range.contig, range.stop() ]
     ];
 
     // TODO: do a recursive search through the index tree. Currently assumes the tree is just one root node.
-    this.cirTree.blocks.contents.forEach(node => {
+    this.index.root.childPointers.forEach(node => {
       var nodeRange =
         [
-          [node.startChromIx, node.startBase],
-          [node.endChromIx, node.endBase]
+          [ node.startChromIx, node.startBase ],
+          [ node.endChromIx, node.endBase ]
         ];
 
       if (utils.tupleRangeOverlaps(nodeRange, tupleRange)) {
