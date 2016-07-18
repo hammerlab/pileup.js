@@ -84,7 +84,8 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
   //if the element doesn't belong to document DOM observe DOM to detect
   //when it's attached
   var observer = null;
-  if (!document.contains(el)) {
+
+  if (!document.body.contains(el)) {
     observer = new MutationObserver(function(mutations) {
       mutations.forEach(function(mutation) {
         if (mutation.type === 'childList') {
@@ -105,7 +106,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
       });
     });
     // configuration of the observer:
-    var config = { attributes: true, childList: true, characterData: true, subtree: true };
+    var config = { childList: true, subtree: true };
 
     // start observing document
     observer.observe(document, config);
