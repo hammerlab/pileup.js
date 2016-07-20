@@ -11,13 +11,26 @@ import ContigInterval from './ContigInterval';
 
 class RemoteRequest {
   url: string;
-  cache: Object;
+  basePairsPerFetch: number;
   numNetworkRequests: number;  // track this for debugging/testing
 
-  constructor(url: string) {
-    this.cache = require('memory-cache');
+  constructor(url: string, basePairsPerFetch: number) {
     this.url = url;
+    this.basePairsPerFetch = basePairsPerFetch;
     this.numNetworkRequests = 0;
+  }
+
+  expandRange(range: ContigInterval<string>): ContigInterval<string> {
+    var roundDown = x => x - x % this.basePairsPerFetch;
+    var newStart = Math.max(1, roundDown(range.start())),
+        newStop = roundDown(range.stop() + this.basePairsPerFetch - 1);
+
+    return new ContigInterval(range.contig, newStart, newStop);
+  }
+
+  getFeaturesInRange(range: ContigInterval<string>): Q.Promise<Object> {
+    var expandedRange = this.expandRange(range);
+    return this.get(expandedRange.contig, expandedRange.start(), expandedRange.stop());
   }
 
   get(contig: string, start: number, stop: number): Q.Promise<Object> {
@@ -26,14 +39,7 @@ class RemoteRequest {
       return Q.reject(`Requested <0 interval (${length}) from ${this.url}`);
     }
 
-    // First check the cache.
-    var contigInterval = new ContigInterval(contig, start, stop);
-    var buf = this.cache.get(contigInterval);
-    if (buf) {
-      return Q.when(buf);
-    }
-
-    // Need to fetch from the network.
+    // Fetch from the network
     return this.getFromNetwork(contig, start, stop);
   }
 
@@ -53,10 +59,7 @@ class RemoteRequest {
 
     return this.promiseXHR(xhr).then(json => {
       // extract response from promise
-      var buffer = json[0];
-      var contigInterval = new ContigInterval(contig, start, stop);
-      this.cache.put(contigInterval, buffer);
-      return buffer;
+      return json[0];
     });
   }
 

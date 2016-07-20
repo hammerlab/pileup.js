@@ -16,6 +16,7 @@ import BigBedDataSource from './sources/BigBedDataSource';
 import VcfDataSource from './sources/VcfDataSource';
 import BamDataSource from './sources/BamDataSource';
 import GA4GHDataSource from './sources/GA4GHDataSource';
+import CoverageDataSource from './sources/CoverageDataSource';
 import EmptySource from './sources/EmptySource';
 
 // Visualizations
@@ -125,6 +126,7 @@ var pileup = {
     vcf: VcfDataSource.create,
     twoBit: TwoBitDataSource.create,
     bigBed: BigBedDataSource.create,
+    coverage: CoverageDataSource.create,
     empty: EmptySource.create
   },
   viz: {
