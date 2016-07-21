@@ -13,7 +13,7 @@
 import Q from 'q';
 import _ from 'underscore';
 import {Events} from 'backbone';
-
+import {ResolutionCache} from '../ResolutionCache';
 import ContigInterval from '../ContigInterval';
 import RemoteRequest from '../RemoteRequest';
 
@@ -33,43 +33,42 @@ export type PositionCount = {
   count: number;
 }
 
-function positionCountKey(p: PositionCount): string {
+function keyFunction(p: PositionCount): string {
   return `${p.contig}:${p.position}`;
 }
 
+function filterFunction(range: ContigInterval<string>, p: PositionCount): boolean {
+  return range.chrContainsLocus(p.contig, p.position);
+}
+
 function createFromCoverageUrl(remoteSource: RemoteRequest): CoverageDataSource {
-  var positions: {[key: string]: PositionCount} = {};
-
-  // Ranges for which we have complete coverage
-  var coveredRanges: ContigInterval<string>[] = [];
-
-  function addPosition(p: PositionCount) {
-    var key = positionCountKey(p);
-    if (!positions[key]) {
-      positions[key] = p;
-    }
-  }
+  var cache: ResolutionCache<PositionCount> =
+    new ResolutionCache(filterFunction, keyFunction);
 
   function fetch(range: GenomeRange) {
     var interval = new ContigInterval(range.contig, range.start, range.stop);
 
     // Check if this interval is already in the cache.
-    if (interval.isCoveredBy(coveredRanges)) {
+    if (cache.coversRange(interval)) {
       return Q.when();
+
     }
 
-    // "Cover" the range immediately to prevent duplicate fetches.
-    coveredRanges.push(interval);
-    coveredRanges = ContigInterval.coalesce(coveredRanges);
-    return remoteSource.getFeaturesInRange(interval).then(positions => {
-      positions.forEach(position => addPosition(position));
+    // modify endpoint to calculate coverage using binning
+    var basePairsPerBin = ResolutionCache.getResolution(interval.interval);
+    var endpointModifier = `binning=${basePairsPerBin}`;
+
+    // Cover the range immediately to prevent duplicate fetches.
+    cache.coverRange(interval);
+    return remoteSource.getFeaturesInRange(interval, endpointModifier).then(positions => {
+      positions.forEach(p => cache.put(p));
       o.trigger('newdata', interval);
     });
   }
 
   function getCoverageInRange(range: ContigInterval<string>): PositionCount[] {
     if (!range) return [];
-    return _.filter(positions, p => range.chrContainsLocus(p.contig, p.position));
+    return cache.get(range);
   }
 
   var o = {

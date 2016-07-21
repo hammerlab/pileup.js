@@ -7,6 +7,7 @@ import sinon from 'sinon';
 
 import RemoteRequest from '../main/RemoteRequest';
 import RemoteFile from '../main/RemoteFile';
+import ContigInterval from '../main/ContigInterval';
 
 describe('RemoteRequest', function() {
   var server: any = null, response;
@@ -14,6 +15,7 @@ describe('RemoteRequest', function() {
   var contig = 'chr17';
   var start = 10;
   var stop = 20;
+  var interval = new ContigInterval(contig, start, stop);
   var basePairsPerFetch = 1000;
 
   before(function () {
@@ -33,7 +35,7 @@ describe('RemoteRequest', function() {
     server.respondWith('GET', endpoint,
                        [200, { "Content-Type": "application/json" }, response]);
 
-    var promisedData = remoteRequest.get(contig, start, stop);
+    var promisedData = remoteRequest.get(interval);
     promisedData.then(obj => {
       var ret = obj.alignments;
       expect(remoteRequest.numNetworkRequests).to.equal(1);

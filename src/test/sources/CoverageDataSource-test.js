@@ -16,7 +16,7 @@ describe('CoverageDataSource', function() {
     return new RemoteFile('/test-data/chrM-coverage.json').getAllString().then(data => {
       response = data;
       server = sinon.fakeServer.create();
-      server.respondWith('GET', '/coverage/chrM?start=1&end=1000',[200, { "Content-Type": "application/json" }, response]);
+      server.respondWith('GET', '/coverage/chrM?start=1&end=1000&binning=1',[200, { "Content-Type": "application/json" }, response]);
     });
   });
 
@@ -34,7 +34,6 @@ describe('CoverageDataSource', function() {
     expect(source.getCoverageInRange(requestInterval))
         .to.deep.equal([]);
 
-    var progress = [];
     source.on('newdata', () => {
       var coverage = source.getCoverageInRange(requestInterval);
       expect(coverage).to.have.length(12);
@@ -46,6 +45,32 @@ describe('CoverageDataSource', function() {
   });
 
   it('should cache coverage after first call', function(done) {
+
+    var source = CoverageDataSource.create({
+      url: '/coverage'
+    });
+    var requestCount = 0;
+    var requestInterval = new ContigInterval('chrM', 10, 20);
+    expect(source.getCoverageInRange(requestInterval))
+        .to.deep.equal([]);
+
+    var progress = [];
+    source.on('networkprogress', e => { progress.push(e); });
+    source.on('networkdone', e => { progress.push('done'); });
+    source.on('newdata', () => {
+      requestCount += 1;
+      expect(requestCount == 1);
+      done();
+    });
+
+    source.rangeChanged({contig: 'chrM', start: 1, stop: 30});
+    source.rangeChanged({contig: 'chrM', start: 2, stop: 8});
+
+    server.respond();
+
+  });
+
+  it('should bin coverage over large regions', function(done) {
 
     var source = CoverageDataSource.create({
       url: '/coverage'
