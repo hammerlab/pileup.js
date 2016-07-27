@@ -91,7 +91,10 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
         if (mutation.type === 'childList') {
           var added= false;
           for (var i=0; i<mutation.addedNodes.length;i++) {
-            if (mutation.addedNodes[i]===el) {
+            //when added element is element where we visualize pileup
+            //or it contains element where we visualize pileup
+            //then we will have to update component
+            if (mutation.addedNodes[i]===el || mutation.addedNodes[i].contains(el)) {
               added = true;
             }
           }
@@ -106,7 +109,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
       });
     });
     // configuration of the observer:
-    var config = { childList: true, subtree: true };
+    var config = {attributes: true, childList: true, characterData: true, subtree: true};
 
     // start observing document
     observer.observe(document, config);
