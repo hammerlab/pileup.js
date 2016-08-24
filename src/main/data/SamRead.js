@@ -216,7 +216,7 @@ class SamRead /* implements Alignment */ {
         var i, list = [];
 
         for (i = 0; i < self.l_seq; i++) {
-          list.push(self._qual.charAt(i) - 33);
+          list.push(self._qual.charCodeAt(i) - 33);
         }
         return list;
       }());
@@ -288,6 +288,8 @@ class SamRead /* implements Alignment */ {
         nextPos = jv.getInt32(24),
         nextStrand = strandFlagToString(flag & bamTypes.Flags.MATE_STRAND);
 
+    console.log('getMateProperties', flag, nextPos, nextStrand);
+    console.trace();
     return {
       // If the mate is on another contig, there's no easy way to get its string name.
       ref: nextRefId == this.refID ? this.ref : null,
