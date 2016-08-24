@@ -71,9 +71,7 @@ class ContigInterval<T: (number|string)> {
 
   // Is this read on the given contig? (allowing for chr17 vs 17-style mismatches)
   chrOnContig(contig: T): boolean {
-    return (this.contig === contig ||
-            this.contig === 'chr' + contig ||
-            'chr' + this.contig === contig);
+    return (this.contig === contig || this.contig === 'chr' + contig || 'chr' + this.contig === contig);
   }
 
   clone(): ContigInterval<T> {
