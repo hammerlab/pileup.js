@@ -8,7 +8,8 @@ import SamViewDataSource from '../../main/sources/SamViewDataSource';
 
 describe('SamViewDataSource', function() {
   function getTestSource() {
-    var url = "http://localhost:8082/scripts/reads.cgi?coords=<range>;bam=test-data/synth3.normal.17.7500000-7515000.bam";
+    var host = window.location.host.replace(/:\d+$/, '');
+    var url = "http://" + host + ":8082/scripts/reads.cgi?coords=<range>;bam=test-data/synth3.normal.17.7500000-7515000.bam";
     return SamViewDataSource.create({'url': url});
   }
 
@@ -23,9 +24,9 @@ describe('SamViewDataSource', function() {
     source.on('newdata', () => {
 
       var reads = source.getAlignmentsInRange(range);
-      expect(reads).to.have.length(51);
-      expect(reads[0].toString()).to.equal('17:7499902-7500002');
-      expect(reads[50].toString()).to.equal('17:7499998-7500098');
+      expect(reads).to.have.length(52);
+      expect(reads[0].toString()).to.equal('17:7499900-7500000');
+      expect(reads[51].toString()).to.equal('17:7499997-7500097');
       done();
     });
     source.rangeChanged({

@@ -35,6 +35,7 @@ function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
   var coveredRanges: ContigInterval<string>[] = [];
 
   function addRead(read: Alignment) {
+    console.log(read);
     var key = read.getKey();
     if (!reads[key]) {
       reads[key] = read;
@@ -88,6 +89,7 @@ function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
               o.trigger('networkprogress', progressEvent);
             })
             .then(reads => {
+              console.log('fetched ' + reads.length + ' reads');
               reads.forEach(read => addRead(read));
               o.trigger('networkdone');
               o.trigger('newdata', range);

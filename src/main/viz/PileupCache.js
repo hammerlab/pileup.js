@@ -78,6 +78,7 @@ class PileupCache {
   // Load a new read into the visualization cache.
   // Calling this multiple times with the same read is a no-op.
   addAlignment(read: Alignment) {
+    console.log('addAlignment', this.groups);
     this._insertStats = null;  // invalidate
     var key = this.groupKey(read),
         range = read.getInterval();

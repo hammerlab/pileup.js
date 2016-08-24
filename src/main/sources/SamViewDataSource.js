@@ -14,6 +14,8 @@ import type {Alignment, AlignmentDataSource} from '../Alignment';
 // TODO: tune this value
 var BASE_PAIRS_PER_FETCH = 10;
 
+var samHeader = {references: []};
+
 function expandRange(range: ContigInterval<string>) {
   var roundDown = x => x - x % BASE_PAIRS_PER_FETCH;
   var newStart = Math.max(1, roundDown(range.start())),
@@ -42,12 +44,75 @@ function create(spec: SamSpec): AlignmentDataSource {
   var coveredRanges: ContigInterval<string>[] = [];
 
   function addRead(read: Alignment) {
+    console.log(read);
     var key = read.getKey();
     if (!reads[key]) {
       reads[key] = read;
     }
   }
 
+  function saveContigMapping(header: Object) {
+    header.references.forEach(ref => {
+      var name = ref.SN;
+      contigNames[name] = name;
+      contigNames['chr' + name] = name;
+      if (name.slice(0, 3) == 'chr') {
+        contigNames[name.slice(3)] = name;
+      }
+    });
+  }
+
+  function fetchHeader() {
+    var refsPromise = Q.when();
+    var deferred = Q.defer();
+
+    return refsPromise.then(() => {
+      var url = url_template.replace(/<range>/, range.contig + ':' + range.start + '-' + range.stop);
+      url = url.replace(/reads.cgi/, 'header.cgi');
+
+      var request = new XMLHttpRequest();
+      request.open("GET", url, true);
+      o.trigger('networkprogress', {
+        status: 'samtools view -H via header.cgi'
+      });
+      request.onreadystatechange = function () {
+        if (request.readyState === 4) {
+          if (request.status === 200) {
+            var lines = request.responseText.split('\n');
+            for (var i = 0; i < lines.length; i++) {
+              if (lines[i] && lines[i].match(/^@SQ/)) {
+                var fields = lines[i].split(/\t/);
+                var attr = {};
+                fields.shift();
+                fields.forEach(kv => {
+                  var p = kv.split(':');
+                  var k = p.shift();
+                  attr[k] = p.join(':');
+                });
+                samHeader.references.push(attr);
+              }
+            }
+            saveContigMapping(samHeader);
+            console.log('fetched ' + lines.length + ' header lines');
+            deferred.resolve(request.responseText);
+          }
+          else if (request.status === 201) {
+            o.trigger('networkerror', {
+              error: true,
+              status: 'error in header.cgi',
+              message: request.responseText
+            });
+          }
+          else {
+            deferred.reject("HTTP " + request.status + " for " + url);
+          }
+        }
+      };
+      request.send();
+
+      return deferred.promise;
+    });
+  }
 
   function fetch(range: GenomeRange) {
     var refsPromise = Q.when();
@@ -55,7 +120,7 @@ function create(spec: SamSpec): AlignmentDataSource {
 
     return refsPromise.then(() => {
       var url = url_template.replace(/<range>/, range.contig + ':' + range.start + '-' + range.stop);
-      var contigName = range.contig;
+      var contigName = contigNames[range.contig];
       var interval = new ContigInterval(contigName, range.start, range.stop);
 
       // Check if this interval is already in the cache.
@@ -64,8 +129,11 @@ function create(spec: SamSpec): AlignmentDataSource {
         return Q.when();
       }
 
+      console.log('interval', interval);
       interval = expandRange(interval);
+      console.log('expanded interval', interval);
       var newRanges = interval.complementIntervals(coveredRanges);
+      console.log('newRanges', newRanges);
       coveredRanges.push(interval);
       coveredRanges = ContigInterval.coalesce(coveredRanges);
 
@@ -84,6 +152,7 @@ function create(spec: SamSpec): AlignmentDataSource {
                   addRead(new SamRead(lines[i]));
                 }
               }
+              console.log('fetched ' + lines.length + ' reads');
               deferred.resolve(request.responseText);
               o.trigger('networkdone');
               o.trigger('newdata', range);
@@ -96,7 +165,6 @@ function create(spec: SamSpec): AlignmentDataSource {
               });
             }
             else {
-              console.log('here');
               deferred.reject("HTTP " + request.status + " for " + url);
             }
           }
@@ -111,15 +179,34 @@ function create(spec: SamSpec): AlignmentDataSource {
   function getAlignmentsInRange() {
     return _.filter(reads, read => true);
   }
-  */
   function getAlignmentsInRange(range: ContigInterval<string>): Alignment[] {
     if (!range) return [];
     return _.filter(reads, read => read.intersects(range));
   }
+  */
+
+  function getAlignmentsInRange(range: ContigInterval<string>): Alignment[] {
+    if (!range) return [];
+    if (_.isEmpty(contigNames)) return [];
+
+    var canonicalRange = new ContigInterval(
+      contigNames[range.contig],
+      range.start(), range.stop()
+    );
+
+    return _.filter(reads, read => read.intersects(canonicalRange));
+  }
 
   var o = {
     rangeChanged: function(newRange: GenomeRange) {
-      fetch(newRange).done();
+      if (_.isEmpty(contigNames)) {
+        fetchHeader().then(() => {
+          fetch(newRange).done();
+        });
+      }
+      else {
+        fetch(newRange).done();
+      }
     },
     getAlignmentsInRange,
 

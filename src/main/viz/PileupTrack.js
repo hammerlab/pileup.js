@@ -36,7 +36,9 @@ var READ_STRAND_ARROW_WIDTH = 5;
 
 var SELECTED_READ = null;
 
-var pileup_render_event = new CustomEvent("pileup rendered");
+
+var pileup_render_event = new Event("pileup rendered");
+
 
 // PhantomJS does not support setLineDash.
 // Node doesn't even know about the symbol.
@@ -341,6 +343,7 @@ class PileupTrack extends React.Component {
     this.tiles = new PileupTiledCanvas(this.cache, this.props.options);
 
     this.props.source.on('newdata', range => {
+      console.log('newdata');
       this.updateReads(range);
       this.tiles.invalidateRange(range);
       this.updateVisualization();
@@ -401,6 +404,7 @@ class PileupTrack extends React.Component {
 
   // Load new reads into the visualization cache.
   updateReads(range: ContigInterval<string>) {
+    console.log('updateReads');
     var anyBefore = this.cache.anyGroupsOverlapping(range);
     this.props.source.getAlignmentsInRange(range)
                      .forEach(read => this.cache.addAlignment(read));
@@ -441,8 +445,8 @@ class PileupTrack extends React.Component {
     this.tiles.renderToScreen(ctx, range, scale);
 
     // TODO: the center line should go above alignments, but below mismatches
-    if (p.mark) {
-      this.renderMark(ctx, true, p.mark, scale);
+    if (g_pileup_gui.mark) {
+      this.renderMark(ctx, true, g_pileup_gui.mark, scale);
     }
     this.renderCenterLine(ctx, range, scale);
 
@@ -496,8 +500,8 @@ class PileupTrack extends React.Component {
     this.renderMark(ctx, false, midPoint, scale);
 
     // Update the flowgram widget
-    if (p.flowgram) {
-      p.flowgram.updateFrame(midPoint - 1);
+    if (g_pileup_gui.flowgram) {
+      g_pileup_gui.flowgram.updateFrame(midPoint - 1);
     }
   }
 
@@ -558,9 +562,9 @@ class PileupTrack extends React.Component {
       this.tiles.invalidateAll();
       this.updateVisualization();
 
-      if (p.mark) {
-        console.log('moving to ' + p.mark);
-        cursor_x = Math.floor(pxPerLetter * (p.mark - 1 - range.interval.start));
+      if (g_pileup_gui.mark) {
+        console.log('moving to ' + g_pileup_gui.mark);
+        cursor_x = Math.floor(pxPerLetter * (g_pileup_gui.mark - 1 - range.interval.start));
       }
       else {
         cursor_x = alignment_center_x;
@@ -571,7 +575,7 @@ class PileupTrack extends React.Component {
         this.scrollTo(hit.row);
       }
 
-      console.log('cursor_x', cursor_x, 'canvas center', alignment_center_x, 'mark', p.mark);
+      console.log('cursor_x', cursor_x, 'canvas center', alignment_center_x, 'mark', g_pileup_gui.mark);
       // Simulate mouse movement to get the cursors rendered
       setTimeout(function () { // delay to avoid updateVisualization() erasing the pileup cursor
         self.handleMouseMove({
@@ -650,9 +654,9 @@ class PileupTrack extends React.Component {
       this.renderCursor(pos - 1, yForRow(SELECTED_READ.n));
     }
 
-    if (p.flowgram) {
+    if (g_pileup_gui.flowgram) {
       if (!(this.mouseX && this.mouseX === pos)) {
-        p.flowgram.refToCursors(pos - 1, true); // true -> check interval
+        g_pileup_gui.flowgram.refToCursors(pos - 1, true); // true -> check interval
         this.mouseX = pos;
       }
     }
@@ -661,7 +665,7 @@ class PileupTrack extends React.Component {
 
 PileupTrack.displayName = 'pileup';
 PileupTrack.defaultOptions = {
-  viewAsPairs: false,
+  viewAsPairs: true,
   colorByInsert: true,
   colorByStrand: false
 };
