@@ -110,9 +110,11 @@ class PileupCache {
 
     var mateInterval = null;
     if (group.alignments.length == 1) {
+      console.log('first read in the group');
       // This is the first read in the group. Infer its span from its mate properties.
       // TODO: if the mate Alignment is also available, it would be better to use that.
       if (this.viewAsPairs) {
+        console.log('  find paired');
         var mateProps = read.getMateProperties();
         var intervals = [range];
         if (mateProps && mateProps.ref && mateProps.ref == read.ref) {
@@ -129,7 +131,8 @@ class PileupCache {
       }
       var pileup = this.refToPileup[read.ref];
       group.row = addToPileup(group.span.interval, pileup);
-    } else if (group.alignments.length == 2) {
+    }
+    else if (group.alignments.length == 2) {
       // Refine the connector
       mateInterval = group.alignments[0].read.getInterval();
       var {span, insert} = spanAndInsert([range, mateInterval]);
@@ -137,7 +140,8 @@ class PileupCache {
       if (insert) {
         group.span = span;
       }
-    } else {
+    }
+    else {
       // this must be a chimeric read.
     }
   }

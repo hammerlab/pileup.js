@@ -85,6 +85,7 @@ class SamRead /* implements Alignment */ {
     }
     else {
       var f = buffer.split('\t');
+      var refID = parseInt(f[2].match(/(\d+)$/)[0], 10) - 1; // !!! Kludge !!!
       Object.assign(this, {
         flag: parseInt(f[1], 10),
         ref: f[2],
@@ -93,6 +94,8 @@ class SamRead /* implements Alignment */ {
         pos: parseInt(f[3], 10) - 1,
         cigarString: f[5],
         cigarOps: this._getCigarOpsFromText(f[5]),
+        nextRefId: f[6] === '=' ? refID : f[6],
+        nextPos: parseInt(f[7], 10) - 1,
         _seq: f[9],
         l_seq: f[9].length,
         _qual: f[10],
@@ -280,16 +283,25 @@ class SamRead /* implements Alignment */ {
   }
 
   getMateProperties(): ?MateProperties {
-    var jv = this._getJDataView(),
-        flag = jv.getUint16(14);
-    if (!(flag & bamTypes.Flags.READ_PAIRED)) return null;
+    var jv, flag, nextRefId, nextPos, nextStrand;
 
-    var nextRefId = jv.getInt32(20),
-        nextPos = jv.getInt32(24),
-        nextStrand = strandFlagToString(flag & bamTypes.Flags.MATE_STRAND);
+    if (this.fromText) {
+      flag = this.flag;
+      if (!(flag & bamTypes.Flags.READ_PAIRED)) return null;
+      nextRefId = this.nextRefId;
+      nextPos = this.nextPos;
+    }
+    else {
+      jv = this._getJDataView();
+      flag = jv.getUint16(14);
+      if (!(flag & bamTypes.Flags.READ_PAIRED)) return null;
 
-    console.log('getMateProperties', flag, nextPos, nextStrand);
-    console.trace();
+      nextRefId = jv.getInt32(20);
+      nextPos = jv.getInt32(24);
+    }
+    nextStrand = strandFlagToString(flag & bamTypes.Flags.MATE_STRAND);
+
+    console.log('getMateProperties', flag, nextRefId, nextPos, nextStrand);
     return {
       // If the mate is on another contig, there's no easy way to get its string name.
       ref: nextRefId == this.refID ? this.ref : null,
