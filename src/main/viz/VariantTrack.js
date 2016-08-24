@@ -92,7 +92,6 @@ class VariantTrack extends React.Component {
   }
 
   handleClick(reactEvent: any) {
-    console.log(this);
     var ev = reactEvent.nativeEvent,
         x = ev.offsetX,
         y = ev.offsetY,
@@ -178,7 +177,6 @@ class BlacklistTrack extends VariantTrack {
   }
 
   handleClick(reactEvent: any) {
-    console.log(this);
     var ev = reactEvent.nativeEvent,
         x = ev.offsetX,
         y = ev.offsetY,
