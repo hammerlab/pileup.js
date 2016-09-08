@@ -35,7 +35,6 @@ function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
   var coveredRanges: ContigInterval<string>[] = [];
 
   function addRead(read: Alignment) {
-    console.log(read);
     var key = read.getKey();
     if (!reads[key]) {
       reads[key] = read;

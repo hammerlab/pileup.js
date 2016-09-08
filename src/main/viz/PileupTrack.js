@@ -343,7 +343,6 @@ class PileupTrack extends React.Component {
     this.tiles = new PileupTiledCanvas(this.cache, this.props.options);
 
     this.props.source.on('newdata', range => {
-      console.log('newdata');
       this.updateReads(range);
       this.tiles.invalidateRange(range);
       this.updateVisualization();
@@ -404,7 +403,6 @@ class PileupTrack extends React.Component {
 
   // Load new reads into the visualization cache.
   updateReads(range: ContigInterval<string>) {
-    console.log('updateReads');
     var anyBefore = this.cache.anyGroupsOverlapping(range);
     this.props.source.getAlignmentsInRange(range)
                      .forEach(read => this.cache.addAlignment(read));

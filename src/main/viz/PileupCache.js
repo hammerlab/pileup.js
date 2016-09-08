@@ -78,7 +78,6 @@ class PileupCache {
   // Load a new read into the visualization cache.
   // Calling this multiple times with the same read is a no-op.
   addAlignment(read: Alignment) {
-    console.log('addAlignment', this.groups);
     this._insertStats = null;  // invalidate
     var key = this.groupKey(read),
         range = read.getInterval();
@@ -110,11 +109,9 @@ class PileupCache {
 
     var mateInterval = null;
     if (group.alignments.length == 1) {
-      console.log('first read in the group');
       // This is the first read in the group. Infer its span from its mate properties.
       // TODO: if the mate Alignment is also available, it would be better to use that.
       if (this.viewAsPairs) {
-        console.log('  find paired');
         var mateProps = read.getMateProperties();
         var intervals = [range];
         if (mateProps && mateProps.ref && mateProps.ref == read.ref) {

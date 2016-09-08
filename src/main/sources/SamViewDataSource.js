@@ -14,7 +14,10 @@ import type {Alignment, AlignmentDataSource} from '../Alignment';
 // TODO: tune this value
 var BASE_PAIRS_PER_FETCH = 10;
 
-var samHeader = {references: []};
+var samHeader = {
+  references: [],
+  numeric_contigs: true
+};
 
 function expandRange(range: ContigInterval<string>) {
   var roundDown = x => x - x % BASE_PAIRS_PER_FETCH;
@@ -44,7 +47,6 @@ function create(spec: SamSpec): AlignmentDataSource {
   var coveredRanges: ContigInterval<string>[] = [];
 
   function addRead(read: Alignment) {
-    console.log(read);
     var key = read.getKey();
     if (!reads[key]) {
       reads[key] = read;
@@ -68,6 +70,7 @@ function create(spec: SamSpec): AlignmentDataSource {
 
     return refsPromise.then(() => {
       var url = url_template.replace(/<range>/, range.contig + ':' + range.start + '-' + range.stop);
+      url = url.replace(/<numeric contigs>/, '');
       url = url.replace(/reads.cgi/, 'header.cgi');
 
       var request = new XMLHttpRequest();
@@ -88,12 +91,15 @@ function create(spec: SamSpec): AlignmentDataSource {
                   var p = kv.split(':');
                   var k = p.shift();
                   attr[k] = p.join(':');
+                  if (k === 'SN' && attr[k].match(/[^0-9]/)) {
+                    samHeader.numeric_contigs = false;
+                  }
                 });
                 samHeader.references.push(attr);
               }
             }
             saveContigMapping(samHeader);
-            console.log('fetched ' + lines.length + ' header lines');
+            console.log('read ' + lines.length + ' header lines');
             deferred.resolve(request.responseText);
           }
           else if (request.status === 201) {
@@ -120,6 +126,12 @@ function create(spec: SamSpec): AlignmentDataSource {
 
     return refsPromise.then(() => {
       var url = url_template.replace(/<range>/, range.contig + ':' + range.start + '-' + range.stop);
+      if (samHeader.numeric_contigs) {
+        url = url.replace(/<numeric contigs>/, '');
+      }
+      else {
+        url = url.replace(/<numeric contigs>/, 'nc;');
+      }
       var contigName = contigNames[range.contig];
       var interval = new ContigInterval(contigName, range.start, range.stop);
 
@@ -129,11 +141,8 @@ function create(spec: SamSpec): AlignmentDataSource {
         return Q.when();
       }
 
-      console.log('interval', interval);
       interval = expandRange(interval);
-      console.log('expanded interval', interval);
       var newRanges = interval.complementIntervals(coveredRanges);
-      console.log('newRanges', newRanges);
       coveredRanges.push(interval);
       coveredRanges = ContigInterval.coalesce(coveredRanges);
 
@@ -152,7 +161,7 @@ function create(spec: SamSpec): AlignmentDataSource {
                   addRead(new SamRead(lines[i]));
                 }
               }
-              console.log('fetched ' + lines.length + ' reads');
+              console.log('read ' + lines.length + ' reads');
               deferred.resolve(request.responseText);
               o.trigger('networkdone');
               o.trigger('newdata', range);

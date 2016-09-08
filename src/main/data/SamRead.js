@@ -301,7 +301,6 @@ class SamRead /* implements Alignment */ {
     }
     nextStrand = strandFlagToString(flag & bamTypes.Flags.MATE_STRAND);
 
-    console.log('getMateProperties', flag, nextRefId, nextPos, nextStrand);
     return {
       // If the mate is on another contig, there's no easy way to get its string name.
       ref: nextRefId == this.refID ? this.ref : null,
