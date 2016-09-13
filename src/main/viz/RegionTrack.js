@@ -115,7 +115,6 @@ class RegionTrack extends React.Component {
         genomeRange = this.props.range;
 
     var range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop);
-    console.log('updating visualization', range);
 
     // Hold off until height & width are known.
     if (width === 0) return;
