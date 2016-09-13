@@ -1,3 +1,5 @@
+/*global g_pileup_gui, pileup, d3 */
+
 /**
  * Pileup visualization of BAM sources.
  * @flow
@@ -538,11 +540,10 @@ class PileupTrack extends React.Component {
       range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop),
       midPoint = Math.floor((range.start() + range.stop()) / 2),
       vGroups = this.cache.getGroupsOverlapping(range),
-      hit, start, end, cursor_x, alignment_center_x,
+      hit, cursor_x, alignment_center_x,
       alignmentCenter,
       scale = this.getScale(),
-      pxPerLetter = scale(1) - scale(0),
-      row;
+      pxPerLetter = scale(1) - scale(0);
 
     vGroups.some(function (read) {
       if (read.key === name) {
@@ -634,15 +635,13 @@ class PileupTrack extends React.Component {
   }
 
   handleMouseMove (reactEvent: any) {
-    var ev = reactEvent.nativeEvent,
-        x = ev.offsetX,
-        y = ev.offsetY,
-        scale = this.getScale(),
-        pos = Math.floor(scale.invert(x)),
-        ctx = canvasUtils.getContext(this.refs.canvas),
-        pxPerLetter = scale(1) - scale(0),
-        genomeRange,
-        range;
+    var
+      ev = reactEvent.nativeEvent,
+      x = ev.offsetX,
+      scale = this.getScale(),
+      pos = Math.floor(scale.invert(x)),
+      genomeRange,
+      range;
 
     if (SELECTED_READ) {
       genomeRange = this.props.range;

@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Central collection of styling settings.
  * Until we figure out a better story around canvas & CSS, they live here.

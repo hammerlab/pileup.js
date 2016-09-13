@@ -8,7 +8,6 @@ import Q from 'q';
 import {Events} from 'backbone';
 
 import ContigInterval from '../ContigInterval';
-import Interval from '../Interval';
 import BigBed from '../data/BigBed';
 
 
