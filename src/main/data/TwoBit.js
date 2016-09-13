@@ -174,7 +174,7 @@ class TwoBit {
       var maybeSeq = _.findWhere(header.sequences, {name: contig}) ||
                      _.findWhere(header.sequences, {name: 'chr' + contig});
       if (maybeSeq === null || maybeSeq === undefined) {
-        throw 'Invalid contig: ' + contig;
+        throw 'Invalid contig: ' + contig + 'in TwoBit';
       }
       var seq = maybeSeq;  // for flow, see facebook/flow#266
 

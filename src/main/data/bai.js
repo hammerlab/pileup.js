@@ -140,7 +140,7 @@ class ImmediateBaiFile {
 
   getChunksForInterval(range: ContigInterval<number>): Q.Promise<Chunk[]> {
     if (range.contig < 0 || range.contig > this.indexChunks.chunks.length) {
-      return Q.reject(`Invalid contig ${range.contig}`);
+      return Q.reject(`Invalid contig ${range.contig} in Bai`);
     }
 
     var bins = reg2bins(range.start(), range.stop() + 1);
@@ -206,7 +206,7 @@ class BaiFile {
     this.remoteFile = remoteFile;
     if (indexChunks) {
       this.immediate = Q.when(new ImmediateBaiFile(null, remoteFile, indexChunks));
-    } else { 
+    } else {
       this.immediate = remoteFile.getAll().then(buf => {
         return new ImmediateBaiFile(buf, remoteFile, indexChunks);
       });

@@ -114,9 +114,11 @@ class ImmediateBigBed {
   // Map contig name to contig ID. Leading "chr" is optional. Throws on failure.
   getContigId(contig: string): number {
     if (contig in this.contigMap) return this.contigMap[contig];
+
     var chr = 'chr' + contig;
     if (chr in this.contigMap) return this.contigMap[chr];
-    throw `Invalid contig ${contig}`;
+
+    throw `Invalid contig ${contig} in BigBed ${this.remoteFile.url}`;
   }
 
   getChrIdInterval(range: ContigInterval<string>): ContigInterval<number> {

@@ -285,7 +285,7 @@ class Bam {
           return {idx: i, name: name};
         }
       }
-      throw `Invalid contig name: ${contigName}`;
+      throw `Invalid contig name: ${contigName} in BAM`;
     });
   }
 
