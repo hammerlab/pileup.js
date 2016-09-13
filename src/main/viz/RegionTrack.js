@@ -14,7 +14,6 @@ import ReactDOM from 'react-dom';
 import _ from 'underscore';
 import shallowEquals from 'shallow-equals';
 
-import bedtools from '../data/bedtools';
 import Interval from '../Interval';
 import d3utils from './d3utils';
 import scale from '../scale';
@@ -24,31 +23,31 @@ import dataCanvas from 'data-canvas';
 import style from '../style';
 
 
-// Draw an arrow in the middle of the visible portion of range.
-function drawArrow(ctx: CanvasRenderingContext2D,
-                   clampedScale: (x: number)=>number,
-                   range: Interval,
-                   tipY: number,
-                   strand: Strand) {
-  var x1 = clampedScale(1 + range.start),
-      x2 = clampedScale(1 + range.stop);
-
-  // it's off-screen or there's not enough room to draw it legibly.
-  if (x2 - x1 <= 2 * style.GENE_ARROW_SIZE) return;
-
-  var cx = (x1 + x2) / 2;
-  ctx.beginPath();
-  if (strand == '-') {
-    ctx.moveTo(cx + style.GENE_ARROW_SIZE, tipY - style.GENE_ARROW_SIZE);
-    ctx.lineTo(cx, tipY);
-    ctx.lineTo(cx + style.GENE_ARROW_SIZE, tipY + style.GENE_ARROW_SIZE);
-  } else {
-    ctx.moveTo(cx - style.GENE_ARROW_SIZE, tipY - style.GENE_ARROW_SIZE);
-    ctx.lineTo(cx, tipY);
-    ctx.lineTo(cx - style.GENE_ARROW_SIZE, tipY + style.GENE_ARROW_SIZE);
-  }
-  ctx.stroke();
-}
+// // Draw an arrow in the middle of the visible portion of range.
+// function drawArrow(ctx: CanvasRenderingContext2D,
+//                    clampedScale: (x: number)=>number,
+//                    range: Interval,
+//                    tipY: number,
+//                    strand: Strand) {
+//   var x1 = clampedScale(1 + range.start),
+//       x2 = clampedScale(1 + range.stop);
+//
+//   // it's off-screen or there's not enough room to draw it legibly.
+//   if (x2 - x1 <= 2 * style.GENE_ARROW_SIZE) return;
+//
+//   var cx = (x1 + x2) / 2;
+//   ctx.beginPath();
+//   if (strand == '-') {
+//     ctx.moveTo(cx + style.GENE_ARROW_SIZE, tipY - style.GENE_ARROW_SIZE);
+//     ctx.lineTo(cx, tipY);
+//     ctx.lineTo(cx + style.GENE_ARROW_SIZE, tipY + style.GENE_ARROW_SIZE);
+//   } else {
+//     ctx.moveTo(cx - style.GENE_ARROW_SIZE, tipY - style.GENE_ARROW_SIZE);
+//     ctx.lineTo(cx, tipY);
+//     ctx.lineTo(cx - style.GENE_ARROW_SIZE, tipY + style.GENE_ARROW_SIZE);
+//   }
+//   ctx.stroke();
+// }
 
 function drawRegionName(
   ctx: CanvasRenderingContext2D,
@@ -152,8 +151,7 @@ class RegionTrack extends React.Component {
       ctx.strokeStyle = style.GENE_COLOR;
       ctx.fillStyle = style.GENE_COLOR;
 
-      var offset =
-      canvasUtils.drawLine(
+      offset = canvasUtils.drawLine(
         ctx,
         clampedScale(1 + region.position.start()), regionLineY + 0.5 + offset,
         clampedScale(1 + region.position.stop()), regionLineY + 0.5 + offset

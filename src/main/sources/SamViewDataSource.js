@@ -1,3 +1,5 @@
+/* jshint loopfunc: true */
+
 /* @flow */
 'use strict';
 
@@ -69,7 +71,7 @@ function create(spec: SamSpec): AlignmentDataSource {
     var deferred = Q.defer();
 
     return refsPromise.then(() => {
-      var url = url_template.replace(/<range>/, range.contig + ':' + range.start + '-' + range.stop);
+      var url = url_template;
       url = url.replace(/<numeric contigs>/, '');
       url = url.replace(/reads.cgi/, 'header.cgi');
 
