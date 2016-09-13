@@ -15,7 +15,12 @@ class ContigInterval<T: (number|string)> {
   interval: Interval;
 
   constructor(contig: T, start: number, stop: number) {
-    this.contig = contig;
+    if (typeof contig === 'string' || contig instanceof String) {
+      this.contig = contig.replace(/chr/, '');
+    }
+    else {
+      this.contig = contig;
+    }
     this.interval = new Interval(start, stop);
   }
 
