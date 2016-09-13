@@ -13,6 +13,7 @@ import ReactDOM from 'react-dom';
 // Data sources
 import TwoBitDataSource from './sources/TwoBitDataSource';
 import BigBedDataSource from './sources/BigBedDataSource';
+import BigBedRegionDataSource from './sources/BigBedRegionDataSource';
 import VcfDataSource from './sources/VcfDataSource';
 import BamDataSource from './sources/BamDataSource';
 import SamViewDataSource from './sources/SamViewDataSource';
@@ -23,6 +24,7 @@ import EmptySource from './sources/EmptySource';
 import CoverageTrack from './viz/CoverageTrack';
 import GenomeTrack from './viz/GenomeTrack';
 import GeneTrack from './viz/GeneTrack';
+import RegionTrack from './viz/RegionTrack';
 import LocationTrack from './viz/LocationTrack';
 import PileupTrack from './viz/PileupTrack';
 import ScaleTrack from './viz/ScaleTrack';
@@ -128,12 +130,14 @@ var pileup = {
     vcf: VcfDataSource.create,
     twoBit: TwoBitDataSource.create,
     bigBed: BigBedDataSource.create,
+    bigBedRegion: BigBedRegionDataSource.create,
     empty: EmptySource.create
   },
   viz: {
     coverage:  makeVizObject(CoverageTrack),
     genome:    makeVizObject(GenomeTrack),
     genes:     makeVizObject(GeneTrack),
+    regions:   makeVizObject(RegionTrack),
     location:  makeVizObject(LocationTrack),
     scale:     makeVizObject(ScaleTrack),
     variants:  makeVizObject(VariantTrack),
