@@ -3,15 +3,13 @@
 
 import {expect} from 'chai';
 
-import BigBed from '../../main/data/BigBed';
 import BigBedDataSource from '../../main/sources/BigBedDataSource';
 import ContigInterval from '../../main/ContigInterval';
 
-describe('BigBedDataSource', function() {
+describe('BBDataSource', function() {
   function getTestSource() {
     // See test/data/README.md
-    return BigBedDataSource.createFromBigBedFile(
-        new BigBed('/test-data/ensembl.chr17.bb'));
+    return BigBedDataSource.create({ url: '/test-data/ensembl.chr17.bb' });
   }
 
   it('should extract features in a range', function(done) {

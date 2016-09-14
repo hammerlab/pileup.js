@@ -26,6 +26,9 @@ class ContigInterval<T: (number|string)> {
   stop(): number {
     return this.interval.stop;
   }
+  end(): number {
+    return this.interval.end;
+  }
   length(): number {
     return this.interval.length();
   }
@@ -138,8 +141,7 @@ class ContigInterval<T: (number|string)> {
 
       var lastR = rs[rs.length - 1];
       if (r.intersects(lastR) || r.isAdjacentTo(lastR)) {
-        lastR = rs[rs.length - 1] = lastR.clone();
-        lastR.interval.stop = Math.max(r.interval.stop, lastR.interval.stop);
+        rs[rs.length - 1] = new ContigInterval(lastR.contig, lastR.start(), Math.max(r.stop(), lastR.stop()));
       } else {
         rs.push(r);
       }

@@ -36,7 +36,8 @@ function tupleRangeOverlaps(tupleRange1: Array<Array<number>>,
      tupleLessOrEqual(tupleRange2[0], tupleRange1[1]) &&
      // ... and non-empty?
      tupleLessOrEqual(tupleRange1[0], tupleRange1[1]) &&
-     tupleLessOrEqual(tupleRange2[0], tupleRange2[1]));
+     tupleLessOrEqual(tupleRange2[0], tupleRange2[1])
+  );
 }
 
 // Return a new ArrayBuffer by concatenating an array of ArrayBuffers.

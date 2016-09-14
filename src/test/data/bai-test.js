@@ -49,6 +49,7 @@ describe('BAI', function() {
   });
 
   it('should use index chunks', function() {
+    // var remoteFile = new LocalFile('test-data/index_test.bam.bai');
     var remoteFile = new RecordedRemoteFile('/test-data/index_test.bam.bai');
     var bai = new BaiFile(remoteFile,
                           {
@@ -64,7 +65,7 @@ describe('BAI', function() {
 
       var requests = remoteFile.requests;
       expect(requests).to.have.length(1);
-      expect(requests[0].toString()).to.equal('[8, 144]');
+      expect(requests[0].toString()).to.equal('[8, 145)');
     });
   });
 

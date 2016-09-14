@@ -171,7 +171,7 @@ describe('utils', function() {
     it('should stay positive', function() {
       var iv = new Interval(5, 25),
           iv2 = utils.scaleRange(iv, 2.0);
-      expect(iv2.toString()).to.equal('[0, 40]');
+      expect(iv2.toString()).to.equal('[0, 41)');
     });
   });
 

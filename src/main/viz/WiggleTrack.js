@@ -1,42 +1,42 @@
 /**
- * Coverage visualization of Alignment sources.
  * @flow
  */
 'use strict';
 
-import type {AlignmentDataSource} from '../Alignment';
-import type {TwoBitSource} from '../sources/TwoBitDataSource';
-import type {DataCanvasRenderingContext2D} from 'data-canvas';
-import type {Scale} from './d3utils';
-
-import CoverageTiledCanvas from './CoverageTiledCanvas';
-import React from 'react';
-import shallowEquals from 'shallow-equals';
-import d3utils from './d3utils';
 import _ from 'underscore';
+import React from 'react';
+import d3utils from './d3utils';
 import dataCanvas from 'data-canvas';
-import canvasUtils from './canvas-utils';
-import CoverageCache from './CoverageCache';
+import shallowEquals from 'shallow-equals';
 import style from '../style';
+
+import WiggleCache from './WiggleCache';
+import BigWigSource from '../sources/BigWigDataSource';
 import ContigInterval from '../ContigInterval';
+import CoverageTiledCanvas from './CoverageTiledCanvas';
+import canvasUtils from './canvas-utils';
 
 type Props = {
   width: number;
   height: number;
   range: GenomeRange;
-  source: AlignmentDataSource;
-  referenceSource: TwoBitSource;
-  options: {
-    vafColorThreshold: number
-  }
+  basesPerBucket: number;
+  source: BigWigSource;
+  //referenceSource: TwoBitSource;
+  // options: {
+  //   vafColorThreshold: number
+  // }
 };
 
-class CoverageTrack extends React.Component {
+// type State = {
+//
+// }
+
+class WiggleTrack extends React.Component {
   props: Props;
   state: void;
-  cache: CoverageCache;
+  cache: WiggleCache;
   tiles: CoverageTiledCanvas;
-  static defaultOptions: Object;
 
   constructor(props: Props) {
     super(props);
@@ -51,13 +51,14 @@ class CoverageTrack extends React.Component {
   }
 
   componentDidMount() {
-    this.cache = new CoverageCache(this.props.referenceSource);
+    this.cache = new WiggleCache(this.props.referenceSource);
     this.tiles = new CoverageTiledCanvas(this.cache, this.props.height, this.props.options);
 
+    var basesPerBucket = this.props.basesPerBucket;
     this.props.source.on('newdata', range => {
       var oldMax = this.cache.maxCoverageForRef(range.contig);
-      this.props.source.getAlignmentsInRange(range)
-                       .forEach(read => this.cache.addAlignment(read));
+      this.props.source.getValuesInRange(range, basesPerBucket)
+        .forEach(read => this.cache.addValue(read));
       var newMax = this.cache.maxCoverageForRef(range.contig);
 
       if (oldMax != newMax) {
@@ -77,9 +78,9 @@ class CoverageTrack extends React.Component {
 
   componentDidUpdate(prevProps: any, prevState: any) {
     if (!shallowEquals(this.props, prevProps) ||
-        !shallowEquals(this.state, prevState)) {
+      !shallowEquals(this.state, prevState)) {
       if (this.props.height != prevProps.height ||
-          this.props.options != prevProps.options) {
+        this.props.options != prevProps.options) {
         this.tiles.update(this.props.height, this.props.options);
         this.tiles.invalidateAll();
       }
@@ -110,7 +111,7 @@ class CoverageTrack extends React.Component {
       // Now print the coverage information
       ctx.font = style.COVERAGE_FONT_STYLE;
       var textPosX = style.COVERAGE_TICK_LENGTH + style.COVERAGE_TEXT_PADDING,
-          textPosY = tickPosY + style.COVERAGE_TEXT_Y_OFFSET;
+        textPosY = tickPosY + style.COVERAGE_TEXT_Y_OFFSET;
       // The stroke creates a border around the text to make it legible over the bars.
       ctx.strokeStyle = 'white';
       ctx.lineWidth = 2;
@@ -124,9 +125,9 @@ class CoverageTrack extends React.Component {
 
   visualizeCoverage() {
     var canvas = (this.refs.canvas : HTMLCanvasElement),
-        width = this.props.width,
-        height = this.props.height,
-        range = ContigInterval.fromGenomeRange(this.props.range);
+      width = this.props.width,
+      height = this.props.height,
+      range = ContigInterval.fromGenomeRange(this.props.range);
 
     // Hold off until height & width are known.
     if (width === 0) return;
@@ -147,15 +148,15 @@ class CoverageTrack extends React.Component {
 
   handleClick(reactEvent: any) {
     var ev = reactEvent.nativeEvent,
-        x = ev.offsetX;
+      x = ev.offsetX;
 
     // It's simple to figure out which position was clicked using the x-scale.
     // No need to render the scene to determine what was clicked.
     var range = ContigInterval.fromGenomeRange(this.props.range),
-        xScale = this.getScale(),
-        bins = this.cache.binsForRef(range.contig),
-        pos = Math.floor(xScale.invert(x)) - 1,
-        bin = bins[pos];
+      xScale = this.getScale(),
+      bins = this.cache.binsForRef(range.contig),
+      pos = Math.floor(xScale.invert(x)) - 1,
+      bin = bins[pos];
 
     var alert = window.alert || console.log;
     if (bin) {
@@ -176,14 +177,6 @@ class CoverageTrack extends React.Component {
   }
 }
 
-CoverageTrack.displayName = 'coverage';
-CoverageTrack.defaultOptions = {
-  // Color the reference base in the bar chart when the Variant Allele Fraction
-  // exceeds this amount. When there are >=2 agreeing mismatches, they are
-  // always rendered. But for mismatches below this threshold, the reference is
-  // not colored in the bar chart. This draws attention to high-VAF mismatches.
-  vafColorThreshold: 0.2
-};
+WiggleTrack.displayName = 'coverage';
 
-
-module.exports = CoverageTrack;
+module.exports = WiggleTrack;

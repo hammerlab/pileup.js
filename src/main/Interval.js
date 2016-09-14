@@ -9,30 +9,36 @@
 class Interval {
   start: number;
   stop: number;
+  end: number;
 
   // Represents [start, stop] -- both ends are inclusive.
   // If stop < start, then this is an empty interval.
   constructor(start: number, stop: number) {
     this.start = start;
     this.stop = stop;
+    this.end = stop + 1;
   }
 
   // TODO: make this a getter method & switch to Babel.
   length(): number {
-    return Math.max(0, this.stop - this.start + 1);
+    return Math.max(0, this.end - this.start);
+  }
+
+  isEmpty(): bool {
+    return this.length() === 0;
   }
 
   intersect(other: Interval): Interval {
     return new Interval(Math.max(this.start, other.start),
-                        Math.min(this.stop, other.stop));
+                        Math.min(this.end, other.end));
   }
 
   intersects(other: Interval): boolean {
-    return this.start <= other.stop && other.start <= this.stop;
+    return this.start < other.end && other.start < this.end;
   }
 
   contains(value: number): boolean {
-    return value >= this.start && value <= this.stop;
+    return value >= this.start && value < this.end;
   }
 
   containsInterval(other: Interval): boolean {
@@ -57,7 +63,7 @@ class Interval {
       if (r.start > remaining.start) {
         return false;  // A position has been missed and there's no going back.
       }
-      remaining.start = r.stop + 1;
+      remaining.start = r.end;
       if (remaining.length() <= 0) {
         return true;
       }
@@ -75,7 +81,7 @@ class Interval {
     } else if (this.containsInterval(other)) {
       // return the bit before and the bit after
       return [new Interval(this.start, other.start - 1),
-              new Interval(other.stop + 1, this.stop)].filter(x => x.length() > 0);
+              new Interval(other.end, this.stop)].filter(x => x.length() > 0);
     } else if (other.containsInterval(this)) {
       return [];  // it's been completely obliterated
     } else {
@@ -113,12 +119,14 @@ class Interval {
     if (!intervals.length) {
       throw new Error('Tried to intersect zero intervals');
     }
-    var result = intervals[0].clone();
-    intervals.slice(1).forEach(function({start, stop}) {
-      result.start = Math.max(start, result.start);
-      result.stop = Math.min(stop, result.stop);
+
+    var start = intervals[0].start;
+    var stop = intervals[0].stop;
+    intervals.slice(1).forEach(i => {
+      start = Math.max(i.start, start);
+      stop = Math.min(i.stop, stop);
     });
-    return result;
+    return new Interval(start, stop);
   }
 
   // Returns an interval which contains all the given intervals.
@@ -126,16 +134,83 @@ class Interval {
     if (!intervals.length) {
       throw new Error('Tried to bound zero intervals');
     }
-    var result = intervals[0].clone();
-    intervals.slice(1).forEach(function({start, stop}) {
-      result.start = Math.min(start, result.start);
-      result.stop = Math.max(stop, result.stop);
+
+    var start = intervals[0].start;
+    var stop = intervals[0].stop;
+    intervals.slice(1).forEach(i => {
+      start = Math.min(i.start, start);
+      stop = Math.max(i.stop, stop);
     });
-    return result;
+    return new Interval(start, stop);
+  }
+
+  static partition(interval: Interval, 
+                   bases: Array<number>, 
+                   baseIdx: number): Array<Interval> {
+    if (typeof bases === 'number') {
+      var n = bases;
+      var c = 1;
+      bases = [];
+      var length = interval.length();
+      while (true) {
+        if (c > length) break;
+        var s = Math.ceil(interval.start / c);
+        var e = Math.floor(interval.end / c);
+        if (s < e) {
+          bases.push(c);
+          c *= n;
+          if (n == 1) break;
+        } else {
+          break;
+        }
+      }
+      return Interval.partition(interval, bases, bases.length - 1);
+    }
+
+    if (interval.isEmpty()) {
+      return [];
+    }
+
+    if (baseIdx === undefined) {
+      baseIdx = bases.length - 1;
+    }
+    
+    if (baseIdx < 0) {
+      throw new Error("Ran out of partition bases: " + bases.join(",") + " with remaining interval: " + interval.toString());
+    }
+
+    var base = bases[baseIdx];
+
+    // Compute lowest and highest contained multiples of `base`, if any exist.
+    // If none exist, the former can be ≥ `this.end` and the latter < `this.start`.
+    // For example, the interval [15,17), with base 10, contains no multiples of 10 and the bounds generated here will
+    // be 20 and 10, resp.
+    var baseStart = Math.ceil(interval.start / base) * base;
+    var baseEnd = Math.floor(interval.end / base) * base;
+
+    // We can only pull an interval of size `base` (whose bounds are multiples of `base`) out of `interval` if
+    // `baseStart` < `baseEnd`. Otherwise, we no-op at this `base` and try the next, smaller `base` value.
+    if (baseStart >= baseEnd) {
+      return Interval.partition(interval, bases, baseIdx - 1);
+    }
+
+    var leftRemnant = new Interval(interval.start, baseStart - 1);
+    var intervals = Interval.partition(leftRemnant, bases, baseIdx - 1);
+
+    for (var baseBucket = baseStart; baseBucket < baseEnd; baseBucket += base) {
+      intervals.push(new Interval(baseBucket, baseBucket + base - 1));
+    }
+
+    var rightRemnant = new Interval(baseEnd, interval.stop);
+    var rightPartition = Interval.partition(rightRemnant, bases, baseIdx - 1);
+
+    var ret = intervals.concat(rightPartition);
+    // console.log("returning:", ret.join(','));
+    return ret;
   }
 
   toString(): string {
-    return `[${this.start}, ${this.stop}]`;
+    return `[${this.start}, ${this.end})`;
   }
 }
 
