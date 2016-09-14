@@ -196,6 +196,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  top: 30px;
 }
 .pileup .network-status-message {
   padding: 4px 8px;
@@ -204,6 +206,8 @@
   border-radius: 3px;
   border: 1px solid #ccc;
   font-size: small;
+  position: absolute;
+  text-align: center;
 }
 
 .pileup .mate-connector {
