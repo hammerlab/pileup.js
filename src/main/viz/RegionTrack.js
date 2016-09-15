@@ -4,7 +4,6 @@
  */
 'use strict';
 
-import type {Strand} from '../Alignment';
 import type {Region, BigBedRegionSource} from '../sources/BigBedRegionDataSource';
 import type {VizProps} from '../VisualizationWrapper';
 import type {Scale} from './d3utils';
@@ -22,32 +21,6 @@ import canvasUtils from './canvas-utils';
 import dataCanvas from 'data-canvas';
 import style from '../style';
 
-
-// // Draw an arrow in the middle of the visible portion of range.
-// function drawArrow(ctx: CanvasRenderingContext2D,
-//                    clampedScale: (x: number)=>number,
-//                    range: Interval,
-//                    tipY: number,
-//                    strand: Strand) {
-//   var x1 = clampedScale(1 + range.start),
-//       x2 = clampedScale(1 + range.stop);
-//
-//   // it's off-screen or there's not enough room to draw it legibly.
-//   if (x2 - x1 <= 2 * style.GENE_ARROW_SIZE) return;
-//
-//   var cx = (x1 + x2) / 2;
-//   ctx.beginPath();
-//   if (strand == '-') {
-//     ctx.moveTo(cx + style.GENE_ARROW_SIZE, tipY - style.GENE_ARROW_SIZE);
-//     ctx.lineTo(cx, tipY);
-//     ctx.lineTo(cx + style.GENE_ARROW_SIZE, tipY + style.GENE_ARROW_SIZE);
-//   } else {
-//     ctx.moveTo(cx - style.GENE_ARROW_SIZE, tipY - style.GENE_ARROW_SIZE);
-//     ctx.lineTo(cx, tipY);
-//     ctx.lineTo(cx - style.GENE_ARROW_SIZE, tipY + style.GENE_ARROW_SIZE);
-//   }
-//   ctx.stroke();
-// }
 
 function drawRegionName(
   ctx: CanvasRenderingContext2D,
@@ -136,7 +109,6 @@ class RegionTrack extends React.Component {
     // TODO: don't pull in regions via state.
     ctx.font = `${style.GENE_FONT_SIZE}px ${style.GENE_FONT}`;
     ctx.textAlign = 'center';
-    console.log(this.state);
     var count = 0;
     this.state.regions.forEach(region => {
       var offset;
@@ -151,17 +123,28 @@ class RegionTrack extends React.Component {
       ctx.strokeStyle = style.GENE_COLOR;
       ctx.fillStyle = style.GENE_COLOR;
 
-      offset = canvasUtils.drawLine(
+      canvasUtils.drawLine(
         ctx,
         clampedScale(1 + region.position.start()), regionLineY + 0.5 + offset,
         clampedScale(1 + region.position.stop()), regionLineY + 0.5 + offset
+      );
+
+      canvasUtils.drawLine(
+        ctx,
+        clampedScale(1 + region.position.start()), regionLineY + 0.5 + offset,
+        clampedScale(1 + region.position.start()), regionLineY + 0.5 + offset + (count % 2 ? -4 : 4)
+      );
+
+      canvasUtils.drawLine(
+        ctx,
+        clampedScale(1 + region.position.stop()), regionLineY + 0.5 + offset,
+        clampedScale(1 + region.position.stop()), regionLineY + 0.5 + offset + (count % 2 ? -4 : 4)
       );
 
       ctx.strokeStyle = style.GENE_COMPLEMENT_COLOR;
       ctx.lineWidth = 2;
 
       drawRegionName(ctx, clampedScale, regionLineY, region, textIntervals);
-
       ctx.popObject();
     });
   }
