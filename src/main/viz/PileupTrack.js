@@ -546,7 +546,7 @@ class PileupTrack extends React.Component {
       pxPerLetter = scale(1) - scale(0);
 
     vGroups.some(function (read) {
-      if (read.key === name) {
+      if (read.key === name || read.key === name + ':' + range.contig) { // paired reads have a contig ID in their key
         hit = read;
         return true;
       }
