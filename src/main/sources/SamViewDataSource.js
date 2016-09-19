@@ -22,10 +22,6 @@ var samHeader = {
   numeric_contigs: true
 };
 
-function header () {
-  return samHeader;
-}
-
 function expandRange(range: ContigInterval<string>) {
   var roundDown = x => x - x % BASE_PAIRS_PER_FETCH;
   var newStart = Math.max(1, roundDown(range.start())),

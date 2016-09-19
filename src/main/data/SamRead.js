@@ -1,3 +1,5 @@
+/*global pileup */
+
 /**
  * This class parses and represents a single read in a SAM/BAM file.
  *
