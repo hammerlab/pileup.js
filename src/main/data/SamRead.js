@@ -85,16 +85,16 @@ class SamRead /* implements Alignment */ {
     }
     else {
       var f = buffer.split('\t');
-      var refID = parseInt(f[2].match(/(\d+)$/)[0], 10) - 1; // !!! Kludge !!!
+      var refID = pileup.contigIndex[f[2]];
       Object.assign(this, {
         flag: parseInt(f[1], 10),
         ref: f[2],
-        refID: parseInt(f[2].match(/(\d+)$/)[0], 10) - 1,
+        refID: refID,
         name: f[0],
         pos: parseInt(f[3], 10) - 1,
         cigarString: f[5],
         cigarOps: this._getCigarOpsFromText(f[5]),
-        nextRefId: f[6] === '=' ? refID : f[6],
+        nextRefId: f[6] === '=' ? refID : pileup.contigIndex[f[6]],
         nextPos: parseInt(f[7], 10) - 1,
         _seq: f[9],
         l_seq: f[9].length,

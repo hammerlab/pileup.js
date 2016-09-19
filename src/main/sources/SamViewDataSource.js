@@ -1,3 +1,4 @@
+/*global pileup */
 /* jshint loopfunc: true */
 
 /* @flow */
@@ -20,6 +21,10 @@ var samHeader = {
   references: [],
   numeric_contigs: true
 };
+
+function header () {
+  return samHeader;
+}
 
 function expandRange(range: ContigInterval<string>) {
   var roundDown = x => x - x % BASE_PAIRS_PER_FETCH;
@@ -44,6 +49,7 @@ function create(spec: SamSpec): AlignmentDataSource {
 
   // Mapping from contig name to canonical contig name.
   var contigNames: {[key:string]: string} = {};
+  var contigIndex: {[key:string]: number} = {};
 
   // Ranges for which we have complete information -- no need to hit network.
   var coveredRanges: ContigInterval<string>[] = [];
@@ -56,14 +62,19 @@ function create(spec: SamSpec): AlignmentDataSource {
   }
 
   function saveContigMapping(header: Object) {
-    header.references.forEach(ref => {
+    header.references.forEach((ref, i) => {
       var name = ref.SN;
       contigNames[name] = name;
       contigNames['chr' + name] = name;
+      contigIndex[name] = i;
+      contigIndex['chr' + name] = i;
       if (name.slice(0, 3) == 'chr') {
         contigNames[name.slice(3)] = name;
+        contigIndex[name.slice(3)] = i;
       }
     });
+    pileup.contigNames = contigNames;
+    pileup.contigIndex = contigIndex;
   }
 
   function fetchHeader() {
@@ -100,7 +111,11 @@ function create(spec: SamSpec): AlignmentDataSource {
                 samHeader.references.push(attr);
               }
             }
-            saveContigMapping(samHeader);
+
+            // The header can be called twice: once by the coverage track and the second time by the pileup track.
+            if (_.isEmpty(contigNames)) {
+              saveContigMapping(samHeader);
+            }
             console.log('read ' + lines.length + ' header lines');
             deferred.resolve(request.responseText);
           }
