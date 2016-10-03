@@ -18,8 +18,8 @@ for %*ENV<QUERY_STRING>.split(/<[&;]>/) {
   else {
     %arg{$k} = True;
   }
-}
-if (%arg<nc>) {
+
+  # This should be an option
   %arg<coords> ~~ s/chr//;
 }
 #}}}
