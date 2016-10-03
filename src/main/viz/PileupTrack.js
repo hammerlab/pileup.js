@@ -533,9 +533,10 @@ class PileupTrack extends React.Component {
     this.refs.canvas.parentNode.parentNode.parentNode.parentNode.scrollTop = yForRow(row);
   }
 
-  find (name: string) {
+  find (spec: string) {
     var
       self = this,
+      spec_list, name, flag,
       genomeRange = this.props.range,
       range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop),
       midPoint = Math.floor((range.start() + range.stop()) / 2),
@@ -545,12 +546,34 @@ class PileupTrack extends React.Component {
       scale = this.getScale(),
       pxPerLetter = scale(1) - scale(0);
 
+    spec_list = spec.split('/');
+    if (spec_list.length === 2) {
+      name = spec_list[0];
+      flag = parseInt(spec_list[1], 10);
+    }
+    else {
+      name = spec;
+    }
+
     vGroups.some(function (read) {
-      if (read.key === name || read.key === name + ':' + range.contig) { // paired reads have a contig ID in their key
-        hit = read;
-        return true;
+      if (
+        read.key === name ||
+        read.key === name + ':' + range.contig // paired reads have a contig ID in their key
+      ) {
+        if (flag) {
+          console.log(flag, read.alignments[0].read.flag);
+          if (read.alignments[0].read.flag === flag) {
+            hit = read;
+            return true;
+          }
+        }
+        else {
+          hit = read;
+          return true;
+        }
       }
     });
+    console.log(hit);
 
     if (hit) {
       alignmentCenter = Math.floor((hit.span.start() + hit.span.stop()) / 2);

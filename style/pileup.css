@@ -26,6 +26,7 @@
 .track-label > span {
   padding-right: 5px;
 }
+
 /* bottom-justify these track labels */
 .track.reference .track-label > span,
 .track.variants .track-label > span
@@ -81,6 +82,7 @@
 .gear:hover {
   color: black;
 }
+
 .menu-container {
   z-index: 1;
   width: 250px;  /* not really 250px, but clears parent constraint */
@@ -141,10 +143,41 @@
   font-weight: bold;
 }
 
+/* regions track */
+.pileup-root > .regions {
+  flex: 0 0 50px;
+}
+
+.region {
+  stroke-width: 1;
+  stroke: blue;
+}
+.region text {
+  font-size: 16px;
+  text-anchor: middle;
+  stroke: black;
+  alignment-baseline: hanging;
+}
+#sense, #antisense .main {
+  stroke: blue;
+  fill: none;
+  stroke-width: 1;
+}
+#antisense .offset, #sense .offset {
+  stroke: white;
+  fill: none;
+  stroke-width: 1;
+}
+.exon {
+  fill: blue;
+  stroke: none;
+}
+
 /* gene track */
 .pileup-root > .genes {
   flex: 0 0 50px;
 }
+
 .gene {
   stroke-width: 1;
   stroke: blue;
@@ -191,6 +224,9 @@
   stroke-width: 2;
 }
 .pileup .network-status {
+  position: absolute; /* to prevent displacing the pileup */
+  left: 20%; /* approximately centered */
+  z-index: 10; /* to avoid hiding behind the pileup */
   height: 100%;
   width: 100%;
   display: flex;
@@ -198,6 +234,10 @@
   justify-content: center;
 }
 .pileup .network-status-message {
+  position: absolute; /* to prevent it from displacing the pileup downward */
+  left: 20px; /* approximately centered */
+  top: 20px;
+  z-index: 10;
   padding: 4px 8px;
   width: auto;
   background: #eee;
@@ -206,13 +246,25 @@
   font-size: small;
 }
 
+.pileup .network-status-error-message {
+  padding: 4px 8px;
+  overflow-x: auto;
+  background: #FFC48C;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+  font-size: small;
+  font-family: monospace;
+  white-space: pre-wrap;
+}
+
 .pileup .mate-connector {
   stroke: #c8c8c8;  /* matches IGV */
 }
 
 /* variants */
 .pileup-root > .variants {
-  flex: 0 0 25px;  /* fixed height */
+  flex: 0 0 20px;  /* fixed height */
+  padding-bottom: 15px;
 }
 .variants rect {
   fill: #ddd;
@@ -277,3 +329,290 @@
   dominant-baseline: central;
   text-anchor: middle;
 }
+
+/* Split panel styles */
+#pileup {
+  width:680px;
+  overflow: auto;
+}
+
+/* Help page */
+.usage {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 12px;
+}
+
+.usage-gray {
+  color: #777;
+}
+
+.usage-arg {
+  color: #66d;
+}
+
+.usage-syntax {
+  color: #ee7600;
+  padding: 2px;
+}
+
+/* These rules must be separate */
+#pileup-bam,
+#pileup-coords {
+  border-color: rgba(255, 0, 0, 0.5);;
+  border-width: 2px;
+}
+
+::-webkit-input-placeholder, /* Chrome/Opera/Safari */
+::-moz-placeholder, /* Firefox 19+ */
+:-moz-placeholder, /* Firefox 18- */
+:-ms-input-placeholder { /* IE 10+ */
+  color: brown;
+}
+
+#pileup-blacklist {
+  margin-top: 3px;
+}
+
+.valid {
+  background: #e8ffe0;
+}
+
+.invalid {
+  background: #ffd0bb;
+}
+
+
+.gutter {
+  background-color: #eee;
+  background-repeat: no-repeat;
+  background-position: 50%;
+}
+
+.gutter.gutter-horizontal {
+  background-image: url('grips/vertical.png');
+  cursor: ew-resize;
+}
+
+.gutter.gutter-vertical {
+  height: 6px !important;
+  background-image: url('grips/horizontal.png');
+  cursor: ns-resize;
+}
+
+.split {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+/* Split pane for read data */
+.split-panel {
+  display: none;
+  width: 100%;
+  overflow: auto; /* Enable scroll if needed */
+}
+
+
+/* Split pane content box */
+#split-panel-content {
+  margin: 10px auto; /* 10px from the top and centered */
+  padding: 20px;
+}
+
+/* Collapsible read data */
+.read-data-container {
+  vertical-align: top;
+  height:auto !important;
+  float: left;
+}
+
+#read-data {
+  font-family: monospace;
+  font-size: 10pt;
+  display: none;
+  height: auto;
+  margin: 0;
+  margin-bottom: 10px;
+}
+
+.show {
+  display: none;
+}
+.hide:target + .show {
+  display: inline;
+}
+.hide:target {
+  display: none;
+}
+.hide:target ~ #read-data {
+  display:inline;
+}
+
+/*style the (+) and (-) */
+.hide, .show {
+  width: 17px;
+  height: 17px;
+  border-radius: 17px;
+  font-size: 14px;
+  color: #fff;
+  text-shadow: 0 1px 0 #666;
+  text-align: center;
+  vertical-align: top;
+  text-decoration: none;
+  box-shadow: 1px 1px 2px #000;
+  background: #cccbbb;
+  opacity: 0.95;
+  margin-right: 0;
+  float: left;
+  margin-bottom: 5px;
+}
+
+.expand-button {
+}
+
+.hide:hover, .show:hover {
+  color: #eee;
+  text-shadow: 0 0 1px #666;
+  text-decoration: none;
+  box-shadow: 0 0 4px #222 inset;
+  opacity: 1;
+  margin-bottom: 25px;
+}
+
+.list p {
+  height:auto;
+  margin:0;
+}
+
+.container-title {
+  float: left;
+  height: auto;
+  width: 90%;
+  line-height: 20px;
+  padding-left: 20px;
+  margin-bottom: 25px;
+  font-family: monospace;
+  font-size: 14px;
+  color: navy;
+}
+
+
+
+#split-panel-content table {
+  width: 100%;
+}
+
+#read-alignment {
+  float: left;
+}
+
+#read-alignment table {
+  margin-bottom: 1em;
+}
+
+#read-alignment-ref,
+#read-alignment-query {
+  font-family: helvetica;
+  font-size: 12px;
+  white-space: pre;
+}
+
+.read-alignment-label {
+  font-family: helvetica;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.ref-char, .query-char, .sequence-gap {
+  float: left;
+  width: 0.8em;
+  text-align: center;
+  cursor: default;
+}
+
+.base-highlighted {
+  background-color: navy;
+  color: white !important;
+}
+
+.softclipped-char {
+  background-color: #cccccc;
+  color: white !important;
+}
+
+.read-data-tag {
+  vertical-align: top;
+  max-width: 20%;
+}
+
+.read-data-value {
+  display: inline-block;
+  word-break: break-word;
+}
+
+/* The Close Button */
+.close {
+  margin-top: -5px;
+  position: fixed;
+  color: #888;
+  right: 19px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Graph styles */
+.key_sequence {
+  opacity: 0.1;
+}
+
+.axis path, .axis line {
+  stroke-opacity: 0.3 !important;
+}
+
+.bar {
+  fill-opacity: 0.4;
+}
+
+/* Sync with src/main/style.js in pileup.js */
+.A {
+  color: #188712;
+  fill: #188712;
+}
+
+.G {
+  color: #C45C16;
+  fill: #C45C16;
+}
+
+.C {
+  color: #0600F9;
+  fill: #0600F9;
+}
+
+.T {
+  color: #F70016;
+  fill: #F70016;
+}
+
+.axis {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
