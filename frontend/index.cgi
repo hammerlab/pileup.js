@@ -1,13 +1,33 @@
 #!/usr/bin/env perl6
 
-say $*ERR: 'pileup.cgi start';
-
 # header {{{1
 v6;
 
 use URI::Encode;
 use Template::Mustache;
+use Terminal::ANSIColor;
 use Data::Dump;
+
+my $basename = IO::Path.new($*PROGRAM-NAME).basename;
+my $path = $*PROGRAM-NAME.substr(0, $*PROGRAM-NAME.index($basename));
+
+sub log_message ($message) {
+  print $*ERR: color('blue');
+  print $*ERR: $path;
+  print $*ERR: color('bold blue');
+  print $*ERR: $basename;
+  print $*ERR: color('reset');
+  print $*ERR: ": ";
+  print $*ERR: color('green');
+  print $*ERR: $message;
+  print $*ERR: color('reset');
+  print $*ERR: "\n";
+}
+
+log_message('start');
+
+print "Content-type: text/html\n";
+print "Access-Control-Allow-Origin: *\n\n";
 #}}}
 
 my $template_engine = Template::Mustache.new(:from<.>, :extension<.mustache>);
@@ -21,7 +41,6 @@ sub usage {
     $path = "%*ENV<HTTP_HOST>%*ENV<SCRIPT_NAME>";
     $path ~~ s% '/index.cgi' $ %%;
   }
-  print "Content-type: text/html\n\n";
   say $template_engine.render('usage.html', {
     base_url => $path,
     server => %*ENV<HTTP_HOST>
@@ -30,7 +49,7 @@ sub usage {
   if (%arg) {
     say "query parameters: {%arg.perl}";
   }
-  say $*ERR: 'pileup/index.cgi usage done';
+  log_message('rendered usage page');
   exit;
 }
 
@@ -45,8 +64,9 @@ if (%*ENV<QUERY_STRING>) {
       %arg{$k} = True;
     }
   }
-  say $*ERR: "pileup/index.cgi args: {%arg.perl}";
-  if (not %arg<coords> and not %arg<bam>) {
+  say $*ERR: Dump(%arg);
+
+  if (not %arg<coords> or not %arg<bam>) {
     usage();
   }
 }
@@ -57,7 +77,6 @@ else {
 #}}}
 
 sub get_url {
-  say $*ERR: Dump(%*ENV);
   my $url = 'http';
   if (%*ENV<HTTPS> and %*ENV<HTTPS> eq 'on') {
     $url ~= "s";
@@ -66,8 +85,6 @@ sub get_url {
   $url ~= %*ENV<HTTP_HOST> ~ %*ENV<REQUEST_URI>;
   return $url;
 }
-
-print "Content-type: text/html\n\n";
 
 my $coords = %arg<coords>;
 if (not $coords) {
@@ -131,8 +148,7 @@ if ($blacklist) {
   };
 }
 
-say $*ERR: "pileup/index.cgi rendering";
+log_message('rendering');
 say $template_engine.render('index.html', %template_data);
-
-say $*ERR: "pileup/index.cgi done";
+log_message('done');
 

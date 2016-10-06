@@ -2,6 +2,8 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <title>{{coords}}</title>
 
+  <script src="//cdn.jsdelivr.net/bluebird/3.4.5/bluebird.js"></script>
+
   <script src="//d3js.org/d3.v3.js"></script>
   <script src="/web/pileup/lib/pileup.js"></script>
   <script src="/web/pileup/lib/split.js"></script>
@@ -41,6 +43,9 @@
 </div>
 
 <script>
+  Promise.config({
+    longStackTraces: true
+  });
 
   // We are going to use the same data source for multiple tracks
   var readSource = pileup.formats.reads({
@@ -60,17 +65,16 @@
       viz: pileup.viz.genes(),
       data: pileup.formats.bigBed({
         // url: 'https://www.biodalliance.org/datasets/ensGene.bb'
-        // url: 'https://www.biodalliance.org/datasets/GRCh37/gencode.v19.annotation.bb'
-        url: '/web/data/gencode.v19.basic.bb'
+        url: 'https://www.biodalliance.org/datasets/GRCh37/gencode.v19.basic.bb'
       }),
       name: 'Gene'
     },
     {
       viz: pileup.viz.regions(),
       data: pileup.formats.bigBedRegion({
-        // url: 'pileup/data/OCP.20150630.designed-trimmed.bb'
-        // url: 'pileup/data/POLARIS_XPLORA_NGS_MANIFEST.txt.1.0.0_with_genename.bb'
-        // url: 'pileup/data/NexteraRapidCapture_Exome_TargetedRegions_v1.2Used.bb'
+        // url: '/web/data/OCP.20150630.designed-trimmed.bb'
+        // url: '/web/data/POLARIS_XPLORA_NGS_MANIFEST.txt.1.0.0_with_genename.bb'
+        // url: '/web/data/NexteraRapidCapture_Exome_TargetedRegions_v1.2Used.num.bb'
         url: '/web/data/test.bb'
       }),
       name: 'Target'
@@ -95,7 +99,6 @@
       isReference: true,
       data: pileup.formats.twoBit({
         url: 'https://www.biodalliance.org/datasets/hg19.2bit'
-        // url: 'pileup/data/hg19.2bit'
       }),
       name: 'Reference'
     },

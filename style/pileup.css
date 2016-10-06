@@ -122,6 +122,7 @@
 /* reference track */
 .pileup-root > .reference {
   flex: 0 0 20px;  /* fixed height */
+  margin-bottom: 3px;
 }
 
 .background {

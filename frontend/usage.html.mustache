@@ -197,7 +197,7 @@ bam_input.oninput = function (e) {
     }
     bam_validate_timer = setTimeout(function () {
       if (bam_input.value !== '') {
-        request('GET', '/bam-index.cgi?file=' + bam_input.value)
+        request('GET', '/web/bam-index.cgi?file=' + bam_input.value)
         .then(
           function (e) {
             if (e.target.status === 200) {
@@ -211,7 +211,6 @@ bam_input.oninput = function (e) {
                 }
                 // if (t[0] === parseInt(t[0], 10) && t[0] >= 1 && t[0] <= 22) {
                 if (isInt(t[0])) {
-                  console.log('integer', t[0]);
                   contig['chr' + t[0]] = parseInt(t[1], 10);
                 }
               });
@@ -260,7 +259,7 @@ blacklist_input.oninput = function (e) {
     }
     blacklist_validate_timer = setTimeout(function () {
       if (blacklist_input.value !== '') {
-        request('GET', '/file-stat.cgi?file=' + blacklist_input.value)
+        request('GET', '/web/file-stat.cgi?file=' + blacklist_input.value)
         .then(
           function (e) {
             if (e.target.status === 200) {
@@ -310,7 +309,6 @@ coords_input.oninput = function (e) {
     coords_input_listener_active = false;
 
     if (coords_input.value !== '' && !isEmpty(contig) ) {
-    console.log(contig);
       var valid;
       var re = new RegExp('^(' + Object.keys(contig).join('|') + '):([0-9]+)(-([0-9]+))?$');
       var match = coords_input.value.match(re);

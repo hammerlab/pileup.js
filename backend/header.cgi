@@ -1,40 +1,63 @@
-#!/bin/bash
+#!/usr/bin/env perl6
 
-echo "Content-type: text/plain"
-echo "Access-Control-Allow-Origin: *"
-echo ""
+# header {{{1
+v6;
 
-# Save the old internal field separator.
-OIFS="$IFS"
+use File::Temp;
+use Terminal::ANSIColor;
 
-# Set the field separator to ; and parse the QUERY_STRING at the ampersand.
-IFS="${IFS};"
-set $QUERY_STRING
-Args="$*"
-IFS="$OIFS"
+print "Content-type: text/plain\n";
+print "Access-Control-Allow-Origin: *\n";
+#}}}
 
-# Next parse the individual "name=value" tokens.
-COORDS=""
-BAM=""
+# query args {{{1
+my %arg;
+for %*ENV<QUERY_STRING>.split(/<[&;]>/) {
+  my ($k, $v) = .split('=');
+  %arg{$k} = $v;
+}
+#}}}
 
-for i in $Args ;do
-  # Set the field separator to =
-  IFS="${OIFS}="
-  set $i
-  IFS="${OIFS}"
+my ($stderr, $stderr-fh) = tempfile(:prefix('samtools-header-stderr'), :unlink);
 
-  case $1 in
-          # Don't allow "/" changed to " ". Prevent hacker problems.
-          coords) COORDS="`echo $2 | sed 's/chr//' | sed 's|[\]||g' | sed 's|%20| |g'`"
-                 ;;
-          # Filter for "/" not applied here
-          bam) BAM="`echo $2 | sed 's|%20| |g'`"
-                 ;;
-          *)     echo "Unrecognized argument \'$1\'"
-                 ;;
+my $command = qq{samtools view -H '%arg<bam>'};
 
-  esac
-done
+my $basename = IO::Path.new($*PROGRAM-NAME).basename;
+my $path = $*PROGRAM-NAME.substr(0, $*PROGRAM-NAME.index($basename));
+print $*ERR: color('blue');
+print $*ERR: $path;
+print $*ERR: color('bold blue');
+print $*ERR: $basename;
+print $*ERR: color('reset');
+print $*ERR: ": ";
+print $*ERR: color('green');
+print $*ERR: $command;
+print $*ERR: color('reset');
+print $*ERR: "\n";
 
-(>&2 echo samtools view -H $BAM)
-samtools view -H $BAM
+my $result = chomp qq:x{$command 2> $stderr};
+
+my $err = False;
+my $message = '';
+for $stderr-fh.lines -> $line {
+  $err = True;
+  $message ~= "\n" ~ $line;
+}
+
+if ($err) {
+  say "Status: 201 Backend Error\n";
+  say 'Error getting bam index size with samtools';
+  print $message;
+
+  print $*ERR: color('yellow');
+  say $*ERR: 'Error getting bam header with samtools';
+  print $*ERR: $message;
+  print $*ERR: color('reset');
+  print $*ERR: "\n";
+}
+else {
+  say ''; # finish the HTTP header
+  print $result;
+}
+
+unlink $stderr;
