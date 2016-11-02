@@ -12,6 +12,8 @@ import type {Scale} from './d3utils';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import Modal from  'react-bootstrap/lib/Modal';
+import Button from  'react-bootstrap/lib/Button';
 
 import d3utils from './d3utils';
 import shallowEquals from 'shallow-equals';
@@ -22,15 +24,45 @@ import style from '../style';
 
 
 class VariantTrack extends React.Component {
-  props: VizProps & {source: VcfDataSource};
-  state: void;  // no state
+  props: VizProps & {source: VcfDataSource, 
+                     variantHeightByFrequency: boolean,
+                     getPopupTitleByVariantId: Object,
+                     getPopupContentByVariantId: Object
+                     };
+  state: {showPopup: boolean,
+          selectedVariantPopupContent: ?Object,
+          selectedVariantPopupTitle: ?Object};
 
   constructor(props: Object) {
     super(props);
+    this.state = {showPopup: false, 
+      selectedVariantPopupContent: null,
+      selectedVariantPopupTitle: null};
   }
 
   render(): any {
-    return <canvas onClick={this.handleClick} />;
+    return <div>
+      <canvas id="x" onClick={this.handleClick.bind(this)} />
+      <Modal show={this.state.showPopup} onHide={this.closePopup.bind(this)}>
+          <Modal.Header closeButton>
+            <Modal.Title dangerouslySetInnerHTML={{__html: this.state.selectedVariantPopupTitle}}/>
+          </Modal.Header>
+          <Modal.Body>
+            <h4 dangerouslySetInnerHTML={{__html: this.state.selectedVariantPopupContent}}/>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={this.closePopup.bind(this)}>Close</Button>
+          </Modal.Footer>
+      </Modal>
+    </div>;
+  }
+
+  closePopup() {
+      this.setState({ showPopup: false });
+  }
+
+  openPopup() {
+    this.setState({ showPopup: true });
   }
 
   componentDidMount() {
@@ -53,7 +85,7 @@ class VariantTrack extends React.Component {
   }
 
   updateVisualization() {
-    var canvas = ReactDOM.findDOMNode(this),
+    var canvas = ReactDOM.findDOMNode(this).firstChild,
         {width, height} = this.props;
 
     // Hold off until height & width are known.
@@ -80,11 +112,21 @@ class VariantTrack extends React.Component {
     ctx.fillStyle = style.VARIANT_FILL;
     ctx.strokeStyle = style.VARIANT_STROKE;
     variants.forEach(variant => {
+      var variantHeightRatio = 1.0;
+      if (this.props.options.variantHeightByFrequency) {
+        if (variant.significantFrequency !== null && variant.significantFrequency !== undefined) {
+          variantHeightRatio = variant.significantFrequency;
+        }
+      }
+      var height = style.VARIANT_HEIGHT*variantHeightRatio;
+      var variantY = y - 0.5 + style.VARIANT_HEIGHT - height;
+      var variantX = Math.round(scale(variant.position)) - 0.5;
+      var width = Math.round(scale(variant.position + 1)) - 0.5 - variantX;
+
       ctx.pushObject(variant);
-      var x = Math.round(scale(variant.position));
-      var width = Math.round(scale(variant.position + 1)) - 1 - x;
-      ctx.fillRect(x - 0.5, y - 0.5, width, style.VARIANT_HEIGHT);
-      ctx.strokeRect(x - 0.5, y - 0.5, width, style.VARIANT_HEIGHT);
+
+      ctx.fillRect(variantX, variantY, width, height);
+      ctx.strokeRect(variantX, variantY, width, height);
       ctx.popObject();
     });
 
@@ -95,14 +137,27 @@ class VariantTrack extends React.Component {
     var ev = reactEvent.nativeEvent,
         x = ev.offsetX,
         y = ev.offsetY,
-        canvas = ReactDOM.findDOMNode(this),
+        canvas = ReactDOM.findDOMNode(this).firstChild,
         ctx = canvasUtils.getContext(canvas),
         trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
     this.renderScene(trackingCtx);
+
     var variant = trackingCtx.hit && trackingCtx.hit[0];
-    var alert = window.alert || console.log;
     if (variant) {
-      alert(JSON.stringify(variant));
+      var popupContent = variant.ref+" &rarr; "+variant.alt;
+      var popupTitle = "Variant "+variant.id+" (contig: "+variant.contig+", position: "+variant.position+")";
+
+      //user provided function for displaying popup title
+      if (typeof this.props.options.getPopupTitleByVariantId  === "function") {
+        popupTitle = this.props.options.getPopupTitleByVariantId(variant.id, variant.vcfLine);
+      }
+      //user provided function for displaying popup content
+      //user provided function for displaying popup title
+      if (typeof this.props.options.getPopupContentByVariantId  === "function") {
+        popupContent = this.props.options.getPopupContentByVariantId(variant.id, variant.vcfLine);
+      }
+      this.setState({ selectedVariantPopupContent: popupContent, selectedVariantPopupTitle: popupTitle });
+      this.openPopup();
     }
   }
 }

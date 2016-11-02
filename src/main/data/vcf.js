@@ -16,6 +16,8 @@ export type Variant = {
   position: number;
   ref: string;
   alt: string;
+  id: string;
+  significantFrequency: ?number;
   vcfLine: string;
 }
 
@@ -41,12 +43,28 @@ function extractLocusLine(vcfLine: string): LocusLine {
 
 function extractVariant(vcfLine: string): Variant {
   var parts = vcfLine.split('\t');
+  var frequency = null;
+  if (parts.length>=7){
+    var params = parts[7].split(';');
+    for (var i=0;i<params.length;i++) {
+      var param = params[i];
+      if (param.startsWith("AF=")) {
+        frequency = 0.0;
+        var frequenciesStrings = param.substr(3).split(",");
+        for (var j=0;j<frequenciesStrings.length;j++) {
+          frequency = Math.max(frequency,parseFloat(frequenciesStrings[j]));
+        }
+      }
+    }
+  }
 
   return {
     contig: parts[0],
     position: Number(parts[1]),
+    id: parts[2],
     ref: parts[3],
     alt: parts[4],
+    significantFrequency: frequency,
     vcfLine
   };
 }

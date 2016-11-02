@@ -28,6 +28,7 @@ var sources = [
     data: pileup.formats.vcf({
       url: '/test-data/snv.chr17.vcf'
     }),
+    options: {variantHeightByFrequency: true},
     name: 'Variants'
   },
   {
