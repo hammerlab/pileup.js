@@ -1,3 +1,6 @@
+/**
+ * @flow
+ */
 'use strict';
 
 import {expect} from 'chai';
