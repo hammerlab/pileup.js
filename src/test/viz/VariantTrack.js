@@ -24,7 +24,7 @@ describe('VariantTrack', function() {
     // avoid pollution between tests.
     testDiv.innerHTML = '';
   });
-  var {drawnObjects, callsOf} = dataCanvas.RecordingContext;
+  var {drawnObjects} = dataCanvas.RecordingContext;
 
   function ready() {
     return testDiv.getElementsByTagName('canvas').length > 0 &&
@@ -36,7 +36,7 @@ describe('VariantTrack', function() {
     var getPopupTitle = function (id) {
       popupId = id;
       return "hello world, "+id;
-    }
+    };
     var p = pileup.create(testDiv, {
       range: {contig: '17', start: 9386380, stop: 9537390},
       tracks: [
