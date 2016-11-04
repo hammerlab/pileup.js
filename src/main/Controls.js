@@ -112,8 +112,8 @@ class Controls extends React.Component {
         <input ref='position' type='text' />{' '}
         <button className='btn-submit' onClick={this.handleFormSubmit.bind(this)}>Go</button>{' '}
         <div className='zoom-controls'>
-          <button className='btn-zoom-out' onClick={this.zoomOut.bind(this)}></button>{' '}
-          <button className='btn-zoom-in' onClick={this.zoomIn.bind(this)}></button>
+          <button className='btn-zoom-out' onClick={this.zoomOut.bind(this)}>-</button>{' '}
+          <button className='btn-zoom-in' onClick={this.zoomIn.bind(this)}>+</button>
         </div>
       </form>
     );
