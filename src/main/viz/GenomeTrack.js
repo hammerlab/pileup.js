@@ -53,7 +53,7 @@ function renderGenome(ctx: DataCanvasRenderingContext2D,
         // We only push objects in the text case as it involves creating a
         // new object & can become a performance issue.
         // 0.5 = centered
-        ctx.fillText(letter, scale(1 + 0.5 + pos), height - 1);
+        ctx.fillText(letter, scale(1 + 0.5 + pos), height / 2);
       } else {
         if (pxPerLetter >= style.COVERAGE_MIN_BAR_WIDTH_FOR_GAP) {
           // We want a white space between blocks at this size, so we can see

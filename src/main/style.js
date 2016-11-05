@@ -19,7 +19,7 @@ module.exports = {
   },
 
   // Styles for base pairs which are rendered as letters
-  LOOSE_TEXT_STYLE: `24px 'Helvetica Neue', Helvetica, Arial, sans-serif`,
+  LOOSE_TEXT_STYLE: `14px 'Helvetica Neue', Helvetica, Arial, sans-serif`,
   TIGHT_TEXT_STYLE: `bold 12px 'Helvetica Neue', Helvetica, Arial, sans-serif`,
 
   // Gene track
