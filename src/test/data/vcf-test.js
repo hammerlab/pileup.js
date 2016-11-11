@@ -52,7 +52,8 @@ describe('VCF', function() {
     return vcf.getFeaturesInRange(range).then(features => {
       expect(features).to.have.length(1);
       expect(features[0].contig).to.equal('20');
-      expect(features[0].significantFrequency).to.equal(0.7);
+      expect(features[0].majorFrequency).to.equal(0.7);
+      expect(features[0].minorFrequency).to.equal(0.7);
     });
   });
 
@@ -62,7 +63,8 @@ describe('VCF', function() {
     return vcf.getFeaturesInRange(range).then(features => {
       expect(features).to.have.length(1);
       expect(features[0].contig).to.equal('20');
-      expect(features[0].significantFrequency).to.equal(0.6);
+      expect(features[0].majorFrequency).to.equal(0.6);
+      expect(features[0].minorFrequency).to.equal(0.3);
     });
   });
 

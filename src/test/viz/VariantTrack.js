@@ -32,10 +32,9 @@ describe('VariantTrack', function() {
   }
 
   it('should render variants', function() {
-    var popupId = null;
-    var getPopupTitle = function (id) {
-      popupId = id;
-      return "hello world, "+id;
+    var variantClickedData = null;
+    var variantClicked = function (data) {
+      variantClickedData = data;
     };
     var p = pileup.create(testDiv, {
       range: {contig: '17', start: 9386380, stop: 9537390},
@@ -52,7 +51,7 @@ describe('VariantTrack', function() {
             url: '/test-data/test.vcf'
           }),
           viz: pileup.viz.variants(),
-          options: {getPopupTitleByVariantId: getPopupTitle}
+          options: {onVariantClicked: variantClicked},
         }
       ]
     });
@@ -63,12 +62,12 @@ describe('VariantTrack', function() {
         expect(variants.length).to.be.equal(1);
         var canvasList =  testDiv.getElementsByTagName('canvas');
         var canvas = canvasList[1];
-        expect(popupId).to.be.null;
+        expect(variantClickedData).to.be.null;
 
         //check clicking on variant
         ReactTestUtils.Simulate.click(canvas,{nativeEvent: {offsetX: -0.5, offsetY: -15.5}});
 
-        expect(popupId).to.not.be.null;
+        expect(variantClickedData).to.not.be.null;
         p.destroy();
       });
   });

@@ -3,6 +3,8 @@
  * @flow
  */
 'use strict';
+import {AllelFrequencyStrategy} from '../types';
+
 
 import type {VcfDataSource} from '../sources/VcfDataSource';
 import type {Variant} from '../data/vcf';
@@ -12,8 +14,6 @@ import type {Scale} from './d3utils';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Modal from  'react-bootstrap/lib/Modal';
-import Button from  'react-bootstrap/lib/Button';
 
 import d3utils from './d3utils';
 import shallowEquals from 'shallow-equals';
@@ -24,45 +24,25 @@ import style from '../style';
 
 
 class VariantTrack extends React.Component {
-  props: VizProps & {source: VcfDataSource, 
+  static propTypes: VizProps & {source: VcfDataSource, 
                      variantHeightByFrequency: boolean,
-                     getPopupTitleByVariantId: Object,
-                     getPopupContentByVariantId: Object
+                     allelFrequencyStrategy: Object,
+                     onVariantClicked: Object,
                      };
-  state: {showPopup: boolean,
-          selectedVariantPopupContent: ?Object,
-          selectedVariantPopupTitle: ?Object};
+  state: void;
+
+  static get defaultProps() {
+    return {
+        allelFrequencyStrategy: AllelFrequencyStrategy.Major,
+    };
+  }
 
   constructor(props: Object) {
     super(props);
-    this.state = {showPopup: false, 
-      selectedVariantPopupContent: null,
-      selectedVariantPopupTitle: null};
   }
 
   render(): any {
-    return <div>
-      <canvas id="x" onClick={this.handleClick.bind(this)} />
-      <Modal show={this.state.showPopup} onHide={this.closePopup.bind(this)}>
-          <Modal.Header closeButton>
-            <Modal.Title dangerouslySetInnerHTML={{__html: this.state.selectedVariantPopupTitle}}/>
-          </Modal.Header>
-          <Modal.Body>
-            <h4 dangerouslySetInnerHTML={{__html: this.state.selectedVariantPopupContent}}/>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button onClick={this.closePopup.bind(this)}>Close</Button>
-          </Modal.Footer>
-      </Modal>
-    </div>;
-  }
-
-  closePopup() {
-      this.setState({ showPopup: false });
-  }
-
-  openPopup() {
-    this.setState({ showPopup: true });
+    return <canvas onClick={this.handleClick.bind(this)} />;
   }
 
   componentDidMount() {
@@ -85,7 +65,7 @@ class VariantTrack extends React.Component {
   }
 
   updateVisualization() {
-    var canvas = ReactDOM.findDOMNode(this).firstChild,
+    var canvas = ReactDOM.findDOMNode(this),
         {width, height} = this.props;
 
     // Hold off until height & width are known.
@@ -114,6 +94,14 @@ class VariantTrack extends React.Component {
     variants.forEach(variant => {
       var variantHeightRatio = 1.0;
       if (this.props.options.variantHeightByFrequency) {
+        var frequency = null;
+        if (this.props.allelFrequencyStrategy === AllelFrequencyStrategy.Major) {
+          frequency = variant.majorFrequency;
+        } else if (this.props.allelFrequencyStrategy === AllelFrequencyStrategy.Minor) {
+          frequency = variant.minorFrequency;
+        } else {
+          console.log("Unknown AllelFrequencyStrategy: ",this.props.allelFrequencyStrategy);
+        }
         if (variant.significantFrequency !== null && variant.significantFrequency !== undefined) {
           variantHeightRatio = variant.significantFrequency;
         }
@@ -137,27 +125,23 @@ class VariantTrack extends React.Component {
     var ev = reactEvent.nativeEvent,
         x = ev.offsetX,
         y = ev.offsetY,
-        canvas = ReactDOM.findDOMNode(this).firstChild,
+        canvas = ReactDOM.findDOMNode(this),
         ctx = canvasUtils.getContext(canvas),
         trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
     this.renderScene(trackingCtx);
 
-    var variant = trackingCtx.hit && trackingCtx.hit[0];
-    if (variant) {
-      var popupContent = variant.ref+" &rarr; "+variant.alt;
-      var popupTitle = "Variant "+variant.id+" (contig: "+variant.contig+", position: "+variant.position+")";
-
-      //user provided function for displaying popup title
-      if (typeof this.props.options.getPopupTitleByVariantId  === "function") {
-        popupTitle = this.props.options.getPopupTitleByVariantId(variant.id, variant.vcfLine);
+    var variants = trackingCtx.hit;
+    if (variants && variants.length>0) {
+      var data = [];
+      for (var i=0;i<variants.length;i++) {
+        data.push({id: variants[i].id,vcfLine:variants[i].vcfLine});
       }
-      //user provided function for displaying popup content
-      //user provided function for displaying popup title
-      if (typeof this.props.options.getPopupContentByVariantId  === "function") {
-        popupContent = this.props.options.getPopupContentByVariantId(variant.id, variant.vcfLine);
+      //user provided function for displaying popup
+      if (typeof this.props.options.onVariantClicked  === "function") {
+        this.props.options.onVariantClicked(data);
+      } else {
+        console.log("Variants clicked: ", data);
       }
-      this.setState({ selectedVariantPopupContent: popupContent, selectedVariantPopupTitle: popupTitle });
-      this.openPopup();
     }
   }
 }

@@ -13,6 +13,11 @@
 
 import type React from 'react';
 
+export const AllelFrequencyStrategy = {
+  Minor : {name: "Minor"},
+  Major : {name: "Major"},
+};
+
 export type VizWithOptions = {
   component: ReactClass;
   options: ?Object;
