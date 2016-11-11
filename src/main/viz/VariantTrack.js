@@ -22,20 +22,10 @@ import canvasUtils from './canvas-utils';
 import dataCanvas from 'data-canvas';
 import style from '../style';
 
-
 class VariantTrack extends React.Component {
-  static propTypes: VizProps & {source: VcfDataSource, 
-                     variantHeightByFrequency: boolean,
-                     allelFrequencyStrategy: Object,
-                     onVariantClicked: Object,
-                     };
-  state: void;
+  props: VizProps & {source: VcfDataSource};
 
-  static get defaultProps() {
-    return {
-        allelFrequencyStrategy: AllelFrequencyStrategy.Major,
-    };
-  }
+  state: void;
 
   constructor(props: Object) {
     super(props);
@@ -95,15 +85,17 @@ class VariantTrack extends React.Component {
       var variantHeightRatio = 1.0;
       if (this.props.options.variantHeightByFrequency) {
         var frequency = null;
-        if (this.props.allelFrequencyStrategy === AllelFrequencyStrategy.Major) {
+        if (this.props.options.allelFrequencyStrategy === undefined) { //default startegy
           frequency = variant.majorFrequency;
-        } else if (this.props.allelFrequencyStrategy === AllelFrequencyStrategy.Minor) {
+        } else if (this.props.options.allelFrequencyStrategy === AllelFrequencyStrategy.Major) {
+          frequency = variant.majorFrequency;
+        } else if (this.props.options.allelFrequencyStrategy === AllelFrequencyStrategy.Minor) {
           frequency = variant.minorFrequency;
         } else {
-          console.log("Unknown AllelFrequencyStrategy: ",this.props.allelFrequencyStrategy);
+          console.log("Unknown AllelFrequencyStrategy: ",this.props.options.allelFrequencyStrategy);
         }
-        if (variant.significantFrequency !== null && variant.significantFrequency !== undefined) {
-          variantHeightRatio = variant.significantFrequency;
+        if (frequency !== null && frequency !== undefined) {
+          variantHeightRatio = frequency;
         }
       }
       var height = style.VARIANT_HEIGHT*variantHeightRatio;
