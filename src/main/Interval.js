@@ -57,7 +57,7 @@ class Interval {
       if (r.start > remaining.start) {
         return false;  // A position has been missed and there's no going back.
       }
-      remaining.start = r.stop + 1;
+      remaining.start = Math.max(remaining.start, r.stop + 1);
       if (remaining.length() <= 0) {
         return true;
       }
