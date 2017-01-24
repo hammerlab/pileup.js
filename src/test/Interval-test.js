@@ -100,6 +100,11 @@ describe('Interval', function() {
     ])).to.be.false;
 
     expect(iv.isCoveredBy([
+      new Interval(0, 5),
+      new Interval(9, 21)
+    ])).to.be.true; // a gap, located in second interval
+
+    expect(iv.isCoveredBy([
       new Interval(0, 30)
     ])).to.be.true;
 
