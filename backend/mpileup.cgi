@@ -16,6 +16,9 @@ for %*ENV<QUERY_STRING>.split(/<[&;]>/) {
   my ($k, $v) = .split('=');
   %arg{$k} = $v;
 }
+unless (%arg<ref>:exists) {
+  %arg<ref> = '/data1/selkov_workdir/data/reference/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa';
+}
 #}}}
 
 my ($stderr, $stderr-fh) = tempfile(:prefix('samtools-mpileup-stderr-'), :!unlink);

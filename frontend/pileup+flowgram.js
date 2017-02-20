@@ -764,7 +764,7 @@ function flowgram_panel () {
         cigarOps: sam_read.cigarOps,
         mapq: parseInt(f[4], 10),
         seq: sam_read._seq,
-        qual: sam_read._qual,
+        qual: sam_read._qual.replace(/</g, '=').replace(/>/g, '='),
         ref: sam_read.ref,
         refID: sam_read.refID,
         samOrder: ['name', 'flag', 'ref', 'pos', 'mapq', 'cigar', 'length', 'seq', 'qual'],
@@ -773,6 +773,7 @@ function flowgram_panel () {
         getReferenceLength: sam_read.getReferenceLength,
       };
 
+    console.log(sam_read._qual);
     for (i = 11; i < f.length; i++) {
       var
         subtag = f[i].split(':'),

@@ -548,7 +548,8 @@
 
 .read-data-value {
   display: inline-block;
-  word-break: break-word;
+  /* word-break: break-word; */
+  word-break: keep-all;
 }
 
 /* The Close Button */

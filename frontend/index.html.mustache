@@ -65,19 +65,41 @@
       viz: pileup.viz.genes(),
       data: pileup.formats.bigBed({
         // url: 'https://www.biodalliance.org/datasets/ensGene.bb'
-        url: 'https://www.biodalliance.org/datasets/GRCh37/gencode.v19.basic.bb'
+        // url: 'https://www.biodalliance.org/datasets/GRCh37/gencode.v19.basic.bb'
+        url: '/web/data/ensGene.bb'
       }),
       name: 'Gene'
+    },
+    // {
+    //   viz: pileup.viz.regions(),
+    //   data: pileup.formats.bigBedRegion({
+    //     // url: '/web/data/OCP.20150630.designed-trimmed.bb'
+    //     // url: '/web/data/POLARIS_XPLORA_NGS_MANIFEST.txt.1.0.0_with_genename.bb'
+    //     // url: '/web/data/test.bb'
+    //     url: '/web/data/ONCOSEQ_V4_FOR_TEMPUS.num.bb'
+    //   }),
+    //   name: 'Old Michigan target'
+    // },
+    {
+      viz: pileup.viz.regions(),
+      data: pileup.formats.bigBedRegion({
+        url: '/web/data/michigan-targets.bb'
+      }),
+      name: 'Michigan target'
     },
     {
       viz: pileup.viz.regions(),
       data: pileup.formats.bigBedRegion({
-        // url: '/web/data/OCP.20150630.designed-trimmed.bb'
-        // url: '/web/data/POLARIS_XPLORA_NGS_MANIFEST.txt.1.0.0_with_genename.bb'
-        // url: '/web/data/NexteraRapidCapture_Exome_TargetedRegions_v1.2Used.num.bb'
-        url: '/web/data/test.bb'
+        url: '/web/data/160111_HG19_OncoPanelV4_XC_EZ_HX1_capture_targets.bb'
       }),
-      name: 'Target'
+      name: 'Roche probes'
+    },
+    {
+      viz: pileup.viz.regions(),
+      data: pileup.formats.bigBedRegion({
+        url: '/web/data/exonic-targets.bb'
+      }),
+      name: 'Exon regions'
     },
   {{#blacklist}}
     {
@@ -99,6 +121,7 @@
       isReference: true,
       data: pileup.formats.twoBit({
         url: 'https://www.biodalliance.org/datasets/hg19.2bit'
+        // url: '/web/data/hg19.2bit'
       }),
       name: 'Reference'
     },

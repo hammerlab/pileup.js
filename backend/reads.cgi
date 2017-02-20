@@ -14,16 +14,16 @@ print "Access-Control-Allow-Origin: *\n";
 my %arg;
 for %*ENV<QUERY_STRING>.split(/<[&;]>/) {
   my ($k, $v) = .split('=');
+  say $*ERR: "$k -> $v";
   if ($v) {
     %arg{$k} = $v;
   }
   else {
     %arg{$k} = True;
   }
-
-  # This should be an option
-  %arg<coords> ~~ s/chr//;
 }
+# This should be an option
+%arg<coords> ~~ s/chr//;
 #}}}
 
 my ($stderr, $stderr-fh) = tempfile(:prefix('samtools-view-stderr-'), :unlink);

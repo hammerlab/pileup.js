@@ -5,6 +5,7 @@ v6;
 
 use File::Temp;
 use Terminal::ANSIColor;
+use Data::Dump;
 
 print "Content-type: text/plain\n";
 print "Access-Control-Allow-Origin: *\n";
@@ -18,6 +19,7 @@ for %*ENV<QUERY_STRING>.split(/<[&;]>/) {
 }
 #}}}
 
+say $*ERR: Dump(%arg);
 my ($stderr, $stderr-fh) = tempfile(:prefix('samtools-faidx-stderr-'), :!unlink);
 
 my $command = qq{samtools faidx %arg<ref> %arg<coords> 2> $stderr | tail -1};

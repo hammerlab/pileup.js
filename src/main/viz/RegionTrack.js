@@ -54,7 +54,7 @@ class RegionTrack extends React.Component {
   }
 
   render(): any {
-    return <canvas />;
+    return <canvas ref='canvas' onClick={this.handleClick.bind(this)} />;
   }
 
   componentDidMount() {
@@ -147,6 +147,43 @@ class RegionTrack extends React.Component {
       drawRegionName(ctx, clampedScale, regionLineY, region, textIntervals);
       ctx.popObject();
     });
+  }
+
+  copyToClipboard(text) {
+    if (window.clipboardData && window.clipboardData.setData) {
+      // IE specific code path to prevent textarea being shown while dialog is visible.
+      return clipboardData.setData("Text", text);
+    }
+    else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+      var textarea = document.createElement("textarea");
+      textarea.textContent = text;
+      textarea.style.position = "fixed";  // Prevent scrolling to bottom of page in MS Edge.
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        return document.execCommand("copy");  // Security exception may be thrown by some browsers.
+      }
+      catch (ex) {
+        console.warn("Copy to clipboard failed.", ex);
+        return false;
+      }
+      finally {
+        document.body.removeChild(textarea);
+      }
+    }
+  }
+
+  handleClick(reactEvent: any) {
+    var ev = reactEvent.nativeEvent,
+        x = ev.offsetX;
+
+    // It's simple to figure out which position was clicked using the x-scale.
+    // No need to render the scene to determine what was clicked.
+    var range = ContigInterval.fromGenomeRange(this.props.range),
+        xScale = this.getScale(),
+        pos = Math.floor(xScale.invert(x)) - 1;
+
+    this.copyToClipboard(this.state.regions[0].name);
   }
 }
 
