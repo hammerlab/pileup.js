@@ -94,7 +94,7 @@ class GenomeTiledCanvas extends TiledCanvas {
     // The +/-1 ensures that partially-visible bases on the edge are rendered.
     var genomeRange = {
       contig: range.contig,
-      start: range.start() - 1,
+      start: Math.max(0, range.start() - 1),
       stop: range.stop() + 1
     };
     var basePairs = this.source.getRangeAsString(genomeRange);
