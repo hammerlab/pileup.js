@@ -119,7 +119,7 @@ if ($range ~~ /'-'/) {
   ($start, $stop) = $range.split('-');
 }
 else {
-  ($start, $stop) = ($range - 10, $range + 10);
+  ($start, $stop) = ($range - 20, $range + 20);
 }
 
 my %template_data =
