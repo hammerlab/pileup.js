@@ -1,5 +1,6 @@
 #!/bin/bash
 # Build require-ale and minified assets for distribution.
+(set -o igncr) 2>/dev/null && set -o igncr; # For Cygwin on Windows compatibility
 set -o errexit
 sh scripts/make-mini-d3.sh # TODO: remove
 

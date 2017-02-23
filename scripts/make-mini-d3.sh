@@ -1,4 +1,5 @@
 #!/bin/bash
+(set -o igncr) 2>/dev/null && set -o igncr; # For Cygwin on Windows compatibility
 # This is a custom build of D3.
 # See https://github.com/hammerlab/pileup.js/issues/275
 
