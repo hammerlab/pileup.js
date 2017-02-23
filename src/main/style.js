@@ -27,7 +27,7 @@ module.exports = {
   GENE_COLOR: 'blue',  // color of the gene line, exons, text, etc.
   GENE_COMPLEMENT_COLOR: 'white',  // a color visible on top of GENE_COLOR
   GENE_FONT: `'Helvetica Neue', Helvetica, Arial, sans-serif`,
-  GENE_FONT_SIZE: 16,
+  GENE_FONT_SIZE: 12,
   GENE_TEXT_PADDING: 5,  // space between bottom of coding exon & top of gene name
 
   // Pileup track
