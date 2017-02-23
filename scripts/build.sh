@@ -1,7 +1,7 @@
 #!/bin/bash
 # Build require-ale and minified assets for distribution.
 set -o errexit
-./scripts/make-mini-d3.sh # TODO: remove
+sh scripts/make-mini-d3.sh # TODO: remove
 
 # Transpile individual files. This is useful if another module,
 # e.g. cycledash, wants to require('pileup').
