@@ -2,6 +2,7 @@
  * Visualization of target regions
  * @flow
  */
+/*global clipboardData */
 'use strict';
 
 import type {Region, BigBedRegionSource} from '../sources/BigBedRegionDataSource';
@@ -129,17 +130,21 @@ class RegionTrack extends React.Component {
         clampedScale(1 + region.position.stop()), regionLineY + 0.5 + offset
       );
 
-      canvasUtils.drawLine(
-        ctx,
-        clampedScale(1 + region.position.start()), regionLineY + 0.5 + offset,
-        clampedScale(1 + region.position.start()), regionLineY + 0.5 + offset + (count % 2 ? -4 : 4)
-      );
+      if (region.position.start() >= genomeRange.start) {
+        canvasUtils.drawLine(
+          ctx,
+          clampedScale(1 + region.position.start()), regionLineY + 0.5 + offset,
+          clampedScale(1 + region.position.start()), regionLineY + 0.5 + offset + (count % 2 ? -4 : 4)
+        );
+      }
 
-      canvasUtils.drawLine(
-        ctx,
-        clampedScale(1 + region.position.stop()), regionLineY + 0.5 + offset,
-        clampedScale(1 + region.position.stop()), regionLineY + 0.5 + offset + (count % 2 ? -4 : 4)
-      );
+      if (region.position.stop() <= genomeRange.stop) {
+        canvasUtils.drawLine(
+          ctx,
+          clampedScale(1 + region.position.stop()), regionLineY + 0.5 + offset,
+          clampedScale(1 + region.position.stop()), regionLineY + 0.5 + offset + (count % 2 ? -4 : 4)
+        );
+      }
 
       ctx.strokeStyle = style.GENE_COMPLEMENT_COLOR;
       ctx.lineWidth = 2;
@@ -174,6 +179,10 @@ class RegionTrack extends React.Component {
   }
 
   handleClick(reactEvent: any) {
+    /*
+     * Later I should use this sort of code to figure out which of the region tracks
+     * was clicked. For now, it will be regions[0]
+     *
     var ev = reactEvent.nativeEvent,
         x = ev.offsetX;
 
@@ -182,6 +191,7 @@ class RegionTrack extends React.Component {
     var range = ContigInterval.fromGenomeRange(this.props.range),
         xScale = this.getScale(),
         pos = Math.floor(xScale.invert(x)) - 1;
+    */
 
     this.copyToClipboard(this.state.regions[0].name);
   }
