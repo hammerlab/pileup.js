@@ -103,9 +103,12 @@
     },
   {{#blacklist}}
     {
-      viz: pileup.viz.blacklist(),
-      data: pileup.formats.vcf({
-        url: 'https://rnd10.itw/~selkovjr/vcfcomp/interface/file.cgi?file={{url}}'
+      // viz: pileup.viz.blacklist(),
+      // data: pileup.formats.vcf({
+      viz: pileup.viz.regions(),
+      data: pileup.formats.bigBedRegion({
+        url: '/web/data/{{url}}'
+        // url: '/web/file.cgi?file={{url}}'
       }),
       name: 'Blacklist'
     },
