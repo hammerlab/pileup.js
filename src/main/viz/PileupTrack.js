@@ -62,8 +62,7 @@ class PileupTiledCanvas extends TiledCanvas {
   }
 
   heightForRef(ref: string): number {
-    return this.cache.pileupHeightForRef(ref) *
-                    (READ_HEIGHT + READ_SPACING);
+    return this.cache.pileupHeightForRef(ref) * (READ_HEIGHT + READ_SPACING);
   }
 
   render(ctx: DataCanvasRenderingContext2D,
@@ -200,7 +199,11 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
       var span = vGroup.insert,
           x1 = scale(span.start + 1),
           x2 = scale(span.stop + 1);
-      ctx.fillRect(x1, y + READ_HEIGHT / 2 - 0.5, x2 - x1, 1);
+      // ctx.fillRect(x1, y + READ_HEIGHT / 2 - 0.5, x2 - x1, 1);
+      ctx.strokeStyle = ctx.fillStyle;
+      ctx.setLineDash([2, 2]);
+      ctx.lineWidth = '1px';
+      canvasUtils.drawLine(ctx, x1, y + READ_HEIGHT / 2 - 0.5, x2, y + READ_HEIGHT / 2 - 0.5);
     }
     vGroup.alignments.forEach(vRead => drawAlignment(vRead, y));
     ctx.popObject();
@@ -406,8 +409,9 @@ class PileupTrack extends React.Component {
   // Load new reads into the visualization cache.
   updateReads(range: ContigInterval<string>) {
     var anyBefore = this.cache.anyGroupsOverlapping(range);
-    this.props.source.getAlignmentsInRange(range)
-                     .forEach(read => this.cache.addAlignment(read));
+    this.props.source.getAlignmentsInRange(range).forEach(
+      read => this.cache.addAlignment(read)
+    );
 
     if (!anyBefore && this.cache.anyGroupsOverlapping(range)) {
       // If these are the first reads to be shown in the visible range,
