@@ -161,7 +161,7 @@ function flowgram_panel () {
             }
 
             // ------------------------------ reverse ------------------------------
-            if (read.isReverse()) {
+            if (data.signal && read.isReverse()) { // reverse the alignment for Torrent reads to sync with the flowgram
               for (i = 0; i < sc_right; i++) {
                 char = complement(padding_seq[padding_seq.length - sc_right + i]);
                 base_node_list.insertAdjacentHTML('beforeend', '<span id="' + char_class + '-' + index + '" class="' + char_class + ' ' + char.toUpperCase() + ' softclipped-char">' + char + '</span>');
