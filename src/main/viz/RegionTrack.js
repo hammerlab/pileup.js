@@ -33,6 +33,10 @@ function drawRegionName(
   var p = region.position,
       centerX = 0.5 * (clampedScale(1 + p.start()) + clampedScale(1 + p.stop()));
   var name = region.name.split('\t')[0];
+  var strand = region.name.split('\t')[2];
+  if (strand && strand !== '.') {
+    name = strand + name;
+  }
   var textWidth = ctx.measureText(name).width;
   var textInterval = new Interval(centerX - 0.5 * textWidth,
                                   centerX + 0.5 * textWidth);
