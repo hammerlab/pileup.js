@@ -67,6 +67,9 @@
 .pileup-root > .controls .btn-zoom-in:before {
   content: '+';
 }
+.pileup-root > .controls .btn-copy:before {
+  content: 'Copy';
+}
 .pileup-root > .controls input,
 .pileup-root > .controls button,
 .pileup-root > .controls select,

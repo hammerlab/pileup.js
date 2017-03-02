@@ -2,7 +2,6 @@
  * Visualization of target regions
  * @flow
  */
-/*global clipboardData */
 'use strict';
 
 import type {Region, BigBedRegionSource} from '../sources/BigBedRegionDataSource';
@@ -21,6 +20,7 @@ import ContigInterval from '../ContigInterval';
 import canvasUtils from './canvas-utils';
 import dataCanvas from 'data-canvas';
 import style from '../style';
+import copyToClipboard from '../Clipboard';
 
 
 function drawRegionName(
@@ -158,30 +158,6 @@ class RegionTrack extends React.Component {
     });
   }
 
-  copyToClipboard(text) {
-    if (window.clipboardData && window.clipboardData.setData) {
-      // IE specific code path to prevent textarea being shown while dialog is visible.
-      return clipboardData.setData("Text", text);
-    }
-    else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
-      var textarea = document.createElement("textarea");
-      textarea.textContent = text;
-      textarea.style.position = "fixed";  // Prevent scrolling to bottom of page in MS Edge.
-      document.body.appendChild(textarea);
-      textarea.select();
-      try {
-        return document.execCommand("copy");  // Security exception may be thrown by some browsers.
-      }
-      catch (ex) {
-        console.warn("Copy to clipboard failed.", ex);
-        return false;
-      }
-      finally {
-        document.body.removeChild(textarea);
-      }
-    }
-  }
-
   handleClick(reactEvent: any) {
     /*
      * Later I should use this sort of code to figure out which of the region tracks
@@ -197,7 +173,7 @@ class RegionTrack extends React.Component {
         pos = Math.floor(xScale.invert(x)) - 1;
     */
 
-    this.copyToClipboard(this.state.regions[0].name);
+    copyToClipboard(this.state.regions[0].name);
   }
 }
 
