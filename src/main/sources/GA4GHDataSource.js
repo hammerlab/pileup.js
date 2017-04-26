@@ -70,11 +70,17 @@ function create(spec: GA4GHSpec): AlignmentDataSource {
 
     interval = expandRange(interval);
 
+    // select only intervals not yet loaded into coveredRangesß
+    var intervals = interval.complementIntervals(coveredRanges);
+
     // We "cover" the interval immediately (before the reads have arrived) to
     // prevent duplicate network requests.
     coveredRanges.push(interval);
     coveredRanges = ContigInterval.coalesce(coveredRanges);
-    fetchAlignmentsForInterval(interval, null, 1 /* first request */);
+
+    intervals.forEach(i => {
+      fetchAlignmentsForInterval(i, null, 1 /* first request */);
+    });
   }
 
   function notifyFailure(message: string) {

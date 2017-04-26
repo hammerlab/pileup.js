@@ -1,6 +1,6 @@
 {
   "name": "pileup",
-  "version": "0.6.3",
+  "version": "0.6.8",
   "description": "JavaScript track viewer",
   "keywords": [
     "genome",
@@ -59,7 +59,8 @@
     "react": "^0.14.0",
     "react-dom": "^0.14.0",
     "shallow-equals": "0.0.0",
-    "underscore": "^1.7.0"
+    "underscore": "^1.7.0",
+    "memory-cache": "0.1.6"
   },
   "devDependencies": {
     "arraybuffer-slice": "^0.1.2",
@@ -82,7 +83,7 @@
     "mocha-phantomjs-istanbul": "0.0.2",
     "number-to-locale-string": "^1.0.0",
     "parse-data-uri": "^0.2.0",
-    "phantomjs": "^1.9.17",
+    "phantomjs": "1.9.17",
     "prepush-hook": "^0.1.0",
     "react-addons-test-utils": "^0.14.0",
     "sinon": "^1.12.2",

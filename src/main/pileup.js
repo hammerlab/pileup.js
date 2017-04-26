@@ -144,7 +144,7 @@ var pileup = {
     blacklist: makeVizObject(BlacklistTrack),
     pileup:    makeVizObject(PileupTrack)
   },
-  version: '0.6.3'
+  version: '0.6.8'
 };
 
 module.exports = pileup;

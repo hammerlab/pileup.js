@@ -1,11 +1,10 @@
 sudo: false  # Use container-based infrastructure
 language: node_js
 node_js:
-  - "0.12"
+  - "5.1"
 
 script: >
     npm run build &&
-    ./scripts/post-code-size.sh &&
     npm run test &&
     npm run flow-check &&
     npm run lint &&

@@ -22,6 +22,7 @@ import VirtualOffset from './VirtualOffset';
 // winds up saving time to do a fast pass over the data to compute them. This
 // allows us to parse a single contig at a time using jBinary.
 function computeIndexChunks(buffer) {
+  var BLOCK_SIZE = 65536;
   var view = new jDataView(buffer, 0, buffer.byteLength, true /* little endian */);
 
   var minBlockIndex = Infinity;
@@ -39,15 +40,14 @@ function computeIndexChunks(buffer) {
     var n_intv = view.getInt32();
     if (n_intv) {
       var offset = VirtualOffset.fromBlob(view.getBytes(8), 0),
-          coffset = offset.coffset + (offset.uoffset ? 65536 : 0);
-      if (coffset) {
-        minBlockIndex = Math.min(coffset, minBlockIndex);
-      }
+          coffset = offset.coffset + (offset.uoffset ? BLOCK_SIZE : 0);
+      minBlockIndex = coffset ? Math.min(coffset, minBlockIndex) : BLOCK_SIZE;
       view.skip((n_intv - 1) * 8);
     }
   }
   contigStartOffsets.push(view.tell());
 
+  // At this point, `minBlockIndex` should be non-Infinity (see #405 & #406)
   return {
     chunks: _.zip(_.initial(contigStartOffsets), _.rest(contigStartOffsets)),
     minBlockIndex
