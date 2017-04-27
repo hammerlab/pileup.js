@@ -2,7 +2,7 @@
  * AbstractFile is an abstract representation of a file. There are two implementation:
  * 1. RemoteFile  - representation of a file on a remote server which can be
  * fetched in chunks, e.g. using a Range request.
- * 2. LocalStringFile is a representation of a file that was created from input string. 
+ * 2. LocalStringFile is a representation of a file that was created from input string.
  * Used for testing and small input files.
  * @flow
  */
@@ -14,7 +14,7 @@ class AbstractFile {
   constructor() {
     //how to prevent instantation of this class???
     //this code doesn't pass npm run flow
-//    if (new.target === AbstractFile) { 
+//    if (new.target === AbstractFile) {
 //      throw new TypeError("Cannot construct AbstractFile instances directly");
 //    }
   }
