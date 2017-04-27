@@ -206,7 +206,7 @@ class ImmediateBigBed {
           return blocks.map(block => {
             var beds = extractFeaturesFromBlock(buffer, byteRange, block, isCompressed);
             if (block.startChromIx != block.endChromIx) {
-              throw `Can't handle blocks which span chromosomes!`;
+              throw "Can't handle blocks which span chromosomes!";
             }
 
             return {

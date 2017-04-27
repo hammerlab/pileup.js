@@ -69,38 +69,60 @@
         url: '/web/data/ensGene.bb'
       }),
       name: 'Gene'
-    },
-    // {
-    //   viz: pileup.viz.regions(),
-    //   data: pileup.formats.bigBedRegion({
-    //     // url: '/web/data/OCP.20150630.designed-trimmed.bb'
-    //     // url: '/web/data/POLARIS_XPLORA_NGS_MANIFEST.txt.1.0.0_with_genename.bb'
-    //     // url: '/web/data/test.bb'
-    //     url: '/web/data/ONCOSEQ_V4_FOR_TEMPUS.num.bb'
-    //   }),
-    //   name: 'Old Michigan target'
-    // },
-    {
-      viz: pileup.viz.regions(),
-      data: pileup.formats.bigBedRegion({
-        url: '/web/data/michigan-targets.bb'
-      }),
-      name: 'Michigan target'
-    },
-    {
-      viz: pileup.viz.regions(),
-      data: pileup.formats.bigBedRegion({
-        url: '/web/data/160111_HG19_OncoPanelV4_XC_EZ_HX1_capture_targets.bb'
-      }),
-      name: 'Roche probes'
-    },
-    {
-      viz: pileup.viz.regions(),
-      data: pileup.formats.bigBedRegion({
-        url: '/web/data/exonic-targets.bb'
-      }),
-      name: 'Exon regions'
-    },
+    }
+  ];
+
+  if ('{{app}}' === 'xo') {
+    sources.push (
+      {
+        viz: pileup.viz.regions(),
+        data: pileup.formats.bigBedRegion({
+          // url: '/web/data/OCP.20150630.designed-trimmed.bb'
+          // url: '/web/data/POLARIS_XPLORA_NGS_MANIFEST.txt.1.0.0_with_genename.bb'
+          // url: '/web/data/test.bb'
+          url: '/web/data/ONCOSEQ_V4_FOR_TEMPUS.num.bb'
+        }),
+        name: 'Old Michigan target'
+      },
+      {
+        viz: pileup.viz.regions(),
+        data: pileup.formats.bigBedRegion({
+          url: '/web/data/michigan-targets.bb'
+        }),
+        name: 'Michigan target'
+      },
+      {
+        viz: pileup.viz.regions(),
+        data: pileup.formats.bigBedRegion({
+          url: '/web/data/160111_HG19_OncoPanelV4_XC_EZ_HX1_capture_targets.bb'
+        }),
+        name: 'Roche probes'
+      },
+      {
+        viz: pileup.viz.regions(),
+        data: pileup.formats.bigBedRegion({
+          url: '/web/data/exonic-targets.bb'
+        }),
+        name: 'Exon regions'
+      }
+    );
+  }
+  else { // assume exome
+    sources.push (
+      {
+        viz: pileup.viz.regions(),
+        data: pileup.formats.bigBedRegion({
+          // url: '/web/data/OCP.20150630.designed-trimmed.bb'
+          // url: '/web/data/POLARIS_XPLORA_NGS_MANIFEST.txt.1.0.0_with_genename.bb'
+          // url: '/web/data/test.bb'
+          url: '/web/data/exons.bb'
+        }),
+        name: 'exon'
+      }
+    );
+  }
+
+  sources.push (
   {{#blacklist}}
     {
       // viz: pileup.viz.blacklist(),
@@ -136,7 +158,7 @@
       cssClass: 'normal',
       name: 'Alignments'
     }
-  ];
+  );
 
   var range = {contig: '{{contig}}', start: {{start}}, stop: {{stop}}};
 

@@ -103,6 +103,11 @@ if (%arg<downsample>) {
   $downsample = "downssample=%arg<downsample>;";
 }
 
+my $app = 'xo';
+if (%arg<exome>) {
+  $app = 'exome';
+}
+
 my $filter = '';
 if (%arg<filter>) {
   $filter = "filter=%arg<filter>;";
@@ -124,6 +129,7 @@ else {
 
 my %template_data =
   url => get_url(),
+  app => $app,
   downsample => $downsample,
   filter => $filter,
   select => $select,
