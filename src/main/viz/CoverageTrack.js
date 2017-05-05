@@ -54,13 +54,11 @@ class CoverageTiledCanvas extends TiledCanvas {
     this.options = options;
   }
 
-  yScaleForRef(ref: string): (y: number) => number {
+  yScaleForRef(ref: string, bottomPadding: number, topPadding:number): (y: number) => number {
     var maxCoverage = this.cache.maxCoverageForRef(ref);
-
-    var padding = 10;  // TODO: move into style
     return scale.linear()
       .domain([maxCoverage, 0])
-      .range([padding, this.height - padding])
+      .range([bottomPadding, this.height - topPadding])
       .nice();
   }
 
@@ -68,7 +66,7 @@ class CoverageTiledCanvas extends TiledCanvas {
          xScale: (x: number)=>number,
          range: ContigInterval<string>) {
     var bins = this.cache.binsForRef(range.contig);
-    var yScale = this.yScaleForRef(range.contig);
+    var yScale = this.yScaleForRef(range.contig, 0, 30);
     var relaxedRange = new ContigInterval(
         range.contig, range.start() - 1, range.stop() + 1);
     renderBars(ctx, xScale, yScale, relaxedRange, bins, this.options);
@@ -287,7 +285,7 @@ class CoverageTrack extends React.Component {
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    var yScale = this.tiles.yScaleForRef(range.contig);
+    var yScale = this.tiles.yScaleForRef(range.contig, 10, 10);
 
     this.tiles.renderToScreen(ctx, range, this.getScale());
     this.renderTicks(ctx, yScale);
