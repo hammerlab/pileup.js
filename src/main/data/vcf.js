@@ -16,6 +16,13 @@ export type Variant = {
   position: number;
   ref: string;
   alt: string;
+  id: string;
+  //this is the bigest allel frequency for single vcf entry
+  //single vcf entry might contain more than one variant like the example below
+  //20 1110696 rs6040355 A G,T 67 PASS NS=2;DP=10;AF=0.333,0.667;AA=T;DB
+  majorFrequency: ?number;
+  //this is the smallest allel frequency for single vcf entry
+  minorFrequency: ?number;
   vcfLine: string;
 }
 
@@ -41,12 +48,33 @@ function extractLocusLine(vcfLine: string): LocusLine {
 
 function extractVariant(vcfLine: string): Variant {
   var parts = vcfLine.split('\t');
+  var maxFrequency = null;
+  var minFrequency = null;
+  if (parts.length>=7){
+    var params = parts[7].split(';');
+    for (var i=0;i<params.length;i++) {
+      var param = params[i];
+      if (param.startsWith("AF=")) {
+        maxFrequency = 0.0;
+        minFrequency = 1.0;
+        var frequenciesStrings = param.substr(3).split(",");
+        for (var j=0;j<frequenciesStrings.length;j++) {
+          var currentFrequency = parseFloat(frequenciesStrings[j]);
+          maxFrequency = Math.max(maxFrequency, currentFrequency);
+          minFrequency = Math.min(minFrequency, currentFrequency);
+        }
+      }
+    }
+  }
 
   return {
     contig: parts[0],
     position: Number(parts[1]),
+    id: parts[2],
     ref: parts[3],
     alt: parts[4],
+    majorFrequency: maxFrequency,
+    minorFrequency: minFrequency,
     vcfLine
   };
 }

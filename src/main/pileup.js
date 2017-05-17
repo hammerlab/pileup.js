@@ -5,6 +5,7 @@
 'use strict';
 
 import type {Track, VisualizedTrack, VizWithOptions} from './types';
+import {AllelFrequencyStrategy} from './types';
 
 import _ from 'underscore';
 import React from 'react';
@@ -175,6 +176,11 @@ var pileup = {
     scale:    makeVizObject(ScaleTrack),
     variants: makeVizObject(VariantTrack),
     pileup:   makeVizObject(PileupTrack)
+  },
+  enum: {
+    variants: {
+      allelFrequencyStrategy: AllelFrequencyStrategy,
+    },
   },
   version: '0.6.8'
 };

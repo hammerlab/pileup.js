@@ -27,6 +27,7 @@ type Props = {
   onRangeChange: (newRange: GenomeRange) => void;
   referenceSource: TwoBitSource;
   source: any;
+  options: ?Object;
 };
 
 class VisualizationWrapper extends React.Component {
@@ -136,6 +137,7 @@ class VisualizationWrapper extends React.Component {
     if (!range) {
       return <EmptyTrack className={component.displayName} />;
     }
+    var options = _.extend({},this.props.visualization.options,this.props.options);
 
     var el = React.createElement(component, ({
       range: range,
@@ -143,7 +145,7 @@ class VisualizationWrapper extends React.Component {
       referenceSource: this.props.referenceSource,
       width: this.state.width,
       height: this.state.height,
-      options: this.props.visualization.options
+      options: options
     } : VizProps));
 
     return <div className='drag-wrapper'>{el}</div>;

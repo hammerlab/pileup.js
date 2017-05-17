@@ -46,6 +46,28 @@ describe('VCF', function() {
     });
   });
 
+  it('should have frequency', function() {
+    var vcf = new VcfFile(new RemoteFile('/test-data/allelFrequency.vcf'));
+    var range = new ContigInterval('chr20', 61790, 61800);
+    return vcf.getFeaturesInRange(range).then(features => {
+      expect(features).to.have.length(1);
+      expect(features[0].contig).to.equal('20');
+      expect(features[0].majorFrequency).to.equal(0.7);
+      expect(features[0].minorFrequency).to.equal(0.7);
+    });
+  });
+
+  it('should have highest frequency', function() {
+    var vcf = new VcfFile(new RemoteFile('/test-data/allelFrequency.vcf'));
+    var range = new ContigInterval('chr20', 61730, 61740);
+    return vcf.getFeaturesInRange(range).then(features => {
+      expect(features).to.have.length(1);
+      expect(features[0].contig).to.equal('20');
+      expect(features[0].majorFrequency).to.equal(0.6);
+      expect(features[0].minorFrequency).to.equal(0.3);
+    });
+  });
+
   it('should add chr', function() {
     var vcf = new VcfFile(new RemoteFile('/test-data/snv.vcf'));
     var range = new ContigInterval('chr20', 63799, 69094);

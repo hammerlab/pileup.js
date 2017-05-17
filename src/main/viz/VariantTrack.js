@@ -3,6 +3,8 @@
  * @flow
  */
 'use strict';
+import {AllelFrequencyStrategy} from '../types';
+
 
 import type {VcfDataSource} from '../sources/VcfDataSource';
 import type {Variant} from '../data/vcf';
@@ -20,17 +22,17 @@ import canvasUtils from './canvas-utils';
 import dataCanvas from 'data-canvas';
 import style from '../style';
 
-
 class VariantTrack extends React.Component {
   props: VizProps & {source: VcfDataSource};
-  state: void;  // no state
+
+  state: void;
 
   constructor(props: Object) {
     super(props);
   }
 
   render(): any {
-    return <canvas onClick={this.handleClick} />;
+    return <canvas onClick={this.handleClick.bind(this)} />;
   }
 
   componentDidMount() {
@@ -80,11 +82,31 @@ class VariantTrack extends React.Component {
     ctx.fillStyle = style.VARIANT_FILL;
     ctx.strokeStyle = style.VARIANT_STROKE;
     variants.forEach(variant => {
+      var variantHeightRatio = 1.0;
+      if (this.props.options.variantHeightByFrequency) {
+        var frequency = null;
+        if (this.props.options.allelFrequencyStrategy === undefined) { //default startegy
+          frequency = variant.majorFrequency;
+        } else if (this.props.options.allelFrequencyStrategy === AllelFrequencyStrategy.Major) {
+          frequency = variant.majorFrequency;
+        } else if (this.props.options.allelFrequencyStrategy === AllelFrequencyStrategy.Minor) {
+          frequency = variant.minorFrequency;
+        } else {
+          console.log("Unknown AllelFrequencyStrategy: ",this.props.options.allelFrequencyStrategy);
+        }
+        if (frequency !== null && frequency !== undefined) {
+          variantHeightRatio = frequency;
+        }
+      }
+      var height = style.VARIANT_HEIGHT*variantHeightRatio;
+      var variantY = y - 0.5 + style.VARIANT_HEIGHT - height;
+      var variantX = Math.round(scale(variant.position)) - 0.5;
+      var width = Math.round(scale(variant.position + 1)) - 0.5 - variantX;
+
       ctx.pushObject(variant);
-      var x = Math.round(scale(variant.position));
-      var width = Math.round(scale(variant.position + 1)) - 1 - x;
-      ctx.fillRect(x - 0.5, y - 0.5, width, style.VARIANT_HEIGHT);
-      ctx.strokeRect(x - 0.5, y - 0.5, width, style.VARIANT_HEIGHT);
+
+      ctx.fillRect(variantX, variantY, width, height);
+      ctx.strokeRect(variantX, variantY, width, height);
       ctx.popObject();
     });
 
@@ -99,10 +121,19 @@ class VariantTrack extends React.Component {
         ctx = canvasUtils.getContext(canvas),
         trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
     this.renderScene(trackingCtx);
-    var variant = trackingCtx.hit && trackingCtx.hit[0];
-    var alert = window.alert || console.log;
-    if (variant) {
-      alert(JSON.stringify(variant));
+
+    var variants = trackingCtx.hit;
+    if (variants && variants.length>0) {
+      var data = [];
+      for (var i=0;i<variants.length;i++) {
+        data.push({id: variants[i].id,vcfLine:variants[i].vcfLine});
+      }
+      //user provided function for displaying popup
+      if (typeof this.props.options.onVariantClicked  === "function") {
+        this.props.options.onVariantClicked(data);
+      } else {
+        console.log("Variants clicked: ", data);
+      }
     }
   }
 }

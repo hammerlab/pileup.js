@@ -28,6 +28,16 @@ var sources = [
     data: pileup.formats.vcf({
       url: '/test-data/snv.chr17.vcf'
     }),
+    options: {
+      variantHeightByFrequency: true,
+      onVariantClicked: function(data) {
+        var content = "Variants:\n";
+        for (var i =0;i< data.length;i++) {
+          content +=data[i].id+" - "+data[i].vcfLine+"\n";
+        }
+        alert(content);
+      },
+    },
     name: 'Variants'
   },
   {
