@@ -5,6 +5,7 @@
 'use strict';
 
 import type {PartialGenomeRange} from './types';
+import copyToClipboard from './Clipboard';
 
 import React from 'react';
 import _ from 'underscore';
@@ -15,7 +16,7 @@ import Interval from './Interval';
 type Props = {
   range: ?GenomeRange;
   contigList: string[];
-  onChange: (newRange: GenomeRange)=>void;
+  onChange: (newRange: GenomeRange) => void;
 };
 
 class Controls extends React.Component {
@@ -98,6 +99,14 @@ class Controls extends React.Component {
     });
   }
 
+  copy(e: any) {
+    e.preventDefault();
+    var range = this.completeRange(utils.parseRange(this.refs.position.value));
+    var contig = range.contig.replace(/^chr/, '');
+    copyToClipboard(contig + ':' + range.start + '-' + range.stop);
+  }
+
+
   render(): any {
     var contigOptions = this.props.contigList
         ? this.props.contigList.map((contig, i) => <option key={i}>{contig}</option>)
@@ -111,6 +120,7 @@ class Controls extends React.Component {
         </select>{' '}
         <input ref='position' type='text' />{' '}
         <button className='btn-submit' onClick={this.handleFormSubmit.bind(this)}>Go</button>{' '}
+        <button className='btn-copy' onClick={this.copy.bind(this)}></button>{' '}
         <div className='zoom-controls'>
           <button className='btn-zoom-out' onClick={this.zoomOut.bind(this)}></button>{' '}
           <button className='btn-zoom-in' onClick={this.zoomIn.bind(this)}></button>

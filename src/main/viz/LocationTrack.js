@@ -14,6 +14,7 @@ import canvasUtils from './canvas-utils';
 import dataCanvas from 'data-canvas';
 import style from '../style';
 import d3utils from './d3utils';
+import copyToClipboard from '../Clipboard';
 
 class LocationTrack extends React.Component {
   props: VizProps;
@@ -22,6 +23,9 @@ class LocationTrack extends React.Component {
 
   constructor(props: Object) {
     super(props);
+    this.state = {
+      midpoint: ""
+    };
   }
 
   getScale(): Scale {
@@ -29,7 +33,7 @@ class LocationTrack extends React.Component {
   }
 
   render(): any {
-    return <canvas />;
+    return <canvas ref='canvas' onClick={this.handleClick.bind(this)} />;
   }
 
   componentDidMount() {
@@ -56,6 +60,8 @@ class LocationTrack extends React.Component {
         rightLineX = Math.round(scale(midPoint + 1)),
         leftLineX = Math.round(scale(midPoint));
 
+    this.state.midpoint = midPoint;
+
     // Left line
     canvasUtils.drawLine(ctx, leftLineX - 0.5, 0, leftLineX - 0.5, height);
 
@@ -67,7 +73,7 @@ class LocationTrack extends React.Component {
 
     ctx.fillStyle = style.LOC_FONT_COLOR;
     ctx.font = style.LOC_FONT_STYLE;
-    ctx.fillText(midPoint.toLocaleString() + ' bp',
+    ctx.fillText(midPoint.toLocaleString(), //  + ' bp',
                  rightLineX + style.LOC_TICK_LENGTH + style.LOC_TEXT_PADDING,
                  midY + style.LOC_TEXT_Y_OFFSET);
 
@@ -76,6 +82,10 @@ class LocationTrack extends React.Component {
 
     // clean up
     ctx.restore();
+  }
+
+  handleClick(reactEvent: any) {
+    copyToClipboard(this.state.midpoint);
   }
 }
 

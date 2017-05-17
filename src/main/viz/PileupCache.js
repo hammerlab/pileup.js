@@ -128,7 +128,8 @@ class PileupCache {
       }
       var pileup = this.refToPileup[read.ref];
       group.row = addToPileup(group.span.interval, pileup);
-    } else if (group.alignments.length == 2) {
+    }
+    else if (group.alignments.length == 2) {
       // Refine the connector
       mateInterval = group.alignments[0].read.getInterval();
       var {span, insert} = spanAndInsert([range, mateInterval]);
@@ -136,7 +137,8 @@ class PileupCache {
       if (insert) {
         group.span = span;
       }
-    } else {
+    }
+    else {
       // this must be a chimeric read.
     }
   }

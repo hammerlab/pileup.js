@@ -23,6 +23,7 @@ import ContigInterval from '../../main/ContigInterval';
 import {waitFor} from '../async';
 import dataCanvas from 'data-canvas';
 
+global.g_pileup_gui = {}; // the pileup GUI object
 
 // This is like TwoBit, but allows a controlled release of sequence data.
 class FakeTwoBit extends TwoBit {

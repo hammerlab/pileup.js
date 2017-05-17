@@ -22,6 +22,7 @@ import ContigInterval from '../ContigInterval';
 import canvasUtils from './canvas-utils';
 import dataCanvas from 'data-canvas';
 import style from '../style';
+import copyToClipboard from '../Clipboard';
 
 
 // Draw an arrow in the middle of the visible portion of range.
@@ -80,7 +81,7 @@ class GeneTrack extends React.Component {
   }
 
   render(): any {
-    return <canvas />;
+    return <canvas onClick={this.handleClick.bind(this)} />;
   }
 
   componentDidMount() {
@@ -166,6 +167,11 @@ class GeneTrack extends React.Component {
 
       ctx.popObject();
     });
+  }
+
+  handleClick(reactEvent: any) {
+    var gene = this.state.genes[0];
+    copyToClipboard(gene.name || gene.id);
   }
 }
 

@@ -1,0 +1,173 @@
+<html><head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>{{coords}}</title>
+
+  <script src="//cdn.jsdelivr.net/bluebird/3.4.5/bluebird.js"></script>
+
+  <script src="//d3js.org/d3.v3.js"></script>
+  <script src="/web/pileup/lib/pileup.js"></script>
+  <script src="/web/pileup/lib/split.js"></script>
+  <script src="/web/pileup/pileup+flowgram.js"> </script>
+  <link rel="stylesheet" href="/web/pileup/css/pileup.css">
+</head>
+
+<body>
+<pre><a target="popup" href="{{url}}">{{bam}}</a></pre>
+
+<div id="parent">
+  <div id="pileup"> </div>
+
+  <div id="read-data-split" class="split split-vertical split-panel">
+    <span id="read-data-split-close" class="close">×</span>
+    <div id="split-panel-content">
+      <div class="read-data-container">
+        <a href="#hide1" class="hide" id="hide1"><span class="expand-button">+</span></a>
+        <a href="#show1" class="show" id="show1"><span class="expand-button">-</span></a>
+        <div id="read-data-title" class="container-title">Read data</div>
+        <div id="read-alignment">
+          <table>
+            <tr>
+              <td class="read-alignment-label">ref:</td>
+              <td> <span id="read-alignment-ref"></span> </td>
+            </tr>
+            <tr>
+              <td class="read-alignment-label">query:</td>
+              <td> <span id="read-alignment-query"> </td>
+            </tr>
+          </table>
+        </div>
+        <div id="read-data"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  Promise.config({
+    longStackTraces: true
+  });
+
+  // We are going to use the same data source for multiple tracks
+  var readSource = pileup.formats.reads({
+    url: '/reads.cgi?{{downsample}}{{filter}}coords=<range>;bam={{bam}}'
+  });
+
+  var sources = [
+    {
+      viz: pileup.viz.scale(),
+      name: ' '
+    },
+    {
+      viz: pileup.viz.location(),
+      name: ' '
+    },
+    {
+      viz: pileup.viz.genes(),
+      data: pileup.formats.bigBed({
+        // url: 'https://www.biodalliance.org/datasets/ensGene.bb'
+        // url: 'https://www.biodalliance.org/datasets/GRCh37/gencode.v19.basic.bb'
+        url: '/web/data/ensGene.bb'
+      }),
+      name: 'Gene'
+    },
+    // {
+    //   viz: pileup.viz.regions(),
+    //   data: pileup.formats.bigBedRegion({
+    //     // url: '/web/data/OCP.20150630.designed-trimmed.bb'
+    //     // url: '/web/data/POLARIS_XPLORA_NGS_MANIFEST.txt.1.0.0_with_genename.bb'
+    //     // url: '/web/data/test.bb'
+    //     url: '/web/data/ONCOSEQ_V4_FOR_TEMPUS.num.bb'
+    //   }),
+    //   name: 'Old Michigan target'
+    // },
+    {
+      viz: pileup.viz.regions(),
+      data: pileup.formats.bigBedRegion({
+        url: '/web/data/michigan-targets.bb'
+      }),
+      name: 'Michigan target'
+    },
+    {
+      viz: pileup.viz.regions(),
+      data: pileup.formats.bigBedRegion({
+        url: '/web/data/160111_HG19_OncoPanelV4_XC_EZ_HX1_capture_targets.bb'
+      }),
+      name: 'Roche probes'
+    },
+    {
+      viz: pileup.viz.regions(),
+      data: pileup.formats.bigBedRegion({
+        url: '/web/data/exonic-targets.bb'
+      }),
+      name: 'Exon regions'
+    },
+  {{#blacklist}}
+    {
+      // viz: pileup.viz.blacklist(),
+      // data: pileup.formats.vcf({
+      viz: pileup.viz.regions(),
+      data: pileup.formats.bigBedRegion({
+        url: '/web/data/{{url}}'
+        // url: '/web/file.cgi?file={{url}}'
+      }),
+      name: 'Black list'
+    },
+  {{/blacklist}}
+    {
+      viz: pileup.viz.coverage(),
+      data: readSource,
+      cssClass: 'normal',
+      name: 'Coverage'
+    },
+    {
+      viz: pileup.viz.genome(),
+      isReference: true,
+      data: pileup.formats.twoBit({
+        url: 'https://www.biodalliance.org/datasets/hg19.2bit'
+        // url: '/web/data/hg19.2bit'
+      }),
+      name: 'Reference'
+    },
+    {
+      viz: pileup.viz.pileup({
+        colorByStrand: true
+      }),
+      data: readSource,
+      cssClass: 'normal',
+      name: 'Alignments'
+    }
+  ];
+
+  var range = {contig: '{{contig}}', start: {{start}}, stop: {{stop}}};
+
+  var g_pileup_gui = pileup.create(document.getElementById('pileup'), {
+    range: range,
+    tracks: sources
+  });
+
+  g_pileup_gui.bam = '{{bam}}';
+  g_pileup_gui.mark = null;
+{{#mark}}
+  g_pileup_gui.mark = {{mark}};
+{{/mark}}
+
+  flowgram_panel();
+
+{{#select}}
+  // a fire-once listener
+  var render_event_count = 0;
+  document.addEventListener('pileup rendered', function (e) {
+    function apply_selection () {
+      pileup.pileupTrack.find('{{select}}');
+    }
+
+    render_event_count += 1;
+    if (render_event_count >= 8) { // A hack!! The number depends on the order of tracks
+      setTimeout(apply_selection, 500); // an even worse hack
+      e.target.removeEventListener(e.type, arguments.callee);
+    }
+  });
+{{/select}}
+</script>
+
+</body></html>

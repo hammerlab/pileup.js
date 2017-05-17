@@ -60,6 +60,7 @@ function formatRange(viewSize: number): {prefix: string, unit: string} {
  * Sizes a canvas appropriately for this device.
  */
 function sizeCanvas(el: HTMLCanvasElement, width: number, height: number) {
+  /* // Setting canvas geometry styles results in incorrect rendering on retina displays in default mode
   var ratio = window.devicePixelRatio;
   el.width = width * ratio;
   el.height = height * ratio;
@@ -68,6 +69,12 @@ function sizeCanvas(el: HTMLCanvasElement, width: number, height: number) {
   var ctx = el.getContext('2d');
   if (ctx !== null && ctx instanceof CanvasRenderingContext2D) {
     ctx.scale(ratio, ratio);
+  }
+  */
+  el.width = width;
+  el.height = height + 50;
+  if (el.height > 32767) {
+    el.height = 32767;
   }
 }
 

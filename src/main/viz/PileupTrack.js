@@ -1,3 +1,5 @@
+/*global g_pileup_gui, pileup, d3 */
+
 /**
  * Pileup visualization of BAM sources.
  * @flow
@@ -29,10 +31,16 @@ import dataCanvas from 'data-canvas';
 import style from '../style';
 
 
-var READ_HEIGHT = 13;
-var READ_SPACING = 2;  // vertical pixels between reads
+var READ_HEIGHT = 11;
+var READ_SPACING = 1;  // vertical pixels between reads
 
 var READ_STRAND_ARROW_WIDTH = 5;
+
+var SELECTED_READ = null;
+
+
+var pileup_render_event = new Event("pileup rendered");
+
 
 // PhantomJS does not support setLineDash.
 // Node doesn't even know about the symbol.
@@ -54,8 +62,7 @@ class PileupTiledCanvas extends TiledCanvas {
   }
 
   heightForRef(ref: string): number {
-    return this.cache.pileupHeightForRef(ref) *
-                    (READ_HEIGHT + READ_SPACING);
+    return this.cache.pileupHeightForRef(ref) * (READ_HEIGHT + READ_SPACING);
   }
 
   render(ctx: DataCanvasRenderingContext2D,
@@ -151,9 +158,16 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
     ctx.pushObject(vRead);
     ctx.save();
     if (colorByStrand) {
-      ctx.fillStyle = vRead.strand == '+' ?
+      if (SELECTED_READ && vRead.read.name === SELECTED_READ.read.name) {
+        ctx.fillStyle = vRead.strand == '+' ?
+          d3.rgb(style.ALIGNMENT_PLUS_STRAND_COLOR).darker(0.3).toString() :
+          d3.rgb(style.ALIGNMENT_MINUS_STRAND_COLOR).darker(0.3).toString();
+      }
+      else {
+        ctx.fillStyle = vRead.strand == '+' ?
           style.ALIGNMENT_PLUS_STRAND_COLOR :
           style.ALIGNMENT_MINUS_STRAND_COLOR;
+      }
     }
     vRead.ops.forEach(op => {
       if (isRendered(op)) {
@@ -185,7 +199,11 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
       var span = vGroup.insert,
           x1 = scale(span.start + 1),
           x2 = scale(span.stop + 1);
-      ctx.fillRect(x1, y + READ_HEIGHT / 2 - 0.5, x2 - x1, 1);
+      // ctx.fillRect(x1, y + READ_HEIGHT / 2 - 0.5, x2 - x1, 1);
+      ctx.strokeStyle = ctx.fillStyle;
+      ctx.setLineDash([2, 2]);
+      ctx.lineWidth = '1px';
+      canvasUtils.drawLine(ctx, x1, y + READ_HEIGHT / 2 - 0.5, x2, y + READ_HEIGHT / 2 - 0.5);
     }
     vGroup.alignments.forEach(vRead => drawAlignment(vRead, y));
     ctx.popObject();
@@ -213,6 +231,8 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
 
   ctx.font = style.TIGHT_TEXT_STYLE;
   vGroups.forEach(vGroup => drawGroup(vGroup));
+
+  document.dispatchEvent(pileup_render_event);
 }
 
 
@@ -225,7 +245,7 @@ var MIN_Q = 5,  // these are Phred-scaled scores
     MAX_Q = 20,
     Q_SCALE = scale.linear()
                    .domain([MIN_Q, MAX_Q])
-                   .range([0.1, 0.9])
+                   .range([0.6, 0.9])
                    .clamp(true);  // clamp output to [0.1, 0.9]
 function opacityForQuality(quality: number): number {
   var alpha = Q_SCALE(quality);
@@ -255,6 +275,7 @@ class PileupTrack extends React.Component {
     this.state = {
       networkStatus: null
     };
+    pileup.pileupTrack = this;
   }
 
   render(): any {
@@ -268,12 +289,22 @@ class PileupTrack extends React.Component {
 
     var statusEl = null,
         networkStatus = this.state.networkStatus;
+
     if (networkStatus) {
-      var message = this.formatStatus(networkStatus);
+      var message;
+      var message_class;
+      if (networkStatus.error) {
+        message = this.formatStatus(networkStatus);
+        message_class = 'network-status-error-message';
+      }
+      else {
+        message = 'Loading alignments… (' + this.formatStatus(networkStatus) + ')';
+        message_class = 'network-status-message';
+      }
       statusEl = (
-        <div ref='status' className='network-status'>
-          <div className='network-status-message'>
-            Loading alignments… ({message})
+        <div ref="status" className="network-status">
+          <div className={message_class}>
+            {message}
           </div>
         </div>
       );
@@ -283,7 +314,7 @@ class PileupTrack extends React.Component {
       <div>
         {statusEl}
         <div ref='container' style={containerStyles}>
-          <canvas ref='canvas' onClick={this.handleClick.bind(this)} />
+          <canvas ref='canvas' id='pileup-canvas' onClick={this.handleClick.bind(this)} onMouseMove={this.handleMouseMove.bind(this)}/>
         </div>
       </div>
     );
@@ -293,7 +324,20 @@ class PileupTrack extends React.Component {
     if (status.numRequests) {
       var pluralS = status.numRequests > 1 ? 's' : '';
       return `issued ${status.numRequests} request${pluralS}`;
-    } else if (status.status) {
+    }
+    else if (status.status) {
+      if (status.error) {
+        return (
+          <div>
+            <div>
+            {status.satus}
+            </div>
+            <div>
+            {status.message}
+            </div>
+          </div>
+        );
+      }
       return status.status;
     }
     throw 'invalid';
@@ -318,6 +362,9 @@ class PileupTrack extends React.Component {
     });
     this.props.source.on('networkdone', e => {
       this.setState({networkStatus: null});
+    });
+    this.props.source.on('networkerror', e => {
+      this.setState({networkStatus: e});
     });
 
     this.updateVisualization();
@@ -362,8 +409,9 @@ class PileupTrack extends React.Component {
   // Load new reads into the visualization cache.
   updateReads(range: ContigInterval<string>) {
     var anyBefore = this.cache.anyGroupsOverlapping(range);
-    this.props.source.getAlignmentsInRange(range)
-                     .forEach(read => this.cache.addAlignment(read));
+    this.props.source.getAlignmentsInRange(range).forEach(
+      read => this.cache.addAlignment(read)
+    );
 
     if (!anyBefore && this.cache.anyGroupsOverlapping(range)) {
       // If these are the first reads to be shown in the visible range,
@@ -401,6 +449,9 @@ class PileupTrack extends React.Component {
     this.tiles.renderToScreen(ctx, range, scale);
 
     // TODO: the center line should go above alignments, but below mismatches
+    if (g_pileup_gui.mark) {
+      this.renderMark(ctx, true, g_pileup_gui.mark, scale);
+    }
     this.renderCenterLine(ctx, range, scale);
 
     // This is a hack to mitigate #350
@@ -409,18 +460,30 @@ class PileupTrack extends React.Component {
   }
 
   // Draw the center line(s), which orient the user
-  renderCenterLine(ctx: CanvasRenderingContext2D,
-                   range: ContigInterval<string>,
-                   scale: (num: number) => number) {
-    var midPoint = Math.floor((range.stop() + range.start()) / 2),
-        rightLineX = Math.ceil(scale(midPoint + 1)),
-        leftLineX = Math.floor(scale(midPoint)),
-        height = ctx.canvas.height;
+  renderMark(
+    ctx: CanvasRenderingContext2D,
+    marker: boolean,
+    mark: number,
+    scale: (num: number) => number
+  ) {
+    var
+      rightLineX = Math.ceil(scale(mark + 1)),
+      leftLineX = Math.floor(scale(mark)),
+      height = ctx.canvas.height;
+
     ctx.save();
     ctx.lineWidth = 1;
-    if (SUPPORTS_DASHES) {
+    if (SUPPORTS_DASHES && !marker) {
       ctx.setLineDash([5, 5]);
     }
+
+    if (marker) {
+      ctx.strokeStyle = 'rgba(200, 100, 100, 0.4)';
+    }
+    else {
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+    }
+
     if (rightLineX - leftLineX < 3) {
       // If the lines are very close, then just draw a center line.
       var midX = Math.round((leftLineX + rightLineX) / 2);
@@ -432,7 +495,129 @@ class PileupTrack extends React.Component {
     ctx.restore();
   }
 
-  handleSort() {
+  renderCenterLine (
+    ctx: CanvasRenderingContext2D,
+    range: ContigInterval<string>,
+    scale: (num: number) => number
+  ) {
+    var midPoint = Math.floor((range.stop() + range.start()) / 2);
+    this.renderMark(ctx, false, midPoint, scale);
+
+    // Update the flowgram widget
+    if (g_pileup_gui.flowgram) {
+      g_pileup_gui.flowgram.updateFrame(midPoint - 1);
+    }
+  }
+
+  renderCursor(pos: number, y: number) {
+    var
+      ctx = canvasUtils.getContext(this.refs.canvas),
+      interval = SELECTED_READ.read.getInterval().interval,
+      scale = this.getScale(),
+      pxPerLetter = scale(1) - scale(0);
+
+    if (pos >= interval.start && pos <= interval.stop) {
+      ctx.save();
+      ctx.strokeStyle = 'black';
+      ctx.lineWidth = '1px';
+      // The 0.5 hack makes it render exactly 1 pixel thick
+      ctx.strokeRect(Math.round(scale(1 + pos)) + 0.5, y - 0.5, Math.round(pxPerLetter - 1), READ_HEIGHT + 1);
+      ctx.restore();
+    }
+  }
+
+  scrollTo (n: number) {
+    var row;
+    if (n > 5) {
+      row = n - 5;
+    }
+    else {
+      row = 0;
+    }
+    this.refs.canvas.parentNode.parentNode.parentNode.parentNode.scrollTop = yForRow(row);
+  }
+
+  find (spec: string) {
+    var
+      self = this,
+      spec_list, name, flag,
+      genomeRange = this.props.range,
+      range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop),
+      midPoint = Math.floor((range.start() + range.stop()) / 2),
+      vGroups = this.cache.getGroupsOverlapping(range),
+      hit, cursor_x, alignment_center_x,
+      alignmentCenter,
+      scale = this.getScale(),
+      pxPerLetter = scale(1) - scale(0);
+
+    spec_list = spec.split('/');
+    if (spec_list.length === 2) {
+      name = spec_list[0];
+      flag = parseInt(spec_list[1], 10);
+    }
+    else {
+      name = spec;
+    }
+
+    vGroups.some(function (read) {
+      if (
+        read.key === name ||
+        read.key === name + ':' + range.contig // paired reads have a contig ID in their key
+      ) {
+        if (flag) {
+          console.log(flag, read.alignments[0].read.flag);
+          if (read.alignments[0].read.flag === flag) {
+            hit = read;
+            return true;
+          }
+        }
+        else {
+          hit = read;
+          return true;
+        }
+      }
+    });
+    console.log(hit);
+
+    if (hit) {
+      alignmentCenter = Math.floor((hit.span.start() + hit.span.stop()) / 2);
+      alignment_center_x = pxPerLetter * (alignmentCenter - range.start());
+
+      SELECTED_READ = hit.alignments[0];
+      SELECTED_READ.n = hit.row;
+      this.tiles.invalidateAll();
+      this.updateVisualization();
+
+      if (g_pileup_gui.mark) {
+        console.log('moving to ' + g_pileup_gui.mark);
+        cursor_x = Math.floor(pxPerLetter * (g_pileup_gui.mark - 1 - range.interval.start));
+      }
+      else {
+        cursor_x = alignment_center_x;
+      }
+
+      if (pileup.readDataPanel) {
+        pileup.readDataPanel.open(SELECTED_READ.read, midPoint, Math.round(scale.invert(cursor_x)));
+        this.scrollTo(hit.row);
+      }
+
+      console.log('cursor_x', cursor_x, 'canvas center', alignment_center_x, 'mark', g_pileup_gui.mark);
+      // Simulate mouse movement to get the cursors rendered
+      setTimeout(function () { // delay to avoid updateVisualization() erasing the pileup cursor
+        self.handleMouseMove({
+          nativeEvent: {
+            offsetX: cursor_x + 1,
+            offsetY: yForRow(hit.row)
+          }
+        });
+      }, 200);
+
+      return hit;
+    }
+    return null;
+  }
+
+  handleSort () {
     var {start, stop} = this.props.range,
         middle = (start + stop) / 2;
     this.cache.sortReadsAt(this.props.range.contig, middle);
@@ -440,7 +625,7 @@ class PileupTrack extends React.Component {
     this.updateVisualization();
   }
 
-  handleClick(reactEvent: any) {
+  handleClick (reactEvent: any) {
     var ev = reactEvent.nativeEvent,
         x = ev.offsetX,
         y = ev.offsetY;
@@ -449,6 +634,7 @@ class PileupTrack extends React.Component {
 
     var genomeRange = this.props.range,
         range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop),
+        midPoint = Math.floor((range.stop() + range.start()) / 2),
         scale = this.getScale(),
         // If click-tracking gets slow, this range could be narrowed to one
         // closer to the click coordinate, rather than the whole visible range.
@@ -458,14 +644,52 @@ class PileupTrack extends React.Component {
     var vRead = _.find(trackingCtx.hits[0], hit => hit.read);
     var alert = window.alert || console.log;
     if (vRead) {
-      alert(vRead.read.debugString());
+      vRead.n = Math.floor(y / yForRow(1));
+      SELECTED_READ = vRead;
+      this.tiles.invalidateAll();
+      this.updateVisualization();
+      window.setTimeout(() => {
+        this.handleMouseMove({nativeEvent: {offsetX: x, offsetY: y}}); // to update the cursor
+      }, 200); // rendering the cursor early will lead to it getting overwritten by udateVisualization()
+      if (pileup.readDataPanel) {
+        this.scrollTo(vRead.n);
+        pileup.readDataPanel.open(vRead.read, midPoint - 1, Math.floor(scale.invert(x)) - 1);
+      }
+      else {
+        alert(vRead.read.debugString());
+      }
+    }
+  }
+
+  handleMouseMove (reactEvent: any) {
+    var
+      ev = reactEvent.nativeEvent,
+      x = ev.offsetX,
+      scale = this.getScale(),
+      pos = Math.floor(scale.invert(x)),
+      genomeRange,
+      range;
+
+    if (SELECTED_READ) {
+      genomeRange = this.props.range;
+      range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop);
+      this.tiles.invalidateRange(range);
+      this.updateVisualization();
+      this.renderCursor(pos - 1, yForRow(SELECTED_READ.n));
+    }
+
+    if (g_pileup_gui.flowgram) {
+      if (!(this.mouseX && this.mouseX === pos)) {
+        g_pileup_gui.flowgram.refToCursors(pos - 1, true); // true -> check interval
+        this.mouseX = pos;
+      }
     }
   }
 }
 
 PileupTrack.displayName = 'pileup';
 PileupTrack.defaultOptions = {
-  viewAsPairs: false,
+  viewAsPairs: true,
   colorByInsert: true,
   colorByStrand: false
 };

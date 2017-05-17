@@ -30,7 +30,7 @@ class VariantTrack extends React.Component {
   }
 
   render(): any {
-    return <canvas onClick={this.handleClick} />;
+    return <canvas onClick={this.handleClick.bind(this)} />;
   }
 
   componentDidMount() {
@@ -107,6 +107,93 @@ class VariantTrack extends React.Component {
   }
 }
 
+class BlacklistTrack extends VariantTrack {
+  renderScene(ctx: DataCanvasRenderingContext2D) {
+    var range = this.props.range,
+        interval = new ContigInterval(range.contig, range.start, range.stop),
+        variants = this.props.source.getFeaturesInRange(interval),
+        scale = this.getScale(),
+        height = this.props.height,
+        y = height - style.VARIANT_HEIGHT - 1;
+
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.reset();
+    ctx.save();
+
+    // ctx.fillStyle = style.VARIANT_FILL;
+    ctx.strokeStyle = style.VARIANT_STROKE;
+    ctx.font = style.TIGHT_TEXT_STYLE;
+    variants.forEach(variant => {
+      ctx.pushObject(variant);
+      var x = Math.round(scale(variant.position));
+      var type, bstrand, symbol;
+      variant.vcfLine.split('\t')[7].split(';').forEach(chunk => {
+        let [key, value] = chunk.split('=');
+        if (key === 'OID') {
+          type = value.split('.')[0];
+        }
+        if (key === 'BSTRAND') {
+          bstrand = value;
+        }
+      });
+      switch (bstrand) {
+        case 'F':
+          ctx.fillStyle = style.ALIGNMENT_PLUS_STRAND_COLOR;
+          break;
+        case 'R':
+          ctx.fillStyle = style.ALIGNMENT_MINUS_STRAND_COLOR;
+          break;
+        default:
+          ctx.fillStyle = 'white';
+      }
+      switch (type) {
+        case 'SSE_SNP':
+          symbol = 'S';
+          break;
+        case 'SSE_DEL':
+          symbol = 'D';
+          break;
+        case 'SSE_INS':
+          symbol = 'I';
+          break;
+        case 'AMPL_LEFT':
+          symbol = 'L';
+          break;
+        case 'AMPL_RIGHT':
+          symbol = 'R';
+          break;
+        case 'LHP':
+          symbol = 'H';
+      }
+      var width = Math.round(scale(variant.position + 1)) - 1 - x;
+      ctx.fillRect(x - 0.5, y - 0.5, width, style.VARIANT_HEIGHT);
+      ctx.strokeRect(x - 0.5, y - 0.5, width, style.VARIANT_HEIGHT);
+      ctx.fillStyle = style.BLACKLIST_TEXT_COLOR;
+      ctx.fillText(symbol, x + 4, y + style.VARIANT_HEIGHT / 2 + 3);
+      ctx.popObject();
+    });
+
+    ctx.restore();
+  }
+
+  handleClick(reactEvent: any) {
+    var ev = reactEvent.nativeEvent,
+        x = ev.offsetX,
+        y = ev.offsetY,
+        canvas = ReactDOM.findDOMNode(this),
+        ctx = canvasUtils.getContext(canvas),
+        trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
+    this.renderScene(trackingCtx);
+    var variant = trackingCtx.hit && trackingCtx.hit[0];
+    var alert = window.alert || console.log;
+    if (variant) {
+      alert(JSON.stringify(variant));
+    }
+  }
+}
+
 VariantTrack.displayName = 'variants';
+BlacklistTrack.displayName = 'blacklist';
 
 module.exports = VariantTrack;
+module.exports = BlacklistTrack;

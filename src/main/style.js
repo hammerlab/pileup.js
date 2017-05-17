@@ -1,11 +1,11 @@
+'use strict';
+
 /**
  * Central collection of styling settings.
  * Until we figure out a better story around canvas & CSS, they live here.
  *
  * @flow
  */
-
-"use strict";
 
 module.exports = {
   // Colors for individual base pairs
@@ -20,20 +20,22 @@ module.exports = {
 
   // Styles for base pairs which are rendered as letters
   LOOSE_TEXT_STYLE: `24px 'Helvetica Neue', Helvetica, Arial, sans-serif`,
-  TIGHT_TEXT_STYLE: `bold 12px 'Helvetica Neue', Helvetica, Arial, sans-serif`,
+  TIGHT_TEXT_STYLE: `bold 10px 'Helvetica Neue', Helvetica, Arial, sans-serif`,
 
   // Gene track
   GENE_ARROW_SIZE: 4,
   GENE_COLOR: 'blue',  // color of the gene line, exons, text, etc.
   GENE_COMPLEMENT_COLOR: 'white',  // a color visible on top of GENE_COLOR
   GENE_FONT: `'Helvetica Neue', Helvetica, Arial, sans-serif`,
-  GENE_FONT_SIZE: 16,
+  GENE_FONT_SIZE: 12,
   GENE_TEXT_PADDING: 5,  // space between bottom of coding exon & top of gene name
 
   // Pileup track
   ALIGNMENT_COLOR: '#c8c8c8',
-  ALIGNMENT_MINUS_STRAND_COLOR: 'rgb(176, 176, 236)',
-  ALIGNMENT_PLUS_STRAND_COLOR: 'rgb(236, 176, 176)',
+  //ALIGNMENT_MINUS_STRAND_COLOR: 'rgb(176, 176, 236)',
+  ALIGNMENT_MINUS_STRAND_COLOR: 'rgb(207, 204, 243)',
+  //ALIGNMENT_PLUS_STRAND_COLOR: 'rgb(236, 176, 176)',
+  ALIGNMENT_PLUS_STRAND_COLOR: 'rgb(241, 212, 214)',
   DELETE_COLOR: 'black',
   INSERT_COLOR: 'rgb(97, 0, 216)',
 
@@ -61,8 +63,10 @@ module.exports = {
   LOC_FONT_COLOR: 'black',
 
   // Variant Track
-  VARIANT_STROKE: 'blue',
+  VARIANT_STROKE: '#666',
   VARIANT_FILL: '#ddd',
   VARIANT_HEIGHT: 14,
 
+  // Blacklist Track
+  BLACKLIST_TEXT_COLOR: 'black'
 };

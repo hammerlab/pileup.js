@@ -1,0 +1,398 @@
+<html><head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>pileup widget: usage</title>
+
+  <link rel="stylesheet" href="/web/pileup/css/pileup.css">
+</head>
+
+<body class="usage">
+<script src="/web/pileup/lib/pileup.js"></script>
+
+<h3>Usage:</h3>
+<p>
+<span class="usage-gray">{{base_url}}?</span><span class="usage-syntax">[</span>downsample=<span class="usage-arg">fraction</span><span class="usage-gray">;</span><span class="usage-syntax">]</span><b>coords=<span class="usage-arg">contig</span><b>:</b><span class="usage-syntax">[</span><span class="usage-arg">pos</span><span class="usage-syntax">|</span><span class="usage-arg">start</span><b>-</b><span class="usage-arg">end</span><span class="usage-syntax">]</span><span class="usage-arg"></span></b><span class="usage-gray">;</span><span class="usage-syntax"> [</span>filter=<span class="usage-arg">pattern</span><span class="usage-gray">;</span><span class="usage-syntax">]</span><span class="usage-syntax"> [</span>select=<span class="usage-arg">ID</span><span class="usage-gray">;</span><span class="usage-syntax">]</span><span class="usage-syntax">[</span>mark=<span class="usage-arg">pos</span><span class="usage-gray">;</span><span class="usage-syntax">]</span><b>bam=<span class="usage-arg">{absolute path.bam}</span></b><span class="usage-syntax">[</span><span class="usage-gray">;</span>blacklist=<span class="usage-arg">{absolute path.vcf}</span><span class="usage-syntax">]</span>
+</p>
+
+<p>
+  <input id="pileup-bam" name="bam" type="text" size="20" placeholder="/bam-path" required />
+  <input id="pileup-coords" name="coords" type="text" size="20" placeholder="contig:pos[-end]" required />
+  <input id="pileup-mark" type="number" min="0" size="12" placeholder="mark position" />
+  <button onclick="run()">Run</button>
+  <br />
+  <input id="pileup-select" type="text" size="50" placeholder="select read ID" />
+  <br />
+  <input id="pileup-filter" type="text" size="50" placeholder="egrep filter regex" />
+  <br />
+  <select id="pileup-downsample">
+    <option value="1" selected>no downsampling</option>
+    <option value="0.5">0.5</option>
+    <option value="0.2">0.2</option>
+    <option value="0.1">0.1</option>
+    <option value="0.05">0.05</option>
+    <option value="0.02">0.02</option>
+    <option value="0.01">0.01</option>
+    <option value="0.01">0.005</option>
+  </select>
+  <br />
+  <input id="pileup-blacklist" type="text" size="20" placeholder="/vcf-blacklist-path" />
+</p>
+
+<h4>Required arguments:</h4>
+
+<ul>
+  <li><b>coords</b>
+  <p>
+  If coordinates are given as a range (<code>contig:start-end</code>) and the <b>mark</b> argument is absent, the pileup cursor will mark the center of the range and it will remain centered while scrolling horizontally.
+  </p>
+  <p>
+  If a single position is supplied (<code>contig:pos</code>), the range including 10 positions on either side of the specified coordinate will be displayed and the cursor will be bound to that position while scrolling, unless a different mark coordinate is given by the <b>mark</b> argument.
+  </p>
+  </li>
+
+  <li><b>bam</b>
+  <p>
+  Absolute path to the BAM file (<em>e.g.</em> <code>/rhome/jveitch/vc_testing/ts-12653/test.bam</code>). The file must be reachable from this server (<code>{{server}}</code>).
+  </p>
+  </li>
+</ul>
+
+
+<h4>Optional arguments:</h4>
+<ul>
+  <li><b>downsample</b>
+  <p>
+  This argument must be given as a fraction of 1. It is passed unchanged to <b>samtools</b>.
+  </p>
+  <p>
+  Downsampling may be good while viewing tall pileups. It may also be <em>required</em> to avoid a problem in the browser canvas where it fails to render too many elements. The symptom for this is blank canvas. Other conditions causing blank canvas are possible, but a sure way to tell is to check the coverage track, which will be rendered regardless of how many reads are received. If it shows more than about 2k reads and the pileup canvas is blank, try downsampling. Do the same if the canvas turns blank while scrolling horizontally. There is no fixed threshold for failure, but it is generally between 2k and 3k reads.
+  </p>
+  </li>
+  <li><b>filter</b>
+  <p>
+  If this argument is set, the output of <b>samtools view</b> is passed through <b><a href="https://www.gnu.org/software/findutils/manual/html_node/find_html/egrep-regular-expression-syntax.html">egrep</a></b> with this expression as the only argument.
+  </p>
+  </li>
+  <li><b>select</b>
+  <p>
+  If this argument is set, the pileup will be scrolled to make the read visible, highlight it, and open its flowgram.
+  </p>
+  </li>
+  <li><b>mark</b>
+  <p>
+  A single integer coordinate of the position to be marked. Without this argument, the mark will be placed on the central position in the range and will remain at the center while scrolling.
+  </p>
+  </li>
+  </li>
+  <li><b>blacklist</b>
+  <p>
+  Abosolute path to the VCF file containing blacklist entries. If it is a combined hotspots+blacklist file, hotspots are ignored. Blacklist positions are displayed on a separate track above the pileup, marked with strand color if single-stranded or white if both strands are blacklisted.
+  </p>
+  </li>
+</ul>
+
+<script>
+function isEmpty (obj) {
+  for (var k in obj) {
+    if (obj.hasOwnProperty(k)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function isInt(value) {
+  return !isNaN(value) && (function(x) {
+    return (x | 0) === x;
+  })(parseFloat(value))
+}
+
+function request(method, url) {
+  return new Promise(function (resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.open(method, url);
+    xhr.onload = resolve;
+    xhr.onerror = reject;
+    xhr.send();
+  });
+}
+
+function run () {
+  var
+    bam = document.getElementById("pileup-bam").value,
+    coords = document.getElementById("pileup-coords").value,
+    downsample_input = document.getElementById("pileup-downsample"),
+    downsample = downsample_input.options[downsample_input.selectedIndex].value,
+    filter = document.getElementById("pileup-filter").value,
+    select = document.getElementById("pileup-select").value,
+    mark = document.getElementById("pileup-mark").value,
+    blacklist = document.getElementById("pileup-blacklist").value,
+    url = 'bam=' + bam + ';coords=' + coords;
+
+  if (bam.length < 4) {
+   return false;
+  }
+
+  if (coords.length < 3) {
+   return false;
+  }
+
+  if (!(downsample === '1')) {
+    url += ';downsample=' + downsample;
+  }
+  if (mark !== '') {
+    url += ';mark=' + mark;
+  }
+  if (select !== '') {
+    url += ';select=' + select;
+  }
+  if (blacklist !== '') {
+    url += ';blacklist=' + blacklist;
+  }
+  window.location.search = url;
+}
+
+window.onkeydown = function (e) {
+  if (e.which == 13 || e.keyCode == 13) {
+    run();
+  }
+  return true;
+};
+
+
+var bam_event = new CustomEvent("bam info loaded");
+
+var contig = {};
+var coord_start, coord_end;
+
+var bam_input = document.getElementById('pileup-bam');
+var coords_input = document.getElementById('pileup-coords');
+var mark_input = document.getElementById('pileup-mark');
+var blacklist_input = document.getElementById('pileup-blacklist');
+
+var bam_input_listener_active = false;
+var bam_validate_timer = null;
+bam_input.oninput = function (e) {
+  if (bam_input_listener_active) {
+    return;
+  }
+
+  if (
+    typeof e.which == 'number' &&
+    e.which > 0 && (
+      e.ctrlKey || e.metaKey || e.altKey || e.shiftKey
+    )
+  ) {
+    return;
+  }
+
+  bam_input.classList.remove("valid");
+  bam_input.classList.remove("invalid");
+  bam_input_listener_active = true;
+  setTimeout(function () {
+    bam_input.size = ( bam_input.value.length > 20 ) ? bam_input.value.length : 20;
+    bam_input_listener_active = false;
+    if (bam_validate_timer) {
+      clearTimeout(bam_validate_timer);
+      bam_validate_timer = null;
+    }
+    bam_validate_timer = setTimeout(function () {
+      if (bam_input.value !== '') {
+        request('GET', '/web/bam-index.cgi?file=' + bam_input.value)
+        .then(
+          function (e) {
+            if (e.target.status === 200) {
+              bam_input.classList.remove("invalid");
+              bam_input.classList.add("valid");
+              coords_input.disabled = false;
+              e.target.response.split("\n").forEach(function (line) {
+                var t = line.split("\t");
+                if (t[0] !== "*") {
+                  contig[t[0]] = parseInt(t[1], 10);
+                }
+                // if (t[0] === parseInt(t[0], 10) && t[0] >= 1 && t[0] <= 22) {
+                if (isInt(t[0])) {
+                  contig['chr' + t[0]] = parseInt(t[1], 10);
+                }
+              });
+              document.dispatchEvent(bam_event);
+            }
+            else {
+              bam_input.classList.add("invalid");
+              coords_input.disabled = true;
+            }
+          },
+          function (e) {
+            alert('could not retrieve BAM index');
+          }
+        );
+      }
+    }, 700);
+  }, 300);
+}; // bam input listener
+
+
+var blacklist_input_listener_active = false;
+var blacklist_validate_timer = null;
+blacklist_input.oninput = function (e) {
+  if (blacklist_input_listener_active) {
+    return;
+  }
+
+  if (
+    typeof e.which == 'number' &&
+    e.which > 0 && (
+      e.ctrlKey || e.metaKey || e.altKey || e.shiftKey
+    )
+  ) {
+    return;
+  }
+
+  blacklist_input.classList.remove("valid");
+  blacklist_input.classList.remove("invalid");
+  blacklist_input_listener_active = true;
+  setTimeout(function () {
+    blacklist_input.size = ( blacklist_input.value.length > 20 ) ? blacklist_input.value.length : 20;
+    blacklist_input_listener_active = false;
+    if (blacklist_validate_timer) {
+      clearTimeout(blacklist_validate_timer);
+      blacklist_validate_timer = null;
+    }
+    blacklist_validate_timer = setTimeout(function () {
+      if (blacklist_input.value !== '') {
+        request('GET', '/web/file-stat.cgi?file=' + blacklist_input.value)
+        .then(
+          function (e) {
+            if (e.target.status === 200) {
+              blacklist_input.classList.remove("invalid");
+              blacklist_input.classList.add("valid");
+              e.target.response.split("\n").forEach(function (line) {
+                var t = line.split("\t");
+                if (t[0] !== "*") {
+                  contig[t[0]] = parseInt(t[1], 10);
+                }
+              });
+            }
+            else {
+              blacklist_input.classList.add("invalid");
+            }
+          },
+          function (e) {
+            alert('could not retrieve blacklist index');
+          }
+        );
+      }
+    }, 700);
+  }, 300);
+}; // blacklist input listener
+
+
+var coords_input_listener_active = false;
+coords_input.oninput = function (e) {
+  if (coords_input_listener_active) {
+    return;
+  }
+
+  if (
+    typeof e.which == 'number' &&
+    e.which > 0 && (
+      e.ctrlKey || e.metaKey || e.altKey || e.shiftKey
+    )
+  ) {
+    return;
+  }
+
+  coords_input.classList.remove("valid");
+  coords_input.classList.remove("invalid");
+  coords_input_listener_active = true;
+  setTimeout(function () {
+    coords_input.size = ( coords_input.value.length > 20 ) ? coords_input.value.length : 20;
+    coords_input_listener_active = false;
+
+    if (coords_input.value !== '' && !isEmpty(contig) ) {
+      var valid;
+      var re = new RegExp('^(' + Object.keys(contig).join('|') + '):([0-9]+)(-([0-9]+))?$');
+      var match = coords_input.value.match(re);
+      if (match) {
+        var c = match[1];
+        coord_start = parseInt(match[2], 10);
+
+        valid = true
+        if (match[4]) {
+          coord_end = parseInt(match[4], 0);
+        }
+        if (coord_start > contig[c]) {
+          valid = false;
+        }
+
+        if (coord_end && (coord_end > contig[c]) || coord_end <= coord_start) {
+          valid = false;
+        }
+
+        if (!coord_end) {
+          coord_start -= 10;
+          coord_end = coord_start + 21;
+        }
+      }
+      else {
+        valid = false
+      }
+
+      if (valid) {
+        coords_input.classList.remove("invalid");
+        coords_input.classList.add("valid");
+      }
+      else {
+        coords_input.classList.add("invalid");
+      }
+    }
+  }, 300);
+};
+
+var mark_input_listener_active = false;
+mark_input.oninput = function (e) {
+  if (mark_input_listener_active) {
+    return;
+  }
+
+  if (
+    typeof e.which == 'number' &&
+    e.which > 0 && (
+      e.ctrlKey || e.metaKey || e.altKey || e.shiftKey
+    )
+  ) {
+    return;
+  }
+
+  mark_input.classList.remove("valid");
+  mark_input.classList.remove("invalid");
+  mark_input_listener_active = true;
+  setTimeout(function () {
+    mark_input.size = ( mark_input.value.length > 12 ) ? mark_input.value.length : 12;
+    mark_input_listener_active = false;
+    if (mark_input.value !== '') {
+      if (mark_input.value >= coord_start && mark_input.value <= coord_end) {
+        mark_input.classList.remove("invalid");
+        mark_input.classList.add("valid");
+      }
+      else {
+        mark_input.classList.add("invalid");
+      }
+    }
+  }, 300);
+};
+
+// The load event takes care of the browser navigating back to this page
+window.onload = function (e) {
+  // Validators in other inputs depend on bam input.
+  // An event is trigered to call them when bam data are ready.
+  bam_input.oninput(e);
+};
+
+document.addEventListener("bam info loaded", function(e) {
+  coords_input.oninput(e);
+  mark_input.oninput(e);
+});
+
+</script>
+
+</body></html>

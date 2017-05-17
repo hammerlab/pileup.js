@@ -23,7 +23,7 @@ export type Track = {
   data: Object;  // This is a DataSource object
   name?: string;
   cssClass?: string;
-  isReference?: boolean
+  isReference?: boolean;
 }
 
 export type VisualizedTrack = {
