@@ -1,4 +1,5 @@
 #!/bin/bash
+(set -o igncr) 2>/dev/null && set -o igncr; # For Cygwin on Windows compatibility
 # This is a custom build of D3.
 # See https://github.com/hammerlab/pileup.js/issues/275
 
@@ -6,7 +7,7 @@
 # https://github.com/facebook/flow/issues/521
 
 mkdir -p src/lib
-smash \
+node_modules/.bin/smash \
     node_modules/d3/src/start.js \
     node_modules/d3/src/behavior/drag.js \
     node_modules/d3/src/end.js \
