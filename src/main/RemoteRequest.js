@@ -11,57 +11,62 @@ import ContigInterval from './ContigInterval';
 
 class RemoteRequest {
   url: string;
-  cache: Object;
+  basePairsPerFetch: number;
   numNetworkRequests: number;  // track this for debugging/testing
 
-  constructor(url: string) {
-    this.cache = require('memory-cache');
+  constructor(url: string, basePairsPerFetch: number) {
     this.url = url;
+    this.basePairsPerFetch = basePairsPerFetch;
     this.numNetworkRequests = 0;
   }
 
-  get(contig: string, start: number, stop: number): Q.Promise<Object> {
-    var length = stop - start;
+  expandRange(range: ContigInterval<string>): ContigInterval<string> {
+    var roundDown = x => x - x % this.basePairsPerFetch;
+    var newStart = Math.max(1, roundDown(range.start())),
+        newStop = roundDown(range.stop() + this.basePairsPerFetch - 1);
+
+    return new ContigInterval(range.contig, newStart, newStop);
+  }
+
+  getFeaturesInRange(range: ContigInterval<string>, modifier: string = ""): Q.Promise<Object> {
+    var expandedRange = this.expandRange(range);
+    return this.get(expandedRange, modifier);
+  }
+
+  get(range: ContigInterval<string>, modifier: string = ""): Q.Promise<Object> {
+
+    var length = range.stop() - range.start();
     if (length <= 0) {
       return Q.reject(`Requested <0 interval (${length}) from ${this.url}`);
+    } else if (length > 5000000) {
+      throw `Monster request: Won't fetch ${length} sized ranges from ${this.url}`;
     }
-
-    // First check the cache.
-    var contigInterval = new ContigInterval(contig, start, stop);
-    var buf = this.cache.get(contigInterval);
-    if (buf) {
-      return Q.when(buf);
-    }
-
-    // Need to fetch from the network.
-    return this.getFromNetwork(contig, start, stop);
+    // get endpoint
+    var endpoint = this.getEndpointFromContig(range.contig, range.start(), range.stop(), modifier);
+    // Fetch from the network
+    return this.getFromNetwork(endpoint);
   }
 
   /**
    * Request must be of form "url/contig?start=start&end=stop"
   */
-  getFromNetwork(contig: string, start: number, stop: number): Q.Promise<Object> {
-    var length = stop - start;
-    if (length > 5000000) {
-      throw `Monster request: Won't fetch ${length} sized ranges from ${this.url}`;
-    }
+  getFromNetwork(endpoint: string): Q.Promise<Object> {
     var xhr = new XMLHttpRequest();
-    var endpoint = this.getEndpointFromContig(contig, start, stop);
     xhr.open('GET', endpoint);
     xhr.responseType = 'json';
     xhr.setRequestHeader('Content-Type', 'application/json');
 
     return this.promiseXHR(xhr).then(json => {
       // extract response from promise
-      var buffer = json[0];
-      var contigInterval = new ContigInterval(contig, start, stop);
-      this.cache.put(contigInterval, buffer);
-      return buffer;
+      return json[0];
     });
   }
 
-  getEndpointFromContig(contig: string, start: number, stop: number): string {
-    return `${this.url}/${contig}?start=${start}&end=${stop}`;
+  getEndpointFromContig(contig: string, start: number, stop: number, modifier: string = ""): string {
+    if (modifier.length < 1)
+      return `${this.url}/${contig}?start=${start}&end=${stop}`;
+    else
+      return `${this.url}/${contig}?start=${start}&end=${stop}&${modifier}`;
   }
 
   // Wrapper to convert XHRs to Promises.
