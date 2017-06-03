@@ -25,15 +25,25 @@
 }
 .track-label > span {
   padding-right: 5px;
+  width: 100px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  right: 0;
 }
+
 /* bottom-justify these track labels */
 .track.reference .track-label > span,
 .track.variants .track-label > span
 {
-  position: absolute;
   bottom: 0;
-  right: 0;
 }
+
+.track-label > span:hover {
+  overflow: visible !important;
+}
+
 .track-content {
   flex: 1;  /* stretch to fill remaining space */
   overflow-y: auto;
