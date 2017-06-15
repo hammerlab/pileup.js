@@ -19,6 +19,9 @@ import BamDataSource from './sources/BamDataSource';
 import GA4GHDataSource from './sources/GA4GHDataSource';
 import EmptySource from './sources/EmptySource';
 
+// Data sources from json
+import GA4GHJson from './json/GA4GHJson';
+
 // Visualizations
 import CoverageTrack from './viz/CoverageTrack';
 import GenomeTrack from './viz/GenomeTrack';
@@ -163,6 +166,7 @@ var pileup = {
   formats: {
     bam: BamDataSource.create,
     ga4gh: GA4GHDataSource.create,
+    json: GA4GHJson.create,
     vcf: VcfDataSource.create,
     twoBit: TwoBitDataSource.create,
     bigBed: BigBedDataSource.create,
