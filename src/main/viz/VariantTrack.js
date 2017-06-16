@@ -124,52 +124,79 @@ class BlacklistTrack extends VariantTrack {
     ctx.strokeStyle = style.VARIANT_STROKE;
     ctx.font = style.TIGHT_TEXT_STYLE;
     variants.forEach(variant => {
+      console.log(variant);
       ctx.pushObject(variant);
       var x = Math.round(scale(variant.position));
-      var type, bstrand, symbol;
-      variant.vcfLine.split('\t')[7].split(';').forEach(chunk => {
-        let [key, value] = chunk.split('=');
-        if (key === 'OID') {
-          type = value.split('.')[0];
-        }
-        if (key === 'BSTRAND') {
-          bstrand = value;
-        }
-      });
-      switch (bstrand) {
-        case 'F':
-          ctx.fillStyle = style.ALIGNMENT_PLUS_STRAND_COLOR;
-          break;
-        case 'R':
-          ctx.fillStyle = style.ALIGNMENT_MINUS_STRAND_COLOR;
-          break;
-        default:
-          ctx.fillStyle = 'white';
-      }
-      switch (type) {
-        case 'SSE_SNP':
-          symbol = 'S';
-          break;
-        case 'SSE_DEL':
-          symbol = 'D';
-          break;
-        case 'SSE_INS':
-          symbol = 'I';
-          break;
-        case 'AMPL_LEFT':
-          symbol = 'L';
-          break;
-        case 'AMPL_RIGHT':
-          symbol = 'R';
-          break;
-        case 'LHP':
-          symbol = 'H';
-      }
       var width = Math.round(scale(variant.position + 1)) - 1 - x;
-      ctx.fillRect(x - 0.5, y - 0.5, width, style.VARIANT_HEIGHT);
-      ctx.strokeRect(x - 0.5, y - 0.5, width, style.VARIANT_HEIGHT);
-      ctx.fillStyle = style.BLACKLIST_TEXT_COLOR;
-      ctx.fillText(symbol, x + 4, y + style.VARIANT_HEIGHT / 2 + 3);
+      var type, bstrand, symbol;
+      var vcfdata = variant.vcfLine.split('\t')[7];
+      if (vcfdata.match(/OID=/)) { // Ion Torrent black list
+        variant.vcfLine.split('\t')[7].split(';').forEach(chunk => {
+          let [key, value] = chunk.split('=');
+          if (key === 'OID') {
+            type = value.split('.')[0];
+          }
+          if (key === 'BSTRAND') {
+            bstrand = value;
+          }
+        });
+        switch (bstrand) {
+          case 'F':
+            ctx.fillStyle = style.ALIGNMENT_PLUS_STRAND_COLOR;
+          break;
+          case 'R':
+            ctx.fillStyle = style.ALIGNMENT_MINUS_STRAND_COLOR;
+          break;
+          default:
+            ctx.fillStyle = 'white';
+        }
+        switch (type) {
+          case 'SSE_SNP':
+            symbol = 'S';
+          break;
+          case 'SSE_DEL':
+            symbol = 'D';
+          break;
+          case 'SSE_INS':
+            symbol = 'I';
+          break;
+          case 'AMPL_LEFT':
+            symbol = 'L';
+          break;
+          case 'AMPL_RIGHT':
+            symbol = 'R';
+          break;
+          case 'LHP':
+            symbol = 'H';
+        }
+        ctx.fillRect(x - 0.5, y - 0.5, width, style.VARIANT_HEIGHT);
+        ctx.strokeRect(x - 0.5, y - 0.5, width, style.VARIANT_HEIGHT);
+        ctx.fillStyle = style.BLACKLIST_TEXT_COLOR;
+        ctx.fillText(symbol, x + 4, y + style.VARIANT_HEIGHT / 2 + 3);
+      }
+      else {
+        // Presumbaly, it is a Tempus black list
+        var vcf = {strand: variant.vcfLine.split('\t')[6]};
+        vcfdata.split(';').forEach(chunk => {
+          let [key, value] = chunk.split('=');
+          vcf[key] = value;
+        });
+        ctx.globalAlpha = 0.65;
+        switch (vcf.strand) {
+          case 'F':
+            ctx.fillStyle = style.ALIGNMENT_PLUS_STRAND_COLOR;
+            ctx.fillRect(x - 0.5, y - 0.5, width, style.VARIANT_HEIGHT);
+          break;
+          case 'R':
+            ctx.fillStyle = style.ALIGNMENT_MINUS_STRAND_COLOR;
+            ctx.fillRect(x - 0.5, y - 0.5, width, style.VARIANT_HEIGHT);
+          break;
+          default:
+            ctx.fillStyle = 'white';
+        }
+        ctx.strokeRect(x - 0.5, y - 0.5, width, style.VARIANT_HEIGHT);
+        ctx.globalAlpha = 1.0;
+      }
       ctx.popObject();
     });
 

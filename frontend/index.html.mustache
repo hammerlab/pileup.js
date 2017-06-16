@@ -112,12 +112,23 @@
       {
         viz: pileup.viz.regions(),
         data: pileup.formats.bigBedRegion({
-          // url: '/web/data/OCP.20150630.designed-trimmed.bb'
-          // url: '/web/data/POLARIS_XPLORA_NGS_MANIFEST.txt.1.0.0_with_genename.bb'
-          // url: '/web/data/test.bb'
           url: '/web/data/exons.bb'
         }),
-        name: 'exon'
+        name: 'Exons'
+      },
+      {
+        viz: pileup.viz.regions(),
+        data: pileup.formats.bigBedRegion({
+          url: '/web/data/exome-targets.bb'
+        }),
+        name: 'Exome targets'
+      },
+      {
+        viz: pileup.viz.regions(),
+        data: pileup.formats.bigBedRegion({
+          url: '/web/data/mask.bb'
+        }),
+        name: 'Repeat Masker'
       }
     );
   }
@@ -125,12 +136,24 @@
   sources.push (
   {{#blacklist}}
     {
-      // viz: pileup.viz.blacklist(),
-      // data: pileup.formats.vcf({
       viz: pileup.viz.regions(),
       data: pileup.formats.bigBedRegion({
         url: '/web/data/{{url}}'
         // url: '/web/file.cgi?file={{url}}'
+      }),
+      name: 'Repeat'
+    },
+    {
+      viz: pileup.viz.regions(),
+      data: pileup.formats.bigBedRegion({
+        url: '/web/data/mask.bb'
+      }),
+      name: 'Repeat Masker'
+    },
+    {
+      viz: pileup.viz.blacklist(),
+      data: pileup.formats.vcf({
+        url: '/web/data/blacklist-xo-manual.vcf'
       }),
       name: 'Black list'
     },
