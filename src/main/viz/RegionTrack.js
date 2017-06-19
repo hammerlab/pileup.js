@@ -12,6 +12,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'underscore';
 import shallowEquals from 'shallow-equals';
+import deepEqual from 'assert';
 
 import Interval from '../Interval';
 import d3utils from './d3utils';
@@ -80,8 +81,19 @@ class RegionTrack extends React.Component {
   }
 
   componentDidUpdate(prevProps: any, prevState: any) {
-    if (!shallowEquals(prevProps, this.props) ||
-        !shallowEquals(prevState, this.state)) {
+    if (!shallowEquals(prevProps, this.props) || !shallowEquals(prevState, this.state)) {
+      var range = this.props.range;
+      var prevRange = prevProps.range;
+      var ci = new ContigInterval(range.contig, range.start, range.stop);
+      var regions = this.props.source.getRegionsInRange(ci)
+      ci = new ContigInterval(prevRange.contig, prevRange.start, prevRange.stop);
+      var prevRegions = this.props.source.getRegionsInRange(ci)
+
+      if (JSON.stringify(prevRegions) !== JSON.stringify(regions)) { // instead of deep compare, which did not work
+        // The idea here is that when a reagion scrolls into view (or out), the region lists in the two states are not equal.
+        // Without this hack, scrolling or zooming out does not render new regions that where not visible at initial rendering.
+        this.setState({regions: regions});
+      }
       this.updateVisualization();
     }
   }
@@ -172,8 +184,9 @@ class RegionTrack extends React.Component {
         xScale = this.getScale(),
         pos = Math.floor(xScale.invert(x)) - 1;
     */
-
-    copyToClipboard(this.state.regions[0].name);
+    if (this.state.regions[0] && this.state.regions[0].name) {
+      copyToClipboard(this.state.regions[0].name);
+    }
   }
 }
 

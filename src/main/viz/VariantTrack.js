@@ -124,7 +124,6 @@ class BlacklistTrack extends VariantTrack {
     ctx.strokeStyle = style.VARIANT_STROKE;
     ctx.font = style.TIGHT_TEXT_STYLE;
     variants.forEach(variant => {
-      console.log(variant);
       ctx.pushObject(variant);
       var x = Math.round(scale(variant.position));
       var width = Math.round(scale(variant.position + 1)) - 1 - x;
