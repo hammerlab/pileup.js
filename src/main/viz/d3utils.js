@@ -72,7 +72,7 @@ function sizeCanvas(el: HTMLCanvasElement, width: number, height: number) {
   }
   */
   el.width = width;
-  el.height = height + 50;
+  el.height = height;
   if (el.height > 32767) {
     el.height = 32767;
   }
