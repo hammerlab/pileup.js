@@ -11,7 +11,6 @@ import type {VizProps} from '../VisualizationWrapper';
 import type {Scale} from './d3utils';
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 
 import d3utils from './d3utils';
 import shallowEquals from 'shallow-equals';
@@ -133,10 +132,11 @@ var Popup = React.createClass({
   }
 });
 
+
 class BlacklistTrack extends VariantTrack {
   constructor(props) {
-    super(props)
-    this.state = {isPopupOpen: false}
+    super(props);
+    this.state = {isPopupOpen: false};
   }
 
   render(): any {
@@ -147,7 +147,7 @@ class BlacklistTrack extends VariantTrack {
             Blacklist entry content
         </Popup>
       </div>
-    )
+    );
   }
 
 
@@ -257,7 +257,6 @@ class BlacklistTrack extends VariantTrack {
     var alert = window.alert || console.log;
     if (variant) {
       // alert(JSON.stringify(variant));
-
     }
   }
 
