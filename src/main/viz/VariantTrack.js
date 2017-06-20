@@ -30,7 +30,7 @@ class VariantTrack extends React.Component {
   }
 
   render(): any {
-    return <canvas onClick={this.handleClick.bind(this)} />;
+    return <canvas ref='canvas' onClick={this.handleClick.bind(this)} />;
   }
 
   componentDidMount() {
@@ -53,7 +53,7 @@ class VariantTrack extends React.Component {
   }
 
   updateVisualization() {
-    var canvas = ReactDOM.findDOMNode(this),
+    var canvas = this.refs.canvas,
         {width, height} = this.props;
 
     // Hold off until height & width are known.
@@ -95,7 +95,7 @@ class VariantTrack extends React.Component {
     var ev = reactEvent.nativeEvent,
         x = ev.offsetX,
         y = ev.offsetY,
-        canvas = ReactDOM.findDOMNode(this),
+        canvas = this.refs.canvas,
         ctx = canvasUtils.getContext(canvas),
         trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
     this.renderScene(trackingCtx);
@@ -107,7 +107,50 @@ class VariantTrack extends React.Component {
   }
 }
 
+var Popup = React.createClass({
+  render: () => null,
+
+  domNode: null,
+
+  componentDidMount() {
+    this.domNode = document.getElementById('blacklist-popup');
+    this.componentDidUpdate();
+  },
+
+  componentDidUpdate() {
+    React.render(
+      <div {...this.props}>{this.props.children}</div>,
+      this.domNode
+    );
+  },
+
+  open() {
+    this.domNode.style.display = 'block';
+  },
+
+  close() {
+    this.domNode.style.display = 'none';
+  }
+});
+
 class BlacklistTrack extends VariantTrack {
+  constructor(props) {
+    super(props)
+    this.state = {isPopupOpen: false}
+  }
+
+  render(): any {
+    return (
+      <div>
+        <canvas ref="canvas" onMouseMove={this.handleMouseMove.bind(this)} onMouseLeave={this.handleMouseLeave.bind(this)} />
+        <Popup ref="popup">
+            Blacklist entry content
+        </Popup>
+      </div>
+    )
+  }
+
+
   renderScene(ctx: DataCanvasRenderingContext2D) {
     var range = this.props.range,
         interval = new ContigInterval(range.contig, range.start, range.stop),
@@ -206,15 +249,42 @@ class BlacklistTrack extends VariantTrack {
     var ev = reactEvent.nativeEvent,
         x = ev.offsetX,
         y = ev.offsetY,
-        canvas = ReactDOM.findDOMNode(this),
+        canvas = this.refs.canvas,
         ctx = canvasUtils.getContext(canvas),
         trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
     this.renderScene(trackingCtx);
     var variant = trackingCtx.hit && trackingCtx.hit[0];
     var alert = window.alert || console.log;
     if (variant) {
-      alert(JSON.stringify(variant));
+      // alert(JSON.stringify(variant));
+
     }
+  }
+
+  handleMouseMove(reactEvent: any) {
+    var ev = reactEvent.nativeEvent,
+        x = ev.offsetX,
+        y = ev.offsetY,
+        canvas = this.refs.canvas,
+        ctx = canvasUtils.getContext(canvas),
+        trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
+
+    this.renderScene(trackingCtx);
+    var variant = trackingCtx.hit && trackingCtx.hit[0];
+    var alert = window.alert || console.log;
+    if (variant) {
+      console.log(variant);
+      this.refs.popup.open();
+      this.refs.popup.domNode.style.left = reactEvent.pageX;
+      this.refs.popup.domNode.style.top = reactEvent.pageY;
+    }
+    else {
+      this.refs.popup.close();
+    }
+  }
+
+  handleMouseLeave(reactEvent: any) {
+    this.refs.popup.close();
   }
 }
 

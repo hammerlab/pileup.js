@@ -37,7 +37,7 @@
 }
 .track-content {
   flex: 1;  /* stretch to fill remaining space */
-  overflow-y: auto;
+  overflow-y: visible;
   overflow-x: hidden;
   position: relative;
 }
