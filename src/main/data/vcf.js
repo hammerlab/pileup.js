@@ -1,7 +1,7 @@
 /**
  * Fetcher/parser for VCF files.
  * This makes very little effort to parse out details from VCF entries. It just
- * extracts CONTIG, POSITION, REF and ALT.
+ * extracts CONTIG, POSITION, REF, ALT, QUAL, and FILTER.
  *
  * @flow
  */
@@ -16,6 +16,8 @@ export type Variant = {
   position: number;
   ref: string;
   alt: string;
+  qual: number;
+  filter: string;
   vcfLine: string;
 }
 
@@ -47,6 +49,8 @@ function extractVariant(vcfLine: string): Variant {
     position: Number(parts[1]),
     ref: parts[3],
     alt: parts[4],
+    qual: parts[5],
+    filter: parts[6],
     vcfLine
   };
 }

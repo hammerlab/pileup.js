@@ -35,7 +35,7 @@ function expandRange(range: ContigInterval<string>) {
 }
 
 function variantKey(v: Variant): string {
-  return `${v.contig}:${v.position}`;
+  return `${v.contig}:${v.position}:${v.ref}:${v.alt}:${v.filter}`;
 }
 
 
