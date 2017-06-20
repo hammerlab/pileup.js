@@ -256,7 +256,7 @@ class BlacklistTrack extends VariantTrack {
     var variant = trackingCtx.hit && trackingCtx.hit[0];
     var alert = window.alert || console.log;
     if (variant) {
-      // alert(JSON.stringify(variant));
+      alert(JSON.stringify(variant));
     }
   }
 
@@ -270,7 +270,6 @@ class BlacklistTrack extends VariantTrack {
 
     this.renderScene(trackingCtx);
     var variant = trackingCtx.hit && trackingCtx.hit[0];
-    var alert = window.alert || console.log;
     if (variant) {
       console.log(variant);
       this.refs.popup.open();
