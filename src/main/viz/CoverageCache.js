@@ -80,6 +80,11 @@ class CoverageCache {
         start = range.start(),
         stop = range.stop();
 
+    var ref_str;
+    var alt_str;
+    var allele;
+    var bin; // pointer to a bin in this.refToCounts (via var counts)
+
     for (var pos = start; pos <= stop; pos++) {
       let c = counts[pos];
       if (!c) {
@@ -90,7 +95,7 @@ class CoverageCache {
     }
 
     for (var mm of opInfo.mismatches) {
-      var bin = counts[mm.pos];
+      bin = counts[mm.pos];
       var mismatches;
       if (bin.mismatches) {
         mismatches = bin.mismatches;
@@ -109,13 +114,13 @@ class CoverageCache {
 
     for (var op of opInfo.ops) {
       if (op.op === 'I') {
-        var ref_str = this.referenceSource.getRangeAsString({
+        ref_str = this.referenceSource.getRangeAsString({
           contig: ref_str,
           start: op.pos - 1,
           stop: op.pos - 1
         });
-        var alt_str = read._seq.substr(op.qpos - 1, op.length + 1);
-        var allele = ref_str + '>' + alt_str;
+        alt_str = read._seq.substr(op.qpos - 1, op.length + 1);
+        allele = ref_str + '>' + alt_str;
         for (let p = op.pos - 1; p <= op.pos; p++) {
           bin = counts[p];
           var insertions;
@@ -138,7 +143,7 @@ class CoverageCache {
         alt_str = ref_str.substr(0, 1);
         allele = ref_str + '>' + alt_str;
         for (let p = op.pos; p < op.pos + op.length; p++) {
-          var bin = counts[p];
+          bin = counts[p];
           var deletions;
           if (bin.deletions) {
             deletions = bin.deletions;
