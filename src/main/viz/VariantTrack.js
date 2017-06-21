@@ -11,6 +11,9 @@ import type {VizProps} from '../VisualizationWrapper';
 import type {Scale} from './d3utils';
 
 import React from 'react';
+import Portal from 'react-portal';
+import Reactable from 'reactable';
+
 
 import d3utils from './d3utils';
 import shallowEquals from 'shallow-equals';
@@ -107,32 +110,28 @@ class VariantTrack extends React.Component {
   }
 }
 
-var Popup = React.createClass({
-  render: () => null,
+// This extra class creates a very convoluted portal DOM structure,
+// but it works and I will not optimize it now
+export class BlacklistPopup extends React.Component {
+  render() {
+    const style = {
+      position: 'absolute',
+      top: this.props.popupTop,
+      left: this.props.popupLeft,
+      width: this.props.width,
+      border: '1px solid gray',
+      background: '#ffffcc',
+      margin: 10,
+      padding: 10,
+    };
 
-  domNode: null,
-
-  componentDidMount() {
-    this.domNode = document.getElementById('blacklist-popup');
-    this.componentDidUpdate();
-  },
-
-  componentDidUpdate() {
-    React.render(
-      <div {...this.props}>{this.props.children}</div>,
-      this.domNode
+    return (
+      <div style={style}>
+      {this.props.children}
+      </div>
     );
-  },
-
-  open() {
-    this.domNode.style.display = 'block';
-  },
-
-  close() {
-    this.domNode.style.display = 'none';
   }
-});
-
+}
 
 class BlacklistTrack extends VariantTrack {
   constructor(props) {
@@ -144,9 +143,12 @@ class BlacklistTrack extends VariantTrack {
     return (
       <div>
         <canvas ref="canvas" onMouseMove={this.handleMouseMove.bind(this)} onMouseLeave={this.handleMouseLeave.bind(this)} />
-        <Popup ref="popup">
-            Blacklist entry content
-        </Popup>
+        <Portal ref="portal">
+          <BlacklistPopup ref="popup" popupLeft={this.state.popupLeft} popupTop={this.state.popupTop}>
+            <h2>Black list entry</h2>
+            <p>This react component is appended to the document body.</p>
+          </BlacklistPopup>
+        </Portal>
       </div>
     );
   }
@@ -300,17 +302,19 @@ class BlacklistTrack extends VariantTrack {
     var bl = trackingCtx.hit && trackingCtx.hit[0];
     if (bl) {
       console.log(bl);
-      this.refs.popup.open();
-      this.refs.popup.domNode.style.left = reactEvent.pageX;
-      this.refs.popup.domNode.style.top = reactEvent.pageY;
+      this.refs.portal.openPortal();
+      this.setState({
+        popupLeft: reactEvent.clientX,
+        popupTop: reactEvent.clientY
+      });
     }
     else {
-      this.refs.popup.close();
+      this.refs.portal.closePortal();
     }
   }
 
   handleMouseLeave(reactEvent: any) {
-    this.refs.popup.close();
+    this.refs.portal.closePortal();
   }
 }
 

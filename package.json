@@ -56,9 +56,12 @@
     "jdataview": "^2.5.0",
     "memory-cache": "0.1.6",
     "pako": "^0.2.5",
+    "prop-types": "^15.5.10",
     "q": "^1.1.2",
     "react": "^0.14.0",
     "react-dom": "^0.14.0",
+    "react-portal": "^3.1.0",
+    "reactable": "^0.14.1",
     "shallow-equals": "0.0.0",
     "underscore": "^1.7.0"
   },
