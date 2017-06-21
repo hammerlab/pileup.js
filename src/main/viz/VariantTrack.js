@@ -118,16 +118,11 @@ export class BlacklistPopup extends React.Component {
     const style = {
       position: 'absolute',
       top: this.props.popupTop,
-      left: this.props.popupLeft,
-      width: this.props.width,
-      border: '1px solid gray',
-      background: '#ffffcc',
-      margin: 10,
-      padding: 10,
+      left: this.props.popupLeft
     };
 
     return (
-      <div style={style}>
+      <div className="blacklist-popup" style={style}>
       {this.props.children}
       </div>
     );
@@ -146,8 +141,8 @@ class BlacklistTrack extends VariantTrack {
         <canvas ref="canvas" onMouseMove={this.handleMouseMove.bind(this)} onMouseLeave={this.handleMouseLeave.bind(this)} />
         <Portal ref="portal">
           <BlacklistPopup ref="popup" popupLeft={this.state.popupLeft} popupTop={this.state.popupTop}>
-            <h3>blacklistable</h3>
-            <Table className="table" data={this.state.blackList} />
+            <div id="blacklist-popup-title">BL cut-off</div>
+            <Table className="blacklist-popup-table" data={this.state.blackList} columns={['allele', 'threshold', 'strand']} />
           </BlacklistPopup>
         </Portal>
       </div>
@@ -297,12 +292,12 @@ class BlacklistTrack extends VariantTrack {
     if (bl) {
       this.refs.portal.openPortal();
       this.setState({
-        popupLeft: reactEvent.clientX,
-        popupTop: reactEvent.clientY,
+        popupLeft: reactEvent.clientX + 10,
+        popupTop: reactEvent.clientY + 35,
         blackList: bl.map((v) => {return {
           allele: `${v.ref} → ${v.alt}`,
           strand: v.filter,
-          threshold: v.qual
+          threshold: Number.parseFloat(v.qual).toFixed(3)
         }})
       });
     }

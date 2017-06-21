@@ -279,6 +279,31 @@
   stroke: blue;
 }
 
+/* black list */
+.blacklist-popup {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: small;
+  background: cornsilk;
+  border-style: solid;
+  border-color: gray;
+  border-width: 1px;
+  padding: 5px;
+}
+
+#blacklist-popup-title {
+  text-align: center;
+  font-weight: bold;
+}
+
+.blacklist-popup-table thead {
+  display: none;
+}
+
+.blacklist-popup-table td {
+  font-size: small;
+  padding: 1px;
+}
+
 /* coverage track */
 .pileup-root > .coverage {
   flex: 0 0 50px;  /* fixed height */
