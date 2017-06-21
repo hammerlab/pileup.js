@@ -28,4 +28,16 @@ describe('GA4GHJson', function() {
 
   });
 
+  it('should not fail on empty json string', function(done) {
+
+    var source = GA4GHJson.create("{}");
+
+    var requestInterval = new ContigInterval('chr17', 10, 20);
+
+    var reads = source.getAlignmentsInRange(requestInterval);
+    expect(reads).to.have.length(0);
+    done();
+
+  });
+
 });

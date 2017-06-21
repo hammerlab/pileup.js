@@ -15,8 +15,14 @@ import GA4GHAlignment from '../GA4GHAlignment';
 
 function create(json: string): AlignmentDataSource {
 
+  // parse json
+  var parsedJson = JSON.parse(json);
+  var reads: Alignment[] = [];
+
   // fill reads with json
-  var reads: Alignment[] = JSON.parse(json).alignments.map(alignment => new GA4GHAlignment(alignment));
+  if (!_.isEmpty(parsedJson)) {
+      reads = _.values(parsedJson.alignments).map(alignment => new GA4GHAlignment(alignment));
+  }
 
   function rangeChanged(newRange: GenomeRange) {
     // Data is already parsed, so immediately return
