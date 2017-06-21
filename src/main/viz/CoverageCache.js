@@ -117,7 +117,7 @@ class CoverageCache {
         var alt_str = read._seq.substr(op.qpos - 1, op.length + 1);
         var allele = ref_str + '>' + alt_str;
         for (let p = op.pos - 1; p <= op.pos; p++) {
-          var bin = counts[p];
+          bin = counts[p];
           var insertions;
           if (bin.insertions) {
             insertions = bin.insertions;
@@ -130,13 +130,13 @@ class CoverageCache {
         }
       }
       if (op.op === 'D') {
-        var ref_str = this.referenceSource.getRangeAsString({
+        ref_str = this.referenceSource.getRangeAsString({
           contig: ref_str,
           start: op.pos - 1,
           stop: op.pos + op.length - 1
         });
-        var alt_str = ref_str.substr(0, 1);
-        var allele = ref_str + '>' + alt_str;
+        alt_str = ref_str.substr(0, 1);
+        allele = ref_str + '>' + alt_str;
         for (let p = op.pos; p < op.pos + op.length; p++) {
           var bin = counts[p];
           var deletions;
