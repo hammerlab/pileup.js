@@ -73,11 +73,13 @@ class CoverageCache {
       this.refToCounts[ref] = {};
       this.refToMaxCoverage[ref] = 0;
     }
+
     var counts = this.refToCounts[ref],
         max = this.refToMaxCoverage[ref],
         range = read.getInterval(),
         start = range.start(),
         stop = range.stop();
+
     for (var pos = start; pos <= stop; pos++) {
       let c = counts[pos];
       if (!c) {
@@ -86,12 +88,14 @@ class CoverageCache {
       c.count += 1;
       if (c.count > max) max = c.count;
     }
+
     for (var mm of opInfo.mismatches) {
       var bin = counts[mm.pos];
       var mismatches;
       if (bin.mismatches) {
         mismatches = bin.mismatches;
-      } else {
+      }
+      else {
         mismatches = bin.mismatches = {};
         bin.ref = this.referenceSource.getRangeAsString({
           contig: ref, start: mm.pos, stop: mm.pos});
@@ -100,7 +104,33 @@ class CoverageCache {
       mismatches[mm.basePair] = 1 + c;
     }
 
+    for (var op of opInfo.ops) {
+      if (op.op === 'D') {
+        console.log('op', op);
+        var ref = this.referenceSource.getRangeAsString({
+          contig: ref,
+          start: op.pos - 1,
+          stop: op.pos + op.length - 1
+        });
+        var alt = ref.substr(0, 1);
+        var allele = ref + '>' + alt;
+        for (let p = op.pos; p < op.pos + op.length; p++) {
+          var bin = counts[p];
+          var deletions;
+          if (bin.deletions) {
+            deletions = bin.deletions;
+          }
+          else {
+            deletions = bin.deletions = {};
+          }
+          let c = deletions[allele] || 0;
+          deletions[allele] = 1 + c;
+        }
+      }
+    }
+
     this.refToMaxCoverage[ref] = max;
+    console.log(this);
   }
 
   maxCoverageForRef(ref: string): number {
