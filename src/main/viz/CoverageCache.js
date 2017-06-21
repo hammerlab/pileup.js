@@ -105,8 +105,28 @@ class CoverageCache {
     }
 
     for (var op of opInfo.ops) {
+      if (op.op === 'I') {
+        var ref = this.referenceSource.getRangeAsString({
+          contig: ref,
+          start: op.pos - 1,
+          stop: op.pos - 1
+        });
+        var alt = read._seq.substr(op.qpos - 1, op.length + 1);
+        var allele = ref + '>' + alt;
+        for (let p = op.pos - 1; p <= op.pos; p++) {
+          var bin = counts[p];
+          var insertions;
+          if (bin.insertions) {
+            insertions = bin.insertions;
+          }
+          else {
+            insertions = bin.insertions = {};
+          }
+          let c = insertions[allele] || 0;
+          insertions[allele] = 1 + c;
+        }
+      }
       if (op.op === 'D') {
-        console.log('op', op);
         var ref = this.referenceSource.getRangeAsString({
           contig: ref,
           start: op.pos - 1,
@@ -130,7 +150,6 @@ class CoverageCache {
     }
 
     this.refToMaxCoverage[ref] = max;
-    console.log(this);
   }
 
   maxCoverageForRef(ref: string): number {

@@ -166,6 +166,7 @@ function getOpInfo(read: Alignment, referenceSource: Object): OpInfo {
       op: op.op,
       length: op.length,
       pos: refPos,
+      qpos: seqPos,
       arrow: null
     });
 
