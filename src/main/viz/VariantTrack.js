@@ -293,7 +293,7 @@ class BlacklistTrack extends VariantTrack {
       this.refs.portal.openPortal();
       this.setState({
         popupLeft: reactEvent.clientX + 10,
-        popupTop: reactEvent.clientY + 35,
+        popupTop: reactEvent.clientY + 20,
         blackList: bl.map((v) => {return {
           allele: `${v.ref} → ${v.alt}`,
           strand: v.filter,
