@@ -67,7 +67,7 @@ class CoverageCache {
   }
 
   addReadToCoverage(read: Alignment, opInfo: OpInfo) {
-    // Add coverage/mismatch information
+    // Add coverage / variant allele information
     var ref = this._canonicalRef(read.ref);
     if (!(ref in this.refToCounts)) {
       this.refToCounts[ref] = {};
@@ -98,7 +98,10 @@ class CoverageCache {
       else {
         mismatches = bin.mismatches = {};
         bin.ref = this.referenceSource.getRangeAsString({
-          contig: ref, start: mm.pos, stop: mm.pos});
+          contig: ref,
+          start: mm.pos,
+          stop: mm.pos
+        });
       }
       let c = mismatches[mm.basePair] || 0;
       mismatches[mm.basePair] = 1 + c;
@@ -106,13 +109,13 @@ class CoverageCache {
 
     for (var op of opInfo.ops) {
       if (op.op === 'I') {
-        var ref = this.referenceSource.getRangeAsString({
-          contig: ref,
+        var ref_str = this.referenceSource.getRangeAsString({
+          contig: ref_str,
           start: op.pos - 1,
           stop: op.pos - 1
         });
-        var alt = read._seq.substr(op.qpos - 1, op.length + 1);
-        var allele = ref + '>' + alt;
+        var alt_str = read._seq.substr(op.qpos - 1, op.length + 1);
+        var allele = ref_str + '>' + alt_str;
         for (let p = op.pos - 1; p <= op.pos; p++) {
           var bin = counts[p];
           var insertions;
@@ -127,13 +130,13 @@ class CoverageCache {
         }
       }
       if (op.op === 'D') {
-        var ref = this.referenceSource.getRangeAsString({
-          contig: ref,
+        var ref_str = this.referenceSource.getRangeAsString({
+          contig: ref_str,
           start: op.pos - 1,
           stop: op.pos + op.length - 1
         });
-        var alt = ref.substr(0, 1);
-        var allele = ref + '>' + alt;
+        var alt_str = ref_str.substr(0, 1);
+        var allele = ref_str + '>' + alt_str;
         for (let p = op.pos; p < op.pos + op.length; p++) {
           var bin = counts[p];
           var deletions;
