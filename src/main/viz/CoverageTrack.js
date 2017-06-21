@@ -314,13 +314,24 @@ class CoverageTrack extends React.Component {
           {contig: range.contig, start: pos, stop: pos});
 
       // Construct a JSON object to show the user.
+      /*
       var messageObject = _.extend(
         {
           'position': range.contig + ':' + (1 + pos),
           'read depth': bin.count
         },
-        bin.mismatches);
-      messageObject[ref] = bin.count - mmCount;
+        bin.mismatches
+      );
+      */
+      var messageObject = {
+        position: range.contig + ':' + (1 + pos),
+        depth: bin.count,
+        refBase: ref,
+        mismatches: bin.mismatches,
+        insertions: bin.insertions,
+        deletions: bin.deletions
+      };
+      messageObject.ref = bin.count - mmCount;
       alert(JSON.stringify(messageObject, null, '  '));
     }
   }

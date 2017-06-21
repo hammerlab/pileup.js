@@ -115,7 +115,7 @@ class CoverageCache {
     for (var op of opInfo.ops) {
       if (op.op === 'I') {
         ref_str = this.referenceSource.getRangeAsString({
-          contig: ref_str,
+          contig: ref,
           start: op.pos - 1,
           stop: op.pos - 1
         });
@@ -136,7 +136,7 @@ class CoverageCache {
       }
       if (op.op === 'D') {
         ref_str = this.referenceSource.getRangeAsString({
-          contig: ref_str,
+          contig: ref,
           start: op.pos - 1,
           stop: op.pos + op.length - 1
         });
