@@ -13,6 +13,7 @@ import type {Scale} from './d3utils';
 import React from 'react';
 import Portal from 'react-portal';
 import Reactable from 'reactable';
+var Table = Reactable.Table;
 
 
 import d3utils from './d3utils';
@@ -145,8 +146,8 @@ class BlacklistTrack extends VariantTrack {
         <canvas ref="canvas" onMouseMove={this.handleMouseMove.bind(this)} onMouseLeave={this.handleMouseLeave.bind(this)} />
         <Portal ref="portal">
           <BlacklistPopup ref="popup" popupLeft={this.state.popupLeft} popupTop={this.state.popupTop}>
-            <h2>Black list entry</h2>
-            <p>This react component is appended to the document body.</p>
+            <h3>blacklistable</h3>
+            <Table className="table" data={this.state.blackList} />
           </BlacklistPopup>
         </Portal>
       </div>
@@ -258,13 +259,6 @@ class BlacklistTrack extends VariantTrack {
             ctx.lineTo(x - 0.5 + width, y - 0.5);
             ctx.lineTo(x - 0.5, y - 0.5 + style.VARIANT_HEIGHT);
             ctx.fill();
-
-/*
-          ctx.beginPath();
-          ctx.moveTo(x - 0.5 + width, y - 0.5);
-          ctx.lineTo(x - 0.5, y - 0.5 + style.VARIANT_HEIGHT);
-          ctx.stroke();
-*/
           }
           else {
             switch (variant.strand) {
@@ -301,11 +295,15 @@ class BlacklistTrack extends VariantTrack {
     this.renderScene(trackingCtx);
     var bl = trackingCtx.hit && trackingCtx.hit[0];
     if (bl) {
-      console.log(bl);
       this.refs.portal.openPortal();
       this.setState({
         popupLeft: reactEvent.clientX,
-        popupTop: reactEvent.clientY
+        popupTop: reactEvent.clientY,
+        blackList: bl.map((v) => {return {
+          allele: `${v.ref} → ${v.alt}`,
+          strand: v.filter,
+          threshold: v.qual
+        }})
       });
     }
     else {
