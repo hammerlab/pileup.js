@@ -12,6 +12,10 @@ import type {BinSummary} from './CoverageCache';
 import type {Scale} from './d3utils';
 
 import React from 'react';
+import Portal from 'react-portal';
+import Reactable from 'reactable';
+var Table = Reactable.Table;
+
 import scale from '../scale';
 import shallowEquals from 'shallow-equals';
 import d3utils from './d3utils';
@@ -181,6 +185,22 @@ type Props = {
   }
 };
 
+export class CoveragePopup extends React.Component {
+  render() {
+    const style = {
+      position: 'absolute',
+      top: this.props.popupTop,
+      left: this.props.popupLeft
+    };
+
+    return (
+      <div className="coverage-popup" style={style}>
+      {this.props.children}
+      </div>
+    );
+  }
+}
+
 class CoverageTrack extends React.Component {
   props: Props;
   state: void;
@@ -190,10 +210,20 @@ class CoverageTrack extends React.Component {
 
   constructor(props: Props) {
     super(props);
+    this.state = {};
   }
 
   render(): any {
-    return <canvas ref='canvas' onClick={this.handleClick.bind(this)} />;
+    return (
+      <div>
+        <canvas ref="canvas" onMouseMove={this.handleMouseMove.bind(this)} onMouseLeave={this.handleMouseLeave.bind(this)} />
+        <Portal ref="portal">
+          <CoveragePopup ref="popup" popupLeft={this.state.popupLeft} popupTop={this.state.popupTop}>
+            <Table className="coverage-popup-table" data={this.state.counts} columns={['ref', 'arrow', 'alt', 'count', 'fraction']} />
+          </CoveragePopup>
+        </Portal>
+      </div>
+    );
   }
 
   getScale(): Scale {
@@ -295,7 +325,7 @@ class CoverageTrack extends React.Component {
     ctx.restore();
   }
 
-  handleClick(reactEvent: any) {
+  handleMouseMove(reactEvent: any) {
     var ev = reactEvent.nativeEvent,
         x = ev.offsetX;
 
@@ -307,33 +337,67 @@ class CoverageTrack extends React.Component {
         pos = Math.floor(xScale.invert(x)) - 1,
         bin = bins[pos];
 
-    var alert = window.alert || console.log;
     if (bin) {
       var mmCount = bin.mismatches ? _.reduce(bin.mismatches, (a, b) => a + b) : 0;
-      var ref = bin.ref || this.props.referenceSource.getRangeAsString(
-          {contig: range.contig, start: pos, stop: pos});
+      var ref = bin.ref || this.props.referenceSource.getRangeAsString({
+        contig: range.contig,
+        start: pos,
+        stop: pos
+      });
 
-      // Construct a JSON object to show the user.
-      /*
-      var messageObject = _.extend(
-        {
-          'position': range.contig + ':' + (1 + pos),
-          'read depth': bin.count
-        },
-        bin.mismatches
-      );
-      */
-      var messageObject = {
-        position: range.contig + ':' + (1 + pos),
-        depth: bin.count,
-        refBase: ref,
-        mismatches: bin.mismatches,
-        insertions: bin.insertions,
-        deletions: bin.deletions
-      };
-      messageObject.ref = bin.count - mmCount;
-      alert(JSON.stringify(messageObject, null, '  '));
+      var counts;
+      if (bin.mismatches || bin.deletions || bin.insertions) {
+        var counts = [{
+          alt: ref, // The idea is that it is a null substitution: ref -> ref
+          count: bin.count - mmCount,
+          fraction: Number.parseFloat((bin.count - mmCount) / bin.count).toFixed(3)
+        }];
+        if (bin.mismatches) {
+          Object.keys(bin.mismatches).sort().forEach(base => counts.push({
+            alt: base,
+            count: bin.mismatches[base],
+            fraction: Number.parseFloat(bin.mismatches[base] / bin.count).toFixed(3)
+          }));
+        }
+        ['insertions', 'deletions'].forEach(indel => {
+          if (bin[indel]) {
+            Object.keys(bin[indel]).sort().forEach(allele => counts.push({
+              ref: allele.split('>')[0],
+              arrow: '→',
+              alt: allele.split('>')[1],
+              count: bin[indel][allele],
+              fraction: Number.parseFloat(bin[indel][allele] / bin.count).toFixed(3)
+            }));
+          }
+        });
+        counts.push({
+          alt: 'all',
+          count: bin.count
+        });
+      }
+      else {
+        var counts = [{
+          alt: 'depth:',
+          count: bin.count
+        }];
+      }
+
+      this.refs.portal.openPortal();
+      this.setState({
+        popupLeft: reactEvent.pageX + 10,
+        popupTop: reactEvent.pageY + 20,
+        counts: counts
+      });
+
+      this.refs.portal.openPortal();
     }
+    else {
+      this.refs.portal.closePortal();
+    }
+  }
+
+  handleMouseLeave(reactEvent: any) {
+    this.refs.portal.closePortal();
   }
 }
 

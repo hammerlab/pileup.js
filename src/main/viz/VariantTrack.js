@@ -132,7 +132,7 @@ export class BlacklistPopup extends React.Component {
 class BlacklistTrack extends VariantTrack {
   constructor(props) {
     super(props);
-    this.state = {isPopupOpen: false};
+    this.state = {};
   }
 
   render(): any {
@@ -192,7 +192,7 @@ class BlacklistTrack extends VariantTrack {
         var type, bstrand, symbol;
         var vcfdata = variant.vcfLine.split('\t')[7];
         if (vcfdata.match(/OID=/)) { // Ion Torrent black list
-          variant.vcfLine.split('\t')[7].split(';').forEach(chunk => {
+          vcfdata.split(';').forEach(chunk => {
             let [key, value] = chunk.split('=');
             if (key === 'OID') {
               type = value.split('.')[0];
@@ -237,6 +237,12 @@ class BlacklistTrack extends VariantTrack {
         }
         else {
           // Presumbaly, it is a Tempus black list
+          vcfdata.split(';').forEach(chunk => {
+            let [key, value] = chunk.split('=');
+            if (key === 'TYPE') {
+              variant.type = value;
+            }
+          });
           variant.strand = variant.filter;
           if (strand[locus].F && strand[locus].R) {
             // ctx.fillStyle = style.ALIGNMENT_PLUS_STRAND_COLOR;
@@ -287,14 +293,49 @@ class BlacklistTrack extends VariantTrack {
         ctx = canvasUtils.getContext(canvas),
         trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
 
+
+    function compare_variants(a, b) {
+      var rank = {del: 0, ins: 1, snp: 2};
+
+      if (rank[a.type] < rank[b.type]) {
+        return -1;
+      }
+      if (rank[a.type] > rank[b.type]) {
+        return 1;
+      }
+
+      if (a.type === 'del' && a.ref < b.ref) {
+        return -1;
+      }
+      if (a.type === 'del' && a.ref > b.ref) {
+        return 1;
+      }
+
+      if (a.alt < b.alt) {
+        return -1;
+      }
+      if (a.alt > b.alt) {
+        return 1;
+      }
+
+      if (a.strand < b.strand) {
+        return -1;
+      }
+      if (a.strand > b.strand) {
+        return 1;
+      }
+
+      return 0;
+    }
+
     this.renderScene(trackingCtx);
     var bl = trackingCtx.hit && trackingCtx.hit[0];
     if (bl) {
       this.refs.portal.openPortal();
       this.setState({
-        popupLeft: reactEvent.clientX + 10,
-        popupTop: reactEvent.clientY + 20,
-        blackList: bl.map((v) => {return {
+        popupLeft: reactEvent.pageX + 10,
+        popupTop: reactEvent.pageY + 20,
+        blackList: bl.sort(compare_variants).map((v) => {return {
           allele: `${v.ref} → ${v.alt}`,
           strand: v.filter,
           threshold: Number.parseFloat(v.qual).toFixed(3)
