@@ -347,7 +347,7 @@ class CoverageTrack extends React.Component {
 
       var counts;
       if (bin.mismatches || bin.deletions || bin.insertions) {
-        var counts = [{
+        counts = [{
           alt: ref, // The idea is that it is a null substitution: ref -> ref
           count: bin.count - mmCount,
           fraction: Number.parseFloat((bin.count - mmCount) / bin.count).toFixed(3)
@@ -376,7 +376,7 @@ class CoverageTrack extends React.Component {
         });
       }
       else {
-        var counts = [{
+        counts = [{
           alt: 'depth:',
           count: bin.count
         }];
