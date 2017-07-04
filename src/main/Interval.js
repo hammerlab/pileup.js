@@ -39,8 +39,10 @@ class Interval {
     return this.contains(other.start) && this.contains(other.stop);
   }
 
-  // Expand range to begin and end on multiples of size
-  expand(size: number, zeroBased: boolean): Interval {
+  // Rounds the interval to the nearest multiples of size.
+  // Optional minimum parameter determines the lowest
+  // possible value for the start of the resulting Interval.
+  round(size: number, zeroBased: boolean): Interval {
     var minimum = zeroBased ? 0 : 1;
     var roundDown = x => x - x % size;
     var newStart = Math.max(minimum, roundDown(this.start)),

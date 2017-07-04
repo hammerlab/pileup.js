@@ -135,7 +135,7 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
           return;
         }
 
-        range = range.expand(BASE_PAIRS_PER_FETCH, ZERO_BASED);
+        range = range.round(BASE_PAIRS_PER_FETCH, ZERO_BASED);
         var newRanges = range.complementIntervals(coveredRanges);
 
         for (var newRange of newRanges) {

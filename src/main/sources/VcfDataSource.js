@@ -5,7 +5,6 @@
  */
 'use strict';
 
-import type {Variant} from '../data/vcf';
 
 import Events from 'backbone';
 import _ from 'underscore';
@@ -14,7 +13,8 @@ import Q from 'q';
 import ContigInterval from '../ContigInterval';
 import RemoteFile from '../RemoteFile';
 import LocalStringFile from '../LocalStringFile';
-import VcfFile from '../data/vcf';
+import {VcfFile} from '../data/vcf';
+import {Variant} from '../data/vcf';
 
 export type VcfDataSource = {
   rangeChanged: (newRange: GenomeRange) => void;
@@ -54,7 +54,7 @@ function createFromVcfFile(remoteSource: VcfFile): VcfDataSource {
       return Q.when();
     }
 
-    interval = interval.expand(BASE_PAIRS_PER_FETCH, ZERO_BASED);
+    interval = interval.round(BASE_PAIRS_PER_FETCH, ZERO_BASED);
 
     // "Cover" the range immediately to prevent duplicate fetches.
     coveredRanges.push(interval);

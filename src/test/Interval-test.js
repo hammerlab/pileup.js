@@ -169,13 +169,13 @@ describe('Interval', function() {
     ]);
   });
 
-  it('should expand interval', function() {
+  it('should round interval', function() {
     var interval = new Interval(1, 20);
-    var expanded = interval.expand(40, true);
-    expect(expanded.start).to.equal(0);
-    expect(expanded.stop).to.equal(40);
+    var rounded = interval.round(40, true);
+    expect(rounded.start).to.equal(0);
+    expect(rounded.stop).to.equal(40);
 
-    expanded = interval.expand(40, false);
-    expect(expanded.start).to.equal(1);
+    rounded = interval.round(40, false);
+    expect(rounded.start).to.equal(1);
   });
 });

@@ -41,8 +41,8 @@ describe('GA4GHFeatureSource', function() {
     source.on('networkprogress', e => { progress.push(e); });
     source.on('networkdone', e => { progress.push('done'); });
     source.on('newdata', () => {
-      var reads = source.getFeaturesInRange(requestInterval);
-      expect(reads).to.have.length(2);
+      var features = source.getFeaturesInRange(requestInterval);
+      expect(features).to.have.length(2);
       done();
     });
 
@@ -62,8 +62,8 @@ describe('GA4GHFeatureSource', function() {
     source.on('networkprogress', e => { progress.push(e); });
     source.on('networkdone', e => { progress.push('done'); });
     source.on('newdata', () => {
-      var reads = source.getFeaturesInRange(requestInterval);
-      expect(reads).to.have.length(0);
+      var features = source.getFeaturesInRange(requestInterval);
+      expect(features).to.have.length(0);
       done();
     });
 

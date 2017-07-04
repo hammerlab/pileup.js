@@ -70,7 +70,7 @@ function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
         return Q.when();
       }
 
-      interval = interval.expand(BASE_PAIRS_PER_FETCH, ZERO_BASED);
+      interval = interval.round(BASE_PAIRS_PER_FETCH, ZERO_BASED);
       var newRanges = interval.complementIntervals(coveredRanges);
       coveredRanges.push(interval);
       coveredRanges = ContigInterval.coalesce(coveredRanges);

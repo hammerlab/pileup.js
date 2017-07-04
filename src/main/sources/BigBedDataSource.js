@@ -10,6 +10,7 @@ import {Events} from 'backbone';
 import ContigInterval from '../ContigInterval';
 import Interval from '../Interval';
 import BigBed from '../data/BigBed';
+import Feature from '../data/feature';
 
 
 export type Gene = {
@@ -20,15 +21,6 @@ export type Gene = {
   exons: Array<Interval>;
   geneId: string;  // ensembl gene ID
   name: string;  // human-readable name, e.g. "TP53"
-}
-
-export type Feature = {
-  id: string;
-  featureType: string;
-  contig: string;
-  start: number;
-  stop: number;
-  score: number;
 }
 
 // Flow type for export.

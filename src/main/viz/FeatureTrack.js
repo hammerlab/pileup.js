@@ -4,7 +4,9 @@
  */
 'use strict';
 
-import type {Feature, FeatureDataSource} from '../sources/BigBedDataSource';
+import type {FeatureDataSource} from '../sources/BigBedDataSource';
+import type Feature from '../data/feature';
+
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 
 import type {VizProps} from '../VisualizationWrapper';

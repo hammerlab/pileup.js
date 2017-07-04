@@ -41,7 +41,7 @@ function create(spec: GA4GHSpec): AlignmentDataSource {
   var coveredRanges: ContigInterval<string>[] = [];
 
   function addReadsFromResponse(response: Object) {
-    if (response.alignments == undefined) {
+    if (response.alignments === undefined) {
       return;
     }
     response.alignments.forEach(alignment => {
@@ -60,7 +60,7 @@ function create(spec: GA4GHSpec): AlignmentDataSource {
     var interval = new ContigInterval(contig, newRange.start, newRange.stop);
     if (interval.isCoveredBy(coveredRanges)) return;
 
-    interval = interval.expand(BASE_PAIRS_PER_FETCH, ZERO_BASED);
+    interval = interval.round(BASE_PAIRS_PER_FETCH, ZERO_BASED);
 
     // select only intervals not yet loaded into coveredRangesß
     var intervals = interval.complementIntervals(coveredRanges);

@@ -113,8 +113,8 @@ class ContigInterval<T: (number|string)> {
     };
   }
 
-  expand(size: number, zeroBased: boolean): ContigInterval<T> {
-    var newInterval = this.interval.expand(size, zeroBased);
+  round(size: number, zeroBased: boolean): ContigInterval<T> {
+    var newInterval = this.interval.round(size, zeroBased);
     return new ContigInterval(this.contig, newInterval.start, newInterval.stop);
   }
 

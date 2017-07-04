@@ -6,6 +6,12 @@ var bamSource = pileup.formats.bam({
   indexUrl: '/test-data/synth3.normal.17.7500000-7515000.bam.bai'
 });
 
+// This URL points to the GA4GH Reference Server, which
+// can be accessed for examples of standardized endpoints
+// for genomic data. All available GA4GH endpoints can
+// be found here: http://1kgenomes.ga4gh.org
+var ga4ghReferenceServer = 'http://1kgenomes.ga4gh.org';
+
 var sources = [
   {
     viz: pileup.viz.genome(),
@@ -33,7 +39,7 @@ var sources = [
   {
     viz: pileup.viz.variants(),
     data: pileup.formats.GAVariant({
-        endpoint: 'http://1kgenomes.ga4gh.org',
+        endpoint: ga4ghReferenceServer,
         variantSetId: "WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIl0",
         callSetIds: ["WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIiwiSEcwMDA5NiJd"],
         killChr: true
@@ -56,7 +62,7 @@ var sources = [
   {
     viz: pileup.viz.features(),
     data: pileup.formats.GAFeature({
-      endpoint: 'http://1kgenomes.ga4gh.org',
+      endpoint: ga4ghReferenceServer,
       featureSetId: "WyIxa2dlbm9tZXMiLCJnZW5jb2RlX3YyNGxpZnQzNyJd",
     }),
     name: 'Features'

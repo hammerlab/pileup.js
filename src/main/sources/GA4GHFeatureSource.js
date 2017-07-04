@@ -9,7 +9,8 @@ import {Events} from 'backbone';
 
 import ContigInterval from '../ContigInterval';
 
-import type {FeatureDataSource, Feature} from './BigBedDataSource';
+import type {FeatureDataSource} from './BigBedDataSource';
+import Feature from '../data/feature';
 
 var BASE_PAIRS_PER_FETCH = 100;
 var FEATURES_PER_REQUEST = 400;
@@ -29,7 +30,7 @@ function create(spec: GA4GHFeatureSpec): FeatureDataSource {
   var coveredRanges: ContigInterval<string>[] = [];
 
   function addFeaturesFromResponse(response: Object) {
-    if (response.features == undefined) {
+    if (response.features === undefined) {
       return;
     }
 
@@ -38,15 +39,7 @@ function create(spec: GA4GHFeatureSpec): FeatureDataSource {
 
       var key = ga4ghFeature.id + contigInterval.toString();
       if (key in features) return;
-      var feature =
-         {
-           id: ga4ghFeature.id,
-           featureType: ga4ghFeature.featureType,
-           contig: ga4ghFeature.referenceName,
-           start: ga4ghFeature.start,
-           stop: ga4ghFeature.end,
-           score: 1000
-        };
+      var feature = Feature.fromGA4GH(ga4ghFeature);
       features[key] = feature;
     });
   }
@@ -55,7 +48,7 @@ function create(spec: GA4GHFeatureSpec): FeatureDataSource {
     var interval = new ContigInterval(newRange.contig, newRange.start, newRange.stop);
     if (interval.isCoveredBy(coveredRanges)) return;
 
-    interval = interval.expand(BASE_PAIRS_PER_FETCH, ZERO_BASED);
+    interval = interval.round(BASE_PAIRS_PER_FETCH, ZERO_BASED);
 
     // select only intervals not yet loaded into coveredRangesß
     var intervals = interval.complementIntervals(coveredRanges);
@@ -119,7 +112,7 @@ function create(spec: GA4GHFeatureSpec): FeatureDataSource {
 
   function getFeaturesInRange(range: ContigInterval<string>): Feature[] {
     if (!range) return [];
-    return _.filter(features, feature => intersects(feature, range));
+    return _.filter(features, feature => feature.intersects(range));
   }
 
   var o = {
@@ -134,10 +127,6 @@ function create(spec: GA4GHFeatureSpec): FeatureDataSource {
   };
   _.extend(o, Events);  // Make this an event emitter
   return o;
-}
-
-function intersects(feature: Feature, range: ContigInterval<string>): boolean {
-  return range.intersects(new ContigInterval(feature.contig, feature.start, feature.stop));
 }
 
 module.exports = {

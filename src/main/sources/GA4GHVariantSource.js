@@ -10,7 +10,7 @@ import {Events} from 'backbone';
 import ContigInterval from '../ContigInterval';
 
 import type {VcfDataSource} from './VcfDataSource';
-import type {Variant} from '../data/vcf';
+import {Variant} from '../data/vcf';
 
 var BASE_PAIRS_PER_FETCH = 100;
 var VARIANTS_PER_REQUEST = 400;
@@ -33,7 +33,7 @@ function create(spec: GA4GHVariantSpec): VcfDataSource {
   var coveredRanges: ContigInterval<string>[] = [];
 
   function addVariantsFromResponse(response: Object) {
-    if (response.variants == undefined) {
+    if (response.variants === undefined) {
       return;
     }
 
@@ -41,17 +41,7 @@ function create(spec: GA4GHVariantSpec): VcfDataSource {
       var key = ga4ghVariant.id;
       if (key in variants) return;
 
-      var variant =
-         {
-          contig: ga4ghVariant.referenceName,
-          position: ga4ghVariant.start,
-          id: ga4ghVariant.id,
-          ref: ga4ghVariant.referenceBases,
-          alt: ga4ghVariant.alternateBases,
-          majorFrequency: 0,
-          minorFrequency: 0, // TODO extract these
-          vcfLine: "" // TODO
-        };
+      var variant = Variant.fromGA4GH(ga4ghVariant);
       variants[key] = variant;
     });
   }
@@ -65,7 +55,7 @@ function create(spec: GA4GHVariantSpec): VcfDataSource {
 
     if (interval.isCoveredBy(coveredRanges)) return;
 
-    interval = interval.expand(BASE_PAIRS_PER_FETCH, ZERO_BASED);
+    interval = interval.round(BASE_PAIRS_PER_FETCH, ZERO_BASED);
 
     // select only intervals not yet loaded into coveredRangesß
     var intervals = interval.complementIntervals(coveredRanges);
@@ -130,7 +120,7 @@ function create(spec: GA4GHVariantSpec): VcfDataSource {
 
   function getFeaturesInRange(range: ContigInterval<string>): Variant[] {
     if (!range) return [];
-    
+
     var contig = range.contig.replace(/^chr/, '');
     if (!spec.killChr) {
       contig = `chr${contig}`;
@@ -160,5 +150,6 @@ function intersects(variant: Variant, range: ContigInterval<string>): boolean {
 }
 
 module.exports = {
-  create
+  create,
+  intersects
 };

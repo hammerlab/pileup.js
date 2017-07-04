@@ -19,7 +19,9 @@ import BamDataSource from './sources/BamDataSource';
 import EmptySource from './sources/EmptySource';
 
 // Data sources from json
-import GA4GHJson from './json/GA4GHJson';
+import GA4GHAlignmentJson from './json/GA4GHAlignmentJson';
+import GA4GHVariantJson from './json/GA4GHVariantJson';
+import GA4GHFeatureJson from './json/GA4GHFeatureJson';
 
 // GA4GH sources
 import GA4GHAlignmentSource from './sources/GA4GHAlignmentSource';
@@ -170,7 +172,9 @@ var pileup = {
   create: create,
   formats: {
     bam: BamDataSource.create,
-    json: GA4GHJson.create,
+    alignmentJson: GA4GHAlignmentJson.create,
+    variantJson: GA4GHVariantJson.create,
+    featureJson: GA4GHFeatureJson.create,
     vcf: VcfDataSource.create,
     twoBit: TwoBitDataSource.create,
     bigBed: BigBedDataSource.create,
