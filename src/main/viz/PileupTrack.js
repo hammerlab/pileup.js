@@ -12,6 +12,7 @@ import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type Interval from '../Interval';
 import type {VizProps} from '../VisualizationWrapper';
 import type {Scale} from './d3utils';
+import type {State, NetworkStatus} from '../types';
 
 import React from 'react';
 import shallowEquals from 'shallow-equals';
@@ -234,11 +235,6 @@ function opacityForQuality(quality: number): number {
   alpha = Math.round(alpha * 10 + 0.5) / 10.0;
   return Math.min(1.0, alpha);
 }
-
-type NetworkStatus = {numRequests?: number, status?: string};
-type State = {
-  networkStatus: ?NetworkStatus;
-};
 
 
 class PileupTrack extends React.Component {

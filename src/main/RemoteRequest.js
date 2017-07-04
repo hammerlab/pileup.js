@@ -9,6 +9,8 @@
 import Q from 'q';
 import ContigInterval from './ContigInterval';
 
+var MONSTER_REQUEST = 5000000;
+
 class RemoteRequest {
   url: string;
   cache: Object;
@@ -85,4 +87,7 @@ class RemoteRequest {
   }
 }
 
-module.exports = RemoteRequest;
+module.exports = {
+  RemoteRequest,
+  MONSTER_REQUEST: MONSTER_REQUEST
+};

@@ -57,14 +57,14 @@ This is a subset of `ensembl.chr17.bb`, shifted to match the coordinates in
 These BAM and BAI files come from the [samtools][1] tests. You can find
 corresponding SAM files for them in the same repo.
 
-#### chr17.1-250.bam, chr17.1-250.json
+#### chr17.1-250.bam, alignments.ga4gh.chr17.1-250.json
 
 This was hand-edited from the SAM equivalent of `test_input_1_a.bam` to have
 reads in chr17:1-250. It was then converted back to BAM/BAI using `samtools view`.
 
 The JSON variant was formed by loading `chr17.1-250.bam` into v0.5.1 of the [GA4GH demo server][ga4gh] and querying for all the reads via:
 
-    curl --data '{"readGroupIds":["pileup.js:chr17.1-250"]}' --header 'Content-Type: application/json' http://localhost:8000/v0.5.1/reads/search > chr17.1-250.json
+    curl --data '{"readGroupIds":["pileup.js:chr17.1-250"]}' --header 'Content-Type: application/json' http://localhost:8000/v0.5.1/reads/search > alginments.ga4gh.chr17.1-250.json
 
 #### index_test.bam
 

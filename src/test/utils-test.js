@@ -8,7 +8,6 @@ import jBinary from 'jbinary';
 
 import utils from '../main/utils';
 import Interval from '../main/Interval';
-import ContigInterval from '../main/ContigInterval';
 
 describe('utils', function() {
   describe('tupleLessOrEqual', function() {
@@ -234,14 +233,6 @@ describe('utils', function() {
     // pathological cases
     expect(utils.computePercentile([1], 99)).to.equal(1);
     expect(utils.computePercentile([], 99)).to.equal(0);
-  });
-
-  it('should expand interval', function() {
-    var contigInterval = new ContigInterval("chr1", 1, 100);
-    var expanded = utils.expandRange(contigInterval, 40);
-    expect(expanded.contig).to.equal("chr1");
-    expect(expanded.start()).to.equal(1);
-    expect(expanded.stop()).to.equal(100);
   });
 
 });

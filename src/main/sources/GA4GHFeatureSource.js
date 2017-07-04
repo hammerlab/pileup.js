@@ -9,45 +9,43 @@ import {Events} from 'backbone';
 
 import ContigInterval from '../ContigInterval';
 
-import type {BigBedSource, Gene} from './BigBedDataSource';
-import {expandRange} from '../utils';
+import type {FeatureDataSource, Feature} from './BigBedDataSource';
 
 var BASE_PAIRS_PER_FETCH = 100;
 var FEATURES_PER_REQUEST = 400;
+var ZERO_BASED = false;
 
 type GA4GHFeatureSpec = {
   endpoint: string;
   featureSetId: string;
 };
 
-function create(spec: GA4GHFeatureSpec): BigBedSource {
-  if (spec.endpoint.slice(-6) != 'v0.6.0') {
-    throw new Error('Only v0.6.0 of the GA4GH API is supported by pileup.js');
-  }
-
+function create(spec: GA4GHFeatureSpec): FeatureDataSource {
   var url = spec.endpoint + '/features/search';
 
-  // TODO maybe rename gene
-  var features: {[key:string]: Gene} = {};
+  var features: {[key:string]: Feature} = {};
 
   // Ranges for which we have complete information -- no need to hit network.
   var coveredRanges: ContigInterval<string>[] = [];
 
   function addFeaturesFromResponse(response: Object) {
-    response.featuress.forEach(ga4ghFeature => {
-      var key = ga4ghFeature.id;
-      if (key in features) return;
+    if (response.features == undefined) {
+      return;
+    }
 
+    response.features.forEach(ga4ghFeature => {
       var contigInterval = new ContigInterval(ga4ghFeature.referenceName, ga4ghFeature.start, ga4ghFeature.end);
+
+      var key = ga4ghFeature.id + contigInterval.toString();
+      if (key in features) return;
       var feature =
          {
-           position: contigInterval,
            id: ga4ghFeature.id,
-           strand: ga4ghFeature.strand,
-           codingRegion: contigInterval.interval,
-           exons: Array(),
-           geneId: ga4ghFeature.gene_id,
-           name: ga4ghFeature.name
+           featureType: ga4ghFeature.featureType,
+           contig: ga4ghFeature.referenceName,
+           start: ga4ghFeature.start,
+           stop: ga4ghFeature.end,
+           score: 1000
         };
       features[key] = feature;
     });
@@ -57,7 +55,7 @@ function create(spec: GA4GHFeatureSpec): BigBedSource {
     var interval = new ContigInterval(newRange.contig, newRange.start, newRange.stop);
     if (interval.isCoveredBy(coveredRanges)) return;
 
-    interval = expandRange(interval, BASE_PAIRS_PER_FETCH);
+    interval = interval.expand(BASE_PAIRS_PER_FETCH, ZERO_BASED);
 
     // select only intervals not yet loaded into coveredRangesß
     var intervals = interval.complementIntervals(coveredRanges);
@@ -119,14 +117,14 @@ function create(spec: GA4GHFeatureSpec): BigBedSource {
     }));
   }
 
-  function getGenesInRange(range: ContigInterval<string>): Gene[] {
+  function getFeaturesInRange(range: ContigInterval<string>): Feature[] {
     if (!range) return [];
     return _.filter(features, feature => intersects(feature, range));
   }
 
   var o = {
     rangeChanged,
-    getGenesInRange,
+    getFeaturesInRange,
 
     // These are here to make Flow happy.
     on: () => {},
@@ -138,8 +136,8 @@ function create(spec: GA4GHFeatureSpec): BigBedSource {
   return o;
 }
 
-function intersects(feature: Gene, range: ContigInterval<string>): boolean {
-  return range.intersects(feature.position);
+function intersects(feature: Feature, range: ContigInterval<string>): boolean {
+  return range.intersects(new ContigInterval(feature.contig, feature.start, feature.stop));
 }
 
 module.exports = {

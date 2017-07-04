@@ -8,12 +8,12 @@ import sinon from 'sinon';
 import ContigInterval from '../../main/ContigInterval';
 import GA4GHAlignmentSource from '../../main/sources/GA4GHAlignmentSource';
 import RemoteFile from '../../main/RemoteFile';
-    
+
 describe('GA4GHAlignmentSource', function() {
   var server: any = null, response;
 
   before(function () {
-    return new RemoteFile('/test-data/chr17.1-250.json').getAllString().then(data => {
+    return new RemoteFile('/test-data/alignments.ga4gh.chr17.1-250.json').getAllString().then(data => {
       response = data;
       server = sinon.fakeServer.create();  // _after_ we do a real XHR!
     });

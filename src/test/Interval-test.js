@@ -168,4 +168,14 @@ describe('Interval', function() {
       '[50, 79]'
     ]);
   });
+
+  it('should expand interval', function() {
+    var interval = new Interval(1, 20);
+    var expanded = interval.expand(40, true);
+    expect(expanded.start).to.equal(0);
+    expect(expanded.stop).to.equal(40);
+
+    expanded = interval.expand(40, false);
+    expect(expanded.start).to.equal(1);
+  });
 });

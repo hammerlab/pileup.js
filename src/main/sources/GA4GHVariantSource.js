@@ -11,22 +11,20 @@ import ContigInterval from '../ContigInterval';
 
 import type {VcfDataSource} from './VcfDataSource';
 import type {Variant} from '../data/vcf';
-import {expandRange} from '../utils';
 
 var BASE_PAIRS_PER_FETCH = 100;
 var VARIANTS_PER_REQUEST = 400;
+var ZERO_BASED = false;
 
 type GA4GHVariantSpec = {
   endpoint: string;
   variantSetId: string;
   callSetIds: string[];
+  // HACK for demo. If true, strips "chr" from reference names. If false, adds chr.
+  killChr: boolean;
 };
 
 function create(spec: GA4GHVariantSpec): VcfDataSource {
-  if (spec.endpoint.slice(-6) != 'v0.6.0') {
-    throw new Error('Only v0.6.0 of the GA4GH API is supported by pileup.js');
-  }
-
   var url = spec.endpoint + '/variants/search';
 
   var variants: {[key:string]: Variant} = {};
@@ -35,6 +33,10 @@ function create(spec: GA4GHVariantSpec): VcfDataSource {
   var coveredRanges: ContigInterval<string>[] = [];
 
   function addVariantsFromResponse(response: Object) {
+    if (response.variants == undefined) {
+      return;
+    }
+
     response.variants.forEach(ga4ghVariant => {
       var key = ga4ghVariant.id;
       if (key in variants) return;
@@ -55,10 +57,15 @@ function create(spec: GA4GHVariantSpec): VcfDataSource {
   }
 
   function rangeChanged(newRange: GenomeRange) {
-    var interval = new ContigInterval(newRange.contig, newRange.start, newRange.stop);
+    var contig = newRange.contig.replace(/^chr/, '');
+    if (!spec.killChr) {
+      contig = `chr${contig}`;
+    }
+    var interval = new ContigInterval(contig, newRange.start, newRange.stop);
+
     if (interval.isCoveredBy(coveredRanges)) return;
 
-    interval = expandRange(interval, BASE_PAIRS_PER_FETCH);
+    interval = interval.expand(BASE_PAIRS_PER_FETCH, ZERO_BASED);
 
     // select only intervals not yet loaded into coveredRangesß
     var intervals = interval.complementIntervals(coveredRanges);
@@ -123,6 +130,13 @@ function create(spec: GA4GHVariantSpec): VcfDataSource {
 
   function getFeaturesInRange(range: ContigInterval<string>): Variant[] {
     if (!range) return [];
+    
+    var contig = range.contig.replace(/^chr/, '');
+    if (!spec.killChr) {
+      contig = `chr${contig}`;
+    }
+    range = new ContigInterval(contig, range.start(), range.stop());
+
     return _.filter(variants, variant => intersects(variant, range));
   }
 

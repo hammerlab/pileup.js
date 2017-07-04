@@ -32,6 +32,8 @@ import utils from '../utils';
 var BASE_PAIRS_PER_FETCH = 10000;
 
 var MAX_BASE_PAIRS_TO_FETCH = 100000;
+var ZERO_BASED = true;
+
 
 
 // Flow type for export.
@@ -133,7 +135,7 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
           return;
         }
 
-        range = utils.expandRange(range, BASE_PAIRS_PER_FETCH);
+        range = range.expand(BASE_PAIRS_PER_FETCH, ZERO_BASED);
         var newRanges = range.complementIntervals(coveredRanges);
 
         for (var newRange of newRanges) {

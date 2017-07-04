@@ -22,10 +22,28 @@ export type Gene = {
   name: string;  // human-readable name, e.g. "TP53"
 }
 
+export type Feature = {
+  id: string;
+  featureType: string;
+  contig: string;
+  start: number;
+  stop: number;
+  score: number;
+}
+
+// Flow type for export.
+export type FeatureDataSource = {
+  rangeChanged: (newRange: GenomeRange) => void;
+  getFeaturesInRange: (range: ContigInterval<string>) => Feature[];
+  on: (event: string, handler: Function) => void;
+  off: (event: string) => void;
+  trigger: (event: string, ...args:any) => void;
+}
+
 // Flow type for export.
 export type BigBedSource = {
   rangeChanged: (newRange: GenomeRange) => void;
-  getGenesInRange: (range: ContigInterval<string>) => Gene[];
+  getFeaturesInRange: (range: ContigInterval<string>) => Gene[];
   on: (event: string, handler: Function) => void;
   off: (event: string) => void;
   trigger: (event: string, ...args:any) => void;
@@ -68,7 +86,7 @@ function createFromBigBedFile(remoteSource: BigBed): BigBedSource {
     }
   }
 
-  function getGenesInRange(range: ContigInterval<string>): Gene[] {
+  function getFeaturesInRange(range: ContigInterval<string>): Gene[] {
     if (!range) return [];
     var results = [];
     _.each(genes, gene => {
@@ -106,7 +124,7 @@ function createFromBigBedFile(remoteSource: BigBed): BigBedSource {
     rangeChanged: function(newRange: GenomeRange) {
       fetch(newRange).done();
     },
-    getGenesInRange,
+    getFeaturesInRange,
 
     // These are here to make Flow happy.
     on: () => {},

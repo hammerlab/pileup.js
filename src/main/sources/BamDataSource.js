@@ -8,7 +8,6 @@ import {Events} from 'backbone';
 import ContigInterval from '../ContigInterval';
 import BamFile from '../data/bam';
 import RemoteFile from '../RemoteFile';
-import {expandRange} from '../utils';
 
 import type {Alignment, AlignmentDataSource} from '../Alignment';
 
@@ -16,6 +15,7 @@ import type {Alignment, AlignmentDataSource} from '../Alignment';
 // This reduces network activity while fetching.
 // TODO: tune this value
 var BASE_PAIRS_PER_FETCH = 100;
+var ZERO_BASED = false;
 
 
 function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
@@ -70,7 +70,7 @@ function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
         return Q.when();
       }
 
-      interval = expandRange(interval, BASE_PAIRS_PER_FETCH);
+      interval = interval.expand(BASE_PAIRS_PER_FETCH, ZERO_BASED);
       var newRanges = interval.complementIntervals(coveredRanges);
       coveredRanges.push(interval);
       coveredRanges = ContigInterval.coalesce(coveredRanges);

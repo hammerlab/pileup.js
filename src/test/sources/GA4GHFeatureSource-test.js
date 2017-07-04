@@ -6,35 +6,34 @@ import {expect} from 'chai';
 import sinon from 'sinon';
 
 import ContigInterval from '../../main/ContigInterval';
-import GA4GHVariantSource from '../../main/sources/GA4GHVariantSource';
+import GA4GHFeatureSource from '../../main/sources/GA4GHFeatureSource';
 import RemoteFile from '../../main/RemoteFile';
 
-describe('GA4GHVariantSource', function() {
+describe('GA4GHFeatureSource', function() {
   var server: any = null, response, source;
 
-  before(function () {
-    source = GA4GHVariantSource.create({
+  beforeEach(function () {
+    source = GA4GHFeatureSource.create({
       endpoint: '/v0.6.0',
-      variantSetId: "WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIl0",
-      callSetIds: ["WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIiwiSEcwMDA5NiJd"]
+      featureSetId: "WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIl0",
     });
 
-    return new RemoteFile('/test-data/variants.ga4gh.chr1.10000-11000.json').getAllString().then(data => {
+    return new RemoteFile('/test-data/features.ga4gh.chr1.120000-125000.json').getAllString().then(data => {
       response = data;
       server = sinon.fakeServer.create();
     });
 
   });
 
-  after(function () {
+  afterEach(function () {
     server.restore();
   });
 
-  it('should fetch variants from a server', function(done) {
-    server.respondWith('POST', '/v0.6.0/variants/search',
+  it('should fetch features from a server', function(done) {
+    server.respondWith('POST', '/v0.6.0/features/search',
                        [200, { "Content-Type": "application/json" }, response]);
 
-    var requestInterval = new ContigInterval('1', 10000, 10500);
+    var requestInterval = new ContigInterval('chr1', 130000, 135000);
     expect(source.getFeaturesInRange(requestInterval))
         .to.deep.equal([]);
 
@@ -43,16 +42,16 @@ describe('GA4GHVariantSource', function() {
     source.on('networkdone', e => { progress.push('done'); });
     source.on('newdata', () => {
       var reads = source.getFeaturesInRange(requestInterval);
-      expect(reads).to.have.length(3);
+      expect(reads).to.have.length(2);
       done();
     });
 
-    source.rangeChanged({contig: '1', start: 10000, stop: 10500});
+    source.rangeChanged({contig: 'chr1', start: 130000, stop: 135000});
     server.respond();
   });
 
   it('should return empty with no data', function(done) {
-    server.respondWith('POST', '/v0.6.0/variants/search',
+    server.respondWith('POST', '/v0.6.0/features/search',
                        [200, { "Content-Type": "application/json" }, response]);
 
     var requestInterval = new ContigInterval('2', 10000, 20000);

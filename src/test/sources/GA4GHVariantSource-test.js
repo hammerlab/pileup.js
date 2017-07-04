@@ -12,11 +12,12 @@ import RemoteFile from '../../main/RemoteFile';
 describe('GA4GHVariantSource', function() {
   var server: any = null, response, source;
 
-  before(function () {
+  beforeEach(function () {
     source = GA4GHVariantSource.create({
       endpoint: '/v0.6.0',
       variantSetId: "WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIl0",
-      callSetIds: ["WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIiwiSEcwMDA5NiJd"]
+      callSetIds: ["WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIiwiSEcwMDA5NiJd"],
+      killChr: true
     });
 
     return new RemoteFile('/test-data/variants.ga4gh.chr1.10000-11000.json').getAllString().then(data => {
@@ -26,7 +27,7 @@ describe('GA4GHVariantSource', function() {
 
   });
 
-  after(function () {
+  afterEach(function () {
     server.restore();
   });
 
