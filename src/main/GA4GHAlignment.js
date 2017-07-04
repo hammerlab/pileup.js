@@ -101,7 +101,7 @@ class GA4GHAlignment /* implements Alignment */ {
     }
   }
 
-  // This is exposed as a static method to facilitate an optimization in GA4GHDataSource.
+  // This is exposed as a static method to facilitate an optimization in GA4GHAlignmentSource.
   static keyFromGA4GHResponse(alignment: Object): string {
     // this.alignment.id would be appealing here, but it's not actually unique!
     return alignment.fragmentName + ':' + alignment.readNumber;

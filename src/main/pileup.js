@@ -16,11 +16,15 @@ import TwoBitDataSource from './sources/TwoBitDataSource';
 import BigBedDataSource from './sources/BigBedDataSource';
 import VcfDataSource from './sources/VcfDataSource';
 import BamDataSource from './sources/BamDataSource';
-import GA4GHDataSource from './sources/GA4GHDataSource';
 import EmptySource from './sources/EmptySource';
 
 // Data sources from json
 import GA4GHJson from './json/GA4GHJson';
+
+// GA4GH sources
+import GA4GHAlignmentSource from './sources/GA4GHAlignmentSource';
+import GA4GHVariantSource from './sources/GA4GHVariantSource';
+import GA4GHFeatureSource from './sources/GA4GHFeatureSource';
 
 // Visualizations
 import CoverageTrack from './viz/CoverageTrack';
@@ -165,11 +169,13 @@ var pileup = {
   create: create,
   formats: {
     bam: BamDataSource.create,
-    ga4gh: GA4GHDataSource.create,
     json: GA4GHJson.create,
     vcf: VcfDataSource.create,
     twoBit: TwoBitDataSource.create,
     bigBed: BigBedDataSource.create,
+    GAReadAlignment: GA4GHAlignmentSource.create,
+    GAVariant: GA4GHVariantSource.create,
+    GAFeature: GA4GHFeatureSource.create,
     empty: EmptySource.create
   },
   viz: {

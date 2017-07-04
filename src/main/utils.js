@@ -11,6 +11,7 @@ import pako from 'pako/lib/inflate';
 import _ from 'underscore';
 
 import Interval from './Interval';
+import ContigInterval from './ContigInterval';
 
 // Compare two tuples of equal length. Is t1 <= t2?
 // TODO: make this tupleLessOrEqual<T> -- it works with strings or booleans, too.
@@ -201,7 +202,7 @@ function parseRange(range: string): ?PartialGenomeRange {
       stop: parseNumberWithCommas(m[3])
     };
   }
-  
+
   // Then contig:number
   m = /^([^ :]+):([0-9,]+)$/.exec(range);
   if (m) {
@@ -273,6 +274,16 @@ function computePercentile(xs: number[], percentile: number): number {
   }
 }
 
+// Expand range to begin and end on multiples of BASE_PAIRS_PER_FETCH.
+function expandRange(range: ContigInterval<string>, size: number): ContigInterval<string> {
+  var roundDown = x => x - x % size;
+  var newStart = Math.max(0, roundDown(range.start())),
+      newStop = roundDown(range.stop() + size - 1);
+
+  var test = new ContigInterval(range.contig, newStart, newStop); // TODO rm
+  return new ContigInterval(range.contig, newStart, newStop);
+}
+
 module.exports = {
   tupleLessOrEqual,
   tupleRangeOverlaps,
@@ -286,5 +297,6 @@ module.exports = {
   formatInterval,
   isChrMatch,
   flatMap,
-  computePercentile
+  computePercentile,
+  expandRange
 };

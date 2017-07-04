@@ -6,10 +6,10 @@ import {expect} from 'chai';
 import sinon from 'sinon';
 
 import ContigInterval from '../../main/ContigInterval';
-import GA4GHDataSource from '../../main/sources/GA4GHDataSource';
+import GA4GHAlignmentSource from '../../main/sources/GA4GHAlignmentSource';
 import RemoteFile from '../../main/RemoteFile';
     
-describe('GA4GHDataSource', function() {
+describe('GA4GHAlignmentSource', function() {
   var server: any = null, response;
 
   before(function () {
@@ -27,7 +27,7 @@ describe('GA4GHDataSource', function() {
     server.respondWith('POST', '/v0.5.1/reads/search',
                        [200, { "Content-Type": "application/json" }, response]);
 
-    var source = GA4GHDataSource.create({
+    var source = GA4GHAlignmentSource.create({
       endpoint: '/v0.5.1',
       readGroupId: 'some-group-set:some-read-group',
       killChr: false

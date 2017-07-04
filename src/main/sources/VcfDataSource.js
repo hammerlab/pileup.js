@@ -15,6 +15,7 @@ import ContigInterval from '../ContigInterval';
 import RemoteFile from '../RemoteFile';
 import LocalStringFile from '../LocalStringFile';
 import VcfFile from '../data/vcf';
+import {expandRange} from '../utils';
 
 export type VcfDataSource = {
   rangeChanged: (newRange: GenomeRange) => void;
@@ -26,13 +27,6 @@ export type VcfDataSource = {
 
 
 var BASE_PAIRS_PER_FETCH = 100;
-function expandRange(range: ContigInterval<string>) {
-  var roundDown = x => x - x % BASE_PAIRS_PER_FETCH;
-  var newStart = Math.max(1, roundDown(range.start())),
-      newStop = roundDown(range.stop() + BASE_PAIRS_PER_FETCH - 1);
-
-  return new ContigInterval(range.contig, newStart, newStop);
-}
 
 function variantKey(v: Variant): string {
   return `${v.contig}:${v.position}`;
@@ -60,7 +54,7 @@ function createFromVcfFile(remoteSource: VcfFile): VcfDataSource {
       return Q.when();
     }
 
-    interval = expandRange(interval);
+    interval = expandRange(interval, BASE_PAIRS_PER_FETCH);
 
     // "Cover" the range immediately to prevent duplicate fetches.
     coveredRanges.push(interval);

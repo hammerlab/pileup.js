@@ -8,6 +8,7 @@ import {Events} from 'backbone';
 import ContigInterval from '../ContigInterval';
 import BamFile from '../data/bam';
 import RemoteFile from '../RemoteFile';
+import {expandRange} from '../utils';
 
 import type {Alignment, AlignmentDataSource} from '../Alignment';
 
@@ -15,14 +16,6 @@ import type {Alignment, AlignmentDataSource} from '../Alignment';
 // This reduces network activity while fetching.
 // TODO: tune this value
 var BASE_PAIRS_PER_FETCH = 100;
-
-function expandRange(range: ContigInterval<string>) {
-  var roundDown = x => x - x % BASE_PAIRS_PER_FETCH;
-  var newStart = Math.max(1, roundDown(range.start())),
-      newStop = roundDown(range.stop() + BASE_PAIRS_PER_FETCH - 1);
-
-  return new ContigInterval(range.contig, newStart, newStop);
-}
 
 
 function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
@@ -53,7 +46,7 @@ function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
   }
 
   function fetch(range: GenomeRange) {
-    var refsPromise = !_.isEmpty(contigNames) ? Q.when() : 
+    var refsPromise = !_.isEmpty(contigNames) ? Q.when() :
         remoteSource.header.then(saveContigMapping);
 
     // For BAMs without index chunks, we need to fetch the entire BAI file
@@ -77,7 +70,7 @@ function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
         return Q.when();
       }
 
-      interval = expandRange(interval);
+      interval = expandRange(interval, BASE_PAIRS_PER_FETCH);
       var newRanges = interval.complementIntervals(coveredRanges);
       coveredRanges.push(interval);
       coveredRanges = ContigInterval.coalesce(coveredRanges);

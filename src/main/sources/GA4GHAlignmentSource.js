@@ -12,6 +12,7 @@ import {Events} from 'backbone';
 
 import ContigInterval from '../ContigInterval';
 import GA4GHAlignment from '../GA4GHAlignment';
+import utils from '../utils';
 
 var ALIGNMENTS_PER_REQUEST = 200;  // TODO: explain this choice.
 
@@ -22,14 +23,6 @@ var ALIGNMENTS_PER_REQUEST = 200;  // TODO: explain this choice.
 // lots of reads being fetched twice, but setting it too large will result in
 // bulkier requests.
 var BASE_PAIRS_PER_FETCH = 100;
-
-function expandRange(range: ContigInterval<string>) {
-  var roundDown = x => x - x % BASE_PAIRS_PER_FETCH;
-  var newStart = Math.max(1, roundDown(range.start())),
-      newStop = roundDown(range.stop() + BASE_PAIRS_PER_FETCH - 1);
-
-  return new ContigInterval(range.contig, newStart, newStop);
-}
 
 type GA4GHSpec = {
   endpoint: string;
@@ -68,7 +61,7 @@ function create(spec: GA4GHSpec): AlignmentDataSource {
     var interval = new ContigInterval(contig, newRange.start, newRange.stop);
     if (interval.isCoveredBy(coveredRanges)) return;
 
-    interval = expandRange(interval);
+    interval = utils.expandRange(interval, BASE_PAIRS_PER_FETCH);
 
     // select only intervals not yet loaded into coveredRangesß
     var intervals = interval.complementIntervals(coveredRanges);

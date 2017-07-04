@@ -47,15 +47,6 @@ export type TwoBitSource = {
   trigger: (event: string, ...args:any) => void;
 }
 
-// Expand range to begin and end on multiples of BASE_PAIRS_PER_FETCH.
-function expandRange(range) {
-  var roundDown = x => x - x % BASE_PAIRS_PER_FETCH;
-  var newStart = Math.max(0, roundDown(range.start())),
-      newStop = roundDown(range.stop() + BASE_PAIRS_PER_FETCH - 1);
-
-  return new ContigInterval(range.contig, newStart, newStop);
-}
-
 
 var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
   // Local cache of genomic data.
@@ -72,7 +63,7 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
       o.trigger('newdatarefused', range);
       return Q.when();  // empty promise
     }
-    //now we can add region to covered regions 
+    //now we can add region to covered regions
     //doing it earlier would provide inconsistency
     coveredRanges.push(range);
     coveredRanges = ContigInterval.coalesce(coveredRanges);
@@ -142,7 +133,7 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
           return;
         }
 
-        range = expandRange(range);
+        range = utils.expandRange(range, BASE_PAIRS_PER_FETCH);
         var newRanges = range.complementIntervals(coveredRanges);
 
         for (var newRange of newRanges) {

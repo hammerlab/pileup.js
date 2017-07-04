@@ -66,10 +66,12 @@ function extractVariant(vcfLine: string): Variant {
       }
     }
   }
+  var contig = parts[0];
+  var position = Number(parts[1]);
 
   return {
-    contig: parts[0],
-    position: Number(parts[1]),
+    contig: contig,
+    position: position,
     id: parts[2],
     ref: parts[3],
     alt: parts[4],
