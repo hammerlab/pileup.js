@@ -29,7 +29,7 @@ function create(spec: GA4GHFeatureSpec): FeatureDataSource {
   var coveredRanges: ContigInterval<string>[] = [];
 
   function addFeaturesFromResponse(response: Object) {
-    if (response.features == undefined) {
+    if (response.features === undefined) {
       return;
     }
 

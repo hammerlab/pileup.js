@@ -33,7 +33,7 @@ function create(spec: GA4GHVariantSpec): VcfDataSource {
   var coveredRanges: ContigInterval<string>[] = [];
 
   function addVariantsFromResponse(response: Object) {
-    if (response.variants == undefined) {
+    if (response.variants === undefined) {
       return;
     }
 
@@ -130,7 +130,7 @@ function create(spec: GA4GHVariantSpec): VcfDataSource {
 
   function getFeaturesInRange(range: ContigInterval<string>): Variant[] {
     if (!range) return [];
-    
+
     var contig = range.contig.replace(/^chr/, '');
     if (!spec.killChr) {
       contig = `chr${contig}`;
