@@ -18,6 +18,13 @@ export const AllelFrequencyStrategy = {
   Major : {name: "Major"},
 };
 
+
+export type NetworkStatus = {numRequests?: number, status?: string};
+
+export type State = {
+  networkStatus: ?NetworkStatus;
+};
+
 export type VizWithOptions = {
   component: ReactClass;
   options: ?Object;

@@ -14,6 +14,7 @@ import ContigInterval from '../ContigInterval';
 import GA4GHAlignment from '../GA4GHAlignment';
 
 var ALIGNMENTS_PER_REQUEST = 200;  // TODO: explain this choice.
+var ZERO_BASED = false;
 
 
 // Genome ranges are rounded to multiples of this for fetching.
@@ -22,14 +23,6 @@ var ALIGNMENTS_PER_REQUEST = 200;  // TODO: explain this choice.
 // lots of reads being fetched twice, but setting it too large will result in
 // bulkier requests.
 var BASE_PAIRS_PER_FETCH = 100;
-
-function expandRange(range: ContigInterval<string>) {
-  var roundDown = x => x - x % BASE_PAIRS_PER_FETCH;
-  var newStart = Math.max(1, roundDown(range.start())),
-      newStop = roundDown(range.stop() + BASE_PAIRS_PER_FETCH - 1);
-
-  return new ContigInterval(range.contig, newStart, newStop);
-}
 
 type GA4GHSpec = {
   endpoint: string;
@@ -40,10 +33,6 @@ type GA4GHSpec = {
 };
 
 function create(spec: GA4GHSpec): AlignmentDataSource {
-  if (spec.endpoint.slice(-6) != 'v0.5.1') {
-    throw new Error('Only v0.5.1 of the GA4GH API is supported by pileup.js');
-  }
-
   var url = spec.endpoint + '/reads/search';
 
   var reads: {[key:string]: Alignment} = {};
@@ -52,6 +41,9 @@ function create(spec: GA4GHSpec): AlignmentDataSource {
   var coveredRanges: ContigInterval<string>[] = [];
 
   function addReadsFromResponse(response: Object) {
+    if (response.alignments == undefined) {
+      return;
+    }
     response.alignments.forEach(alignment => {
       // optimization: don't bother constructing a GA4GHAlignment unless it's new.
       var key = GA4GHAlignment.keyFromGA4GHResponse(alignment);
@@ -68,7 +60,7 @@ function create(spec: GA4GHSpec): AlignmentDataSource {
     var interval = new ContigInterval(contig, newRange.start, newRange.stop);
     if (interval.isCoveredBy(coveredRanges)) return;
 
-    interval = expandRange(interval);
+    interval = interval.expand(BASE_PAIRS_PER_FETCH, ZERO_BASED);
 
     // select only intervals not yet loaded into coveredRangesß
     var intervals = interval.complementIntervals(coveredRanges);
