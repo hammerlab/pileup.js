@@ -124,7 +124,7 @@ class SamRead /* implements Alignment */ {
    */
   getKey(): string {
     if (this.fromText) {
-      return this.name;
+      return this.name + '/' + this.flag;
     }
     else {
       return this.offset.toString();
