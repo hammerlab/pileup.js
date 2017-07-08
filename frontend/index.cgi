@@ -108,6 +108,11 @@ if (%arg<exome>) {
   $app = 'exome';
 }
 
+my $ref = 'hg19';
+if (%arg<ref>) {
+  $ref = %arg<ref>
+}
+
 my $filter = '';
 if (%arg<filter>) {
   $filter = "filter=%arg<filter>;";
@@ -130,6 +135,7 @@ else {
 my %template_data =
   url => get_url(),
   app => $app,
+  ref => $ref,
   downsample => $downsample,
   filter => $filter,
   select => $select,

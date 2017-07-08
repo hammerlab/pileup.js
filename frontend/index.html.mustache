@@ -138,17 +138,17 @@
     {
       viz: pileup.viz.regions(),
       data: pileup.formats.bigBedRegion({
-        url: '/web/data/{{url}}'
-        // url: '/web/file.cgi?file={{url}}'
+        url: '/web/data/mask.bb'
       }),
-      name: 'Repeat'
+      name: 'Repeat Masker'
     },
     {
       viz: pileup.viz.regions(),
       data: pileup.formats.bigBedRegion({
-        url: '/web/data/mask.bb'
+        url: '/web/data/{{url}}'
+        // url: '/web/file.cgi?file={{url}}'
       }),
-      name: 'Repeat Masker'
+      name: 'Repeat'
     },
     {
       viz: pileup.viz.blacklist(),
@@ -168,8 +168,8 @@
       viz: pileup.viz.genome(),
       isReference: true,
       data: pileup.formats.twoBit({
-        url: 'https://www.biodalliance.org/datasets/hg19.2bit'
-        // url: '/web/data/hg19.2bit'
+        url: 'https://www.biodalliance.org/datasets/{{ref}}.2bit'
+        //url: '/web/data/{{ref}}.2bit'
       }),
       name: 'Reference'
     },
