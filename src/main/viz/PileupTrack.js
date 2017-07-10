@@ -124,12 +124,14 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
   function drawSegment(op, y, vRead) {
     switch (op.op) {
       case CigarOp.MATCH:
+        ctx.globalAlpha = 0.35;
         if (op.arrow) {
           drawArrow(op.pos, op.length, y, op.arrow);
         } else {
           var x = scale(op.pos + 1);
           ctx.fillRect(x, y, scale(op.pos + op.length + 1) - x, READ_HEIGHT);
         }
+        ctx.globalAlpha = 1.0;
         break;
 
       case CigarOp.DELETE:
