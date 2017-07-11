@@ -57,7 +57,7 @@ var sources = [
         alert(content);
       },
     },
-    name: 'Variants'
+    name: 'Phase3 Release Variants'
   },
   {
     viz: pileup.viz.features(),
@@ -65,16 +65,30 @@ var sources = [
       endpoint: ga4ghReferenceServer,
       featureSetId: "WyIxa2dlbm9tZXMiLCJnZW5jb2RlX3YyNGxpZnQzNyJd",
     }),
-    name: 'Features'
+    name: 'gencode_v24lift37'
   },
-  // { TODO
-  //   viz: pileup.viz.pileup(),
-  //   data: pileup.formats.GAReadAlignment({
-  //     endpoint: 'http://1kgenomes.ga4gh.org',
-  //     readGroupId: "WyIxa2dlbm9tZXMiLCJyZ3MiLCJIRzAzMjcwIiwiRVJSMTgxMzI5Il0",
-  //   }),
-  //   name: 'Alignments'
-  // }
+  {
+    viz: pileup.viz.coverage(),
+    data: pileup.formats.GAReadAlignment({
+      endpoint: ga4ghReferenceServer,
+      readGroupId: "WyIxa2dlbm9tZXMiLCJyZ3MiLCJOQTEyODc4IiwiU1JSNjIyNDYxIl0",
+      killChr: true,
+      forcedReferenceId: "WyJOQ0JJMzciLCIxIl0"
+    }),
+    cssClass: 'normal',
+    name: 'Coverage'
+  },
+  {
+    viz: pileup.viz.pileup(),
+    data: pileup.formats.GAReadAlignment({
+      endpoint: ga4ghReferenceServer,
+      readGroupId: "WyIxa2dlbm9tZXMiLCJyZ3MiLCJOQTEyODc4IiwiU1JSNjIyNDYxIl0",
+      killChr: true,
+      forcedReferenceId: "WyJOQ0JJMzciLCIxIl0"
+    }),
+    cssClass: 'normal',
+    name: 'NA12878'
+  }
 ];
 
 var range = {contig: 'chr1', start: 120000, stop: 125000};

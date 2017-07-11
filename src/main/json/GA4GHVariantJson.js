@@ -6,7 +6,7 @@
 'use strict';
 
 import type {VcfDataSource} from '../sources/VcfDataSource';
-import {Variant} from '../data/vcf';
+import {Variant} from '../data/variant';
 
 import _ from 'underscore';
 import {Events} from 'backbone';

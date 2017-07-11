@@ -10,7 +10,7 @@ import {Events} from 'backbone';
 import ContigInterval from '../ContigInterval';
 
 import type {VcfDataSource} from './VcfDataSource';
-import {Variant} from '../data/vcf';
+import {Variant} from '../data/variant';
 
 var BASE_PAIRS_PER_FETCH = 100;
 var VARIANTS_PER_REQUEST = 400;

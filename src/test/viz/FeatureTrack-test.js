@@ -66,9 +66,9 @@ describe('FeatureTrack', function() {
         var features = drawnObjects(testDiv, '.features');
         // there can be duplicates in the case where features are
         // overlapping  more than one section of the canvas
-        features =  _.unique(_.collect(features, function(x) {
-            return x;
-        }));
+        features =  _.uniq(features, false, function(x) {
+            return x.start;
+        });
 
         expect(features).to.have.length(4);
         expect(features.map(f => f.start)).to.deep.equal(

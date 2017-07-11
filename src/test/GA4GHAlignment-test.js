@@ -48,6 +48,9 @@ describe('GA4GHAlignment', function() {
         var ga4gh = new GA4GHAlignment(sampleAlignments[i]),
             bam = samReads[i];
         expect(ga4gh.getSequence()).to.equal(bam.getSequence());
+        var interval = ga4gh.getInterval();
+        expect(interval.start()).to.equal(bam.pos);
+
         // See https://github.com/ga4gh/server/issues/491
         // expect(ga4gh.getStrand()).to.equal(bam.getStrand());
         // For the if statement, see https://github.com/ga4gh/server/issues/492

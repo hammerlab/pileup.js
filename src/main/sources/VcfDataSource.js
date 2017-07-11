@@ -13,8 +13,10 @@ import Q from 'q';
 import ContigInterval from '../ContigInterval';
 import RemoteFile from '../RemoteFile';
 import LocalStringFile from '../LocalStringFile';
+// requirement for jshint to pass
+/* exported Variant */
+import {Variant} from '../data/variant';
 import {VcfFile} from '../data/vcf';
-import {Variant} from '../data/vcf';
 
 export type VcfDataSource = {
   rangeChanged: (newRange: GenomeRange) => void;

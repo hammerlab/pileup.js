@@ -30,7 +30,8 @@ describe('GA4GHAlignmentSource', function() {
     var source = GA4GHAlignmentSource.create({
       endpoint: '/v0.5.1',
       readGroupId: 'some-group-set:some-read-group',
-      killChr: false
+      killChr: false,
+      forcedReferenceId: null
     });
 
     var requestInterval = new ContigInterval('chr17', 10, 20);

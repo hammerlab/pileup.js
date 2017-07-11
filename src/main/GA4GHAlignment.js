@@ -39,12 +39,13 @@ class GA4GHAlignment /* implements Alignment */ {
   // https://github.com/ga4gh/schemas/blob/v0.5.1/src/main/resources/avro/reads.avdl
   constructor(alignment: Object) {
     this.alignment = alignment;
-    this.pos = alignment.alignment.position.position;
+    this.pos = parseInt(alignment.alignment.position.position);
     this.ref = alignment.alignment.position.referenceName;
     this.name = alignment.fragmentName;
 
     this.cigarOps = alignment.alignment.cigar.map(
-        ({operation, operationLength: length}) => ({ op: OP_MAP[operation], length }));
+        ({operation, operationLength: length}) => ({ op: OP_MAP[operation], length: parseInt(length)})
+    );
     this._interval = new ContigInterval(this.ref,
                                         this.pos,
                                         this.pos + this.getReferenceLength() - 1);

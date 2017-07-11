@@ -10,6 +10,8 @@ import {Events} from 'backbone';
 import ContigInterval from '../ContigInterval';
 import Interval from '../Interval';
 import BigBed from '../data/BigBed';
+// requirement for jshint to pass
+/* exported Feature */
 import Feature from '../data/feature';
 
 
