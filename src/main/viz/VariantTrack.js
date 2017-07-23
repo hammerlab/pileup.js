@@ -126,7 +126,11 @@ class VariantTrack extends React.Component {
     if (variants && variants.length>0) {
       var data = [];
       for (var i=0;i<variants.length;i++) {
-        data.push({id: variants[i].id,vcfLine:variants[i].vcfLine});
+        data.push({
+          id:       variants[i].id,
+          vcfLine:  variants[i].vcfLine,
+          ref:      variants[i].ref,
+          alt:      variants[i].alt});
       }
       //user provided function for displaying popup
       if (typeof this.props.options.onVariantClicked  === "function") {

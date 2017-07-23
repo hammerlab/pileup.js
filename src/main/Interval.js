@@ -39,6 +39,18 @@ class Interval {
     return this.contains(other.start) && this.contains(other.stop);
   }
 
+  // Rounds the interval to the nearest multiples of size.
+  // Optional minimum parameter determines the lowest
+  // possible value for the start of the resulting Interval.
+  round(size: number, zeroBased: boolean): Interval {
+    var minimum = zeroBased ? 0 : 1;
+    var roundDown = x => x - x % size;
+    var newStart = Math.max(minimum, roundDown(this.start)),
+        newStop = roundDown(this.stop + size - 1);
+
+    return new Interval(newStart, newStop);
+  }
+
   clone(): Interval {
     return new Interval(this.start, this.stop);
   }

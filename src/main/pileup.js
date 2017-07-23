@@ -16,16 +16,23 @@ import TwoBitDataSource from './sources/TwoBitDataSource';
 import BigBedDataSource from './sources/BigBedDataSource';
 import VcfDataSource from './sources/VcfDataSource';
 import BamDataSource from './sources/BamDataSource';
-import GA4GHDataSource from './sources/GA4GHDataSource';
 import EmptySource from './sources/EmptySource';
 
 // Data sources from json
-import GA4GHJson from './json/GA4GHJson';
+import GA4GHAlignmentJson from './json/GA4GHAlignmentJson';
+import GA4GHVariantJson from './json/GA4GHVariantJson';
+import GA4GHFeatureJson from './json/GA4GHFeatureJson';
+
+// GA4GH sources
+import GA4GHAlignmentSource from './sources/GA4GHAlignmentSource';
+import GA4GHVariantSource from './sources/GA4GHVariantSource';
+import GA4GHFeatureSource from './sources/GA4GHFeatureSource';
 
 // Visualizations
 import CoverageTrack from './viz/CoverageTrack';
 import GenomeTrack from './viz/GenomeTrack';
 import GeneTrack from './viz/GeneTrack';
+import FeatureTrack from './viz/FeatureTrack';
 import LocationTrack from './viz/LocationTrack';
 import PileupTrack from './viz/PileupTrack';
 import ScaleTrack from './viz/ScaleTrack';
@@ -165,17 +172,22 @@ var pileup = {
   create: create,
   formats: {
     bam: BamDataSource.create,
-    ga4gh: GA4GHDataSource.create,
-    json: GA4GHJson.create,
+    alignmentJson: GA4GHAlignmentJson.create,
+    variantJson: GA4GHVariantJson.create,
+    featureJson: GA4GHFeatureJson.create,
     vcf: VcfDataSource.create,
     twoBit: TwoBitDataSource.create,
     bigBed: BigBedDataSource.create,
+    GAReadAlignment: GA4GHAlignmentSource.create,
+    GAVariant: GA4GHVariantSource.create,
+    GAFeature: GA4GHFeatureSource.create,
     empty: EmptySource.create
   },
   viz: {
     coverage: makeVizObject(CoverageTrack),
     genome:   makeVizObject(GenomeTrack),
     genes:    makeVizObject(GeneTrack),
+    features: makeVizObject(FeatureTrack),
     location: makeVizObject(LocationTrack),
     scale:    makeVizObject(ScaleTrack),
     variants: makeVizObject(VariantTrack),

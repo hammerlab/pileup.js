@@ -87,7 +87,7 @@ class GeneTrack extends React.Component {
     // Visualize new reference data as it comes in from the network.
     this.props.source.on('newdata', (range) => {
       this.setState({
-        genes: this.props.source.getGenesInRange(range)
+        genes: this.props.source.getFeaturesInRange(range)
       });
     });
 

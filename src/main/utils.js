@@ -201,7 +201,7 @@ function parseRange(range: string): ?PartialGenomeRange {
       stop: parseNumberWithCommas(m[3])
     };
   }
-  
+
   // Then contig:number
   m = /^([^ :]+):([0-9,]+)$/.exec(range);
   if (m) {

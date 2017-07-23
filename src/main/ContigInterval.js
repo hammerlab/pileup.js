@@ -113,6 +113,11 @@ class ContigInterval<T: (number|string)> {
     };
   }
 
+  round(size: number, zeroBased: boolean): ContigInterval<T> {
+    var newInterval = this.interval.round(size, zeroBased);
+    return new ContigInterval(this.contig, newInterval.start, newInterval.stop);
+  }
+
   // Comparator for use with Array.prototype.sort
   static compare(a: ContigInterval, b: ContigInterval): number {
     if (a.contig > b.contig) {

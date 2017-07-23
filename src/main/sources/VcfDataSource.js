@@ -5,7 +5,6 @@
  */
 'use strict';
 
-import type {Variant} from '../data/vcf';
 
 import Events from 'backbone';
 import _ from 'underscore';
@@ -14,7 +13,10 @@ import Q from 'q';
 import ContigInterval from '../ContigInterval';
 import RemoteFile from '../RemoteFile';
 import LocalStringFile from '../LocalStringFile';
-import VcfFile from '../data/vcf';
+// requirement for jshint to pass
+/* exported Variant */
+import {Variant} from '../data/variant';
+import {VcfFile} from '../data/vcf';
 
 export type VcfDataSource = {
   rangeChanged: (newRange: GenomeRange) => void;
@@ -26,13 +28,7 @@ export type VcfDataSource = {
 
 
 var BASE_PAIRS_PER_FETCH = 100;
-function expandRange(range: ContigInterval<string>) {
-  var roundDown = x => x - x % BASE_PAIRS_PER_FETCH;
-  var newStart = Math.max(1, roundDown(range.start())),
-      newStop = roundDown(range.stop() + BASE_PAIRS_PER_FETCH - 1);
-
-  return new ContigInterval(range.contig, newStart, newStop);
-}
+var ZERO_BASED = false;
 
 function variantKey(v: Variant): string {
   return `${v.contig}:${v.position}`;
@@ -60,7 +56,7 @@ function createFromVcfFile(remoteSource: VcfFile): VcfDataSource {
       return Q.when();
     }
 
-    interval = expandRange(interval);
+    interval = interval.round(BASE_PAIRS_PER_FETCH, ZERO_BASED);
 
     // "Cover" the range immediately to prevent duplicate fetches.
     coveredRanges.push(interval);

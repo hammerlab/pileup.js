@@ -234,4 +234,5 @@ describe('utils', function() {
     expect(utils.computePercentile([1], 99)).to.equal(1);
     expect(utils.computePercentile([], 99)).to.equal(0);
   });
+
 });
