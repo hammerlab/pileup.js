@@ -183,6 +183,8 @@
 /* pileup track */
 .pileup-root > .pileup {
   flex: 1;  /* stretch to fill remaining space */
+  flex-basis: auto;
+  min-height: 300px; /* prevent tracks from becoming too small */
 }
 .pileup .alignment .match {
   fill: #c8c8c8;  /* matches IGV */
