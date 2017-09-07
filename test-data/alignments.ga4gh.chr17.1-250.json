@@ -2,14 +2,7 @@
   "nextPageToken": null,
   "alignments": [
     {
-      "info": {
-        "RG": [
-          "cow"
-        ],
-        "PG": [
-          "bull"
-        ]
-      },
+      "attributes": {"attr": {"XC": {"values": [{"int32Value": 84}]}, "RG": {"values": [{"stringValue": "ERR181329"}]}}},
       "duplicateFragment": false,
       "alignedQuality": [
         32,
@@ -26,10 +19,10 @@
       "failedVendorQualityChecks": false,
       "fragmentName": "r000",
       "readNumber": 0,
-      "properPlacement": true,
+      "improperPlacement": true,
       "nextMatePosition": {
         "position": 79,
-        "reverseStrand": false,
+        "strand": "POS_STRAND",
         "referenceName": "chr17"
       },
       "supplementaryAlignment": false,
@@ -41,7 +34,7 @@
       "alignment": {
         "position": {
           "position": 4,
-          "reverseStrand": false,
+          "strand": "POS_STRAND",
           "referenceName": "chr17"
         },
         "cigar": [
@@ -56,14 +49,7 @@
       "readGroupId": "pileup.js:chr17.1-250"
     },
     {
-      "info": {
-        "RG": [
-          "cow"
-        ],
-        "PG": [
-          "bull"
-        ]
-      },
+       "attributes": {"attr": {"XC": {"values": [{"int32Value": 84}]}, "RG": {"values": [{"stringValue": "ERR181329"}]}}},
       "duplicateFragment": false,
       "alignedQuality": [
         32,
@@ -80,10 +66,10 @@
       "failedVendorQualityChecks": false,
       "fragmentName": "r000",
       "readNumber": 0,
-      "properPlacement": true,
+      "improperPlacement": false,
       "nextMatePosition": {
         "position": 49,
-        "reverseStrand": false,
+        "strand": "POS_STRAND",
         "referenceName": "chr17"
       },
       "supplementaryAlignment": false,
@@ -95,7 +81,7 @@
       "alignment": {
         "position": {
           "position": 19,
-          "reverseStrand": false,
+          "strand": "POS_STRAND",
           "referenceName": "chr17"
         },
         "cigar": [
@@ -110,7 +96,7 @@
       "readGroupId": "pileup.js:chr17.1-250"
     },
     {
-      "info": {
+      "": {
         "YY": [
           "100"
         ],
@@ -129,10 +115,10 @@
       "failedVendorQualityChecks": false,
       "fragmentName": "r001",
       "readNumber": 1,
-      "properPlacement": true,
+      "improperPlacement": true,
       "nextMatePosition": {
         "position": 36,
-        "reverseStrand": false,
+        "strand": "POS_STRAND",
         "referenceName": "chr17"
       },
       "supplementaryAlignment": false,
@@ -144,7 +130,7 @@
       "alignment": {
         "position": {
           "position": 24,
-          "reverseStrand": false,
+          "strand": "POS_STRAND",
           "referenceName": "chr17"
         },
         "cigar": [
@@ -179,23 +165,13 @@
       "readGroupId": "pileup.js:chr17.1-250"
     },
     {
-      "info": {
-        "XB": [
-          "-10"
-        ],
-        "XA": [
-          "abc"
-        ],
-        "PG": [
-          "colt"
-        ]
-      },
+       "attributes": {"attr": {"XC": {"values": [{"int32Value": 84}]}, "RG": {"values": [{"stringValue": "ERR181329"}]}}},
       "duplicateFragment": false,
       "alignedQuality": [],
       "failedVendorQualityChecks": false,
       "fragmentName": "r002",
       "readNumber": null,
-      "properPlacement": false,
+      "improperPlacement": true,
       "nextMatePosition": null,
       "supplementaryAlignment": false,
       "numberReads": null,
@@ -206,7 +182,7 @@
       "alignment": {
         "position": {
           "position": 34,
-          "reverseStrand": false,
+          "strand": "POS_STRAND",
           "referenceName": "chr17"
         },
         "cigar": [
@@ -261,17 +237,13 @@
       "readGroupId": "pileup.js:chr17.1-250"
     },
     {
-      "info": {
-        "RG": [
-          "cow"
-        ]
-      },
+       "attributes": {"attr": {"XC": {"values": [{"int32Value": 84}]}, "RG": {"values": [{"stringValue": "ERR181329"}]}}},
       "duplicateFragment": false,
       "alignedQuality": [],
       "failedVendorQualityChecks": false,
       "fragmentName": "r003",
       "readNumber": null,
-      "properPlacement": false,
+      "improperPlacement": false,
       "nextMatePosition": null,
       "supplementaryAlignment": false,
       "numberReads": null,
@@ -282,7 +254,7 @@
       "alignment": {
         "position": {
           "position": 44,
-          "reverseStrand": false,
+          "strand": "POS_STRAND",
           "referenceName": "chr17"
         },
         "cigar": [
@@ -302,20 +274,13 @@
       "readGroupId": "pileup.js:chr17.1-250"
     },
     {
-      "info": {
-        "RG": [
-          "colt"
-        ],
-        "PG": [
-          "colt"
-        ]
-      },
+       "attributes": {"attr": {"XC": {"values": [{"int32Value": 84}]}, "RG": {"values": [{"stringValue": "ERR181329"}]}}},
       "duplicateFragment": false,
       "alignedQuality": [],
       "failedVendorQualityChecks": false,
       "fragmentName": "r004",
       "readNumber": null,
-      "properPlacement": false,
+      "improperPlacement": true,
       "nextMatePosition": null,
       "supplementaryAlignment": false,
       "numberReads": null,
@@ -326,7 +291,7 @@
       "alignment": {
         "position": {
           "position": 55,
-          "reverseStrand": false,
+          "strand": "POS_STRAND",
           "referenceName": "chr17"
         },
         "cigar": [
@@ -356,20 +321,13 @@
       "readGroupId": "pileup.js:chr17.1-250"
     },
     {
-      "info": {
-        "RG": [
-          "cow"
-        ],
-        "PG": [
-          "colt"
-        ]
-      },
+       "attributes": {"attr": {"XC": {"values": [{"int32Value": 84}]}, "RG": {"values": [{"stringValue": "ERR181329"}]}}},
       "duplicateFragment": false,
       "alignedQuality": [],
       "failedVendorQualityChecks": false,
       "fragmentName": "r003",
       "readNumber": null,
-      "properPlacement": false,
+      "improperPlacement": false,
       "nextMatePosition": null,
       "supplementaryAlignment": false,
       "numberReads": null,
@@ -380,7 +338,7 @@
       "alignment": {
         "position": {
           "position": 68,
-          "reverseStrand": false,
+          "strand": "POS_STRAND",
           "referenceName": "chr17"
         },
         "cigar": [
@@ -400,23 +358,16 @@
       "readGroupId": "pileup.js:chr17.1-250"
     },
     {
-      "info": {
-        "RG": [
-          "fish"
-        ],
-        "PG": [
-          "colt"
-        ]
-      },
+       "attributes": {"attr": {"XC": {"values": [{"int32Value": 84}]}, "RG": {"values": [{"stringValue": "ERR181329"}]}}},
       "duplicateFragment": false,
       "alignedQuality": [],
       "failedVendorQualityChecks": false,
       "fragmentName": "r001",
       "readNumber": 0,
-      "properPlacement": true,
+      "improperPlacement": true,
       "nextMatePosition": {
         "position": 6,
-        "reverseStrand": false,
+        "strand": "POS_STRAND",
         "referenceName": "chr17"
       },
       "supplementaryAlignment": false,
@@ -428,7 +379,7 @@
       "alignment": {
         "position": {
           "position": 76,
-          "reverseStrand": false,
+          "strand": "POS_STRAND",
           "referenceName": "chr17"
         },
         "cigar": [
@@ -443,20 +394,13 @@
       "readGroupId": "pileup.js:chr17.1-250"
     },
     {
-      "info": {
-        "RG": [
-          "colt"
-        ],
-        "PG": [
-          "bull"
-        ]
-      },
+       "attributes": {"attr": {"XC": {"values": [{"int32Value": 84}]}, "RG": {"values": [{"stringValue": "ERR181329"}]}}},
       "duplicateFragment": false,
       "alignedQuality": [],
       "failedVendorQualityChecks": false,
       "fragmentName": "x1",
       "readNumber": null,
-      "properPlacement": false,
+      "improperPlacement": false,
       "nextMatePosition": null,
       "supplementaryAlignment": false,
       "numberReads": null,
@@ -467,7 +411,7 @@
       "alignment": {
         "position": {
           "position": 79,
-          "reverseStrand": false,
+          "strand": "POS_STRAND",
           "referenceName": "chr17"
         },
         "cigar": [
@@ -482,14 +426,7 @@
       "readGroupId": "pileup.js:chr17.1-250"
     },
     {
-      "info": {
-        "RG": [
-          "colt"
-        ],
-        "PG": [
-          "bull"
-        ]
-      },
+       "attributes": {"attr": {"XC": {"values": [{"int32Value": 84}]}, "RG": {"values": [{"stringValue": "ERR181329"}]}}},
       "duplicateFragment": false,
       "alignedQuality": [
         30,
@@ -517,7 +454,7 @@
       "failedVendorQualityChecks": false,
       "fragmentName": "x2",
       "readNumber": null,
-      "properPlacement": false,
+      "improperPlacement": false,
       "nextMatePosition": null,
       "supplementaryAlignment": false,
       "numberReads": null,
@@ -528,7 +465,7 @@
       "alignment": {
         "position": {
           "position": 90,
-          "reverseStrand": false,
+          "strand": "POS_STRAND",
           "referenceName": "chr17"
         },
         "cigar": [
@@ -543,14 +480,7 @@
       "readGroupId": "pileup.js:chr17.1-250"
     },
     {
-      "info": {
-        "RG": [
-          "fish"
-        ],
-        "PG": [
-          "bull"
-        ]
-      },
+       "attributes": {"attr": {"XC": {"values": [{"int32Value": 84}]}, "RG": {"values": [{"stringValue": "ERR181329"}]}}},
       "duplicateFragment": false,
       "alignedQuality": [
         30,
@@ -583,7 +513,7 @@
       "failedVendorQualityChecks": false,
       "fragmentName": "x3",
       "readNumber": null,
-      "properPlacement": false,
+      "improperPlacement": false,
       "nextMatePosition": null,
       "supplementaryAlignment": false,
       "numberReads": null,
@@ -594,7 +524,7 @@
       "alignment": {
         "position": {
           "position": 103,
-          "reverseStrand": false,
+          "strand": "POS_STRAND",
           "referenceName": "chr17"
         },
         "cigar": [
@@ -619,14 +549,7 @@
       "readGroupId": "pileup.js:chr17.1-250"
     },
     {
-      "info": {
-        "RG": [
-          "fish"
-        ],
-        "PG": [
-          "bull"
-        ]
-      },
+       "attributes": {"attr": {"XC": {"values": [{"int32Value": 84}]}, "RG": {"values": [{"stringValue": "ERR181329"}]}}},
       "duplicateFragment": false,
       "alignedQuality": [
         30,
@@ -658,7 +581,7 @@
       "failedVendorQualityChecks": false,
       "fragmentName": "x4",
       "readNumber": null,
-      "properPlacement": false,
+      "improperPlacement": false,
       "nextMatePosition": null,
       "supplementaryAlignment": false,
       "numberReads": null,
@@ -669,7 +592,7 @@
       "alignment": {
         "position": {
           "position": 114,
-          "reverseStrand": false,
+          "strand": "POS_STRAND",
           "referenceName": "chr17"
         },
         "cigar": [
@@ -684,14 +607,7 @@
       "readGroupId": "pileup.js:chr17.1-250"
     },
     {
-      "info": {
-        "RG": [
-          "fish"
-        ],
-        "PG": [
-          "bull"
-        ]
-      },
+       "attributes": {"attr": {"XC": {"values": [{"int32Value": 84}]}, "RG": {"values": [{"stringValue": "ERR181329"}]}}},
       "duplicateFragment": false,
       "alignedQuality": [
         30,
@@ -722,7 +638,7 @@
       "failedVendorQualityChecks": false,
       "fragmentName": "x5",
       "readNumber": null,
-      "properPlacement": false,
+      "improperPlacement": false,
       "nextMatePosition": null,
       "supplementaryAlignment": false,
       "numberReads": null,
@@ -733,7 +649,7 @@
       "alignment": {
         "position": {
           "position": 134,
-          "reverseStrand": false,
+          "strand": "POS_STRAND",
           "referenceName": "chr17"
         },
         "cigar": [
@@ -748,11 +664,7 @@
       "readGroupId": "pileup.js:chr17.1-250"
     },
     {
-      "info": {
-        "RG": [
-          "cow"
-        ]
-      },
+       "attributes": {"attr": {"XC": {"values": [{"int32Value": 84}]}, "RG": {"values": [{"stringValue": "ERR181329"}]}}},
       "duplicateFragment": false,
       "alignedQuality": [
         30,
@@ -782,7 +694,7 @@
       "failedVendorQualityChecks": false,
       "fragmentName": "x6",
       "readNumber": null,
-      "properPlacement": false,
+      "improperPlacement": false,
       "nextMatePosition": null,
       "supplementaryAlignment": false,
       "numberReads": null,
@@ -793,7 +705,7 @@
       "alignment": {
         "position": {
           "position": 164,
-          "reverseStrand": false,
+          "strand": "POS_STRAND",
           "referenceName": "chr17"
         },
         "cigar": [

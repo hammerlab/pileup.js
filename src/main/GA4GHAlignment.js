@@ -10,7 +10,8 @@ import type {CigarOp, MateProperties, Strand} from './Alignment';
 import ContigInterval from './ContigInterval';
 import SamRead from './data/SamRead';
 
-// See https://github.com/ga4gh/schemas/blob/v0.5.1/src/main/resources/avro/common.avdl
+// See https://github.com/ga4gh/ga4gh-schemas/blob/master/src/main/proto/ga4gh/reads.proto
+// Data can be queried at http://1kg.ga4gh.org/reads/search
 var OP_MAP = {
   ALIGNMENT_MATCH: 'M',
   INSERT: 'I',
@@ -36,7 +37,7 @@ class GA4GHAlignment /* implements Alignment */ {
   _interval: ContigInterval<string>;
 
   // alignment follows org.ga4gh.GAReadAlignment
-  // https://github.com/ga4gh/schemas/blob/v0.5.1/src/main/resources/avro/reads.avdl
+  // https://github.com/ga4gh/ga4gh-schemas/blob/master/src/main/proto/ga4gh/reads.proto
   constructor(alignment: Object) {
     this.alignment = alignment;
     this.pos = parseInt(alignment.alignment.position.position);
@@ -56,7 +57,7 @@ class GA4GHAlignment /* implements Alignment */ {
   }
 
   getStrand(): Strand {
-    return this.alignment.alignment.position.reverseStrand ? '-' : '+';
+    return this.alignment.alignment.position.strand == 'NEG_STRAND' ? '-' : '+';
   }
 
   getQualityScores(): number[] {
@@ -83,8 +84,8 @@ class GA4GHAlignment /* implements Alignment */ {
     var next = this.alignment.nextMatePosition;
     return next && {
       ref: next.referenceName,
-      pos: next.position,
-      strand: next.reverseStrand ? '-' : '+'
+      pos: parseInt(next.position),
+      strand: next.strand == 'NEG_STRAND' ? '-' : '+'
     };
   }
 
