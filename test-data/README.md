@@ -62,9 +62,16 @@ corresponding SAM files for them in the same repo.
 This was hand-edited from the SAM equivalent of `test_input_1_a.bam` to have
 reads in chr17:1-250. It was then converted back to BAM/BAI using `samtools view`.
 
-The JSON variant was formed by loading `chr17.1-250.bam` into v0.5.1 of the [GA4GH demo server][ga4gh] and querying for all the reads via:
+The JSON variant was formed by loading `chr17.1-250.bam` into 0.6.0a10 of the [GA4GH demo server][ga4gh] and querying for all the reads via:
 
-    curl --data '{"readGroupIds":["pileup.js:chr17.1-250"]}' --header 'Content-Type: application/json' http://localhost:8000/v0.5.1/reads/search > alginments.ga4gh.chr17.1-250.json
+    curl --data '{"readGroupIds":["pileup.js:chr17.1-250"]}' --header 'Content-Type: application/json' http://localhost:8000/0.6.0a10/reads/search > alignments.ga4gh.chr17.1-250.json
+
+
+#### alignments.ga4gh.1.10000-11000.json
+
+alignments.ga4gh.1.10000-11000.json was generated from the 0.6.0a10 GA4GH server http://1kgenomes.ga4gh.org/reads/search with the following
+parameters:
+{"readGroupIds": ["WyIxa2dlbm9tZXMiLCJyZ3MiLCJIRzAzMjcwIiwiRVJSMTgxMzI5Il0"], "referenceId": "WyJOQ0JJMzciLCIxIl0"}
 
 #### index_test.bam
 
