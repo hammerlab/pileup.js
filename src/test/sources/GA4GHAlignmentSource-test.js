@@ -30,7 +30,6 @@ describe('GA4GHAlignmentSource', function() {
     var source = GA4GHAlignmentSource.create({
       endpoint: '/v0.5.1',
       readGroupId: 'some-group-set:some-read-group',
-      killChr: false,
       forcedReferenceId: null
     });
 

@@ -69,7 +69,7 @@ function createFromVcfFile(remoteSource: VcfFile): VcfDataSource {
 
   function getFeaturesInRange(range: ContigInterval<string>): Variant[] {
     if (!range) return [];  // XXX why would this happen?
-    return _.filter(variants, v => range.chrContainsLocus(v.contig, v.position));
+    return _.filter(variants, v => range.containsLocus(v.contig, v.position));
   }
 
   var o = {
