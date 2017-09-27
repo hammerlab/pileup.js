@@ -21,7 +21,7 @@ function create(json: string): VcfDataSource {
 
   // fill variants with json
   if (!_.isEmpty(parsedJson)) {
-      variants = _.values(parsedJson.variants).map(feature => Variant.fromGA4GH(feature));
+      variants = _.values(parsedJson.variants).map(variant => Variant.fromGA4GH(variant));
   }
 
   function rangeChanged(newRange: GenomeRange) {

@@ -72,7 +72,7 @@ describe('FeatureTrack', function() {
 
         expect(features).to.have.length(4);
         expect(features.map(f => f.start)).to.deep.equal(
-            ["89295", "92230", "110953", "120725"]);
+            [89295, 92230, 110953, 120725]);
         p.destroy();
       });
   });
