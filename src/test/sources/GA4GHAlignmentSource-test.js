@@ -13,7 +13,7 @@ describe('GA4GHAlignmentSource', function() {
   var server: any = null, response;
 
   before(function () {
-    return new RemoteFile('/test-data/alignments.ga4gh.chr17.1-250.json').getAllString().then(data => {
+    return new RemoteFile('/test-data/alignments.ga4gh.1.10000-11000.json').getAllString().then(data => {
       response = data;
       server = sinon.fakeServer.create();  // _after_ we do a real XHR!
     });
@@ -24,16 +24,16 @@ describe('GA4GHAlignmentSource', function() {
   });
 
   it('should fetch alignments from a server', function(done) {
-    server.respondWith('POST', '/v0.5.1/reads/search',
+    server.respondWith('POST', '/v0.6.0a10/reads/search',
                        [200, { "Content-Type": "application/json" }, response]);
 
     var source = GA4GHAlignmentSource.create({
-      endpoint: '/v0.5.1',
+      endpoint: '/v0.6.0a10',
       readGroupId: 'some-group-set:some-read-group',
       forcedReferenceId: null
     });
 
-    var requestInterval = new ContigInterval('chr17', 10, 20);
+    var requestInterval = new ContigInterval('1', 10000, 10007);
     expect(source.getAlignmentsInRange(requestInterval))
         .to.deep.equal([]);
 
@@ -42,11 +42,11 @@ describe('GA4GHAlignmentSource', function() {
     source.on('networkdone', e => { progress.push('done'); });
     source.on('newdata', () => {
       var reads = source.getAlignmentsInRange(requestInterval);
-      expect(reads).to.have.length(1);
+      expect(reads).to.have.length(16);
       done();
     });
 
-    source.rangeChanged({contig: 'chr17', start: 1, stop: 30});
+    source.rangeChanged({contig: '1', start: 10000, stop: 10007});
     server.respond();
   });
 
