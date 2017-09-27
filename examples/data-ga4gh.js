@@ -41,8 +41,7 @@ var sources = [
     data: pileup.formats.GAVariant({
         endpoint: ga4ghReferenceServer,
         variantSetId: "WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIl0",
-        callSetIds: ["WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIiwiSEcwMDA5NiJd"],
-        killChr: true
+        callSetIds: ["WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIiwiSEcwMDA5NiJd"]
     }),
     options: {
       onVariantClicked: function(data) {
@@ -63,7 +62,7 @@ var sources = [
     viz: pileup.viz.features(),
     data: pileup.formats.GAFeature({
       endpoint: ga4ghReferenceServer,
-      featureSetId: "WyIxa2dlbm9tZXMiLCJnZW5jb2RlX3YyNGxpZnQzNyJd",
+      featureSetId: "WyIxa2dlbm9tZXMiLCJnZW5jb2RlX3YyNGxpZnQzNyJd"
     }),
     name: 'gencode_v24lift37'
   },
@@ -72,7 +71,6 @@ var sources = [
     data: pileup.formats.GAReadAlignment({
       endpoint: ga4ghReferenceServer,
       readGroupId: "WyIxa2dlbm9tZXMiLCJyZ3MiLCJOQTEyODc4IiwiU1JSNjIyNDYxIl0",
-      killChr: true,
       forcedReferenceId: "WyJOQ0JJMzciLCIxIl0"
     }),
     cssClass: 'normal',
@@ -83,7 +81,6 @@ var sources = [
     data: pileup.formats.GAReadAlignment({
       endpoint: ga4ghReferenceServer,
       readGroupId: "WyIxa2dlbm9tZXMiLCJyZ3MiLCJOQTEyODc4IiwiU1JSNjIyNDYxIl0",
-      killChr: true,
       forcedReferenceId: "WyJOQ0JJMzciLCIxIl0"
     }),
     cssClass: 'normal',

@@ -20,8 +20,6 @@ type GA4GHVariantSpec = {
   endpoint: string;
   variantSetId: string;
   callSetIds: string[];
-  // HACK for demo. If true, strips "chr" from reference names. If false, adds chr.
-  killChr: boolean;
 };
 
 function create(spec: GA4GHVariantSpec): VcfDataSource {
@@ -47,11 +45,7 @@ function create(spec: GA4GHVariantSpec): VcfDataSource {
   }
 
   function rangeChanged(newRange: GenomeRange) {
-    var contig = newRange.contig.replace(/^chr/, '');
-    if (!spec.killChr) {
-      contig = `chr${contig}`;
-    }
-    var interval = new ContigInterval(contig, newRange.start, newRange.stop);
+    var interval = new ContigInterval(newRange.contig, newRange.start, newRange.stop);
 
     if (interval.isCoveredBy(coveredRanges)) return;
 
@@ -121,11 +115,7 @@ function create(spec: GA4GHVariantSpec): VcfDataSource {
   function getFeaturesInRange(range: ContigInterval<string>): Variant[] {
     if (!range) return [];
 
-    var contig = range.contig.replace(/^chr/, '');
-    if (!spec.killChr) {
-      contig = `chr${contig}`;
-    }
-    range = new ContigInterval(contig, range.start(), range.stop());
+    range = new ContigInterval(range.contig, range.start(), range.stop());
 
     return _.filter(variants, variant => intersects(variant, range));
   }

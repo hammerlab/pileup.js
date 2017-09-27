@@ -30,41 +30,30 @@ class ContigInterval<T: (number|string)> {
     return this.interval.length();
   }
 
+  // Intersects function, allowing for 'chr17' vs. '17'-style mismatches.
   intersects(other: ContigInterval<T>): boolean {
-    return (this.contig === other.contig &&
-            this.interval.intersects(other.interval));
-  }
-
-  // Like intersects(), but allows 'chr17' vs. '17'-style mismatches.
-  chrIntersects(other: ContigInterval<T>): boolean {
     return (this.chrOnContig(other.contig) &&
             this.interval.intersects(other.interval));
   }
 
   containsInterval(other: ContigInterval<T>): boolean {
-    return (this.contig === other.contig &&
+    return (this.chrOnContig(other.contig) &&
             this.interval.containsInterval(other.interval));
   }
 
   isAdjacentTo(other: ContigInterval<T>): boolean {
-    return (this.contig === other.contig &&
+    return (this.chrOnContig(other.contig) &&
             (this.start() == 1 + other.stop() ||
              this.stop() + 1 == other.start()));
   }
 
   isCoveredBy(intervals: ContigInterval<T>[]): boolean {
-    var ivs = intervals.filter(iv => iv.contig === this.contig)
+    var ivs = intervals.filter(iv => this.chrOnContig(iv.contig))
                        .map(iv => iv.interval);
     return this.interval.isCoveredBy(ivs);
   }
 
   containsLocus(contig: T, position: number): boolean {
-    return this.contig === contig &&
-           this.interval.contains(position);
-  }
-
-  // Like containsLocus, but allows 'chr17' vs '17'-style mismatches
-  chrContainsLocus(contig: T, position: number): boolean {
     return this.chrOnContig(contig) &&
            this.interval.contains(position);
   }
@@ -86,7 +75,7 @@ class ContigInterval<T: (number|string)> {
    */
   complementIntervals(intervals: ContigInterval<T>[]): ContigInterval<T>[] {
     return this.interval.complementIntervals(
-        flatMap(intervals, ci => ci.contig === this.contig ? [ci.interval] : []))
+        flatMap(intervals, ci => this.chrOnContig(ci.contig) ? [ci.interval] : []))
         .map(iv => new ContigInterval(this.contig, iv.start, iv.stop));
   }
 

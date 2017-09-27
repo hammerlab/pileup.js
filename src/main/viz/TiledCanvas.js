@@ -83,7 +83,7 @@ class TiledCanvas {
       tilesAtRes = tilesAtRes.concat(this.makeNewTiles(existingIntervals, pixelsPerBase, range));
     }
 
-    var tiles = tilesAtRes.filter(tile => range.chrIntersects(tile.range));
+    var tiles = tilesAtRes.filter(tile => range.intersects(tile.range));
 
     tiles.forEach(tile => {
       var left = Math.round(scale(tile.range.start())),
@@ -114,7 +114,7 @@ class TiledCanvas {
   }
 
   invalidateRange(range: ContigInterval) {
-    this.tileCache = this.tileCache.filter(tile => !tile.range.chrIntersects(range));
+    this.tileCache = this.tileCache.filter(tile => !tile.range.intersects(range));
   }
 
   heightForRef(ref: string): number {
