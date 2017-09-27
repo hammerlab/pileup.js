@@ -27,9 +27,6 @@ var BASE_PAIRS_PER_FETCH = 100;
 type GA4GHSpec = {
   endpoint: string;
   readGroupId: string;
-  // HACK if set, strips "chr" from reference names.
-  // See https://github.com/ga4gh/schemas/issues/362
-  killChr: boolean;
   // HACK for demo. If set, will always use this reference id.
   // This is for fetching referenceIds specified in GA4GH reference
   // server
@@ -63,12 +60,7 @@ function create(spec: GA4GHSpec): AlignmentDataSource {
   }
 
   function rangeChanged(newRange: GenomeRange) {
-    // HACK FOR DEMO
-    var contig = newRange.contig.replace(/^chr/, '');
-    if (!spec.killChr) {
-      contig = `chr${contig}`;
-    }
-    var interval = new ContigInterval(contig, newRange.start, newRange.stop);
+    var interval = new ContigInterval(newRange.contig, newRange.start, newRange.stop);
     if (interval.isCoveredBy(coveredRanges)) return;
 
     interval = interval.round(BASE_PAIRS_PER_FETCH, ZERO_BASED);
@@ -142,12 +134,7 @@ function create(spec: GA4GHSpec): AlignmentDataSource {
   function getAlignmentsInRange(range: ContigInterval<string>): Alignment[] {
     if (!range) return [];
 
-    // HACK FOR DEMO
-    var contig = range.contig.replace(/^chr/, '');
-    if (!spec.killChr) {
-      contig = `chr${contig}`;
-    }
-    range = new ContigInterval(contig, range.start(), range.stop());
+    range = new ContigInterval(range.contig, range.start(), range.stop());
 
     return _.filter(reads, read => read.intersects(range));
   }

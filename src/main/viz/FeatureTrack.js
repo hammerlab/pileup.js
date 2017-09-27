@@ -68,7 +68,7 @@ function renderFeatures(ctx: DataCanvasRenderingContext2D,
 
     features.forEach(feature => {
       var position = new ContigInterval(feature.contig, feature.start, feature.stop);
-      if (!position.chrIntersects(range)) return;
+      if (!position.intersects(range)) return;
       ctx.pushObject(feature);
       ctx.lineWidth = 1;
 
