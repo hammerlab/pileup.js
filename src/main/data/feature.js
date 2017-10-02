@@ -18,8 +18,8 @@ class Feature {
    this.id = feature.id;
    this.featureType = feature.featureType;
    this.contig = feature.contig;
-   this.start = feature.start;
-   this.stop = feature.stop;
+   this.start = parseInt(feature.start);
+   this.stop = parseInt(feature.stop);
    this.score = feature.score;
   }
 
@@ -29,8 +29,8 @@ class Feature {
       id: ga4ghFeature.id,
       featureType: ga4ghFeature.featureType,
       contig: ga4ghFeature.referenceName,
-      start: ga4ghFeature.start,
-      stop: ga4ghFeature.end,
+      start: parseInt(ga4ghFeature.start),
+      stop: parseInt(ga4ghFeature.end),
       score: 1000
     });
   }
