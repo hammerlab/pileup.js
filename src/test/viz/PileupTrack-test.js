@@ -141,6 +141,9 @@ describe('PileupTrack', function() {
       return testDiv.querySelector('.pileup canvas') &&
           drawnObjectsWith(testDiv, '.pileup', x => x.span).length > 0;
     },
+    hasPileupSelector = () => {
+      return testDiv.querySelector('.pileup canvas') !== undefined;
+    },
 
     // Helpers for working with DataCanvas
     mismatchesAtPos = pos => drawnObjectsWith(testDiv, '.pileup', x => x.basePair && x.pos == pos),
@@ -196,6 +199,36 @@ describe('PileupTrack', function() {
       var mismatches = drawnObjectsWith(testDiv, '.pileup', x => x.basePair);
       expect(mismatches).to.have.length.below(60);
       assertHasColumnOfTs();
+      p.destroy();
+    });
+  });
+
+  it('should hide alignments', function() {
+    var p = pileup.create(testDiv, {
+      range: {contig: 'chr17', start: 7500734, stop: 7500796},
+      tracks: [
+        {
+          data: pileup.formats.twoBit({
+            url: '/test-data/test.2bit'
+          }),
+          viz: pileup.viz.genome(),
+          isReference: true
+        },
+        {
+          data: pileup.formats.bam({
+            url: '/test-data/synth3.normal.17.7500000-7515000.bam',
+            indexUrl: '/test-data/synth3.normal.17.7500000-7515000.bam.bai'
+          }),
+          viz: pileup.viz.pileup({
+            hideAlignments: true
+          }),
+        }
+      ]
+    });
+
+    return waitFor(hasPileupSelector, 2000).then(() => {
+      var alignments = drawnObjectsWith(testDiv, '.pileup', x => x.span);
+      expect(alignments.length).to.equal(0);
       p.destroy();
     });
   });
