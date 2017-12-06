@@ -117,7 +117,7 @@ function create(spec: GA4GHSpec): AlignmentDataSource {
     o.trigger('networkprogress', {numRequests});
     // hack for DEMO. force GA4GH reference ID
     var contig = range.contig;
-    if (spec.forcedReferenceId !== null)
+    if (spec.forcedReferenceId !== undefined)
     {
       contig = spec.forcedReferenceId;
     }
