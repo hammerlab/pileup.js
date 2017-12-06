@@ -348,6 +348,9 @@ class PileupTrack extends React.Component {
       this.tiles.update(this.props.options);
       this.tiles.invalidateAll();
       this.updateVisualization();
+    } else if (oldOpts.hideAlignments != this.props.options.hideAlignments) {
+      this.tiles.update(this.props.options);
+      this.updateVisualization();
     }
 
     if (oldOpts.sort != this.props.options.sort) {
@@ -377,23 +380,42 @@ class PileupTrack extends React.Component {
     // Hold off until height & width are known.
     if (width === 0) return;
 
-    // Height can only be computed after the pileup has been updated.
-    var height = yForRow(this.cache.pileupHeightForRef(this.props.range.contig));
-
-    d3utils.sizeCanvas(canvas, width, height);
-
     var ctx = canvasUtils.getContext(canvas);
     var dtx = dataCanvas.getDataContext(ctx);
+
     this.renderScene(dtx);
+
   }
 
   renderScene(ctx: DataCanvasRenderingContext2D) {
     var genomeRange = this.props.range,
         range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop),
-        scale = this.getScale();
+        scale = this.getScale(),
+        canvas = this.refs.canvas,
+        width = this.props.width;
 
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    // get parent of canvas
+    // The typecasts through `any` are to fool flow.
+    var parent = ((d3utils.findParent(canvas, "pileup") : any) : HTMLCanvasElement);
+
+    if (this.props.options.hideAlignments) {
+      d3utils.sizeCanvas(canvas, width, 0);
+      // if alignments are hidden, set parent div to 0px
+      if (parent) parent.style.minHeight = "0px";
+      return;
+    }
+
+    // unset minimum hight for viewing alignments
+    if (parent) parent.style.minHeight = "";
+
+    // Height can only be computed after the pileup has been updated.
+    var height = yForRow(this.cache.pileupHeightForRef(this.props.range.contig));
+
+    d3utils.sizeCanvas(canvas, width, height);
+
     this.tiles.renderToScreen(ctx, range, scale);
 
     // TODO: the center line should go above alignments, but below mismatches
@@ -463,7 +485,8 @@ PileupTrack.displayName = 'pileup';
 PileupTrack.defaultOptions = {
   viewAsPairs: false,
   colorByInsert: true,
-  colorByStrand: false
+  colorByStrand: false,
+  hideAlignments: false
 };
 
 PileupTrack.getOptionsMenu = function(options: Object): any {
@@ -472,6 +495,7 @@ PileupTrack.getOptionsMenu = function(options: Object): any {
     '-',
     {key: 'color-insert', label: 'Color by insert size', checked: options.colorByInsert},
     {key: 'color-strand', label: 'Color by strand', checked: options.colorByStrand},
+    {key: 'hide-alignments', label: 'Hide alignments', checked: options.hideAlignments},
     '-',
     {key: 'sort', label: 'Sort alignments'}
   ];
@@ -491,6 +515,9 @@ PileupTrack.handleSelectOption = function(key: string, oldOptions: Object): Obje
   } else if (key == 'color-strand') {
     opts.colorByStrand = !opts.colorByStrand;
     if (opts.colorByStrand) opts.colorByInsert = false;
+    return opts;
+  } else if (key == 'hide-alignments') {
+    opts.hideAlignments = !opts.hideAlignments;
     return opts;
   } else if (key == 'sort') {
     opts.sort = (messageId++);
