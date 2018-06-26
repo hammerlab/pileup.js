@@ -18,6 +18,7 @@ import Feature from '../data/feature';
 export type Gene = {
   position: ContigInterval<string>;
   id: string;  // transcript ID, e.g. "ENST00000269305"
+  score: number;
   strand: Strand;
   codingRegion: Interval;  // locus of coding start
   exons: Array<Interval>;
@@ -44,28 +45,43 @@ export type BigBedSource = {
 }
 
 // The fields are described at http://genome.ucsc.edu/FAQ/FAQformat#format1
+// Fields 4-12 are optional
 function parseBedFeature(f): Gene {
   var position = new ContigInterval(f.contig, f.start, f.stop),
-      x = f.rest.split('\t'),
-      // exons arrays sometimes have trailing commas
-      exonLengths = x[7].replace(/,*$/, '').split(',').map(Number),
-      exonStarts = x[8].replace(/,*$/, '').split(',').map(Number),
-      exons = _.zip(exonStarts, exonLengths)
-               .map(function([start, length]) {
-                 return new Interval(f.start + start, f.start + start + length);
-               });
+      x = f.rest.split('\t');
+
+  // if no id, generate randomly for unique storage
+  var id = x[0] ? x[0] : "feature_" + Math.random().toString(36).substr(2, 9); // e.g. ENST00000359597
+  var score = x[1] ? x[1] : 1000; // number from 0-1000
+  var strand =  x[2] ? x[2] : '.'; // either +, - or .
+  var codingRegion = (x[3] && x[4]) ? new Interval(Number(x[3]), Number(x[4])) :new Interval(0, 0);
+  var geneId =  x[9] ? x[9] : "";
+  var name =  x[10] ? x[10] : "";
+
+  // parse exons
+  var exons = [];
+  if (x[7] && x[8]) {
+    // exons arrays sometimes have trailing commas
+    var exonLengths = x[7].replace(/,*$/, '').split(',').map(Number),
+      exonStarts = x[8].replace(/,*$/, '').split(',').map(Number);
+
+    exons = _.zip(exonStarts, exonLengths)
+             .map(function([start, length]) {
+               return new Interval(f.start + start, f.start + start + length);
+             });
+  }
 
   return {
     position,
-    id: x[0],  // e.g. ENST00000359597
-    strand: x[2],  // either + or -
-    codingRegion: new Interval(Number(x[3]), Number(x[4])),
-    geneId: x[9],
-    name: x[10],
+    id: id,
+    score: score,
+    strand: strand,
+    codingRegion: codingRegion,
+    geneId: geneId,
+    name: name,
     exons
   };
 }
-
 
 function createFromBigBedFile(remoteSource: BigBed): BigBedSource {
   // Collection of genes that have already been loaded.
