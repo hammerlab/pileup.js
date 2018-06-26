@@ -14,7 +14,7 @@ export type CigarOp = {
 }
 
 
-export type Strand = '-' | '+';
+export type Strand = '-' | '+' | '.';
 
 export type MateProperties = {
   ref: ?string;
