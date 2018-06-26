@@ -57,7 +57,7 @@ function drawGeneName(ctx: CanvasRenderingContext2D,
                       textIntervals: Interval[]) {
   var p = gene.position,
       centerX = 0.5 * (clampedScale(1 + p.start()) + clampedScale(1 + p.stop()));
-  var name = gene.name || gene.id;
+  var name = gene.name || gene.id || gene.position.toString();
   var textWidth = ctx.measureText(name).width;
   var textInterval = new Interval(centerX - 0.5 * textWidth,
                                   centerX + 0.5 * textWidth);
@@ -144,23 +144,25 @@ class GeneTrack extends React.Component {
                                 clampedScale(1 + gene.position.stop()), geneLineY + 0.5);
 
       // TODO: only compute all these intervals when data becomes available.
-      var exons = bedtools.splitCodingExons(gene.exons, gene.codingRegion);
-      exons.forEach(exon => {
-        ctx.fillRect(sc(1 + exon.start),
-                     geneLineY - 3 * (exon.isCoding ? 2 : 1),
-                     sc(exon.stop + 2) - sc(1 + exon.start),
-                     6 * (exon.isCoding ? 2 : 1));
-      });
+      if (gene.strand && gene.exons && gene.codingRegion) {
+        var exons = bedtools.splitCodingExons(gene.exons, gene.codingRegion);
+        exons.forEach(exon => {
+          ctx.fillRect(sc(1 + exon.start),
+                      geneLineY - 3 * (exon.isCoding ? 2 : 1),
+                      sc(exon.stop + 2) - sc(1 + exon.start),
+                      6 * (exon.isCoding ? 2 : 1));
+        });
 
-      var introns = gene.position.interval.complementIntervals(gene.exons);
-      introns.forEach(range => {
-        drawArrow(ctx, clampedScale, range, geneLineY + 0.5, gene.strand);
-      });
-      ctx.strokeStyle = style.GENE_COMPLEMENT_COLOR;
-      ctx.lineWidth = 2;
-      gene.exons.forEach(range => {
-        drawArrow(ctx, clampedScale, range, geneLineY + 0.5, gene.strand);
-      });
+        var introns = gene.position.interval.complementIntervals(gene.exons);
+        introns.forEach(range => {
+          drawArrow(ctx, clampedScale, range, geneLineY + 0.5, gene.strand);
+        });
+        ctx.strokeStyle = style.GENE_COMPLEMENT_COLOR;
+        ctx.lineWidth = 2;
+        gene.exons.forEach(range => {
+          drawArrow(ctx, clampedScale, range, geneLineY + 0.5, gene.strand);
+        });
+      }
 
       drawGeneName(ctx, clampedScale, geneLineY, gene, textIntervals);
 

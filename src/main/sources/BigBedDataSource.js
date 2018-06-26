@@ -46,24 +46,31 @@ export type BigBedSource = {
 // The fields are described at http://genome.ucsc.edu/FAQ/FAQformat#format1
 function parseBedFeature(f): Gene {
   var position = new ContigInterval(f.contig, f.start, f.stop),
-      x = f.rest.split('\t'),
-      // exons arrays sometimes have trailing commas
-      exonLengths = x[7].replace(/,*$/, '').split(',').map(Number),
-      exonStarts = x[8].replace(/,*$/, '').split(',').map(Number),
-      exons = _.zip(exonStarts, exonLengths)
-               .map(function([start, length]) {
-                 return new Interval(f.start + start, f.start + start + length);
-               });
+      x = f.rest.split('\t'), exons = [];
 
-  return {
-    position,
-    id: x[0],  // e.g. ENST00000359597
-    strand: x[2],  // either + or -
-    codingRegion: new Interval(Number(x[3]), Number(x[4])),
-    geneId: x[9],
-    name: x[10],
-    exons
-  };
+	if (x.length > 0 && x[0] !== "") {
+		// exons arrays sometimes have trailing commas
+		var exonLengths = x[7].replace(/,*$/, '').split(',').map(Number),
+		exonStarts = x[8].replace(/,*$/, '').split(',').map(Number);
+		exons = _.zip(exonStarts, exonLengths)
+					.map(function([start, length]) {
+						return new Interval(f.start + start, f.start + start + length);
+					});
+
+    return {
+      position,
+      id: x[0],  // e.g. ENST00000359597
+      strand: x[2],  // either + or -
+      codingRegion: new Interval(Number(x[3]), Number(x[4])),
+      geneId: x[9],
+      name: x[10],
+      exons
+    };
+  } else {
+    return {
+      position
+    };
+  }
 }
 
 
