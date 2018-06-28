@@ -9,34 +9,29 @@ import ContigInterval from '../ContigInterval';
 class Feature {
   id: string;
   featureType: string;
-  contig: string;
-  start: number;
-  stop: number;
+  position: ContigInterval<string>;
   score: number;
 
   constructor(feature: Object) {
-   this.id = feature.id;
-   this.featureType = feature.featureType;
-   this.contig = feature.contig;
-   this.start = parseInt(feature.start);
-   this.stop = parseInt(feature.stop);
-   this.score = feature.score;
+    this.id = feature.id;
+    this.featureType = feature.featureType;
+    this.position = feature.position;
+    this.score = feature.score;
   }
 
   static fromGA4GH(ga4ghFeature: Object): Feature {
-   return new Feature(
-     {
+    var position = new ContigInterval(ga4ghFeature.referenceName, parseInt(ga4ghFeature.start), parseInt(ga4ghFeature.end));
+    return new Feature(
+    {
       id: ga4ghFeature.id,
       featureType: ga4ghFeature.featureType,
-      contig: ga4ghFeature.referenceName,
-      start: parseInt(ga4ghFeature.start),
-      stop: parseInt(ga4ghFeature.end),
+      position: position,
       score: 1000
     });
   }
 
   intersects(range: ContigInterval<string>): boolean {
-    return range.intersects(new ContigInterval(this.contig, this.start, this.stop));
+    return range.intersects(this.position);
   }
 }
 

@@ -67,7 +67,7 @@ function renderFeatures(ctx: DataCanvasRenderingContext2D,
     ctx.textAlign = 'center';
 
     features.forEach(feature => {
-      var position = new ContigInterval(feature.contig, feature.start, feature.stop);
+      var position = new ContigInterval(feature.position.contig, feature.position.start(), feature.position.stop());
       if (!position.intersects(range)) return;
       ctx.pushObject(feature);
       ctx.lineWidth = 1;
@@ -76,8 +76,8 @@ function renderFeatures(ctx: DataCanvasRenderingContext2D,
       var alphaScore = Math.max(feature.score / 1000.0, 0.2);
       ctx.fillStyle = 'rgba(0, 0, 0, ' + alphaScore + ')';
 
-      var x = Math.round(scale(feature.start));
-      var width = Math.ceil(scale(feature.stop) - scale(feature.start));
+      var x = Math.round(scale(feature.position.start()));
+      var width = Math.ceil(scale(feature.position.stop()) - scale(feature.position.start()));
       ctx.fillRect(x - 0.5, 0, width, style.VARIANT_HEIGHT);
       ctx.popObject();
     });
@@ -195,14 +195,14 @@ class FeatureTrack extends React.Component {
         // If click-tracking gets slow, this range could be narrowed to one
         // closer to the click coordinate, rather than the whole visible range.
         vFeatures = this.props.source.getFeaturesInRange(range);
-    var feature = _.find(vFeatures, f => utils.tupleRangeOverlaps([[f.start], [f.stop]], [[clickStart], [clickEnd]]));
+    var feature = _.find(vFeatures, f => utils.tupleRangeOverlaps([[f.position.start()], [f.position.stop()]], [[clickStart], [clickEnd]]));
     var alert = window.alert || console.log;
     if (feature) {
       // Construct a JSON object to show the user.
       var messageObject = _.extend(
         {
           'id': feature.id,
-          'range': `${feature.contig}:${feature.start}-${feature.stop}`,
+          'range': `${feature.position.contig}:${feature.position.start()}-${feature.position.stop()}`,
           'score': feature.score
         });
       alert(JSON.stringify(messageObject, null, '  '));

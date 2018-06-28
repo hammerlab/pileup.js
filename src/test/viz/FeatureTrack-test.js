@@ -38,10 +38,10 @@ describe('FeatureTrack', function() {
 
   function ready() {
     return testDiv.querySelector('canvas') &&
-       drawnObjects(testDiv, '.features').length > 2;
+       drawnObjects(testDiv, '.features').length > 0;
   }
 
-  it('should render features', function() {
+  it('should render features with json', function() {
 
     var p = pileup.create(testDiv, {
       range: range,
@@ -67,12 +67,51 @@ describe('FeatureTrack', function() {
         // there can be duplicates in the case where features are
         // overlapping  more than one section of the canvas
         features =  _.uniq(features, false, function(x) {
-            return x.start;
+            return x.position.start();
         });
 
         expect(features).to.have.length(4);
-        expect(features.map(f => f.start)).to.deep.equal(
+        expect(features.map(f => f.position.start())).to.deep.equal(
             [89295, 92230, 110953, 120725]);
+        p.destroy();
+      });
+  });
+
+  it('should render features with bigBed file', function() {
+
+    var p = pileup.create(testDiv, {
+      range: {contig: 'chr17', start: 10000, stop: 10500},
+      tracks: [
+        {
+          viz: pileup.viz.genome(),
+          data: pileup.formats.twoBit({
+            url: '/test-data/test.2bit'
+          }),
+          isReference: true
+        },
+        {
+          viz: pileup.viz.features(),
+          data: pileup.formats.bigBed({
+            url: '/test-data/chr17.10000-100000.bb'
+          }),
+          name: 'Features'
+        }
+      ]
+    });
+
+
+    return waitFor(ready, 2000)
+      .then(() => {
+        var features = drawnObjects(testDiv, '.features');
+        // there can be duplicates in the case where features are
+        // overlapping  more than one section of the canvas
+        features =  _.uniq(features, false, function(x) {
+            return x.position.start();
+        });
+
+        expect(features).to.have.length(3);
+        expect(features.map(f => f.position.start())).to.deep.equal(
+            [10000, 10200, 10400]);
         p.destroy();
       });
   });
