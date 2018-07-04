@@ -4,6 +4,18 @@
 import type SamRead from '../data/SamRead';
 import type {Alignment, CigarSymbol} from '../Alignment';
 import type Interval from '../Interval';
+import style from '../style';
+
+/**
+ * Calculate row height for pileup
+ * row: row number
+ * height: height of elements to draw
+ * spacing: spacing between elements to draw
+ * Returns y location for this row
+ */
+function yForRow(row: number, height: number=style.READ_HEIGHT, spacing: number=style.READ_SPACING): number {
+  return (row * (height + spacing));
+}
 
 /**
  * Given a list of Intervals, return a parallel list of row numbers for each.
@@ -202,6 +214,7 @@ function getOpInfo(read: Alignment, referenceSource: Object): OpInfo {
 }
 
 module.exports = {
+  yForRow,
   pileup,
   addToPileup,
   getOpInfo,

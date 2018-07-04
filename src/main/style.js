@@ -36,6 +36,9 @@ module.exports = {
   ALIGNMENT_PLUS_STRAND_COLOR: 'rgb(236, 176, 176)',
   DELETE_COLOR: 'black',
   INSERT_COLOR: 'rgb(97, 0, 216)',
+  READ_SPACING: 2, // vertical spacing between reads
+  READ_HEIGHT: 13, // Height of read
+
 
   // Coverage track
   COVERAGE_FONT_STYLE: `bold 9px 'Helvetica Neue', Helvetica, Arial, sans-serif`,

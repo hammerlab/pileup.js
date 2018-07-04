@@ -1,12 +1,14 @@
 /**
- * Visualization of features, including exons and coding regions.
+ * Visualization of features.
  * @flow
  */
 'use strict';
 
 import type {FeatureDataSource} from '../sources/BigBedDataSource';
 import type Feature from '../data/feature';
-
+import GenericFeature from '../data/genericFeature';
+import {GenericFeatureCache} from '../../main/viz/GenericFeatureCache';
+import type {VisualGroup} from '../../main/viz/GenericFeatureCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 
 import type {VizProps} from '../VisualizationWrapper';
@@ -23,16 +25,19 @@ import canvasUtils from './canvas-utils';
 import TiledCanvas from './TiledCanvas';
 import dataCanvas from 'data-canvas';
 import style from '../style';
-import utils from '../utils';
 import type {State, NetworkStatus} from '../types';
+import {yForRow} from './pileuputils';
+
 
 class FeatureTiledCanvas extends TiledCanvas {
   options: Object;
   source: FeatureDataSource;
+  cache: GenericFeatureCache;
 
-  constructor(source: FeatureDataSource, options: Object) {
+  constructor(source: FeatureDataSource, cache: GenericFeatureCache, options: Object) {
     super();
     this.source = source;
+    this.cache = cache;
     this.options = options;
   }
 
@@ -42,7 +47,8 @@ class FeatureTiledCanvas extends TiledCanvas {
 
   // TODO: can update to handle overlapping features
   heightForRef(ref: string): number {
-    return style.VARIANT_HEIGHT;
+    return this.cache.pileupHeightForRef(ref) *
+                    (style.READ_HEIGHT + style.READ_SPACING);
   }
 
   render(ctx: DataCanvasRenderingContext2D,
@@ -52,7 +58,12 @@ class FeatureTiledCanvas extends TiledCanvas {
          resolution: ?number) {
     var relaxedRange =
         new ContigInterval(range.contig, range.start() - 1, range.stop() + 1);
-    var vFeatures = this.source.getFeaturesInRange(relaxedRange, resolution);
+    // get features and put in cache
+    var features = this.source.getFeaturesInRange(relaxedRange, resolution);
+    features.forEach(f => this.cache.addFeature(new GenericFeature(f.id, f.position, f)));
+    
+    // get visual features with assigned rows    
+    var vFeatures = this.cache.getGroupsOverlapping(relaxedRange);
     renderFeatures(ctx, scale, relaxedRange, vFeatures);
   }
 }
@@ -61,14 +72,14 @@ class FeatureTiledCanvas extends TiledCanvas {
 function renderFeatures(ctx: DataCanvasRenderingContext2D,
                     scale: (num: number) => number,
                     range: ContigInterval<string>,
-                    features: Feature[]) {
+                    vFeatures: VisualGroup[]) {
 
     ctx.font = `${style.GENE_FONT_SIZE}px ${style.GENE_FONT}`;
     ctx.textAlign = 'center';
 
-    features.forEach(feature => {
-      var position = new ContigInterval(feature.position.contig, feature.position.start(), feature.position.stop());
-      if (!position.intersects(range)) return;
+    vFeatures.forEach(vFeature => {
+      var feature = vFeature.gFeatures[0].gFeature;
+      if (!vFeature.span.intersects(range)) return;
       ctx.pushObject(feature);
       ctx.lineWidth = 1;
 
@@ -76,9 +87,10 @@ function renderFeatures(ctx: DataCanvasRenderingContext2D,
       var alphaScore = Math.max(feature.score / 1000.0, 0.2);
       ctx.fillStyle = 'rgba(0, 0, 0, ' + alphaScore + ')';
 
-      var x = Math.round(scale(feature.position.start()));
-      var width = Math.ceil(scale(feature.position.stop()) - scale(feature.position.start()));
-      ctx.fillRect(x - 0.5, 0, width, style.VARIANT_HEIGHT);
+      var x = Math.round(scale(vFeature.span.start()));
+      var width = Math.ceil(scale(vFeature.span.stop()) - scale(vFeature.span.start()));
+      var y = yForRow(vFeature.row);
+      ctx.fillRect(x - 0.5, y, width, style.READ_HEIGHT);
       ctx.popObject();
     });
 }
@@ -87,6 +99,7 @@ class FeatureTrack extends React.Component {
   props: VizProps & { source: FeatureDataSource };
   state: State;
   tiles: FeatureTiledCanvas;
+  cache: GenericFeatureCache;
 
   constructor(props: VizProps) {
     super(props);
@@ -96,6 +109,14 @@ class FeatureTrack extends React.Component {
   }
 
   render(): any {
+    // These styles allow vertical scrolling to see the full pileup.
+    // Adding a vertical scrollbar shrinks the visible area, but we have to act
+    // as though it doesn't, since adjusting the scale would put it out of sync
+    // with other tracks.
+    var containerStyles = {
+      'height': '100%'
+    };
+
     var statusEl = null,
         networkStatus = this.state.networkStatus;
     if (networkStatus) {
@@ -122,7 +143,7 @@ class FeatureTrack extends React.Component {
       return (
         <div>
           {statusEl}
-          <div ref='container'>
+          <div ref='container' style={containerStyles}>
             <canvas ref='canvas' onClick={this.handleClick.bind(this)} />
           </div>
         </div>
@@ -131,10 +152,15 @@ class FeatureTrack extends React.Component {
   }
 
   componentDidMount() {
-    this.tiles = new FeatureTiledCanvas(this.props.source, this.props.options);
+    this.cache = new GenericFeatureCache(this.props.referenceSource);
+    this.tiles = new FeatureTiledCanvas(this.props.source, this.cache, this.props.options);
 
     // Visualize new reference data as it comes in from the network.
     this.props.source.on('newdata', (range) => {
+      this.tiles.invalidateRange(range);
+      this.updateVisualization();
+    });
+    this.props.referenceSource.on('newdata', range => {
       this.tiles.invalidateRange(range);
       this.updateVisualization();
     });
@@ -148,6 +174,7 @@ class FeatureTrack extends React.Component {
     this.updateVisualization();
   }
 
+  // TODO this is redundant
   getScale(): Scale {
     return d3utils.getTrackScale(this.props.range, this.props.width);
   }
@@ -163,49 +190,71 @@ class FeatureTrack extends React.Component {
 
   updateVisualization() {
     var canvas = (this.refs.canvas : HTMLCanvasElement),
-        {width, height} = this.props,
+        width = this.props.width,
         genomeRange = this.props.range;
 
     var range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop);
 
     // Hold off until height & width are known.
     if (width === 0 || typeof canvas == 'undefined') return;
-    d3utils.sizeCanvas(canvas, width, height);
 
     var ctx = dataCanvas.getDataContext(canvasUtils.getContext(canvas));
+
+
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    this.tiles.renderToScreen(ctx, range, this.getScale());
-    ctx.restore();
+    // get parent of canvas
+    // The typecasts through `any` are to fool flow.
+    var parent = ((d3utils.findParent(canvas, "features") : any) : HTMLCanvasElement);
+    
+    // Height can only be computed after the pileup has been updated.
+    var height = yForRow(this.cache.pileupHeightForRef(this.props.range.contig)); // TODO AM fillRect wrong?
 
+    // resize height for device TODO
+    height = d3utils.heightForCanvas(canvas, height);
+
+    // set height for parent div to include all features
+    if (parent) parent.style.height = `${height}px`;
+
+    d3utils.sizeCanvas(canvas, width, height);  
+
+    this.tiles.renderToScreen(ctx, range, this.getScale());
   }
 
   handleClick(reactEvent: any) {
+    var ratio = window.devicePixelRatio;
     var ev = reactEvent.nativeEvent,
-        x = ev.offsetX;
+        x = ev.offsetX, // resize offset to canvas size
+        y = ev.offsetY/ratio;
+
+    var ctx = canvasUtils.getContext(this.refs.canvas);
+    var trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
 
     var genomeRange = this.props.range,
         // allow some buffering so click isn't so sensitive
         range = new ContigInterval(genomeRange.contig, genomeRange.start-1, genomeRange.stop+1),
         scale = this.getScale(),
-        // leave padding of 2px to reduce click specificity
-        clickStart = Math.floor(scale.invert(x)) - 2,
-        clickEnd = clickStart + 2,
-        // If click-tracking gets slow, this range could be narrowed to one
-        // closer to the click coordinate, rather than the whole visible range.
-        vFeatures = this.props.source.getFeaturesInRange(range);
-    var feature = _.find(vFeatures, f => utils.tupleRangeOverlaps([[f.position.start()], [f.position.stop()]], [[clickStart], [clickEnd]]));
-    var alert = window.alert || console.log;
+        vFeatures = this.cache.getGroupsOverlapping(range);
+
+    renderFeatures(trackingCtx, scale, range, vFeatures);
+    var feature = _.find(trackingCtx.hits[0], hit => hit);
+
     if (feature) {
-      // Construct a JSON object to show the user.
-      var messageObject = _.extend(
-        {
-          'id': feature.id,
-          'range': `${feature.position.contig}:${feature.position.start()}-${feature.position.stop()}`,
-          'score': feature.score
-        });
-      alert(JSON.stringify(messageObject, null, '  '));
+      //user provided function for displaying popup
+      if (typeof this.props.options.onFeatureClicked  === "function") {
+        this.props.options.onFeatureClicked(feature);
+      } else {
+        var alert = window.alert || console.log;
+        // Construct a JSON object to show the user.
+        var messageObject = _.extend(
+          {
+            'id':     feature.id,
+            'range':  `${feature.position.contig}:${feature.position.start()}-${feature.position.stop()}`,
+            'score':  feature.score
+          });
+        alert(JSON.stringify(messageObject, null, '  '));
+      }
     }
   }
 }
