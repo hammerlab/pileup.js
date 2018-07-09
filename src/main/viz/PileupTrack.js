@@ -7,7 +7,8 @@
 import type {Strand, Alignment, AlignmentDataSource} from '../Alignment';
 import type {TwoBitSource} from '../sources/TwoBitDataSource';
 import type {BasePair} from './pileuputils';
-import type {VisualAlignment, VisualGroup, InsertStats} from './PileupCache';
+import type {VisualAlignment, InsertStats} from './PileupCache';
+import type {VisualGroup} from './AbstractCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type Interval from '../Interval';
 import type {VizProps} from '../VisualizationWrapper';
@@ -20,7 +21,7 @@ import _ from 'underscore';
 
 import scale from '../scale';
 import d3utils from './d3utils';
-import {CigarOp} from './pileuputils';
+import {CigarOp, yForRow} from './pileuputils';
 import ContigInterval from '../ContigInterval';
 import DisplayMode from './DisplayMode';
 import PileupCache from './PileupCache';
@@ -29,9 +30,6 @@ import canvasUtils from './canvas-utils';
 import dataCanvas from 'data-canvas';
 import style from '../style';
 
-
-var READ_HEIGHT = 13;
-var READ_SPACING = 2;  // vertical pixels between reads
 
 var READ_STRAND_ARROW_WIDTH = 5;
 
@@ -56,7 +54,7 @@ class PileupTiledCanvas extends TiledCanvas {
 
   heightForRef(ref: string): number {
     return this.cache.pileupHeightForRef(ref) *
-                    (READ_HEIGHT + READ_SPACING);
+                    (style.READ_HEIGHT + style.READ_SPACING);
   }
 
   render(ctx: DataCanvasRenderingContext2D,
@@ -93,7 +91,7 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
   function drawArrow(pos: number, refLength: number, top: number, direction: 'L' | 'R') {
     var left = scale(pos + 1),
         right = scale(pos + refLength + 1),
-        bottom = top + READ_HEIGHT,
+        bottom = top + style.READ_HEIGHT,
         // Arrowheads become a distraction as you zoom out and the reads get
         // shorter. They should never be more than 1/6 the read length.
         arrowSize = Math.min(READ_STRAND_ARROW_WIDTH, (right - left) / 6);
@@ -122,14 +120,14 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
           drawArrow(op.pos, op.length, y, op.arrow);
         } else {
           var x = scale(op.pos + 1);
-          ctx.fillRect(x, y, scale(op.pos + op.length + 1) - x, READ_HEIGHT);
+          ctx.fillRect(x, y, scale(op.pos + op.length + 1) - x, style.READ_HEIGHT);
         }
         break;
 
       case CigarOp.DELETE:
         var x1 = scale(op.pos + 1),
             x2 = scale(op.pos + 1 + op.length),
-            yp = y + READ_HEIGHT / 2 - 0.5;
+            yp = y + style.READ_HEIGHT / 2 - 0.5;
         ctx.save();
         ctx.fillStyle = style.DELETE_COLOR;
         ctx.fillRect(x1, yp, x2 - x1, 1);
@@ -141,7 +139,7 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
         ctx.fillStyle = style.INSERT_COLOR;
         var x0 = scale(op.pos + 1) - 2,  // to cover a bit of the previous segment
             y1 = y - 1,
-            y2 = y + READ_HEIGHT + 2;
+            y2 = y + style.READ_HEIGHT + 2;
         ctx.fillRect(x0, y1, 1, y2 - y1);
         ctx.restore();
         break;
@@ -186,9 +184,9 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
       var span = vGroup.insert,
           x1 = scale(span.start + 1),
           x2 = scale(span.stop + 1);
-      ctx.fillRect(x1, y + READ_HEIGHT / 2 - 0.5, x2 - x1, 1);
+      ctx.fillRect(x1, y + style.READ_HEIGHT / 2 - 0.5, x2 - x1, 1);
     }
-    vGroup.alignments.forEach(vRead => drawAlignment(vRead, y));
+    vGroup.items.forEach(vRead => drawAlignment(vRead, y));
     ctx.popObject();
     ctx.restore();
   }
@@ -204,9 +202,9 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
     ctx.textAlign = 'center';
     if (showText) {
       // 0.5 = centered
-      ctx.fillText(bp.basePair, scale(1 + 0.5 + bp.pos), y + READ_HEIGHT - 2);
+      ctx.fillText(bp.basePair, scale(1 + 0.5 + bp.pos), y + style.READ_HEIGHT - 2);
     } else {
-      ctx.fillRect(scale(1 + bp.pos), y,  pxPerLetter - 1, READ_HEIGHT);
+      ctx.fillRect(scale(1 + bp.pos), y,  pxPerLetter - 1, style.READ_HEIGHT);
     }
     ctx.restore();
     ctx.popObject();
@@ -214,11 +212,6 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
 
   ctx.font = style.TIGHT_TEXT_STYLE;
   vGroups.forEach(vGroup => drawGroup(vGroup));
-}
-
-
-function yForRow(row) {
-  return row * (READ_HEIGHT + READ_SPACING);
 }
 
 // This is adapted from IGV.
