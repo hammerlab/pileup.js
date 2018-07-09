@@ -5,6 +5,7 @@
  */
 'use strict';
 
+/*jshint unused:false */
 import ContigInterval from '../ContigInterval';
 
 
@@ -13,7 +14,7 @@ class GenericFeature {
   position: ContigInterval<string>;
   gFeature: Object;
 
-  constructor(id: string, position: ContigInterval<string>, genericFeature: Object) { // TODO abstract class
+  constructor(id: string, position: ContigInterval<string>, genericFeature: Object) {
     this.id = genericFeature.id;
     this.position = genericFeature.position;
     this.gFeature = genericFeature;

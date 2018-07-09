@@ -20,7 +20,6 @@ import ReactTestUtils from 'react-addons-test-utils';
 
 describe('FeatureTrack', function() {
   var testDiv = document.getElementById('testdiv');
-  var range = {contig: 'chr1', start: 130000, stop: 135000};
   var json;
 
   beforeEach(() => {
@@ -30,6 +29,8 @@ describe('FeatureTrack', function() {
 
   afterEach(() => {
     dataCanvas.RecordingContext.reset();
+    // avoid pollution between tests.
+    testDiv.innerHTML = '';
   });
 
   before(function () {
@@ -52,7 +53,7 @@ describe('FeatureTrack', function() {
     };
 
     var p = pileup.create(testDiv, {
-      range: range,
+      range: {contig: 'chr1', start: 130000, stop: 135000},
       tracks: [
         {
           viz: pileup.viz.genome(),
@@ -83,14 +84,14 @@ describe('FeatureTrack', function() {
         expect(features.map(f => f.position.start())).to.deep.equal(
             [89295, 92230, 110953, 120725]);
 
-        var height = yForRow(8); // 8 rows
+        var height = yForRow(4) * window.devicePixelRatio; // should be 4 rows
         expect(testDiv.querySelector('.features').style.height).to.equal(`${height}px`);
 
         // check clicking on feature TODO
         var canvasList =  testDiv.getElementsByTagName('canvas');
         var canvas = canvasList[1]; 
         expect(featureClickedData).to.be.null;
-        ReactTestUtils.Simulate.click(canvas,{nativeEvent: {offsetX: 430, offsetY: 100}});
+        ReactTestUtils.Simulate.click(canvas,{nativeEvent: {offsetX: 430, offsetY: 50 * window.devicePixelRatio}});
         expect(featureClickedData).to.not.be.null;
 
         p.destroy();
@@ -116,7 +117,7 @@ describe('FeatureTrack', function() {
         {
           viz: pileup.viz.features(),
           data: pileup.formats.bigBed({
-            url: '/test-data/chr17.10000-21000.bb',
+            url: '/test-data/chr17.22.10000-21000.bb',
           }),
           options: {onFeatureClicked: featureClicked},  
           name: 'Features'
@@ -146,12 +147,12 @@ describe('FeatureTrack', function() {
         var canvasList =  testDiv.getElementsByTagName('canvas');
         var canvas = canvasList[1]; 
         expect(featureClickedData).to.be.null;
-        ReactTestUtils.Simulate.click(canvas,{nativeEvent: {offsetX: 660, offsetY: 20}});
+        ReactTestUtils.Simulate.click(canvas,{nativeEvent: {offsetX: 0, offsetY: 10}});
         expect(featureClickedData).to.not.be.null;
 
         // check clicking on feature in row 1
         featureClickedData = null;
-        ReactTestUtils.Simulate.click(canvas,{nativeEvent: {offsetX: 680, offsetY: 40}});
+        ReactTestUtils.Simulate.click(canvas,{nativeEvent: {offsetX: 55, offsetY: 10}});
         expect(featureClickedData).to.not.be.null;
 
         p.destroy();
@@ -162,7 +163,7 @@ describe('FeatureTrack', function() {
   it('should not exceed parent height limits', function() {
 
     var p = pileup.create(testDiv, {
-      range: {contig: 'chr17', start: 20000, stop: 21000},
+      range: {contig: 'chr22', start: 20000, stop: 21000},
       tracks: [
         {
           viz: pileup.viz.genome(),
@@ -174,7 +175,7 @@ describe('FeatureTrack', function() {
         {
           viz: pileup.viz.features(),
           data: pileup.formats.bigBed({
-            url: '/test-data/chr17.10000-21000.bb',
+            url: '/test-data/chr17.22.10000-21000.bb',
           }),
           name: 'Features'
         }
@@ -193,7 +194,8 @@ describe('FeatureTrack', function() {
         expect(features).to.have.length(10);
 
         // canvas height should be maxed out
-        expect(testDiv.querySelector('.features').style.height).to.equal("300px");
+        var expectedHeight = 150 * window.devicePixelRatio;
+        expect(testDiv.querySelector('.features').style.height).to.equal(`${expectedHeight}px`);
 
         p.destroy();
 

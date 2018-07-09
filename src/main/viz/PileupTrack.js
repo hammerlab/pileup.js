@@ -7,7 +7,8 @@
 import type {Strand, Alignment, AlignmentDataSource} from '../Alignment';
 import type {TwoBitSource} from '../sources/TwoBitDataSource';
 import type {BasePair} from './pileuputils';
-import type {VisualAlignment, VisualGroup, InsertStats} from './PileupCache';
+import type {VisualAlignment, InsertStats} from './PileupCache';
+import type {VisualGroup} from './AbstractCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type Interval from '../Interval';
 import type {VizProps} from '../VisualizationWrapper';
@@ -185,7 +186,7 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
           x2 = scale(span.stop + 1);
       ctx.fillRect(x1, y + style.READ_HEIGHT / 2 - 0.5, x2 - x1, 1);
     }
-    vGroup.alignments.forEach(vRead => drawAlignment(vRead, y));
+    vGroup.items.forEach(vRead => drawAlignment(vRead, y));
     ctx.popObject();
     ctx.restore();
   }

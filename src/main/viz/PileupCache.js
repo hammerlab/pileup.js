@@ -10,6 +10,8 @@
 import type {Strand, Alignment, AlignmentDataSource} from '../Alignment';
 import type {TwoBitSource} from '../sources/TwoBitDataSource';
 import type {BasePair} from './pileuputils';
+import AbstractCache from './AbstractCache';
+import type {VisualGroup} from './AbstractCache';
 
 import _ from 'underscore';
 import ContigInterval from '../ContigInterval';
@@ -27,15 +29,6 @@ export type VisualAlignment = {
   ops: Object[];
 };
 
-// This is typically a read pair, but may be a single read in some situations.
-export type VisualGroup = {
-  key: string;
-  row: number;  // pileup row.
-  span: ContigInterval<string>;  // tip-to-tip span for the read group
-  insert: ?Interval;  // interval for the connector, if applicable.
-  alignments: VisualAlignment[];
-};
-
 // Insert sizes within this percentile range will be considered "normal".
 const MIN_OUTLIER_PERCENTILE = 0.5;
 const MAX_OUTLIER_PERCENTILE = 99.5;
@@ -49,7 +42,7 @@ export type InsertStats = {
 
 // This class provides data management for the visualization, grouping paired
 // reads and managing the pileup.
-class PileupCache {
+class PileupCache extends AbstractCache {
   // maps groupKey to VisualGroup
   groups: {[key: string]: VisualGroup};
   refToPileup: {[key: string]: Array<Interval[]>};
@@ -58,9 +51,7 @@ class PileupCache {
   _insertStats: ?InsertStats;
 
   constructor(referenceSource: TwoBitSource, viewAsPairs: boolean) {
-    this.groups = {};
-    this.refToPileup = {};
-    this.referenceSource = referenceSource;
+    super(referenceSource);
     this.viewAsPairs = viewAsPairs;
     this._insertStats = null;
   }
@@ -88,12 +79,12 @@ class PileupCache {
         row: -1,  // TBD
         insert: null,  // TBD
         span: range,
-        alignments: []
+        items: []
       };
     }
     var group = this.groups[key];
 
-    if (_.find(group.alignments, a => a.read == read)) {
+    if (_.find(group.items, a => a.read == read)) {
       return;  // we've already got it.
     }
 
@@ -105,10 +96,10 @@ class PileupCache {
       ops: opInfo.ops,
       mismatches: opInfo.mismatches
     };
-    group.alignments.push(visualAlignment);
+    group.items.push(visualAlignment);
 
     var mateInterval = null;
-    if (group.alignments.length == 1) {
+    if (group.items.length == 1) {
       // This is the first read in the group. Infer its span from its mate properties.
       // TODO: if the mate Alignment is also available, it would be better to use that.
       if (this.viewAsPairs) {
@@ -128,9 +119,9 @@ class PileupCache {
       }
       var pileup = this.refToPileup[read.ref];
       group.row = addToPileup(group.span.interval, pileup);
-    } else if (group.alignments.length == 2) {
+    } else if (group.items.length == 2) {
       // Refine the connector
-      mateInterval = group.alignments[0].read.getInterval();
+      mateInterval = group.items[0].read.getInterval();
       var {span, insert} = spanAndInsert([range, mateInterval]);
       group.insert = insert;
       if (insert) {
@@ -144,7 +135,7 @@ class PileupCache {
   // Updates reference mismatch information for previously-loaded reads.
   updateMismatches(range: ContigInterval<string>) {
     for (var k in this.groups) {
-      var reads = this.groups[k].alignments;
+      var reads = this.groups[k].items;
       for (var vRead of reads) {
         var read = vRead.read;
         if (read.getInterval().intersects(range)) {
@@ -153,44 +144,6 @@ class PileupCache {
         }
       }
     }
-  }
-
-  pileupForRef(ref: string): Array<Interval[]> {
-    if (ref in this.refToPileup) {
-      return this.refToPileup[ref];
-    } else {
-      var alt = utils.altContigName(ref);
-      if (alt in this.refToPileup) {
-        return this.refToPileup[alt];
-      } else {
-        return [];
-      }
-    }
-  }
-
-  // How many rows tall is the pileup for a given ref? This is related to the
-  // maximum read depth. This is 'chr'-agnostic.
-  pileupHeightForRef(ref: string): number {
-    var pileup = this.pileupForRef(ref);
-    return pileup ? pileup.length : 0;
-  }
-
-  // Find groups overlapping the range. This is 'chr'-agnostic.
-  getGroupsOverlapping(range: ContigInterval<string>): VisualGroup[] {
-    // TODO: speed this up using an interval tree
-    return _.filter(this.groups, group => group.span.intersects(range));
-  }
-
-  // Determine the number of groups at a locus.
-  // Like getGroupsOverlapping(range).length > 0, but more efficient.
-  anyGroupsOverlapping(range: ContigInterval<string>): boolean {
-    for (var k in this.groups) {
-      var group = this.groups[k];
-      if (group.span.intersects(range)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   // Re-sort the pileup so that reads overlapping the locus are on top.
@@ -204,7 +157,7 @@ class PileupCache {
 
     // Find the groups for which an alignment overlaps the locus.
     var groups = _.filter(this.groups,
-          group => _.any(group.alignments,
+          group => _.any(group.items,
               a => a.read.getInterval().containsLocus(contig, position)));
 
     // For each row, find the left-most point (for sorting).
@@ -233,7 +186,7 @@ class PileupCache {
   getInsertStats(): InsertStats {
     if (this._insertStats) return this._insertStats;
     var inserts = _.map(this.groups,
-                        g => g.alignments[0].read.getInferredInsertSize())
+                        g => g.items[0].read.getInferredInsertSize())
                    .filter(x => x < MAX_INSERT_SIZE);
     const insertStats = inserts.length >= MIN_READS_FOR_OUTLIERS ? {
       minOutlierSize: utils.computePercentile(inserts, MIN_OUTLIER_PERCENTILE),

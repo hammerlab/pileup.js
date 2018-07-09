@@ -7,8 +7,8 @@
 import type {FeatureDataSource} from '../sources/BigBedDataSource';
 import type Feature from '../data/feature';
 import GenericFeature from '../data/genericFeature';
-import {GenericFeatureCache} from '../../main/viz/GenericFeatureCache';
-import type {VisualGroup} from '../../main/viz/GenericFeatureCache';
+import {GenericFeatureCache} from './GenericFeatureCache';
+import type {VisualGroup} from './AbstractCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 
 import type {VizProps} from '../VisualizationWrapper';
@@ -45,7 +45,6 @@ class FeatureTiledCanvas extends TiledCanvas {
     this.options = newOptions;
   }
 
-  // TODO: can update to handle overlapping features
   heightForRef(ref: string): number {
     return this.cache.pileupHeightForRef(ref) *
                     (style.READ_HEIGHT + style.READ_SPACING);
@@ -78,7 +77,7 @@ function renderFeatures(ctx: DataCanvasRenderingContext2D,
     ctx.textAlign = 'center';
 
     vFeatures.forEach(vFeature => {
-      var feature = vFeature.gFeatures[0].gFeature;
+      var feature = vFeature.items[0].gFeature;
       if (!vFeature.span.intersects(range)) return;
       ctx.pushObject(feature);
       ctx.lineWidth = 1;
@@ -174,7 +173,6 @@ class FeatureTrack extends React.Component {
     this.updateVisualization();
   }
 
-  // TODO this is redundant
   getScale(): Scale {
     return d3utils.getTrackScale(this.props.range, this.props.width);
   }
@@ -209,9 +207,9 @@ class FeatureTrack extends React.Component {
     var parent = ((d3utils.findParent(canvas, "features") : any) : HTMLCanvasElement);
     
     // Height can only be computed after the pileup has been updated.
-    var height = yForRow(this.cache.pileupHeightForRef(this.props.range.contig)); // TODO AM fillRect wrong?
+    var height = yForRow(this.cache.pileupHeightForRef(this.props.range.contig));
 
-    // resize height for device TODO
+    // resize height for device
     height = d3utils.heightForCanvas(canvas, height);
 
     // set height for parent div to include all features
