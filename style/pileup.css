@@ -180,6 +180,11 @@
   stroke: none;
 }
 
+/* features track */
+.pileup-root > .features {
+  max-height: 200px; /* prevents track from becoming too large */
+}
+
 /* pileup track */
 .pileup-root > .pileup {
   flex: 1;  /* stretch to fill remaining space */

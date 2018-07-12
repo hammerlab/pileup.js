@@ -37,9 +37,9 @@ describe('PileupCache', function() {
     expect(g.insert).to.not.be.null;
     if (!g.insert) return;  // for flow
     expect(g.insert.toString()).to.equal('[200, 300]');
-    expect(g.alignments).to.have.length(2);
-    expect(g.alignments[0].read.getInterval().toString()).to.equal('chr1:100-200');
-    expect(g.alignments[1].read.getInterval().toString()).to.equal('chr1:300-400');
+    expect(g.items).to.have.length(2);
+    expect(g.items[0].read.getInterval().toString()).to.equal('chr1:100-200');
+    expect(g.items[1].read.getInterval().toString()).to.equal('chr1:300-400');
     expect(g.span.toString()).to.equal('chr1:100-400');
     expect(cache.pileupHeightForRef('chr1')).to.equal(1);
     expect(cache.pileupHeightForRef('chr2')).to.equal(0);
@@ -95,8 +95,8 @@ describe('PileupCache', function() {
     expect(groups).to.have.length(2);
     expect(groups[0].row).to.equal(0);
     expect(groups[1].row).to.equal(0);
-    expect(groups[0].alignments).to.have.length(1);
-    expect(groups[1].alignments).to.have.length(1);
+    expect(groups[0].items).to.have.length(1);
+    expect(groups[1].items).to.have.length(1);
     expect(groups[0].insert).to.be.null;
     expect(groups[1].insert).to.be.null;
     expect(cache.pileupHeightForRef('chr1')).to.equal(1);

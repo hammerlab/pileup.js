@@ -56,6 +56,11 @@ function formatRange(viewSize: number): {prefix: string, unit: string} {
   return {prefix, unit};
 }
 
+function heightForCanvas(el: HTMLCanvasElement, height: number): number {
+  var ratio = window.devicePixelRatio;
+  return (height * ratio);
+}
+
 /**
  * Sizes a canvas appropriately for this device.
  */
@@ -84,6 +89,7 @@ function findParent(inEl: Element, className: string): ?Element {
 }
 
 module.exports = {
+  heightForCanvas,
   formatRange,
   getTrackScale,
   sizeCanvas,
