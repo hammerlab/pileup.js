@@ -468,8 +468,14 @@ class PileupTrack extends React.Component {
     renderPileup(trackingCtx, scale, range, null, false, vGroups);
     var vRead = _.find(trackingCtx.hits[0], hit => hit.read);
     var alert = window.alert || console.log;
+
     if (vRead) {
-      alert(vRead.read.debugString());
+      //user provided function for displaying popup
+      if (typeof this.props.options.onReadClicked  === "function") {
+        this.props.options.onReadClicked(vRead);
+      } else {
+        alert(vRead.read.debugString());
+      }
     }
   }
 }

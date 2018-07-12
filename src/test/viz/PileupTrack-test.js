@@ -23,6 +23,8 @@ import ContigInterval from '../../main/ContigInterval';
 import {waitFor} from '../async';
 import dataCanvas from 'data-canvas';
 
+// Uncomment this for testing click
+//import ReactTestUtils from 'react-addons-test-utils';
 
 // This is like TwoBit, but allows a controlled release of sequence data.
 class FakeTwoBit extends TwoBit {
@@ -202,7 +204,7 @@ describe('PileupTrack', function() {
       p.destroy();
     });
   });
-
+  
   it('should hide alignments', function() {
     var p = pileup.create(testDiv, {
       range: {contig: 'chr17', start: 7500734, stop: 7500796},
@@ -229,6 +231,58 @@ describe('PileupTrack', function() {
     return waitFor(hasPileupSelector, 2000).then(() => {
       var alignments = drawnObjectsWith(testDiv, '.pileup', x => x.span);
       expect(alignments.length).to.equal(0);
+      p.destroy();
+    });
+  });
+
+  it('should use provided click function', function() {
+    var readClickedData = null;
+    var readClicked = function (data) {
+      // TODO: remove after testing is done
+      var alert = window.alert || console.log;
+      alert(data.read.debugString());
+      readClickedData = data;
+    };
+
+    var p = pileup.create(testDiv, {
+      range: {contig: 'chr17', start: 7500734, stop: 7500796},
+      tracks: [
+        {
+          data: pileup.formats.twoBit({
+            url: '/test-data/test.2bit'
+          }),
+          viz: pileup.viz.genome(),
+          isReference: true
+        },
+        {
+          data: pileup.formats.bam({
+            url: '/test-data/synth3.normal.17.7500000-7515000.bam',
+            indexUrl: '/test-data/synth3.normal.17.7500000-7515000.bam.bai'
+          }),
+          viz: pileup.viz.pileup({
+            onReadClicked: readClicked
+          }),
+        }
+      ]
+    });
+
+    return waitFor(hasPileupSelector, 2000).then(() => {
+      /*
+      // TODO: Fix - canvasList is empty but testDiv is fine?
+      var alignments = drawnObjectsWith(testDiv, '.pileup')
+      console.log("alignments", alignments)
+      var canvasList = testDiv.getElementsByTagName('canvas');
+    
+      console.log("canvasList", canvasList)
+      console.log("canaslist len", canvasList.length)
+      var canvas = canvasList[1];
+      console.log("canvas", canvas);
+      expect(readClickedData).to.be.null;
+    
+      //check clicking on variant
+      // TODO: how can I tell what offsets to provide??
+      ReactTestUtils.Simulate.click(canvas,{nativeEvent: {offsetX: -0.5, offsetY: -15.5}});
+      */
       p.destroy();
     });
   });
