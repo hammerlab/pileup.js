@@ -67,4 +67,40 @@ describe('GeneTrack', function() {
       });
   });
 
+  it('should not print null gene name', function() {
+    var p = pileup.create(testDiv, {
+      range: {contig: '17', start: 1156459, stop: 1156529},
+      tracks: [
+        {
+          viz: pileup.viz.genome(),
+          data: pileup.formats.twoBit({
+            url: '/test-data/test.2bit'
+          }),
+          isReference: true
+        },
+        {
+          data: pileup.formats.bigBed({
+            url: '/test-data/ensembl.chr17.bb'
+          }),
+          viz: pileup.viz.genes(),
+        }
+      ]
+    });
+
+    return waitFor(ready, 2000)
+      .then(() => {
+        var genes = drawnObjects(testDiv, '.genes');
+        expect(genes).to.have.length(1);
+        expect(genes.map(g => g.name)).to.deep.equal(
+            [ 'null']);  // null gene name
+
+        // Do not draw null gene name. Default to gene id.
+        var texts = callsOf(testDiv, '.genes', 'fillText');
+        expect(texts.map(t => t[1])).to.deep.equal(['ENST00000386721']);
+        p.destroy();
+      });
+  });
+
+
+
 });
