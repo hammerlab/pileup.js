@@ -273,6 +273,23 @@ function computePercentile(xs: number[], percentile: number): number {
   }
 }
 
+/**
+ * Converts a string into a null, NaN, undefined, Inf or -Inf. Returns
+ * original string if string is not a special case.
+ * Returns string parsed to special case (null, NaN, undefined, Inf or -Inf)
+ * or original string.
+ */
+function stringToLiteral(value: string): any {
+  var maps = {
+   "NaN": NaN,
+   "null": null,
+   "undefined": undefined,
+   "Infinity": Infinity,
+   "-Infinity": -Infinity
+   };
+  return ((value in maps) ? maps[value] : value);
+}
+
 module.exports = {
   tupleLessOrEqual,
   tupleRangeOverlaps,
@@ -286,5 +303,6 @@ module.exports = {
   formatInterval,
   isChrMatch,
   flatMap,
-  computePercentile
+  computePercentile,
+  stringToLiteral
 };
