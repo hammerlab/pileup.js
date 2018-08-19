@@ -134,6 +134,7 @@ describe('FeatureTrack', function() {
         features =  _.uniq(features, false, function(x) {
             return x.position.start();
         });
+        console.log(features);
 
         expect(features).to.have.length(5);
         expect(features.map(f => f.position.start())).to.deep.equal(
