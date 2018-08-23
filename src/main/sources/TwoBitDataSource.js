@@ -19,6 +19,7 @@ import Q from 'q';
 import _ from 'underscore';
 import {Events} from 'backbone';
 
+import type {GenomeRange} from '../types';
 import ContigInterval from '../ContigInterval';
 import TwoBit from '../data/TwoBit';
 import RemoteFile from '../RemoteFile';
@@ -58,7 +59,7 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
   // Ranges for which we have complete information -- no need to hit network.
   var coveredRanges = ([]: ContigInterval<string>[]);
 
-  function fetch(range: ContigInterval) {
+  function fetch(range: ContigInterval<string>) {
     var span = range.length();
     if (span > MAX_BASE_PAIRS_TO_FETCH) {
       //inform that we won't fetch the data
@@ -153,7 +154,7 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
     on: () => {},
     once: () => {},
     off: () => {},
-    trigger: () => {}
+    trigger: (status: string, param: any) => {}
   };
   _.extend(o, Events);  // Make this an event emitter
 

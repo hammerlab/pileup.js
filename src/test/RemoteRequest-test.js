@@ -16,7 +16,7 @@ describe('RemoteRequest', function() {
   var stop = 20;
 
   before(function () {
-    return new RemoteFile('/test-data/alignments.ga4gh.chr17.1-250.json').getAllString().then(data => {
+    new RemoteFile('/test-data/alignments.ga4gh.chr17.1-250.json').getAllString().then(data => {
       response = data;
       server = sinon.fakeServer.create();
     });

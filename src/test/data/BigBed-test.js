@@ -20,8 +20,8 @@ describe('BigBed', function() {
   it('should extract features in a range', function() {
     var bb = getTestBigBed();
 
-    return bb.getFeaturesInRange('chrX', 151077036, 151078532)
-        .then(features => {
+    bb.getFeaturesInRange('chrX', 151077036, 151078532)
+        .then(featuresP => featuresP.then(features => {
           // Here's what these two lines in the file look like:
           // chrX 151077031 151078198 MID_BLUE 0 - 151077031 151078198 0,0,128
           // chrX 151078198 151079365 VIOLET_RED1 0 - 151078198 151079365 255,62,150
@@ -44,13 +44,13 @@ describe('BigBed', function() {
           expect(rest1[0]).to.equal('VIOLET_RED1');
           expect(rest1[2]).to.equal('-');
           expect(rest1[5]).to.equal('255,62,150');
-        });
+        }));
   });
 
   it('should extract features from an uncompressed BigBed', function () {
     var bb = getUncompressedTestBigBed();
 
-    return bb.getFeaturesInRange('chr17', 60000, 270000)
+    bb.getFeaturesInRange('chr17', 60000, 270000)
       .then(features => {
         // Here's what these three lines in the file look like:
         // chr17	62296	202576
@@ -77,7 +77,7 @@ describe('BigBed', function() {
         expect(features).to.have.length(n);
       };
 
-    return Q.all([
+    Q.all<any>([
         // request for precisely one row from the file.
         bb.getFeaturesInRange('chrX', red[0], red[1])
             .then(expectN(1)),
@@ -96,7 +96,7 @@ describe('BigBed', function() {
   it('should add "chr" to contig names', function() {
     var bb = getTestBigBed();
 
-    return bb.getFeaturesInRange('X', 151077036, 151078532)
+    bb.getFeaturesInRange('X', 151077036, 151078532)
         .then(features => {
           // (same as 'should extract features in a range' test)
           expect(features).to.have.length(2);
@@ -108,7 +108,7 @@ describe('BigBed', function() {
   it('should cache requests in a block', function() {
     var bb = getTestBigBed(),
         remote = bb.remoteFile;
-    return bb.getFeaturesInRange('X', 151077036, 151078532).then(() => {
+    bb.getFeaturesInRange('X', 151077036, 151078532).then(() => {
       // cache has been warmed up -- flush it to get a deterministic test.
       remote.clearCache();
       remote.numNetworkRequests = 0;
@@ -135,8 +135,8 @@ describe('BigBed', function() {
     var bb = getTestBigBed();
 
     var range = new ContigInterval('X', 151077036, 151078532);
-    return bb.getFeatureBlocksOverlapping(range)
-        .then(blockFeatures => {
+    bb.getFeatureBlocksOverlapping(range)
+    .then(blockFeatures => {
           expect(blockFeatures).to.have.length(1);  // just one block fetched.
           var range = blockFeatures[0].range,
               rows = blockFeatures[0].rows;

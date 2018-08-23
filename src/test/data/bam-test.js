@@ -12,7 +12,7 @@ import VirtualOffset from '../../main/data/VirtualOffset';
 describe('BAM', function() {
   it('should parse BAM files', function() {
     var bamFile = new Bam(new RemoteFile('/test-data/test_input_1_a.bam'));
-    return bamFile.readAll().then(bamData => {
+    bamFile.readAll().then(bamData => {
       var refs = bamData.header.references;
       expect(refs).to.have.length(4);
       expect(refs[0]).to.contain({l_ref: 599, name: 'insert'});
@@ -68,7 +68,7 @@ describe('BAM', function() {
 
     // TODO: run these in parallel
     var range = new ContigInterval('chrM', 10400, 10600);
-    return bam.getAlignmentsInRange(range, true).then(alignments => {
+    bam.getAlignmentsInRange(range, true).then(alignments => {
       expect(alignments).to.have.length(1);
       expect(alignments[0].toString()).to.equal('chrM:10427-10477');
       return bam.getAlignmentsInRange(range, false).then(alignments => {
@@ -97,7 +97,7 @@ describe('BAM', function() {
      x = x;
      */
 
-    return bam.getAlignmentsInRange(range).then(reads => {
+    bam.getAlignmentsInRange(range).then(reads => {
       // Note: htsjdk returns contig names like 'chr18', not 18.
       expect(reads).to.have.length(14);
       expect(reads.map(r => r.toString())).to.deep.equal([
@@ -123,7 +123,7 @@ describe('BAM', function() {
     var bam = new Bam(new RemoteFile('/test-data/index_test.bam'),
                       new RemoteFile('/test-data/index_test.bam.bai'));
     var range = new ContigInterval('chr1', 90002285, 116992285);
-    return bam.getAlignmentsInRange(range).then(reads => {
+    bam.getAlignmentsInRange(range).then(reads => {
       expect(reads).to.have.length(92);
       expect(reads.slice(0, 5).map(r => r.toString())).to.deep.equal([
         'chr1:90071452-90071502',
@@ -150,7 +150,7 @@ describe('BAM', function() {
     // This virtual offset matches the one above.
     // This verifies that alignments are tagged with the correct offset.
     var bam = new Bam(new RemoteFile('/test-data/index_test.bam'));
-    return bam.readAtOffset(new VirtualOffset(28269, 2247)).then(read => {
+    bam.readAtOffset(new VirtualOffset(28269, 2247)).then(read => {
       expect(read.toString()).to.equal('chr1:116563944-116563994');
     });
   });
@@ -159,7 +159,7 @@ describe('BAM', function() {
     var bam = new Bam(new RemoteFile('/test-data/index_test.bam'),
                       new RemoteFile('/test-data/index_test.bam.bai'));
     var range = new ContigInterval('chr20', 1, 412345678);
-    return bam.getAlignmentsInRange(range).then(reads => {
+    bam.getAlignmentsInRange(range).then(reads => {
       // This count matches what you get if you run:
       // samtools view test/data/index_test.bam | cut -f3 | grep 'chr20' | wc -l
       expect(reads).to.have.length(228);
@@ -184,7 +184,7 @@ describe('BAM', function() {
 
     var range = new ContigInterval('chr20', 31511349, 31514172);
 
-    return bam.getAlignmentsInRange(range).then(reads => {
+    bam.getAlignmentsInRange(range).then(reads => {
       expect(reads).to.have.length(1114);
       expect(reads[0].toString()).to.equal('20:31511251-31511351');
       expect(reads[1113].toString()).to.equal('20:31514171-31514271');
@@ -198,7 +198,7 @@ describe('BAM', function() {
         bam = new Bam(bamFile, baiFile);
 
     var range = new ContigInterval('chr17', 7514800, 7515100);
-    return bam.getAlignmentsInRange(range).then(reads => {
+    bam.getAlignmentsInRange(range).then(reads => {
       // TODO: samtools says 128. Figure out why there's a difference.
       expect(reads).to.have.length(130);
     });
@@ -213,7 +213,7 @@ describe('BAM', function() {
         bam = new Bam(bamFile, baiFile, chunks);
 
     var range = new ContigInterval('chr20', 2684600, 2684800);
-    return bam.getAlignmentsInRange(range).then(reads => {
+    bam.getAlignmentsInRange(range).then(reads => {
       expect(reads).to.have.length(7);
     });
   });
@@ -226,7 +226,7 @@ describe('BAM', function() {
 
     var range = new ContigInterval('chr20', 2684600, 2684800);
     var progressEvents = [];
-    return bam.getAlignmentsInRange(range).progress(event => {
+    bam.getAlignmentsInRange(range).progress(event => {
       progressEvents.push(event);
     }).then(reads => {
       expect(progressEvents).to.deep.equal([

@@ -1,6 +1,8 @@
 /* @flow */
 'use strict';
 
+import type {GenomeRange} from './types';
+
 import Interval from './Interval';
 import {flatMap} from './utils';
 
@@ -108,10 +110,10 @@ class ContigInterval<T: (number|string)> {
   }
 
   // Comparator for use with Array.prototype.sort
-  static compare(a: ContigInterval, b: ContigInterval): number {
-    if (a.contig > b.contig) {
+  static compare<T: (string|number)>(a: ContigInterval<T>, b: ContigInterval<T>): number {
+    if (a.contig.toString() > b.contig.toString()) {
       return -1;
-    } else if (a.contig < b.contig) {
+    } else if (a.contig.toString() < b.contig.toString()) {
       return +1;
     } else {
       return a.start() - b.start();
@@ -120,7 +122,7 @@ class ContigInterval<T: (number|string)> {
 
   // Sort an array of intervals & coalesce adjacent/overlapping ranges.
   // NB: this may re-order the intervals parameter
-  static coalesce(intervals: ContigInterval[]): ContigInterval[] {
+  static coalesce<T: (string|number)>(intervals: ContigInterval<T>[]): ContigInterval<T>[] {
     intervals.sort(ContigInterval.compare);
 
     var rs = [];
@@ -143,7 +145,7 @@ class ContigInterval<T: (number|string)> {
   }
 
   static fromGenomeRange(range: GenomeRange): ContigInterval<string> {
-    return new ContigInterval(range.contig, range.start, range.stop);
+    return new ContigInterval(range.contig.toString(), range.start, range.stop);
   }
 }
 

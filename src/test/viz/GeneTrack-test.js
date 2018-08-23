@@ -15,7 +15,8 @@ import {waitFor} from '../async';
 
 describe('GeneTrack', function() {
   var testDiv = document.getElementById('testdiv');
-
+  if (!testDiv) throw new Error("Failed to match: testdiv");
+  
   beforeEach(() => {
     testDiv.style.width = '800px';
     dataCanvas.RecordingContext.recordAll();
@@ -28,8 +29,8 @@ describe('GeneTrack', function() {
   });
   var {drawnObjects, callsOf} = dataCanvas.RecordingContext;
 
-  function ready() {
-    return testDiv.querySelector('canvas') &&
+  function ready(): boolean {
+    return testDiv.querySelector('canvas') != null &&
         drawnObjects(testDiv, '.genes').length > 0;
   }
 
@@ -53,7 +54,7 @@ describe('GeneTrack', function() {
       ]
     });
 
-    return waitFor(ready, 2000)
+    waitFor(ready, 2000)
       .then(() => {
         var genes = drawnObjects(testDiv, '.genes');
         expect(genes).to.have.length(4);

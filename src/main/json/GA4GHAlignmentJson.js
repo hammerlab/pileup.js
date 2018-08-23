@@ -6,6 +6,7 @@
 'use strict';
 
 import type {Alignment, AlignmentDataSource} from '../Alignment';
+import type {GenomeRange} from '../types';
 
 import _ from 'underscore';
 import {Events} from 'backbone';
@@ -45,7 +46,7 @@ function create(json: string): AlignmentDataSource {
     on: () => {},
     once: () => {},
     off: () => {},
-    trigger: () => {}
+    trigger: (status: string, param: any) => {}
   };
   _.extend(o, Events);
   return o;

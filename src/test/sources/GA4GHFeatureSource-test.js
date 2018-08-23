@@ -18,7 +18,7 @@ describe('GA4GHFeatureSource', function() {
       featureSetId: "WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIl0",
     });
 
-    return new RemoteFile('/test-data/features.ga4gh.chr1.120000-125000.json').getAllString().then(data => {
+    new RemoteFile('/test-data/features.ga4gh.chr1.120000-125000.json').getAllString().then(data => {
       response = data;
       server = sinon.fakeServer.create();
     });

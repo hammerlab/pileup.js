@@ -71,7 +71,7 @@ class FeatureTiledCanvas extends TiledCanvas {
 function renderFeatures(ctx: DataCanvasRenderingContext2D,
                     scale: (num: number) => number,
                     range: ContigInterval<string>,
-                    vFeatures: VisualGroup[]) {
+                    vFeatures: VisualGroup<GenericFeature>[]) {
 
     ctx.font = `${style.GENE_FONT_SIZE}px ${style.GENE_FONT}`;
     ctx.textAlign = 'center';
@@ -94,13 +94,13 @@ function renderFeatures(ctx: DataCanvasRenderingContext2D,
     });
 }
 
-class FeatureTrack extends React.Component {
-  props: VizProps & { source: FeatureDataSource };
+class FeatureTrack extends React.Component<VizProps<FeatureDataSource>, State> {
+  props: VizProps<FeatureDataSource>;
   state: State;
   tiles: FeatureTiledCanvas;
   cache: GenericFeatureCache;
 
-  constructor(props: VizProps) {
+  constructor(props: VizProps<FeatureDataSource>) {
     super(props);
     this.state = {
       networkStatus: null

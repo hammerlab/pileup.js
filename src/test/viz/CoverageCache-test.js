@@ -17,7 +17,7 @@ describe('CoverageCache', function() {
     return new ContigInterval(chr, start, end);
   }
 
-  function makeCache(args) {
+  function makeCache(args: any) {
     var cache = new CoverageCache(fakeSource);
     _.flatten(args).forEach(read => cache.addAlignment(read));
     return cache;
@@ -41,7 +41,7 @@ describe('CoverageCache', function() {
 
   it('should collect mismatches', function() {
     var letter = '.';  // pretend the reference is this letter, repeated
-    var refSource = _.extend({}, fakeSource, {
+    var refSource = _.extend(_.clone(fakeSource), {
       getRangeAsString: function(range) {
         return letter.repeat(range.stop - range.start + 1);
       }

@@ -10,7 +10,7 @@ describe('Variant', function() {
   var json;
 
   before(function () {
-    return new RemoteFile('/test-data/variants.ga4gh.chr1.10000-11000.json').getAllString().then(data => {
+    new RemoteFile('/test-data/variants.ga4gh.chr1.10000-11000.json').getAllString().then(data => {
       json = data;
     });
   });

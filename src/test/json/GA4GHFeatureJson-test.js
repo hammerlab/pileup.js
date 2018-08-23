@@ -11,7 +11,7 @@ describe('GA4GHFeatureJson', function() {
   var json;
 
   before(function () {
-    return new RemoteFile('/test-data/features.ga4gh.chr1.120000-125000.json').getAllString().then(data => {
+    new RemoteFile('/test-data/features.ga4gh.chr1.120000-125000.json').getAllString().then(data => {
       json = data;
     });
   });

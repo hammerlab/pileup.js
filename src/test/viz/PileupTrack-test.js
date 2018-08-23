@@ -67,7 +67,8 @@ class FakeBam extends Bam {
 
 
 describe('PileupTrack', function() {
-  var testDiv = document.getElementById('testdiv');
+ var testDiv = document.getElementById('testdiv');
+  if (!testDiv) throw new Error("Failed to match: testdiv");
 
   beforeEach(() => {
     // A fixed width container results in predictable x-positions for mismatches.
@@ -89,13 +90,13 @@ describe('PileupTrack', function() {
       bamIndexFile = new RemoteFile('/test-data/synth3.normal.17.7500000-7515000.bam.bai');
 
   // It simplifies the tests to have these variables available synchronously.
-  var reference = '',
+  var reference: string = '',
       alignments = [];
 
   before(function() {
     var twoBit = new TwoBit(twoBitFile),
         bam = new Bam(bamFile, bamIndexFile);
-    return twoBit.getFeaturesInRange('chr17', 7500000, 7510000).then(seq => {
+    twoBit.getFeaturesInRange('chr17', 7500000, 7510000).then(seq => {
       reference = seq;
       return bam.getAlignmentsInRange(new ContigInterval('chr17', 7500734, 7500795));
     }).then(result => {
@@ -134,11 +135,11 @@ describe('PileupTrack', function() {
   var hasReference = () => {
       // The reference initially shows "unknown" base pairs, so we have to
       // check for a specific known one to ensure that it's really loaded.
-      return testDiv.querySelector('.reference canvas') &&
+      return testDiv.querySelector('.reference canvas') != null &&
           drawnObjectsWith(testDiv, '.reference', x => x.letter).length > 0;
     },
     hasAlignments = () => {
-      return testDiv.querySelector('.pileup canvas') &&
+      return testDiv.querySelector('.pileup canvas') != null &&
           drawnObjectsWith(testDiv, '.pileup', x => x.span).length > 0;
     },
     hasPileupSelector = () => {
@@ -171,7 +172,7 @@ describe('PileupTrack', function() {
     fakeTwoBit.release(reference);
 
     // Wait for the track to render, then release the alignments.
-    return waitFor(hasReference, 2000).then(() => {
+    waitFor(hasReference, 2000).then(() => {
       fakeBam.release(alignments);
       return waitFor(hasAlignments, 2000);
     }).then(() => {
@@ -192,7 +193,7 @@ describe('PileupTrack', function() {
     fakeBam.release(alignments);
 
     // Wait for the track to render, then release the reference.
-    return waitFor(hasAlignments, 2000).then(() => {
+    waitFor(hasAlignments, 2000).then(() => {
       fakeTwoBit.release(reference);
       return waitFor(hasReference, 2000);
     }).then(() => {
@@ -226,7 +227,7 @@ describe('PileupTrack', function() {
       ]
     });
 
-    return waitFor(hasPileupSelector, 2000).then(() => {
+    waitFor(hasPileupSelector, 2000).then(() => {
       var alignments = drawnObjectsWith(testDiv, '.pileup', x => x.span);
       expect(alignments.length).to.equal(0);
       p.destroy();
@@ -256,7 +257,7 @@ describe('PileupTrack', function() {
       ]
     });
 
-    return waitFor(hasAlignments, 2000).then(() => {
+    waitFor(hasAlignments, 2000).then(() => {
       var alignments = drawnObjectsWith(testDiv, '.pileup', x => x.span);
       var center = (7500796 + 7500734) / 2;
       expect(Math.floor(center)).to.equal(center);  // no rounding issues

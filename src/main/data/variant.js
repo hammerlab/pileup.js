@@ -23,7 +23,7 @@ class Variant {
 
   constructor(variant: Object) {
    this.contig = variant.contig;
-   this.position = parseInt(variant.position);
+   this.position = variant.position;
    this.ref = variant.ref;
    this.alt = variant.alt;
    this.id = variant.id;
@@ -36,7 +36,7 @@ class Variant {
    return new Variant(
     {
      contig: ga4ghVariant.referenceName,
-     position: parseInt(ga4ghVariant.start),
+     position: ga4ghVariant.start,
      id: ga4ghVariant.id,
      ref: ga4ghVariant.referenceBases,
      alt: ga4ghVariant.alternateBases,

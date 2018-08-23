@@ -11,7 +11,7 @@ describe('GA4GHAlignment', function() {
   var sampleAlignments = [];
 
   before(function() {
-    return new RemoteFile('/test-data/alignments.ga4gh.1.10000-11000.json').getAllString().then(data => {
+    new RemoteFile('/test-data/alignments.ga4gh.1.10000-11000.json').getAllString().then(data => {
       sampleAlignments = JSON.parse(data).alignments;
     });
   });

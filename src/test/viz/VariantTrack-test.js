@@ -13,6 +13,7 @@ import ReactTestUtils from 'react-addons-test-utils';
 
 describe('VariantTrack', function() {
   var testDiv = document.getElementById('testdiv');
+  if (!testDiv) throw new Error("Failed to match: testdiv");
 
   beforeEach(() => {
     testDiv.style.width = '700px';
@@ -56,7 +57,7 @@ describe('VariantTrack', function() {
       ]
     });
 
-    return waitFor(ready, 2000)
+    waitFor(ready, 2000)
       .then(() => {
         var variants = drawnObjects(testDiv, '.variants');
         expect(variants.length).to.be.equal(1);

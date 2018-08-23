@@ -4,6 +4,7 @@
  */
 'use strict';
 
+import type {GenomeRange} from './types';
 import type {TwoBitSource} from './sources/TwoBitDataSource';
 import type {VisualizedTrack, VizWithOptions} from './types';
 
@@ -18,14 +19,16 @@ type Props = {
   initialRange: GenomeRange;
 };
 
-class Root extends React.Component {
+type State = {
+  contigList: string[];
+  range: ?GenomeRange;
+  settingsMenuKey: ?string;
+  updateSize: boolean;
+};
+
+class Root extends React.Component<Props, State> {
   props: Props;
-  state: {
-    contigList: string[];
-    range: ?GenomeRange;
-    settingsMenuKey: ?string;
-    updateSize: boolean;
-  };
+  state: State;
   trackReactElements: Array<Object>; //it's an array of reactelement that are created for tracks
 
   constructor(props: Object) {
@@ -68,7 +71,7 @@ class Root extends React.Component {
     }).done();
   }
 
-  toggleSettingsMenu(key: string, e: SyntheticEvent) {
+  toggleSettingsMenu(key: string, e: SyntheticEvent<>) {
     if (this.state.settingsMenuKey == key) {
       this.setState({settingsMenuKey: null});
     } else {
@@ -88,9 +91,9 @@ class Root extends React.Component {
     }
   }
 
-  makeDivForTrack(key: string, track: VisualizedTrack): React.Element {
+  makeDivForTrack(key: string, track: VisualizedTrack): React$Element<'div'> {
     //this should be improved, but I have no idea how (when trying to
-    //access this.trackReactElements wih string key, flow complains)
+    //access this.trackReactElements with string key, flow complains)
     var intKey = parseInt(key); 
     var trackEl = (
         <VisualizationWrapper visualization={track.visualization}
@@ -99,7 +102,7 @@ class Root extends React.Component {
             source={track.source}
             options={track.track.options}
             referenceSource={this.props.referenceSource}
-            ref = {(c) => {this.trackReactElements[intKey]=c}}
+            ref = {(c: React$ElementRef<Object>) => {this.trackReactElements[intKey]=c}}
           />);
 
     var trackName = track.track.name || '(track name)';

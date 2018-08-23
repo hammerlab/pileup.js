@@ -120,7 +120,7 @@ describe('pileuputils', function() {
       }
     };
 
-    return bam.getAlignmentsInRange(range).then(reads => {
+    bam.getAlignmentsInRange(range).then(reads => {
       var findRead = function(startPos): SamRead {
         var r = null;
         for (var i = 0; i < reads.length; i++) {

@@ -12,7 +12,7 @@ import RemoteFile from '../../main/RemoteFile';
 import RecordedRemoteFile from '../RecordedRemoteFile';
 
 function chunkToString(chunk) {
-  return `${chunk.chunk_beg}-${chunk.chunk_end}`;
+  return `${chunk.chunk_beg.toString()}-${chunk.chunk_end.toString()}`;
 }
 
 describe('BAI', function() {
@@ -42,10 +42,10 @@ describe('BAI', function() {
 
     // contig 0 = chrM
     var range = new ContigInterval(0, 10400, 10600);
-    return bai.getChunksForInterval(range).then(chunks => {
+    bai.getChunksForInterval(range).then(pChunks => pChunks.then(chunks => {
       expect(chunks).to.have.length(1);
       expect(chunkToString(chunks[0])).to.equal('0:8384-0:11328');
-    });
+    }));
   });
 
   it('should use index chunks', function() {
@@ -58,19 +58,19 @@ describe('BAI', function() {
 
     // contig 0 = chrM
     var range = new ContigInterval(0, 10400, 10600);
-    return bai.getChunksForInterval(range).then(chunks => {
+    bai.getChunksForInterval(range).then(pChunks => pChunks.then(chunks => {
       expect(chunks).to.have.length(1);
       expect(chunkToString(chunks[0])).to.equal('0:8384-0:11328');
 
       var requests = remoteFile.requests;
       expect(requests).to.have.length(1);
       expect(requests[0].toString()).to.equal('[8, 144]');
-    });
+    }));
   });
 
   it('should compute index chunks', function() {
     var bai = new BaiFile(new RemoteFile('/test-data/index_test.bam.bai'));
-    return bai.immediate.then(imm => {
+    bai.immediate.then(imm => {
       var chunks = imm.indexChunks;
 
       // This is the output from bai-indexer
@@ -129,7 +129,7 @@ describe('BAI', function() {
 
   it('should index a small BAI file', function() {
     var bai = new BaiFile(new RemoteFile('/test-data/test_input_1_b.bam.bai'));
-    return bai.immediate.then(imm => {
+    bai.immediate.then(imm => {
       var chunks = imm.indexChunks;
 
       // This is the output from bai-indexer

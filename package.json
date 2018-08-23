@@ -29,7 +29,7 @@
     "http-server": "http-server .",
     "test": "./scripts/test.sh",
     "flow": "flow status",
-    "flow-check": "flow check",
+    "flow-check": "flow check --show-all-errors", // TODO AM
     "coverage": "./scripts/generate-coverage.sh",
     "build": "./scripts/build.sh"
   },
@@ -72,7 +72,7 @@
     "coveralls": "2.10.x",
     "envify": "^3.4.0",
     "exorcist": "^0.4.0",
-    "flow-bin": "^0.21.0",
+    "flow-bin": "^0.79.1",
     "http-server": "^0.8.0",
     "istanbul": "^0.3.17",
     "jsxhint": "git://github.com/strml/JSXHint.git",

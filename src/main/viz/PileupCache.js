@@ -42,9 +42,9 @@ export type InsertStats = {
 
 // This class provides data management for the visualization, grouping paired
 // reads and managing the pileup.
-class PileupCache extends AbstractCache {
+class PileupCache extends AbstractCache<VisualAlignment> {
   // maps groupKey to VisualGroup
-  groups: {[key: string]: VisualGroup};
+  groups: {[key: string]: VisualGroup<VisualAlignment>};
   refToPileup: {[key: string]: Array<Interval[]>};
   referenceSource: TwoBitSource;
   viewAsPairs: boolean;
@@ -163,7 +163,7 @@ class PileupCache extends AbstractCache {
     // For each row, find the left-most point (for sorting).
     var rowsOverlapping =
         _.mapObject(_.groupBy(groups, g => g.row),
-                    gs => _.min(gs, g=>g.span.start()).span.start());
+                    gs => _.min([gs, g=>g.span.start().span.start()]));
 
     // Sort groups by whether they overlap, then by their start.
     // TODO: is there an easier way to construct the forward map directly?

@@ -124,7 +124,7 @@ class ImmediateBigBed {
   contigMap: {[key:string]: number};
   chrIdToContig: string[];
 
-  constructor(remoteFile, header, cirTree, contigMap: {[key:string]: number}) {
+  constructor(remoteFile: RemoteFile, header: Object, cirTree: Object, contigMap: {[key:string]: number}) {
     this.remoteFile = remoteFile;
     this.header = header;
     this.cirTree = cirTree;
@@ -204,7 +204,7 @@ class ImmediateBigBed {
           return blocks.map(block => {
             var beds = extractFeaturesFromBlock(buffer, byteRange, block, isCompressed);
             if (block.startChromIx != block.endChromIx) {
-              throw `Can't handle blocks which span chromosomes!`;
+              throw `CanTODOAMt handle blocks which span chromosomes!`;
             }
 
             return {
@@ -282,7 +282,7 @@ class BigBed {
       return this.remoteFile.getBytes(start, length).then(parseCirTree);
     });
 
-    this.immediate = Q.all([this.header, this.cirTree, this.contigMap])
+    this.immediate = Q.all<any, any, any>([this.header, this.cirTree, this.contigMap])
         .then(([header, cirTree, contigMap]) => {
           var cm: {[key:string]: number} = contigMap;
           return new ImmediateBigBed(this.remoteFile, header, cirTree, cm);
@@ -300,7 +300,9 @@ class BigBed {
    */
   getFeaturesInRange(contig: string, start: number, stop: number): Q.Promise<Array<BedRow>> {
     var range = new ContigInterval(contig, start, stop);
-    return this.immediate.then(im => im.getFeaturesInRange(range));
+    return this.immediate.then(im => im.getFeaturesInRange(range)).then(p => {
+      return p;
+    });
   }
 
   /**
@@ -309,7 +311,9 @@ class BigBed {
    * anyway, this can be helpful for upstream caching.
    */
   getFeatureBlocksOverlapping(range: ContigInterval<string>): Q.Promise<Array<BedBlock>> {
-    return this.immediate.then(im => im.getFeatureBlocksOverlapping(range));
+    return this.immediate.then(im => im.getFeatureBlocksOverlapping(range)).then(p => {
+      return p;
+    });
   }
 }
 

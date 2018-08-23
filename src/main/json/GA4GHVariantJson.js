@@ -12,6 +12,7 @@ import _ from 'underscore';
 import {Events} from 'backbone';
 
 import ContigInterval from '../ContigInterval';
+import type {GenomeRange} from '../types';
 
 function create(json: string): VcfDataSource {
 
@@ -45,7 +46,7 @@ function create(json: string): VcfDataSource {
     on: () => {},
     once: () => {},
     off: () => {},
-    trigger: () => {}
+    trigger: (status: string, param: any) => {}
   };
   _.extend(o, Events);
   return o;

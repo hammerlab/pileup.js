@@ -20,7 +20,8 @@ import {waitFor} from '../async';
 
 describe('GenomeTrack', function() {
   var testDiv = document.getElementById('testdiv');
-
+  if (!testDiv) throw new Error("Failed to match: testdiv");
+  
   beforeEach(() => {
     // A fixed width container results in predictable x-positions for mismatches.
     testDiv.style.width = '800px';
@@ -40,14 +41,14 @@ describe('GenomeTrack', function() {
       referenceSource = TwoBitDataSource.createFromTwoBitFile(new TwoBit(twoBitFile));
 
   var {drawnObjects} = dataCanvas.RecordingContext;
-  var hasReference = () => {
+  var hasReference = (): boolean => {
       // The reference initially shows "unknown" base pairs, so we have to
       // check for a specific known one to ensure that it's really loaded.
-      return testDiv.querySelector('canvas') &&
+      return testDiv.querySelector('canvas') != null &&
           drawnObjects(testDiv, '.reference').length > 0;
     };
 
-  var referenceTrackLoaded = () => {
+  var referenceTrackLoaded = (): boolean => {
     //this can be done in a preatier way
     return testDiv.querySelector('canvas') !== null ;
   };
@@ -64,7 +65,7 @@ describe('GenomeTrack', function() {
       ]
     });
 
-    return waitFor(hasReference, 2000).then(() => {
+    waitFor(hasReference, 2000).then(() => {
       // The contig selector should list have "chr" prefixes & an active selection.
       var options = testDiv.querySelectorAll('option');
       expect(options).to.have.length.above(20);
@@ -113,7 +114,7 @@ describe('GenomeTrack', function() {
     expect(minusBtn.className).to.equal('btn-zoom-out');
     expect(plusBtn.className).to.equal('btn-zoom-in');
 
-    return waitFor(referenceTrackLoaded, 2000).then(() => {
+    waitFor(referenceTrackLoaded, 2000).then(() => {
       //in global view we shouldn't see reference track
       expect(hasReference()).to.be.false;
       p.setRange({contig: '17', start: 7500725, stop: 7500775});
@@ -146,7 +147,7 @@ describe('GenomeTrack', function() {
     expect(minusBtn.className).to.equal('btn-zoom-out');
     expect(plusBtn.className).to.equal('btn-zoom-in');
 
-    return waitFor(hasReference, 2000).then(() => {
+    waitFor(hasReference, 2000).then(() => {
       expect(locationTxt.value).to.equal('7,500,725-7,500,775');
       ReactTestUtils.Simulate.click(minusBtn);
     }).delay(50).then(() => {
@@ -184,7 +185,7 @@ describe('GenomeTrack', function() {
     var [goBtn] = testDiv.querySelectorAll('.controls button');
     expect(goBtn.textContent).to.equal('Go');
 
-    return waitFor(hasReference, 2000).then(() => {
+    waitFor(hasReference, 2000).then(() => {
       expect(locationTxt.value).to.equal('7,500,725-7,500,775');
       locationTxt.value = '17:7500745-7500785';
       ReactTestUtils.Simulate.click(goBtn);

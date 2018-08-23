@@ -38,7 +38,7 @@ describe('VCF', function() {
     });
 
     it('local file from string', function() {
-      return remoteFile.getAllString().then(content => {
+      remoteFile.getAllString().then(content => {
         var localFile = new LocalStringFile(content);
         var vcf = new VcfFile(localFile);
         testQueries(vcf);
@@ -49,7 +49,7 @@ describe('VCF', function() {
   it('should have frequency', function() {
     var vcf = new VcfFile(new RemoteFile('/test-data/allelFrequency.vcf'));
     var range = new ContigInterval('chr20', 61790, 61800);
-    return vcf.getFeaturesInRange(range).then(features => {
+    vcf.getFeaturesInRange(range).then(features => {
       expect(features).to.have.length(1);
       expect(features[0].contig).to.equal('20');
       expect(features[0].majorFrequency).to.equal(0.7);
@@ -60,7 +60,7 @@ describe('VCF', function() {
   it('should have highest frequency', function() {
     var vcf = new VcfFile(new RemoteFile('/test-data/allelFrequency.vcf'));
     var range = new ContigInterval('chr20', 61730, 61740);
-    return vcf.getFeaturesInRange(range).then(features => {
+    vcf.getFeaturesInRange(range).then(features => {
       expect(features).to.have.length(1);
       expect(features[0].contig).to.equal('20');
       expect(features[0].majorFrequency).to.equal(0.6);
@@ -71,7 +71,7 @@ describe('VCF', function() {
   it('should add chr', function() {
     var vcf = new VcfFile(new RemoteFile('/test-data/snv.vcf'));
     var range = new ContigInterval('chr20', 63799, 69094);
-    return vcf.getFeaturesInRange(range).then(features => {
+    vcf.getFeaturesInRange(range).then(features => {
       expect(features).to.have.length(6);
       expect(features[0].contig).to.equal('20');  // not chr20
       expect(features[5].contig).to.equal('20');
@@ -82,7 +82,7 @@ describe('VCF', function() {
     var vcf = new VcfFile(new RemoteFile('/test-data/sort-bug.vcf'));
     var chr1 = new ContigInterval('chr1', 1, 1234567890),  // all of chr1
         chr5 = new ContigInterval('chr5', 1, 1234567890);
-    return vcf.getFeaturesInRange(chr1).then(features => {
+    vcf.getFeaturesInRange(chr1).then(features => {
       expect(features).to.have.length(5);
       return vcf.getFeaturesInRange(chr5);
     }).then(features => {

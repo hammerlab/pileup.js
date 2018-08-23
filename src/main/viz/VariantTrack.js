@@ -7,11 +7,11 @@ import {AllelFrequencyStrategy} from '../types';
 
 
 import type {VcfDataSource} from '../sources/VcfDataSource';
-import type {Variant} from '../data/vcf';
+import type {Variant} from '../data/variant';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {VizProps} from '../VisualizationWrapper';
 import type {Scale} from './d3utils';
-
+import type {State} from '../types';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -22,12 +22,12 @@ import canvasUtils from './canvas-utils';
 import dataCanvas from 'data-canvas';
 import style from '../style';
 
-class VariantTrack extends React.Component {
-  props: VizProps & {source: VcfDataSource};
+class VariantTrack extends React.Component<VizProps<VcfDataSource>, State> {
+  props: VizProps<VcfDataSource>;
 
-  state: void;
+  state: State;
 
-  constructor(props: Object) {
+  constructor(props: VizProps<VcfDataSource>) {
     super(props);
   }
 
@@ -60,11 +60,17 @@ class VariantTrack extends React.Component {
 
     // Hold off until height & width are known.
     if (width === 0) return;
-
-    d3utils.sizeCanvas(canvas, width, height);
-    var ctx = canvasUtils.getContext(canvas);
-    var dtx = dataCanvas.getDataContext(ctx);
-    this.renderScene(dtx);
+    
+    if (canvas && canvas instanceof Element) { // check for getContext
+      if (canvas instanceof HTMLCanvasElement) { // check for sizeCanvas
+        d3utils.sizeCanvas(canvas, width, height);
+      }
+      var ctx = canvasUtils.getContext(canvas);
+      var dtx = dataCanvas.getDataContext(ctx);
+      this.renderScene(dtx);
+    } else {
+      throw new TypeError("canvas is not an Element");
+    }
   }
 
   renderScene(ctx: DataCanvasRenderingContext2D) {
@@ -117,27 +123,34 @@ class VariantTrack extends React.Component {
     var ev = reactEvent.nativeEvent,
         x = ev.offsetX,
         y = ev.offsetY,
-        canvas = ReactDOM.findDOMNode(this),
-        ctx = canvasUtils.getContext(canvas),
-        trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
-    this.renderScene(trackingCtx);
+        canvas: (null | Element | Text) = ReactDOM.findDOMNode(this);
 
-    var variants = trackingCtx.hit;
-    if (variants && variants.length>0) {
-      var data = [];
-      for (var i=0;i<variants.length;i++) {
-        data.push({
-          id:       variants[i].id,
-          vcfLine:  variants[i].vcfLine,
-          ref:      variants[i].ref,
-          alt:      variants[i].alt});
+    if (canvas == null ) return;
+
+    if (canvas && canvas instanceof Element) {
+      var ctx = canvasUtils.getContext(canvas),
+          trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
+      this.renderScene(trackingCtx);
+
+      var variants = trackingCtx.hit;
+      if (variants && variants.length>0) {
+        var data = [];
+        for (var i=0;i<variants.length;i++) {
+          data.push({
+            id:       variants[i].id,
+            vcfLine:  variants[i].vcfLine,
+            ref:      variants[i].ref,
+            alt:      variants[i].alt});
+        }
+        //user provided function for displaying popup
+        if (typeof this.props.options.onVariantClicked  === "function") {
+          this.props.options.onVariantClicked(data);
+        } else {
+          console.log("Variants clicked: ", data);
+        }
       }
-      //user provided function for displaying popup
-      if (typeof this.props.options.onVariantClicked  === "function") {
-        this.props.options.onVariantClicked(data);
-      } else {
-        console.log("Variants clicked: ", data);
-      }
+    } else {
+      throw new TypeError("canvas is not an Element");
     }
   }
 }

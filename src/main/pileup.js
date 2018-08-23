@@ -6,7 +6,9 @@
 
 import type {Track, VisualizedTrack, VizWithOptions} from './types';
 import {AllelFrequencyStrategy} from './types';
+import type {State} from './types';
 
+import type {VizProps} from './VisualizationWrapper';
 import _ from 'underscore';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -67,14 +69,15 @@ function findReference(tracks: VisualizedTrack[]): ?VisualizedTrack {
 function create(elOrId: string|Element, params: PileupParams): Pileup {
   var el = typeof(elOrId) == 'string' ? document.getElementById(elOrId) : elOrId;
   if (!el) {
-    throw new Error(`Attempted to create pileup with non-existent element ${elOrId}`);
+    throw new Error(`Attempted to create pileup with non-existent element ${elOrId.toString()}`);
   }
 
   var vizTracks = params.tracks.map(function(track: Track): VisualizedTrack {
     var source = track.data ? track.data : track.viz.component.defaultSource;
     if(!source) {
+      var displayName = track.viz.component.displayName != null ? track.viz.component.displayName : 'track';
       throw new Error(
-        `Track '${track.viz.component.displayName}' doesn't have a default ` +
+        `Track '${displayName}' doesn't have a default ` +
         `data source; you must specify one when initializing it.`
       );
     }
@@ -95,8 +98,10 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
   //if the element doesn't belong to document DOM observe DOM to detect
   //when it's attached
   var observer = null;
+  var body = document.body;
+  if (!body) throw new Error("Failed to match: document.body");
 
-  if (!document.body.contains(el)) {
+  if (!body.contains(el)) {
     observer = new MutationObserver(function(mutations) {
       mutations.forEach(function(mutation) {
         if (mutation.type === 'childList') {
@@ -135,9 +140,14 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
     },
     getRange(): GenomeRange {
       if (reactElement === null) {
-        throw 'Cannot call setRange on a destroyed pileup';
+        throw 'Cannot call getRange on a destroyed pileup';
       }
-      return _.clone(reactElement.state.range);
+      if (reactElement.state.range != null) {
+        return _.clone(reactElement.state.range);
+      } else {
+        throw 'Cannot call setRange on non-existent range';
+      }
+      
     },
     destroy(): void {
       if (!vizTracks) {
@@ -163,7 +173,7 @@ type VizObject = ((options: ?Object) => VizWithOptions);
 
 function makeVizObject(component: ReactClass): VizObject {
   return options => {
-    options = _.extend({}, component.defaultOptions, options);
+    options = _.extend(_.clone(component.props.options), options);
     return {component, options};
   };
 }

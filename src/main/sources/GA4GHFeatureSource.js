@@ -6,7 +6,7 @@
 
 import _ from 'underscore';
 import {Events} from 'backbone';
-
+import type {GenomeRange} from '../types';
 import ContigInterval from '../ContigInterval';
 
 import type {FeatureDataSource} from './BigBedDataSource';
@@ -77,7 +77,7 @@ function create(spec: GA4GHFeatureSpec): FeatureDataSource {
     xhr.responseType = 'json';
     xhr.setRequestHeader('Content-Type', 'application/json');
 
-    xhr.addEventListener('load', function(e) {
+    xhr.addEventListener('load', function(e: any) {
       var response = this.response;
       if (this.status >= 400) {
         notifyFailure(this.status + ' ' + this.statusText + ' ' + JSON.stringify(response));
@@ -95,7 +95,7 @@ function create(spec: GA4GHFeatureSpec): FeatureDataSource {
         }
       }
     });
-    xhr.addEventListener('error', function(e) {
+    xhr.addEventListener('error', function(e: any) {
       notifyFailure('Request failed with status: ' + this.status);
     });
 
@@ -123,7 +123,7 @@ function create(spec: GA4GHFeatureSpec): FeatureDataSource {
     on: () => {},
     once: () => {},
     off: () => {},
-    trigger: () => {}
+    trigger: (status: string, param: any) => {}
   };
   _.extend(o, Events);  // Make this an event emitter
   return o;

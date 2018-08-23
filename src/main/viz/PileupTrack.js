@@ -82,7 +82,7 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
                       range: ContigInterval<string>,
                       insertStats: ?InsertStats,
                       colorByStrand: boolean,
-                      vGroups: VisualGroup[]) {
+                      vGroups: VisualGroup<VisualAlignment>[]) {
   // Should mismatched base pairs be shown as blocks of color or as letters?
   var pxPerLetter = scale(1) - scale(0),
       mode = DisplayMode.getDisplayMode(pxPerLetter),
@@ -164,7 +164,7 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
     ctx.popObject();
   }
 
-  function drawGroup(vGroup: VisualGroup) {
+  function drawGroup(vGroup: VisualGroup<VisualAlignment>) {
     ctx.save();
     if (insertStats && vGroup.insert) {
       var len = vGroup.span.length();
@@ -229,17 +229,26 @@ function opacityForQuality(quality: number): number {
   return Math.min(1.0, alpha);
 }
 
-
-class PileupTrack extends React.Component {
-  props: VizProps & { source: AlignmentDataSource };
+//type Props = VizProps<AlignmentDataSource>;
+class PileupTrack extends React.Component<VizProps<AlignmentDataSource>, State> {
+  props: VizProps<AlignmentDataSource>;
   state: State;
   cache: PileupCache;
   tiles: PileupTiledCanvas;
-  static defaultOptions: { viewAsPairs: boolean };
   static getOptionsMenu: (options: Object) => any;
   static handleSelectOption: (key: string, oldOptions: Object) => Object;
 
-  constructor(props: VizProps) {
+
+  static defaultProps : {
+    options: {
+      viewAsPairs: false,
+      colorByInsert: true,
+      colorByStrand: false,
+      hideAlignments: false
+    }
+  };
+
+  constructor(props: VizProps<AlignmentDataSource>) {
     super(props);
     this.state = {
       networkStatus: null
@@ -475,12 +484,6 @@ class PileupTrack extends React.Component {
 }
 
 PileupTrack.displayName = 'pileup';
-PileupTrack.defaultOptions = {
-  viewAsPairs: false,
-  colorByInsert: true,
-  colorByStrand: false,
-  hideAlignments: false
-};
 
 PileupTrack.getOptionsMenu = function(options: Object): any {
   return [

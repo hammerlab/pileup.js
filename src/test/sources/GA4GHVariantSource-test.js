@@ -19,7 +19,7 @@ describe('GA4GHVariantSource', function() {
       callSetIds: ["WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIiwiSEcwMDA5NiJd"]
     });
 
-    return new RemoteFile('/test-data/variants.ga4gh.chr1.10000-11000.json').getAllString().then(data => {
+    new RemoteFile('/test-data/variants.ga4gh.chr1.10000-11000.json').getAllString().then(data => {
       response = data;
       server = sinon.fakeServer.create();
     });

@@ -5,6 +5,7 @@
  */
 'use strict';
 
+import type {GenomeRange} from '../types';
 import type {Alignment, AlignmentDataSource} from '../Alignment';
 
 import _ from 'underscore';
@@ -92,7 +93,7 @@ function create(spec: GA4GHSpec): AlignmentDataSource {
     xhr.responseType = 'json';
     xhr.setRequestHeader('Content-Type', 'application/json');
 
-    xhr.addEventListener('load', function(e) {
+    xhr.addEventListener('load', function(e: any) {
       var response = this.response;
       if (this.status >= 400) {
         notifyFailure(this.status + ' ' + this.statusText + ' ' + JSON.stringify(response));
@@ -110,7 +111,7 @@ function create(spec: GA4GHSpec): AlignmentDataSource {
         }
       }
     });
-    xhr.addEventListener('error', function(e) {
+    xhr.addEventListener('error', function(e: any) {
       notifyFailure('Request failed with status: ' + this.status);
     });
 
@@ -147,7 +148,7 @@ function create(spec: GA4GHSpec): AlignmentDataSource {
     on: () => {},
     once: () => {},
     off: () => {},
-    trigger: () => {}
+    trigger: (status: string, param: any) => {}
   };
   _.extend(o, Events);  // Make this an event emitter
   return o;

@@ -25,9 +25,9 @@ export type VisualGroup<T: (VisualAlignment | GenericFeature)> = {
   items: T[];
 };
 
-class AbstractCache {
+class AbstractCache<T: (VisualAlignment | GenericFeature)> {
   // maps groupKey to VisualGroup
-  groups: {[key: string]: VisualGroup}; 
+  groups: {[key: string]: VisualGroup<T>}; 
   refToPileup: {[key: string]: Array<Interval[]>};
   referenceSource: TwoBitSource;
 
@@ -58,7 +58,7 @@ class AbstractCache {
   }
 
   // Find groups overlapping the range. This is 'chr'-agnostic.
-  getGroupsOverlapping(range: ContigInterval<string>): VisualGroup[] {
+  getGroupsOverlapping(range: ContigInterval<string>): VisualGroup<T>[] {
     // TODO: speed this up using an interval tree
     return _.filter(this.groups, group => group.span.intersects(range));
   }
