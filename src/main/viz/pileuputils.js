@@ -5,7 +5,6 @@ import type SamRead from '../data/SamRead';
 import type {Alignment, CigarSymbol} from '../Alignment';
 import type Interval from '../Interval';
 import style from '../style';
-import React from 'react';
 
 /**
  * Calculate row height for pileup

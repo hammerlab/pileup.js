@@ -143,7 +143,6 @@ class GeneTrack extends React.Component<VizProps<BigBedSource>, State> {
       }
       var ctx = dataCanvas.getDataContext(canvasUtils.getContext(canvas));
 
-      var ctx = dataCanvas.getDataContext(canvasUtils.getContext(canvas));
       ctx.reset();
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
@@ -152,7 +151,7 @@ class GeneTrack extends React.Component<VizProps<BigBedSource>, State> {
       ctx.font = `${style.GENE_FONT_SIZE}px ${style.GENE_FONT}`;
       ctx.textAlign = 'center';
       var vFeatures = _.flatten(_.map(this.cache.getGroupsOverlapping(range),
-                    g => g.items))
+                    g => g.items));
 
       vFeatures.forEach(vFeature => {
         var gene = vFeature.gFeature;
