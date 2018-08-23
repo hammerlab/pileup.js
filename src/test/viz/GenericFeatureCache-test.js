@@ -3,8 +3,6 @@
  */
 'use strict';
 
-import type {Alignment, CigarOp, MateProperties, Strand} from '../../main/Alignment';
-
 import {expect} from 'chai';
 import _ from 'underscore';
 

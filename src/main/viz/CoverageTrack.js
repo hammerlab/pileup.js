@@ -4,13 +4,11 @@
  */
 'use strict';
 
-import type {Alignment, AlignmentDataSource} from '../Alignment';
-import type Interval from '../Interval';
-import type {TwoBitSource} from '../sources/TwoBitDataSource';
+import type {AlignmentDataSource} from '../Alignment';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {BinSummary} from './CoverageCache';
 import type {Scale} from './d3utils';
-import type {GenomeRange, State} from '../types';
+import type {State} from '../types';
 import type {VizProps} from '../VisualizationWrapper';
 
 import React from 'react';

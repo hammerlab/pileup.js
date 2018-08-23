@@ -87,7 +87,7 @@ describe('FeatureTrack', function() {
             [89295, 92230, 110953, 120725]);
 
         var height = yForRow(4) * window.devicePixelRatio; // should be 4 rows
-        var features = testDiv.querySelector('.features');
+        features = testDiv.querySelector('.features');
         expect(features).to.not.be.null;
         if (features != null) {
           expect(features.style.height).to.equal(`${height}px`);
@@ -148,7 +148,7 @@ describe('FeatureTrack', function() {
         // canvas height should be height of features that are overlapping
         var height = yForRow(2) * window.devicePixelRatio; // should be 2 rows
 
-        var features = testDiv.querySelector('.features');
+        features = testDiv.querySelector('.features');
         expect(features).to.not.be.null;
         if (features != null) {
           expect(features.style.height).to.equal(`${height}px`);
@@ -205,7 +205,7 @@ describe('FeatureTrack', function() {
 
         // canvas height should be maxed out
         var expectedHeight = 150 * window.devicePixelRatio;
-        var features = testDiv.querySelector('.features');
+        features = testDiv.querySelector('.features');
         expect(features).to.not.be.null;
         if (features != null) {
           expect(features.style.height).to.equal(`${expectedHeight}px`);

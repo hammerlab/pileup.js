@@ -56,7 +56,7 @@ class FakeBam extends Bam {
     this.deferred = Q.defer();
   }
 
-  getAlignmentsInRange(range: ContigInterval<string>, opt_contained?: boolean): Q.Promise<SamRead[]> {
+  getAlignmentsInRange(): Q.Promise<SamRead[]> {
     return this.deferred.promise;
   }
 

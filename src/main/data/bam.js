@@ -264,7 +264,7 @@ class Bam {
     });
 
 
-    return Q.all<SamRead, Object>([readPromise, this.header])
+    return Q.all([readPromise, this.header])
     .then(([read, header]) => {
       read.ref = header.references[read.refID].name;
       return read;

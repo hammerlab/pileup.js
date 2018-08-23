@@ -1,7 +1,6 @@
 /** @flow */
 'use strict';
 
-import type SamRead from '../data/SamRead';
 import type {Alignment, CigarSymbol} from '../Alignment';
 import type Interval from '../Interval';
 import style from '../style';

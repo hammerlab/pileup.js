@@ -282,7 +282,7 @@ class BigBed {
       return this.remoteFile.getBytes(start, length).then(parseCirTree);
     });
 
-    this.immediate = Q.all<any, any, any>([this.header, this.cirTree, this.contigMap])
+    this.immediate = Q.all([this.header, this.cirTree, this.contigMap])
         .then(([header, cirTree, contigMap]) => {
           var cm: {[key:string]: number} = contigMap;
           return new ImmediateBigBed(this.remoteFile, header, cirTree, cm);

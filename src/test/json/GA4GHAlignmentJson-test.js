@@ -7,7 +7,7 @@ import ContigInterval from '../../main/ContigInterval';
 import GA4GHAlignmentJson from '../../main/json/GA4GHAlignmentJson';
 import RemoteFile from '../../main/RemoteFile';
 
-describe('GA4GHAlignmentJson', function() {
+describe('GA4GHAlignmentJson', function () {
   var json;
 
   before(function () {
@@ -16,8 +16,7 @@ describe('GA4GHAlignmentJson', function() {
     });
   });
 
-  it('should filter alignments from json', function(done) {
-
+  it('should filter alignments from json', function (done) {
     var source = GA4GHAlignmentJson.create(json);
 
     var requestInterval = new ContigInterval('chr17', 10, 20);
@@ -25,11 +24,9 @@ describe('GA4GHAlignmentJson', function() {
     var reads = source.getAlignmentsInRange(requestInterval);
     expect(reads).to.have.length(2);
     done();
-
   });
 
-  it('should not fail on empty json string', function(done) {
-
+  it('should not fail on empty json string', function (done) {
     var source = GA4GHAlignmentJson.create("{}");
 
     var requestInterval = new ContigInterval('chr17', 10, 20);
@@ -37,7 +34,5 @@ describe('GA4GHAlignmentJson', function() {
     var reads = source.getAlignmentsInRange(requestInterval);
     expect(reads).to.have.length(0);
     done();
-
   });
-
 });

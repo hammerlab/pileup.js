@@ -4,13 +4,11 @@
  */
 'use strict';
 
-import type {Strand, Alignment, AlignmentDataSource} from '../Alignment';
-import type {TwoBitSource} from '../sources/TwoBitDataSource';
+import type {AlignmentDataSource} from '../Alignment';
 import type {BasePair} from './pileuputils';
 import type {VisualAlignment, InsertStats} from './PileupCache';
 import type {VisualGroup} from './AbstractCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
-import type Interval from '../Interval';
 import type {VizProps} from '../VisualizationWrapper';
 import type {Scale} from './d3utils';
 import type {State, NetworkStatus} from '../types';
@@ -229,7 +227,6 @@ function opacityForQuality(quality: number): number {
   return Math.min(1.0, alpha);
 }
 
-//type Props = VizProps<AlignmentDataSource>;
 class PileupTrack extends React.Component<VizProps<AlignmentDataSource>, State> {
   props: VizProps<AlignmentDataSource>;
   state: State;

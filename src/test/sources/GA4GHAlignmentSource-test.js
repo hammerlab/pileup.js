@@ -10,7 +10,8 @@ import GA4GHAlignmentSource from '../../main/sources/GA4GHAlignmentSource';
 import RemoteFile from '../../main/RemoteFile';
 
 describe('GA4GHAlignmentSource', function() {
-  var server: any = null, response;
+  var server: any = null;
+  var response: any = null;
 
   before(function () {
     new RemoteFile('/test-data/alignments.ga4gh.1.10000-11000.json').getAllString().then(data => {

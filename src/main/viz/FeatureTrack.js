@@ -5,7 +5,6 @@
 'use strict';
 
 import type {FeatureDataSource} from '../sources/BigBedDataSource';
-import type Feature from '../data/feature';
 import GenericFeature from '../data/genericFeature';
 import {GenericFeatureCache} from './GenericFeatureCache';
 import type {VisualGroup} from './AbstractCache';
@@ -25,7 +24,7 @@ import canvasUtils from './canvas-utils';
 import TiledCanvas from './TiledCanvas';
 import dataCanvas from 'data-canvas';
 import style from '../style';
-import type {State, NetworkStatus} from '../types';
+import type {State} from '../types';
 import {yForRow} from './pileuputils';
 
 

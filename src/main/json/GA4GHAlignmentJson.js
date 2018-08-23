@@ -46,7 +46,7 @@ function create(json: string): AlignmentDataSource {
     on: () => {},
     once: () => {},
     off: () => {},
-    trigger: (status: string, param: any) => {}
+    trigger: (string, any) => {}
   };
   _.extend(o, Events);
   return o;

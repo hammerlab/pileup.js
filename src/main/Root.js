@@ -81,14 +81,14 @@ class Root extends React.Component<Props, State> {
 
   handleSelectOption(trackKey: string, optionKey: string) {
     this.setState({settingsMenuKey: null});
-
-    var viz = this.props.tracks[Number(trackKey)].visualization;
-    var oldOpts = viz.options;
-    var newOpts = viz.component.handleSelectOption(optionKey, oldOpts);
-    viz.options = newOpts;
-    if (newOpts != oldOpts) {
-      this.forceUpdate();
-    }
+    // TODO AM
+    // var viz = this.props.tracks[Number(trackKey)].visualization;
+    // var oldOpts = viz.options;
+    // var newOpts = viz.component.handleSelectOption(optionKey, oldOpts);
+    // viz.options = newOpts;
+    // if (newOpts != oldOpts) {
+    //   this.forceUpdate();
+    // }
   }
 
   makeDivForTrack(key: string, track: VisualizedTrack): React$Element<'div'> {
@@ -109,34 +109,36 @@ class Root extends React.Component<Props, State> {
 
     var gearIcon = null,
         settingsMenu = null;
-    if (track.visualization.component.getOptionsMenu) {
-      gearIcon = (
-          <span ref={'gear-' + key}
-                className='gear'
-                onClick={this.toggleSettingsMenu.bind(this, key)}>
-            ⚙
-          </span>
-      );
-    }
+    // TODO AM
+    // if (track.visualization.component.getOptionsMenu) {
+    //   gearIcon = (
+    //       <span ref={'gear-' + key}
+    //             className='gear'
+    //             onClick={this.toggleSettingsMenu.bind(this, key)}>
+    //         ⚙
+    //       </span>
+    //   );
+    // }
 
-    if (this.state.settingsMenuKey == key) {
-      var gear = this.refs['gear-' + key],
-          gearX = gear.offsetLeft,
-          gearW = gear.offsetWidth,
-          gearY = gear.offsetTop;
+    // TODO AM
+    // if (this.state.settingsMenuKey == key) {
+    //   var gear = this.refs['gear-' + key],
+    //       gearX = gear.offsetLeft,
+    //       gearW = gear.offsetWidth,
+    //       gearY = gear.offsetTop;
 
-      var menuStyle = {
-        position: 'absolute',
-        left: (gearX + gearW) + 'px',
-        top: gearY + 'px'
-      };
-      var items = track.visualization.component.getOptionsMenu(track.visualization.options);
-      settingsMenu = (
-        <div className='menu-container' style={menuStyle}>
-          <Menu header={trackName} items={items} onSelect={this.handleSelectOption.bind(this, key)} />
-        </div>
-      );
-    }
+    //   var menuStyle = {
+    //     position: 'absolute',
+    //     left: (gearX + gearW) + 'px',
+    //     top: gearY + 'px'
+    //   };
+    //   var items = track.visualization.component.getOptionsMenu(track.visualization.options);
+    //   settingsMenu = (
+    //     <div className='menu-container' style={menuStyle}>
+    //       <Menu header={trackName} items={items} onSelect={this.handleSelectOption.bind(this, key)} />
+    //     </div>
+    //   );
+    // }
 
     var className = ['track', track.visualization.component.displayName || '', track.track.cssClass || ''].join(' ');
 

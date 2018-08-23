@@ -11,7 +11,7 @@ import {waitFor} from '../async';
 
 import ReactTestUtils from 'react-addons-test-utils';
 
-describe('VariantTrack', function() {
+describe('VariantTrack', function () {
   var testDiv = document.getElementById('testdiv');
   if (!testDiv) throw new Error("Failed to match: testdiv");
 
@@ -27,12 +27,12 @@ describe('VariantTrack', function() {
   });
   var {drawnObjects} = dataCanvas.RecordingContext;
 
-  function ready() {
+  function ready () {
     return testDiv.getElementsByTagName('canvas').length > 0 &&
         drawnObjects(testDiv, '.variants').length > 0;
   }
 
-  it('should render variants', function() {
+  it('should render variants', function () {
     var variantClickedData = null;
     var variantClicked = function (data) {
       variantClickedData = data;
@@ -52,7 +52,7 @@ describe('VariantTrack', function() {
             url: '/test-data/test.vcf'
           }),
           viz: pileup.viz.variants(),
-          options: {onVariantClicked: variantClicked},
+          options: {onVariantClicked: variantClicked}
         }
       ]
     });
@@ -61,16 +61,15 @@ describe('VariantTrack', function() {
       .then(() => {
         var variants = drawnObjects(testDiv, '.variants');
         expect(variants.length).to.be.equal(1);
-        var canvasList =  testDiv.getElementsByTagName('canvas');
+        var canvasList = testDiv.getElementsByTagName('canvas');
         var canvas = canvasList[1];
         expect(variantClickedData).to.be.null;
 
-        //check clicking on variant
-        ReactTestUtils.Simulate.click(canvas,{nativeEvent: {offsetX: -0.5, offsetY: -15.5}});
+        // check clicking on variant
+        ReactTestUtils.Simulate.click(canvas, {nativeEvent: {offsetX: -0.5, offsetY: -15.5}});
 
         expect(variantClickedData).to.not.be.null;
         p.destroy();
       });
   });
-
 });

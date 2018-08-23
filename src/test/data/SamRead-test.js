@@ -1,10 +1,10 @@
 /* @flow */
 'use strict';
 
-import type Q from 'q';
-import type SamRead from '../../main/data/SamRead';
-
 import {expect} from 'chai';
+
+import Q from 'q';
+import type SamRead from '../../main/data/SamRead';
 
 import RemoteFile from '../../main/RemoteFile';
 import Bam from '../../main/data/bam';

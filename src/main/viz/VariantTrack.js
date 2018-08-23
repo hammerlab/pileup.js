@@ -7,7 +7,6 @@ import {AllelFrequencyStrategy} from '../types';
 
 
 import type {VcfDataSource} from '../sources/VcfDataSource';
-import type {Variant} from '../data/variant';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {VizProps} from '../VisualizationWrapper';
 import type {Scale} from './d3utils';
