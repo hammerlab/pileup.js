@@ -166,7 +166,7 @@ describe('BAM', function () {
     });
   });
 
-  it('should fetch from a large, dense BAM file', function () {
+  it('should fetch from a large, dense BAM file', function (): any {
     this.timeout(5000);
 
     // See test/data/README.md for details on where these files came from.
@@ -185,7 +185,7 @@ describe('BAM', function () {
 
     var range = new ContigInterval('chr20', 31511349, 31514172);
 
-    bam.getAlignmentsInRange(range).then(reads => {
+    return bam.getAlignmentsInRange(range).then(reads => {
       expect(reads).to.have.length(1114);
       expect(reads[0].toString()).to.equal('20:31511251-31511351');
       expect(reads[1113].toString()).to.equal('20:31514171-31514271');
@@ -193,7 +193,7 @@ describe('BAM', function () {
   });
 
   // Regression test for https://github.com/hammerlab/pileup.js/issues/88
-  it('should fetch reads at EOF', function () {
+  it('should fetch reads at EOF', function (): any {
     var bamFile = new RemoteFile('/test-data/synth3.normal.17.7500000-7515000.bam');
 
     var baiFile = new RemoteFile('/test-data/synth3.normal.17.7500000-7515000.bam.bai');
@@ -201,7 +201,7 @@ describe('BAM', function () {
     var bam = new Bam(bamFile, baiFile);
 
     var range = new ContigInterval('chr17', 7514800, 7515100);
-    bam.getAlignmentsInRange(range).then(reads => {
+    return bam.getAlignmentsInRange(range).then(reads => {
       // TODO: samtools says 128. Figure out why there's a difference.
       expect(reads).to.have.length(130);
     });
@@ -209,7 +209,7 @@ describe('BAM', function () {
 
   // Regression test for https://github.com/hammerlab/pileup.js/issues/172
   // TODO: find a simpler BAM which exercises this code path.
-  it('should progress through the chunk list', function () {
+  it('should progress through the chunk list', function (): any {
     var bamFile = new MappedRemoteFile('/test-data/small-chunks.bam.mapped', [[0, 65535], [6536374255, 6536458689], [6536533365, 6536613506], [6536709837, 6536795141]]);
 
     var baiFile = new MappedRemoteFile('/test-data/small-chunks.bam.bai.mapped', [[6942576, 7102568]]);
@@ -219,12 +219,12 @@ describe('BAM', function () {
     var bam = new Bam(bamFile, baiFile, chunks);
 
     var range = new ContigInterval('chr20', 2684600, 2684800);
-    bam.getAlignmentsInRange(range).then(reads => {
+    return bam.getAlignmentsInRange(range).then(reads => {
       expect(reads).to.have.length(7);
     });
   });
 
-  it('should fire progress events', function () {
+  it('should fire progress events', function (): any {
     var bamFile = new MappedRemoteFile('/test-data/small-chunks.bam.mapped', [[0, 65535], [6536374255, 6536458689], [6536533365, 6536613506], [6536709837, 6536795141]]);
 
     var baiFile = new MappedRemoteFile('/test-data/small-chunks.bam.bai.mapped', [[6942576, 7102568]]);
@@ -235,7 +235,7 @@ describe('BAM', function () {
 
     var range = new ContigInterval('chr20', 2684600, 2684800);
     var progressEvents = [];
-    bam.getAlignmentsInRange(range).progress(event => {
+    return bam.getAlignmentsInRange(range).progress(event => {
       progressEvents.push(event);
     }).then(reads => {
       expect(progressEvents).to.deep.equal([

@@ -17,7 +17,7 @@ describe('RemoteFile', () => {
     var promisedData = f.getBytes(4, 5);
 
     expect(f.numNetworkRequests).to.equal(1);
-    promisedData.then(buf => {
+    return promisedData.then(buf => {
       expect(buf.byteLength).to.equal(5);
       expect(bufferToText(buf)).to.equal('45678');
     });
@@ -83,7 +83,7 @@ describe('RemoteFile', () => {
       expect(buf.byteLength).to.equal(11);
       expect(bufferToText(buf)).to.equal('0123456789\n');
       expect(f.numNetworkRequests).to.equal(1);
-      f.getAll().then(buf => {
+      return f.getAll().then(buf => {
         expect(buf.byteLength).to.equal(11);
         expect(bufferToText(buf)).to.equal('0123456789\n');
         expect(f.numNetworkRequests).to.equal(1);  // still 1

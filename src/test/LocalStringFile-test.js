@@ -32,7 +32,7 @@ describe('LocalStringFile', () => {
         expect(buf.byteLength).to.equal(10);
         expect(bufferToText(buf)).to.equal('0123456789');
       } 
-      f.getBytes(4, 5).then(buf => {
+      return f.getBytes(4, 5).then(buf => {
         expect(buf).to.not.be.null;
         if (buf != null) {
           expect(buf.byteLength).to.equal(5);
@@ -63,7 +63,7 @@ describe('LocalStringFile', () => {
   it('should get file lengths from full requests', function(): any {
     var f = new LocalStringFile('0123456789\n');
     return f.getAll().then(buf => {
-      f.getSize().then(size => {
+      return f.getSize().then(size => {
         expect(size).to.equal(11);
       });
     });
@@ -72,7 +72,7 @@ describe('LocalStringFile', () => {
   it('should get file lengths from range requests', function(): any {
     var f = new LocalStringFile('0123456789\n');
     return f.getBytes(4, 5).then(buf => {
-      f.getSize().then(size => {
+      return f.getSize().then(size => {
         expect(size).to.equal(11);
       });
     });
@@ -86,7 +86,7 @@ describe('LocalStringFile', () => {
         expect(buf.byteLength).to.equal(11);
         expect(bufferToText(buf)).to.equal('0123456789\n');
       }
-      f.getAll().then(buf => {
+      return f.getAll().then(buf => {
         expect(buf).to.not.be.null;
         if (buf != null) {
           expect(buf.byteLength).to.equal(11);
@@ -104,7 +104,7 @@ describe('LocalStringFile', () => {
         expect(buf.byteLength).to.equal(11);
         expect(bufferToText(buf)).to.equal('0123456789\n');
       }
-      f.getBytes(4, 5).then(buf => {
+      return f.getBytes(4, 5).then(buf => {
         expect(buf).to.not.be.null;
         if (buf != null) {
           expect(buf.byteLength).to.equal(5);
@@ -124,7 +124,7 @@ describe('LocalStringFile', () => {
         expect(buf.byteLength).to.equal(7);
         expect(bufferToText(buf)).to.equal('456789\n');
       }
-      f.getBytes(6, 90).then(buf => {
+      return f.getBytes(6, 90).then(buf => {
         expect(buf).to.not.be.null;
         if (buf != null) {
           expect(buf.byteLength).to.equal(5);
