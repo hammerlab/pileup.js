@@ -150,14 +150,14 @@ class RemoteFile extends AbstractFile{
   promiseXHR(xhr: XMLHttpRequest): Q.Promise<[any, Event]> {
     var url = this.url;
     var deferred = Q.defer();
-    xhr.addEventListener('load', function(e) {
+    xhr.addEventListener('load', function(e: any) {
       if (this.status >= 400) {
         deferred.reject(`Request for ${url} failed with status: ${this.status} ${this.statusText}`);
       } else {
         deferred.resolve([this.response, e]);
       }
     });
-    xhr.addEventListener('error', function(e) {
+    xhr.addEventListener('error', function(e: any) {
       deferred.reject(`Request for ${url} failed with status: ${this.status} ${this.statusText}`);
     });
     this.numNetworkRequests++;

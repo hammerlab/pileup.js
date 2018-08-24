@@ -6,12 +6,12 @@ import {expect} from 'chai';
 import bedtools from '../../main/data/bedtools';
 import Interval from '../../main/Interval';
 
-describe('bedtools', function() {
-  describe('splitCodingExons', function() {
+describe('bedtools', function () {
+  describe('splitCodingExons', function () {
     var splitCodingExons = bedtools.splitCodingExons;
     var CodingInterval = bedtools.CodingInterval;
 
-    it('should split one exon', function() {
+    it('should split one exon', function () {
       var exon = new Interval(10, 20);
 
       expect(splitCodingExons([exon], new Interval(13, 17))).to.deep.equal([
@@ -41,7 +41,7 @@ describe('bedtools', function() {
       ]);
     });
 
-    it('should handle purely coding or non-coding exons', function() {
+    it('should handle purely coding or non-coding exons', function () {
       var exon = new Interval(10, 20);
 
       expect(splitCodingExons([exon], new Interval(0, 9))).to.deep.equal([

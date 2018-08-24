@@ -1,9 +1,7 @@
-/**
+ /**
  * @flow
  */
 'use strict';
-
-import type {Alignment, CigarOp, MateProperties, Strand} from '../../main/Alignment';
 
 import {expect} from 'chai';
 import _ from 'underscore';
@@ -20,7 +18,7 @@ describe('PileupCache', function() {
     return new ContigInterval(chr, start, end);
   }
 
-  function makeCache(args, viewAsPairs: boolean) {
+  function makeCache(args: any, viewAsPairs: boolean) {
     var cache = new PileupCache(fakeSource, viewAsPairs);
     _.flatten(args).forEach(read => cache.addAlignment(read));
     return cache;
@@ -225,7 +223,7 @@ describe('PileupCache', function() {
     expect(rows()).to.deep.equal([2, 1, 0]);
   });
 
-  it('should compute statistics on a BAM file', function() {
+  it('should compute statistics on a BAM file', function(): any {
     this.timeout(5000);
     var bam = new Bam(
         new RemoteFile('/test-data/synth4.tumor.1.4930000-4950000.bam'),

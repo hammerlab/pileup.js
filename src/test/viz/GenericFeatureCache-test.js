@@ -3,8 +3,6 @@
  */
 'use strict';
 
-import type {Alignment, CigarOp, MateProperties, Strand} from '../../main/Alignment';
-
 import {expect} from 'chai';
 import _ from 'underscore';
 
@@ -18,7 +16,7 @@ describe('GenericFeatureCache', function() {
     return new ContigInterval(chr, start, end);
   }
 
-  function makeCache(features) {
+  function makeCache(features: any) {
     var cache = new GenericFeatureCache(fakeSource);
     _.flatten(features).forEach(feature => cache.addFeature(feature));
     return cache;

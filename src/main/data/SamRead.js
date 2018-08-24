@@ -216,7 +216,7 @@ class SamRead /* implements Alignment */ {
 
     return `Name: ${this.name}
 FLAG: ${this.getFlag()}
-Position: ${this.getInterval()}
+Position: ${this.getInterval().toString()}
 CIGAR: ${this.getCigarString()}
 Sequence: ${f.seq}
 Quality:  ${this.getQualPhred()}

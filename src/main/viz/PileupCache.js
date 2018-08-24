@@ -7,7 +7,7 @@
  */
 'use strict';
 
-import type {Strand, Alignment, AlignmentDataSource} from '../Alignment';
+import type {Strand, Alignment} from '../Alignment';
 import type {TwoBitSource} from '../sources/TwoBitDataSource';
 import type {BasePair} from './pileuputils';
 import AbstractCache from './AbstractCache';
@@ -42,9 +42,9 @@ export type InsertStats = {
 
 // This class provides data management for the visualization, grouping paired
 // reads and managing the pileup.
-class PileupCache extends AbstractCache {
+class PileupCache extends AbstractCache<VisualAlignment> {
   // maps groupKey to VisualGroup
-  groups: {[key: string]: VisualGroup};
+  groups: {[key: string]: VisualGroup<VisualAlignment>};
   refToPileup: {[key: string]: Array<Interval[]>};
   referenceSource: TwoBitSource;
   viewAsPairs: boolean;

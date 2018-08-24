@@ -98,7 +98,7 @@ describe('pileuputils', function() {
     "GTATATATATACACACACACACACACACATATATATAAATTAGCCAGGCGTGGTGGCACATGGCTGTAACC" +
     "TCAGCTATTCAGGGTGGCTGAGATATGAGAATCACTTGAAGCCAGGAGGCAGAGGCTGCAGGGTCGTCTGG" +
     "ATTT";
-  it('should split reads into ops', function() {
+  it('should split reads into ops', function(): any {
     var bamFile = new RemoteFile('/test-data/synth3.normal.17.7500000-7515000.bam'),
         bamIndexFile = new RemoteFile('/test-data/synth3.normal.17.7500000-7515000.bam.bai'),
         bam = new Bam(bamFile, bamIndexFile);
