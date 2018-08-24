@@ -9,7 +9,7 @@
 import Events from 'backbone';
 import _ from 'underscore';
 import Q from 'q';
-
+import type {GenomeRange} from '../types';
 import ContigInterval from '../ContigInterval';
 import RemoteFile from '../RemoteFile';
 import LocalStringFile from '../LocalStringFile';
@@ -81,7 +81,7 @@ function createFromVcfFile(remoteSource: VcfFile): VcfDataSource {
     // These are here to make Flow happy.
     on: () => {},
     off: () => {},
-    trigger: () => {}
+    trigger: (status: string, param: any) => {}
   };
   _.extend(o, Events);  // Make this an event emitter
 
