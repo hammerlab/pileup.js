@@ -47,7 +47,9 @@ function readAlignment(view: jDataView, pos: number,
   pos += 4;
 
   if (pos + readLength > view.byteLength) {
-    throw new Error("Read length is larger than byteLength");
+    // We cannot replace with an error here, because promise depends on response.
+    // $FlowIgnore: TODO remove flow suppression. 
+    return null;
   }
 
   var readSlice = view.buffer.slice(pos, pos + readLength);

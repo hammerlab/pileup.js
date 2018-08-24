@@ -49,7 +49,7 @@ describe('MappedRemoteFile', function() {
     return Q.all(promises);
   });
 
-  it('should forget file length', function() {
+  it('should forget file length', function(): any {
     var remoteFile = new MappedRemoteFile('/test-data/0to9.txt', [
       [0, 2],  // 0,1,2
       [12345673, 12345690]  // 3456789\n
