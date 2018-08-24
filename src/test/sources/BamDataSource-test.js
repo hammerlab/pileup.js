@@ -8,13 +8,14 @@ import BamDataSource from '../../main/sources/BamDataSource';
 import ContigInterval from '../../main/ContigInterval';
 import MappedRemoteFile from '../MappedRemoteFile';
 
-describe('BamDataSource', function() {
-  function getTestSource() {
+describe('BamDataSource', function () {
+  function getTestSource () {
     // See test/data/README.md for provenance of these files.
     var remoteBAI = new MappedRemoteFile('/test-data/dream.synth3.bam.bai.mapped',
-                                         [[8054040, 8242920]]),
-        remoteBAM = new MappedRemoteFile('/test-data/dream.synth3.bam.mapped',
-                                         [[0, 69453], [163622109888, 163622739903]]);
+      [[8054040, 8242920]]);
+
+    var remoteBAM = new MappedRemoteFile('/test-data/dream.synth3.bam.mapped',
+      [[0, 69453], [163622109888, 163622739903]]);
 
     var bam = new Bam(remoteBAM, remoteBAI, {
       // "chunks" is usually an array; here we take advantage of the
@@ -26,7 +27,7 @@ describe('BamDataSource', function() {
     return BamDataSource.createFromBamFile(bam);
   }
 
-  it('should extract features in a range', function(done) {
+  it('should extract features in a range', function (done) {
     this.timeout(5000);
     var source = getTestSource();
 
@@ -49,21 +50,23 @@ describe('BamDataSource', function() {
     });
   });
 
-  it('should fetch nearby features', function(done) {
+  it('should fetch nearby features', function (done) {
     this.timeout(5000);
     var source = getTestSource();
 
     // Requests are for 'chr20', while the canonical name is just '20'.
-    var range       = new ContigInterval('chr20', 31512050, 31512150),
-        rangeBefore = new ContigInterval('chr20', 31512000, 31512050),
-        rangeAfter  = new ContigInterval('chr20', 31512150, 31512199);
+    var range = new ContigInterval('chr20', 31512050, 31512150);
+
+    var rangeBefore = new ContigInterval('chr20', 31512000, 31512050);
+
+    var rangeAfter = new ContigInterval('chr20', 31512150, 31512199);
 
     var reads = source.getAlignmentsInRange(range);
     expect(reads).to.deep.equal([]);
 
     var networkEvents = [];
-    source.on('networkprogress', event => { networkEvents.push(event) });
-    source.on('networkdone', () => { networkEvents.push('networkdone') });
+    source.on('networkprogress', event => { networkEvents.push(event); });
+    source.on('networkdone', () => { networkEvents.push('networkdone'); });
 
     // Fetching [50, 150] should cache [0, 200]
     source.on('newdata', () => {
@@ -72,8 +75,9 @@ describe('BamDataSource', function() {
       expect(reads[0].toString()).to.equal('20:31511951-31512051');
       expect(reads[17].toString()).to.equal('20:31512146-31512246');
 
-      var readsBefore = source.getAlignmentsInRange(rangeBefore),
-          readsAfter = source.getAlignmentsInRange(rangeAfter);
+      var readsBefore = source.getAlignmentsInRange(rangeBefore);
+
+      var readsAfter = source.getAlignmentsInRange(rangeAfter);
 
       expect(readsBefore).to.have.length(26);
       expect(readsAfter).to.have.length(12);
@@ -100,12 +104,12 @@ describe('BamDataSource', function() {
     });
   });
 
-  it('should only fetch new features', function(done) {
+  it('should only fetch new features', function (done) {
     var source = getTestSource();
     source.once('newdata', range => {
-      expect(range.toString()).to.equal('20:31512100-31512400');  // expanded range
+      expect(range.toString()).to.equal('20:31512100-31512400'); // expanded range
       source.once('newdata', range => {
-        expect(range.toString()).to.equal('20:31512000-31512099');  // only 100bp
+        expect(range.toString()).to.equal('20:31512000-31512099'); // only 100bp
         done();
       });
       // This range is 100bp to the left of the previous one.
