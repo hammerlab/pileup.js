@@ -6,6 +6,8 @@
 
 import type {Alignment, CigarOp, MateProperties, Strand} from '../main/Alignment';
 import type ContigInterval from '../main/ContigInterval';
+import Q from 'q';
+import type {GenomeRange} from '../main/types';
 
 var numAlignments = 1;
 class FakeAlignment /* implements Alignment */ {
@@ -64,7 +66,7 @@ var fakeSource = {
   getRange: function(): any { return {}; },
   getRangeAsString: function(): string { return ''; },
   contigList: function(): string[] { return []; },
-  normalizeRange: function() { },
+  normalizeRange: function(range: GenomeRange): Q.Promise<GenomeRange> { return Q.when(range); },
   on: dieFn,
   off: dieFn,
   once: dieFn,

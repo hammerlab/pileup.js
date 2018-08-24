@@ -9,7 +9,7 @@ import Q from 'q';
 var WAIT_FOR_POLL_INTERVAL_MS = 100;
 
 // Returns a promise which resolves when predFn() is truthy.
-function waitFor(predFn: () => boolean, timeoutMs: number): Q.Promise {
+function waitFor<T>(predFn: () => boolean, timeoutMs: number): Q.Promise<(T | null)>{
   var def = Q.defer();
 
   var checkTimeoutId = null;

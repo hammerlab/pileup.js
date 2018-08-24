@@ -46,7 +46,7 @@ describe('MappedRemoteFile', function() {
       }),
     ];
 
-    return Q.all(promises);
+    Q.all(promises);
   });
 
   it('should forget file length', function() {
@@ -55,7 +55,7 @@ describe('MappedRemoteFile', function() {
       [12345673, 12345690]  // 3456789\n
     ]);
 
-    return remoteFile.getBytes(0, 3).then(buf => {
+    remoteFile.getBytes(0, 3).then(buf => {
       expect(bufferToText(buf)).to.equal('012');
       // This second read would fail if the file remembered its length.
       return remoteFile.getBytes(12345673, 8).then(buf => {
