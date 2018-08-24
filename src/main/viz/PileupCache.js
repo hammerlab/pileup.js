@@ -163,7 +163,7 @@ class PileupCache extends AbstractCache<VisualAlignment> {
     // For each row, find the left-most point (for sorting).
     var rowsOverlapping =
         _.mapObject(_.groupBy(groups, g => g.row),
-                    gs => _.min([gs, g=>g.span.start().span.start()]));
+                    gs => _.min(gs, g=>g.span.start()).span.start());
 
     // Sort groups by whether they overlap, then by their start.
     // TODO: is there an easier way to construct the forward map directly?

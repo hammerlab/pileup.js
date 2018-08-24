@@ -12,13 +12,13 @@ import RemoteFile from '../../main/RemoteFile';
 describe('GA4GHFeatureSource', function() {
   var server: any = null, response, source;
 
-  beforeEach(function () {
+  beforeEach(function (): any {
     source = GA4GHFeatureSource.create({
       endpoint: '/v0.6.0',
       featureSetId: "WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIl0",
     });
 
-    new RemoteFile('/test-data/features.ga4gh.chr1.120000-125000.json').getAllString().then(data => {
+    return new RemoteFile('/test-data/features.ga4gh.chr1.120000-125000.json').getAllString().then(data => {
       response = data;
       server = sinon.fakeServer.create();
     });

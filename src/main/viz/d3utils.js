@@ -21,7 +21,7 @@ function getTrackScale(range: Range, width: number): any {
   if (!range) return scale.linear();
   return scale.linear()
           .domain([range.start, range.stop + 1])  // 1 bp wide
-          .range([width]);
+          .range([0, width]);
 }
 
 var formatPrefixes = ["","k","M","G","T","P","E","Z","Y"];

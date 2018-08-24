@@ -54,11 +54,17 @@ class VisualizationWrapper extends React.Component<Props, State> {
   }
 
   updateSize(): any {
-    this.setState({
-      updateSize: false,
-      width: this.refs.child.parentNode.offsetWidth,
-      height: this.refs.child.parentNode.offsetHeight
-    });
+    var thisNode = ReactDOM.findDOMNode(this)
+    if (thisNode && thisNode instanceof Element) { // check for getContext
+      var parentDiv = thisNode.parentNode;  
+      if (parentDiv && parentDiv instanceof HTMLElement) { // check for getContext
+        this.setState({
+          updateSize: false,
+          width: parentDiv.offsetWidth,
+          height: parentDiv.offsetHeight
+        });
+      }
+    }
   }
 
   componentDidMount(): any {

@@ -10,8 +10,8 @@ import RemoteFile from '../../main/RemoteFile';
 describe('GA4GHAlignmentJson', function () {
   var json;
 
-  before(function () {
-    new RemoteFile('/test-data/alignments.ga4gh.chr17.1-250.json').getAllString().then(data => {
+  before(function (): any {
+    return new RemoteFile('/test-data/alignments.ga4gh.chr17.1-250.json').getAllString().then(data => {
       json = data;
     });
   });

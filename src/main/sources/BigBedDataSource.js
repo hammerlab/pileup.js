@@ -120,7 +120,7 @@ function createFromBigBedFile(remoteSource: BigBed): BigBedSource {
     coveredRanges.push(interval);
     coveredRanges = ContigInterval.coalesce(coveredRanges);
 
-    return remoteSource.getFeatureBlocksOverlapping(interval).then(featureBlocksP => featureBlocksP.then(featureBlocks => {
+    return remoteSource.getFeatureBlocksOverlapping(interval).then(featureBlocks => {
       featureBlocks.forEach(fb => {
         coveredRanges.push(fb.range);
         coveredRanges = ContigInterval.coalesce(coveredRanges);
@@ -129,7 +129,7 @@ function createFromBigBedFile(remoteSource: BigBed): BigBedSource {
         //we have new data from our internal block range
         o.trigger('newdata', fb.range);
       });
-    }));
+    });
   }
 
   var o = {

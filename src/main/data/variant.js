@@ -36,7 +36,7 @@ class Variant {
    return new Variant(
     {
      contig: ga4ghVariant.referenceName,
-     position: ga4ghVariant.start,
+     position: parseInt(ga4ghVariant.start),
      id: ga4ghVariant.id,
      ref: ga4ghVariant.referenceBases,
      alt: ga4ghVariant.alternateBases,

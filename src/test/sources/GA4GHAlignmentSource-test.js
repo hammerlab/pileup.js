@@ -13,8 +13,8 @@ describe('GA4GHAlignmentSource', function() {
   var server: any = null;
   var response: any = null;
 
-  before(function () {
-    new RemoteFile('/test-data/alignments.ga4gh.1.10000-11000.json').getAllString().then(data => {
+  before(function (): any {
+    return new RemoteFile('/test-data/alignments.ga4gh.1.10000-11000.json').getAllString().then(data => {
       response = data;
       server = sinon.fakeServer.create();  // _after_ we do a real XHR!
     });

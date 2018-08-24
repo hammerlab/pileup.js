@@ -309,9 +309,9 @@ class Bam {
 
       utils.pipePromise(
         def,
-        index.getChunksForInterval(idxRange).then(pChunks => pChunks.then(chunks => {
+        index.getChunksForInterval(idxRange).then(chunks => {
           return fetchAlignments(this.remoteFile, name, idxRange, contained, chunks);
-        })));
+        }));
       return def.promise;
     });
   }

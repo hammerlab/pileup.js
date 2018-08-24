@@ -10,8 +10,8 @@ import RemoteFile from '../../main/RemoteFile';
 describe('GA4GHFeatureJson', function () {
   var json;
 
-  before(function () {
-    new RemoteFile('/test-data/features.ga4gh.chr1.120000-125000.json').getAllString().then(data => {
+  before(function (): any {
+    return new RemoteFile('/test-data/features.ga4gh.chr1.120000-125000.json').getAllString().then(data => {
       json = data;
     });
   });
