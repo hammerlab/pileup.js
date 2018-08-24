@@ -23,7 +23,7 @@ class Variant {
 
   constructor(variant: Object) {
    this.contig = variant.contig;
-   this.position = parseInt(variant.position);
+   this.position = variant.position;
    this.ref = variant.ref;
    this.alt = variant.alt;
    this.id = variant.id;

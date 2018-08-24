@@ -214,7 +214,7 @@ class BaiFile {
     this.immediate.done();
   }
 
-  getChunksForInterval(range: ContigInterval<number>): Q.Promise<Chunk[]> {
+  getChunksForInterval(range: ContigInterval<number>): Q.Promise<Q.Promise<Chunk[]>> {
     return this.immediate.then(immediate => {
       return immediate.getChunksForInterval(range);
     });

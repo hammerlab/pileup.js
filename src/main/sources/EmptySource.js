@@ -4,6 +4,8 @@
  */
 'use strict';
 
+import type {GenomeRange} from '../types';
+
 type EmptySource = {
   rangeChanged: (newRange: GenomeRange) => void;
   on: (event: string, handler: Function) => void;

@@ -4,12 +4,12 @@
  */
 'use strict';
 
-import type {Alignment, AlignmentDataSource} from '../Alignment';
-import type Interval from '../Interval';
-import type {TwoBitSource} from '../sources/TwoBitDataSource';
+import type {AlignmentDataSource} from '../Alignment';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {BinSummary} from './CoverageCache';
 import type {Scale} from './d3utils';
+import type {State} from '../types';
+import type {VizProps} from '../VisualizationWrapper';
 
 import React from 'react';
 import scale from '../scale';
@@ -168,25 +168,21 @@ function renderBars(ctx: DataCanvasRenderingContext2D,
   });
 }
 
-type Props = {
-  width: number;
-  height: number;
-  range: GenomeRange;
-  source: AlignmentDataSource;
-  referenceSource: TwoBitSource;
-  options: {
-    vafColorThreshold: number
-  }
-};
-
-class CoverageTrack extends React.Component {
-  props: Props;
-  state: void;
+class CoverageTrack extends React.Component<VizProps<AlignmentDataSource>, State> {
+  props: VizProps<AlignmentDataSource>;
+  state: State; // no state, used to make flow happy
   cache: CoverageCache;
   tiles: CoverageTiledCanvas;
-  static defaultOptions: Object;
 
-  constructor(props: Props) {
+  // Color the reference base in the bar chart when the Variant Allele Fraction
+  // exceeds this amount. When there are >=2 agreeing mismatches, they are
+  // always rendered. But for mismatches below this threshold, the reference is
+  // not colored in the bar chart. This draws attention to high-VAF mismatches.
+  static defaultProps: {
+    vafColorThreshold: 0.2
+  }
+
+  constructor(props: VizProps<AlignmentDataSource>) {
     super(props);
   }
 
@@ -325,13 +321,5 @@ class CoverageTrack extends React.Component {
 }
 
 CoverageTrack.displayName = 'coverage';
-CoverageTrack.defaultOptions = {
-  // Color the reference base in the bar chart when the Variant Allele Fraction
-  // exceeds this amount. When there are >=2 agreeing mismatches, they are
-  // always rendered. But for mismatches below this threshold, the reference is
-  // not colored in the bar chart. This draws attention to high-VAF mismatches.
-  vafColorThreshold: 0.2
-};
-
 
 module.exports = CoverageTrack;

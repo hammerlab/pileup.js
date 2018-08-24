@@ -19,10 +19,9 @@ export type Scale = (num: number) => number;
  */
 function getTrackScale(range: Range, width: number): any {
   if (!range) return scale.linear();
-  var offsetPx = range.offsetPx || 0;
   return scale.linear()
           .domain([range.start, range.stop + 1])  // 1 bp wide
-          .range([-offsetPx, width - offsetPx]);
+          .range([0, width]);
 }
 
 var formatPrefixes = ["","k","M","G","T","P","E","Z","Y"];

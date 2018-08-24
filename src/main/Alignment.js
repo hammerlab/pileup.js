@@ -2,7 +2,9 @@
  * Interface for alignments, shared between BAM and GA4GH backends.
  * @flow
  */
-
+'use strict';
+ 
+import type {GenomeRange} from './types';
 import type ContigInterval from './ContigInterval';
 
 // "CIGAR" operations express how a sequence aligns to the reference: does it
@@ -13,6 +15,9 @@ export type CigarOp = {
   length: number
 }
 
+function strToStrand(str: string): Strand {
+  return str && str == '+' ? '+' : (str && str == '-' ? '-' : '.'); // either +, - or .
+}
 
 export type Strand = '-' | '+' | '.';
 
@@ -45,4 +50,8 @@ export type AlignmentDataSource = {
   on: (event: string, handler: Function) => void;  // really => AlignmentDataSource
   once: (event: string, handler: Function) => void;
   off: (event: string) => void;
+};
+
+module.exports = {
+  strToStrand
 };

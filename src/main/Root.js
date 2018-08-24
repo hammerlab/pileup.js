@@ -4,6 +4,7 @@
  */
 'use strict';
 
+import type {GenomeRange} from './types';
 import type {TwoBitSource} from './sources/TwoBitDataSource';
 import type {VisualizedTrack, VizWithOptions} from './types';
 
@@ -18,14 +19,16 @@ type Props = {
   initialRange: GenomeRange;
 };
 
-class Root extends React.Component {
+type State = {
+  contigList: string[];
+  range: ?GenomeRange;
+  settingsMenuKey: ?string;
+  updateSize: boolean;
+};
+
+class Root extends React.Component<Props, State> {
   props: Props;
-  state: {
-    contigList: string[];
-    range: ?GenomeRange;
-    settingsMenuKey: ?string;
-    updateSize: boolean;
-  };
+  state: State;
   trackReactElements: Array<Object>; //it's an array of reactelement that are created for tracks
 
   constructor(props: Object) {
@@ -68,7 +71,7 @@ class Root extends React.Component {
     }).done();
   }
 
-  toggleSettingsMenu(key: string, e: SyntheticEvent) {
+  toggleSettingsMenu(key: string, e: SyntheticEvent<>) {
     if (this.state.settingsMenuKey == key) {
       this.setState({settingsMenuKey: null});
     } else {
@@ -78,19 +81,19 @@ class Root extends React.Component {
 
   handleSelectOption(trackKey: string, optionKey: string) {
     this.setState({settingsMenuKey: null});
-
-    var viz = this.props.tracks[Number(trackKey)].visualization;
-    var oldOpts = viz.options;
-    var newOpts = viz.component.handleSelectOption(optionKey, oldOpts);
-    viz.options = newOpts;
-    if (newOpts != oldOpts) {
-      this.forceUpdate();
-    }
+    // TODO AM
+    // var viz = this.props.tracks[Number(trackKey)].visualization;
+    // var oldOpts = viz.options;
+    // var newOpts = viz.component.handleSelectOption(optionKey, oldOpts);
+    // viz.options = newOpts;
+    // if (newOpts != oldOpts) {
+    //   this.forceUpdate();
+    // }
   }
 
-  makeDivForTrack(key: string, track: VisualizedTrack): React.Element {
+  makeDivForTrack(key: string, track: VisualizedTrack): React$Element<'div'> {
     //this should be improved, but I have no idea how (when trying to
-    //access this.trackReactElements wih string key, flow complains)
+    //access this.trackReactElements with string key, flow complains)
     var intKey = parseInt(key); 
     var trackEl = (
         <VisualizationWrapper visualization={track.visualization}
@@ -99,41 +102,43 @@ class Root extends React.Component {
             source={track.source}
             options={track.track.options}
             referenceSource={this.props.referenceSource}
-            ref = {(c) => {this.trackReactElements[intKey]=c}}
+            ref = {(c: React$ElementRef<Object>) => {this.trackReactElements[intKey]=c}}
           />);
 
     var trackName = track.track.name || '(track name)';
 
     var gearIcon = null,
         settingsMenu = null;
-    if (track.visualization.component.getOptionsMenu) {
-      gearIcon = (
-          <span ref={'gear-' + key}
-                className='gear'
-                onClick={this.toggleSettingsMenu.bind(this, key)}>
-            ⚙
-          </span>
-      );
-    }
+    // TODO AM
+    // if (track.visualization.component.getOptionsMenu) {
+    //   gearIcon = (
+    //       <span ref={'gear-' + key}
+    //             className='gear'
+    //             onClick={this.toggleSettingsMenu.bind(this, key)}>
+    //         ⚙
+    //       </span>
+    //   );
+    // }
 
-    if (this.state.settingsMenuKey == key) {
-      var gear = this.refs['gear-' + key],
-          gearX = gear.offsetLeft,
-          gearW = gear.offsetWidth,
-          gearY = gear.offsetTop;
+    // TODO AM
+    // if (this.state.settingsMenuKey == key) {
+    //   var gear = this.refs['gear-' + key],
+    //       gearX = gear.offsetLeft,
+    //       gearW = gear.offsetWidth,
+    //       gearY = gear.offsetTop;
 
-      var menuStyle = {
-        position: 'absolute',
-        left: (gearX + gearW) + 'px',
-        top: gearY + 'px'
-      };
-      var items = track.visualization.component.getOptionsMenu(track.visualization.options);
-      settingsMenu = (
-        <div className='menu-container' style={menuStyle}>
-          <Menu header={trackName} items={items} onSelect={this.handleSelectOption.bind(this, key)} />
-        </div>
-      );
-    }
+    //   var menuStyle = {
+    //     position: 'absolute',
+    //     left: (gearX + gearW) + 'px',
+    //     top: gearY + 'px'
+    //   };
+    //   var items = track.visualization.component.getOptionsMenu(track.visualization.options);
+    //   settingsMenu = (
+    //     <div className='menu-container' style={menuStyle}>
+    //       <Menu header={trackName} items={items} onSelect={this.handleSelectOption.bind(this, key)} />
+    //     </div>
+    //   );
+    // }
 
     var className = ['track', track.visualization.component.displayName || '', track.track.cssClass || ''].join(' ');
 

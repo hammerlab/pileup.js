@@ -113,7 +113,7 @@ class TiledCanvas {
     this.tileCache = [];
   }
 
-  invalidateRange(range: ContigInterval) {
+  invalidateRange(range: ContigInterval<string>) {
     this.tileCache = this.tileCache.filter(tile => !tile.range.intersects(range));
   }
 

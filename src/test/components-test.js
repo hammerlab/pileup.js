@@ -57,6 +57,7 @@ describe('pileup', function() {
   ];
 
   var testDiv = document.getElementById('testdiv');
+  if (!testDiv) throw new Error("Failed to match: testdiv");
 
   beforeEach(() => {
     dataCanvas.RecordingContext.recordAll();  // record all data canvases
@@ -81,9 +82,9 @@ describe('pileup', function() {
 
     var {drawnObjects, drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
 
-    var uniqDrawnObjectsWith = function() {
+    var uniqDrawnObjectsWith = function(div: any, name: string, f: any) {
       return _.uniq(
-          drawnObjectsWith.apply(null, arguments),
+          drawnObjectsWith(div, name, f),
           false,  // not sorted
           x => x.key);
     };
@@ -93,14 +94,14 @@ describe('pileup', function() {
       return div.querySelector(selector + ' canvas') && drawnObjects(div, selector).length > 0;
     }
 
-    var ready = (() =>
-      hasCanvasAndObjects(div, '.reference') &&
-      hasCanvasAndObjects(div, '.variants') &&
-      hasCanvasAndObjects(div, '.genes') &&
-      hasCanvasAndObjects(div, '.pileup')
+    var ready = ((): boolean =>
+      hasCanvasAndObjects(div, '.reference') != null &&
+      hasCanvasAndObjects(div, '.variants') != null &&
+      hasCanvasAndObjects(div, '.genes') != null &&
+      hasCanvasAndObjects(div, '.pileup') != null
     );
 
-    return waitFor(ready, 5000)
+    waitFor(ready, 5000)
       .then(() => {
         var basepairs = drawnObjectsWith(div, '.reference', x => x.letter);
         expect(basepairs).to.have.length.at.least(10);
@@ -118,10 +119,14 @@ describe('pileup', function() {
         // Note: there are 11 exons, but two are split into coding/non-coding
         expect(callsOf(div, '.genes', 'fillRect')).to.have.length(13);
 
-        expect(div.querySelector('div > .a').className).to.equal('track reference a');
-        expect(div.querySelector('div > .b').className).to.equal('track variants b');
-        expect(div.querySelector('div > .c').className).to.equal('track genes c');
-        expect(div.querySelector('div > .d').className).to.equal('track pileup d');
+        var selectedClass = div.querySelector('div > .a');
+        expect(selectedClass).to.not.be.null;
+        if (selectedClass != null) {
+          expect(selectedClass.className).to.equal('track reference a');
+          expect(selectedClass.className).to.equal('track variants b');
+          expect(selectedClass.className).to.equal('track genes c');
+          expect(selectedClass.className).to.equal('track pileup d');
+        }
 
         expect(p.getRange()).to.deep.equal({
           contig: 'chr17',

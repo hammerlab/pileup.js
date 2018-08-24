@@ -148,7 +148,13 @@ function IncompleteChunkError(message) {
     this.name = "IncompleteChunkError";
     this.message = (message || "");
 }
-IncompleteChunkError.prototype = Error.prototype;
+IncompleteChunkError.prototype = Object.create(Error.prototype, {
+    constructor: {
+        value: IncompleteChunkError,
+        writable: true,
+        configurable: true
+    }
+});
 
 /**
  * Wraps a parsing attempt, captures errors related to
@@ -186,7 +192,7 @@ function retryRemoteGet(remoteFile: RemoteFile, start: number, size: number, unt
     if(error.name == "IncompleteChunkError") {
       // Do not attempt to download more than `untilSize`
       if(size > untilSize) {
-        throw `Couldn't parse the header ` +
+        throw `Couldnt parse the header ` +
               `from the first ${size} bytes of the file. ` +
               `Corrupted 2bit file?`;
       }
@@ -238,6 +244,8 @@ class TwoBit {
             unpackDNA(dataView, start % 4, stop - start + 1), start, header)
             .join('');
       });
+    }).then(p => {
+      return p;
     });
   }
 
@@ -266,6 +274,8 @@ class TwoBit {
           });
         }
       );
+    }).then(p => {
+      return p;
     });
   }
 }
