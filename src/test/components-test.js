@@ -57,6 +57,7 @@ describe('pileup', function() {
   ];
 
   var testDiv = document.getElementById('testdiv');
+  if (!testDiv) throw new Error("Failed to match: testdiv");
 
   beforeEach(() => {
     dataCanvas.RecordingContext.recordAll();  // record all data canvases
@@ -67,7 +68,7 @@ describe('pileup', function() {
     testDiv.innerHTML = '';  // avoid pollution between tests.
   });
 
-  it('should render reference genome and genes', function() {
+  it('should render reference genome and genes', function(): any {
     this.timeout(5000);
 
     var div = document.createElement('div');
@@ -81,9 +82,9 @@ describe('pileup', function() {
 
     var {drawnObjects, drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
 
-    var uniqDrawnObjectsWith = function() {
+    var uniqDrawnObjectsWith = function(div: any, name: string, f: any) {
       return _.uniq(
-          drawnObjectsWith.apply(null, arguments),
+          drawnObjectsWith(div, name, f),
           false,  // not sorted
           x => x.key);
     };
@@ -93,7 +94,8 @@ describe('pileup', function() {
       return div.querySelector(selector + ' canvas') && drawnObjects(div, selector).length > 0;
     }
 
-    var ready = (() =>
+    var ready = ((): boolean =>
+      // $FlowIgnore: TODO remove flow suppression
       hasCanvasAndObjects(div, '.reference') &&
       hasCanvasAndObjects(div, '.variants') &&
       hasCanvasAndObjects(div, '.genes') &&
@@ -118,10 +120,33 @@ describe('pileup', function() {
         // Note: there are 11 exons, but two are split into coding/non-coding
         expect(callsOf(div, '.genes', 'fillRect')).to.have.length(13);
 
-        expect(div.querySelector('div > .a').className).to.equal('track reference a');
-        expect(div.querySelector('div > .b').className).to.equal('track variants b');
-        expect(div.querySelector('div > .c').className).to.equal('track genes c');
-        expect(div.querySelector('div > .d').className).to.equal('track pileup d');
+        // check for reference
+        var selectedClass = div.querySelector('div > .a');
+        expect(selectedClass).to.not.be.null;
+        if (selectedClass != null) {
+          expect(selectedClass.className).to.equal('track reference a');
+        }
+
+        // check for variants
+        selectedClass = div.querySelector('div > .b');
+        expect(selectedClass).to.not.be.null;
+        if (selectedClass != null) {
+          expect(selectedClass.className).to.equal('track variants b');
+        }
+
+        // check for genes
+        selectedClass = div.querySelector('div > .c');
+        expect(selectedClass).to.not.be.null;
+        if (selectedClass != null) {
+          expect(selectedClass.className).to.equal('track genes c');
+        }
+
+        // check for pileup
+        selectedClass = div.querySelector('div > .d');
+        expect(selectedClass).to.not.be.null;
+        if (selectedClass != null) {
+          expect(selectedClass.className).to.equal('track pileup d');
+        }
 
         expect(p.getRange()).to.deep.equal({
           contig: 'chr17',

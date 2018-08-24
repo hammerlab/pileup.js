@@ -19,9 +19,9 @@ import AbstractCache from './AbstractCache';
 import type {VisualGroup} from './AbstractCache';
 
 // This class provides data management for the visualization
-class GenericFeatureCache extends AbstractCache {
+class GenericFeatureCache extends AbstractCache<GenericFeature> {
   // maps groupKey to VisualGroup
-  groups: {[key: string]: VisualGroup};
+  groups: {[key: string]: VisualGroup<GenericFeature>};
   refToPileup: {[key: string]: Array<Interval[]>};
   referenceSource: TwoBitSource;
 

@@ -20,6 +20,8 @@ import ReactTestUtils from 'react-addons-test-utils';
 
 describe('FeatureTrack', function() {
   var testDiv = document.getElementById('testdiv');
+  if (!testDiv) throw new Error("Failed to match: testdiv");
+  
   var json;
 
   beforeEach(() => {
@@ -33,7 +35,7 @@ describe('FeatureTrack', function() {
     testDiv.innerHTML = '';
   });
 
-  before(function () {
+  before(function (): any {
     return new RemoteFile('/test-data/features.ga4gh.chr1.120000-125000.json').getAllString().then(data => {
       json = data;
     });
@@ -41,12 +43,12 @@ describe('FeatureTrack', function() {
 
   var drawnObjects = dataCanvas.RecordingContext.drawnObjects;
 
-  function ready() {
-    return testDiv.querySelector('canvas') &&
+  function ready(): boolean {
+    return testDiv.querySelector('canvas') != null &&
        drawnObjects(testDiv, '.features').length > 0;
   }
 
-  it('should render features with json', function() {
+  it('should render features with json', function(): any {
     var featureClickedData = null;
     var featureClicked = function (data) {
       featureClickedData = data;
@@ -85,7 +87,11 @@ describe('FeatureTrack', function() {
             [89295, 92230, 110953, 120725]);
 
         var height = yForRow(4) * window.devicePixelRatio; // should be 4 rows
-        expect(testDiv.querySelector('.features').style.height).to.equal(`${height}px`);
+        features = testDiv.querySelector('.features');
+        expect(features).to.not.be.null;
+        if (features != null) {
+          expect(features.style.height).to.equal(`${height}px`);
+        }
 
         // check clicking on feature TODO
         var canvasList =  testDiv.getElementsByTagName('canvas');
@@ -98,7 +104,7 @@ describe('FeatureTrack', function() {
       });
   });
 
-  it('should render features with bigBed file', function() {
+  it('should render features with bigBed file', function(): any {
     var featureClickedData = null;
     var featureClicked = function (data) {
       featureClickedData = data;
@@ -141,8 +147,12 @@ describe('FeatureTrack', function() {
 
         // canvas height should be height of features that are overlapping
         var height = yForRow(2) * window.devicePixelRatio; // should be 2 rows
-        expect(testDiv.querySelector('.features').style.height).to.equal(`${height}px`);
 
+        features = testDiv.querySelector('.features');
+        expect(features).to.not.be.null;
+        if (features != null) {
+          expect(features.style.height).to.equal(`${height}px`);
+        }
         // check clicking on feature in row 0
         var canvasList =  testDiv.getElementsByTagName('canvas');
         var canvas = canvasList[1]; 
@@ -160,7 +170,7 @@ describe('FeatureTrack', function() {
       });
   });
 
-  it('should not exceed parent height limits', function() {
+  it('should not exceed parent height limits', function(): any {
 
     var p = pileup.create(testDiv, {
       range: {contig: 'chr22', start: 20000, stop: 21000},
@@ -195,8 +205,11 @@ describe('FeatureTrack', function() {
 
         // canvas height should be maxed out
         var expectedHeight = 150 * window.devicePixelRatio;
-        expect(testDiv.querySelector('.features').style.height).to.equal(`${expectedHeight}px`);
-
+        features = testDiv.querySelector('.features');
+        expect(features).to.not.be.null;
+        if (features != null) {
+          expect(features.style.height).to.equal(`${expectedHeight}px`);
+        }
         p.destroy();
 
       });

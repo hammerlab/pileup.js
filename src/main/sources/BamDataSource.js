@@ -9,6 +9,7 @@ import ContigInterval from '../ContigInterval';
 import BamFile from '../data/bam';
 import RemoteFile from '../RemoteFile';
 
+import type {GenomeRange} from '../types';
 import type {Alignment, AlignmentDataSource} from '../Alignment';
 
 // Genome ranges are rounded to multiples of this for fetching.
@@ -108,7 +109,7 @@ function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
     on: () => {},
     once: () => {},
     off: () => {},
-    trigger: () => {}
+    trigger: (status: string, param: any) => {}
   };
   _.extend(o, Events);  // Make this an event emitter
 

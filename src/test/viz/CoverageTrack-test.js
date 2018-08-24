@@ -6,8 +6,6 @@
  */
 'use strict';
 
-import type SamRead from '../../main/data/SamRead';
-
 import {expect} from 'chai';
 
 import pileup from '../../main/pileup';
@@ -19,6 +17,7 @@ import {waitFor} from '../async';
 
 describe('CoverageTrack', function() {
   var testDiv = document.getElementById('testdiv');
+  if (!testDiv) throw new Error("Failed to match: testdiv");
   var range = {contig: '17', start: 7500730, stop: 7500790};
   var p;
 
@@ -74,22 +73,22 @@ describe('CoverageTrack', function() {
     return drawnObjectsWith(testDiv, '.coverage', l => l.type == 'label');
   };
 
-  var hasCoverage = () => {
+  var hasCoverage = (): boolean => {
     // Check whether the coverage bins are loaded yet
-    return testDiv.querySelector('canvas') &&
+    return testDiv.querySelector('canvas') != null &&
         findCoverageBins().length > 1 &&
         findMismatchBins().length > 0 &&
         findCoverageLabels().length > 1;
   };
 
-  it('should create coverage information for all bases shown in the view', function() {
+  it('should create coverage information for all bases shown in the view', function(): any {
     return waitFor(hasCoverage, 2000).then(() => {
       var bins = findCoverageBins();
       expect(bins).to.have.length.at.least(range.stop - range.start + 1);
     });
   });
 
-  it('should show mismatch information', function() {
+  it('should show mismatch information', function(): any {
     return waitFor(hasCoverage, 2000).then(() => {
       var visibleMismatches = findMismatchBins()
           .filter(bin => bin.position >= range.start && bin.position <= range.stop);
@@ -101,7 +100,7 @@ describe('CoverageTrack', function() {
     });
   });
 
-  it('should create correct labels for coverage', function() {
+  it('should create correct labels for coverage', function(): any {
     return waitFor(hasCoverage, 2000).then(() => {
       // These are the objects being used to draw labels
       var labelTexts = findCoverageLabels();

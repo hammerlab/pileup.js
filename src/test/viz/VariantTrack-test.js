@@ -11,7 +11,7 @@ import {waitFor} from '../async';
 
 import ReactTestUtils from 'react-addons-test-utils';
 
-describe('VariantTrack', function() {
+describe('VariantTrack', function () {
   var testDiv = document.getElementById('testdiv');
 
   beforeEach(() => {
