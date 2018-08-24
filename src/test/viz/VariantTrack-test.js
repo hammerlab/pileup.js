@@ -65,7 +65,6 @@ describe('VariantTrack', function () {
         expect(variantClickedData).to.be.null;
 
         //check clicking on variant
-        var ratio = window.devicePixelRatio;
         ReactTestUtils.Simulate.click(canvas,{nativeEvent: {offsetX: -0.5, offsetY: -15.5}});
 
         expect(variantClickedData).to.not.be.null;
