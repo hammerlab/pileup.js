@@ -301,17 +301,20 @@ class Bam {
     var index = this.index;
 
     return this.getContigIndex(range.contig).then(({idx, name}) => {
-      var def = Q.defer();
+      var def: Q.Deferred<SamRead[]> = Q.defer();
       // This happens in the next event loop to give listeners a chance to register.
       Q.when().then(() => { def.notify({status: 'Fetching BAM index'}); });
 
       var idxRange = new ContigInterval(idx, range.start(), range.stop());
 
-      utils.pipePromise(
-        def,
-        index.getChunksForInterval(idxRange).then(chunks => {
+      var promise: Q.Promise<SamRead[]> = index.getChunksForInterval(idxRange).then(chunks => {
           return fetchAlignments(this.remoteFile, name, idxRange, contained, chunks);
-        }));
+        }).then(samReads => {
+          return samReads;
+        });
+
+      utils.pipePromise(def, promise);
+        
       return def.promise;
     });
   }

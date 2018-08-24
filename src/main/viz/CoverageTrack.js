@@ -173,7 +173,8 @@ class CoverageTrack extends React.Component<VizProps<AlignmentDataSource>, State
   state: State; // no state, used to make flow happy
   cache: CoverageCache;
   tiles: CoverageTiledCanvas;
-
+  static defaultOptions: Object;
+  
   constructor(props: VizProps<AlignmentDataSource>) {
     super(props);
   }

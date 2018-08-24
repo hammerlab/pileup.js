@@ -232,18 +232,9 @@ class PileupTrack extends React.Component<VizProps<AlignmentDataSource>, State> 
   state: State;
   cache: PileupCache;
   tiles: PileupTiledCanvas;
+  static defaultOptions: { viewAsPairs: boolean };
   static getOptionsMenu: (options: Object) => any;
   static handleSelectOption: (key: string, oldOptions: Object) => Object;
-
-
-  static defaultProps : {
-    options: {
-      viewAsPairs: false,
-      colorByInsert: true,
-      colorByStrand: false,
-      hideAlignments: false
-    }
-  };
 
   constructor(props: VizProps<AlignmentDataSource>) {
     super(props);
@@ -481,6 +472,12 @@ class PileupTrack extends React.Component<VizProps<AlignmentDataSource>, State> 
 }
 
 PileupTrack.displayName = 'pileup';
+PileupTrack.defaultOptions = {
+  viewAsPairs: false,
+  colorByInsert: true,
+  colorByStrand: false,
+  hideAlignments: false
+};
 
 PileupTrack.getOptionsMenu = function(options: Object): any {
   return [
