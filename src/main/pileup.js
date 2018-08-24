@@ -173,7 +173,7 @@ type VizObject = ((options: ?Object) => VizWithOptions);
 
 function makeVizObject(component: Class<React.Component<VizProps<any>, State>>): VizObject {
   return options => {
-    options = null; //_.extend(_.clone(component.props.options), options); // TODO AM
+    options = _.extend(_.clone(component.defaultOptions), options);
     return {component, options};
   };
 }
