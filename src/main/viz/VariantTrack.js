@@ -106,8 +106,7 @@ class VariantTrack extends React.Component<VizProps<VcfDataSource>, State> {
       var height = style.VARIANT_HEIGHT*variantHeightRatio;
       var variantY = y - 0.5 + style.VARIANT_HEIGHT - height;
       var variantX = Math.round(scale(variant.position)) - 0.5;
-      var width = Math.round(scale(variant.position + 1)) - 0.5 - variantX;
-
+      var width = Math.max(1, Math.round(scale(variant.position + 1) - scale(variant.position)));
       ctx.pushObject(variant);
 
       ctx.fillRect(variantX, variantY, width, height);
