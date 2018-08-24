@@ -192,7 +192,7 @@ function retryRemoteGet(remoteFile: RemoteFile, start: number, size: number, unt
     if(error.name == "IncompleteChunkError") {
       // Do not attempt to download more than `untilSize`
       if(size > untilSize) {
-        throw `Couldnt parse the header ` +
+        throw `Couldn't parse the header ` +
               `from the first ${size} bytes of the file. ` +
               `Corrupted 2bit file?`;
       }
