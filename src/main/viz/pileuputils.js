@@ -1,7 +1,6 @@
 /** @flow */
 'use strict';
 
-import type SamRead from '../data/SamRead';
 import type {Alignment, CigarSymbol} from '../Alignment';
 import type Interval from '../Interval';
 import style from '../style';
@@ -160,7 +159,7 @@ function getOpInfo(read: Alignment, referenceSource: Object): OpInfo {
       refPos = start,
       arrowIndex = getArrowIndex(read);
 
-  var result = [];
+  var result: Op[] = [];
   var mismatches = ([]: BasePair[]);
   for (var i = 0; i < ops.length; i++) {
     var op = ops[i];
@@ -178,7 +177,7 @@ function getOpInfo(read: Alignment, referenceSource: Object): OpInfo {
       op: op.op,
       length: op.length,
       pos: refPos,
-      arrow: null
+      arrow: null // direction will be set below
     });
 
     // These are the cigar operations which advance position in the reference

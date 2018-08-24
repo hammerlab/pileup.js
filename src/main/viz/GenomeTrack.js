@@ -12,6 +12,7 @@ import type {Scale} from './d3utils';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import shallowEquals from 'shallow-equals';
+import type {State} from '../types';
 
 import canvasUtils from './canvas-utils';
 import ContigInterval from '../ContigInterval';
@@ -110,10 +111,9 @@ class GenomeTiledCanvas extends TiledCanvas {
   }
 }
 
-
-class GenomeTrack extends React.Component {
-  props: VizProps & {source: TwoBitSource};
-  state: void;  // no state
+class GenomeTrack extends React.Component<VizProps<TwoBitSource>, State> {
+  props: VizProps<TwoBitSource>;
+  state: State;  // no state, used to make flow happy
   tiles: GenomeTiledCanvas;
 
   render(): any {
@@ -153,12 +153,17 @@ class GenomeTrack extends React.Component {
 
     // Hold off until height & width are known.
     if (width === 0) return;
-    d3utils.sizeCanvas(canvas, width, height);
 
-    var ctx = dataCanvas.getDataContext(canvasUtils.getContext(canvas));
-    ctx.reset();
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    this.tiles.renderToScreen(ctx, ContigInterval.fromGenomeRange(range), this.getScale());
+    if (canvas && canvas instanceof Element) { // check for getContext
+      if (canvas instanceof HTMLCanvasElement) { // check for sizeCanvas
+        d3utils.sizeCanvas(canvas, width, height);
+      }
+      var ctx = dataCanvas.getDataContext(canvasUtils.getContext(canvas));
+
+      ctx.reset();
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      this.tiles.renderToScreen(ctx, ContigInterval.fromGenomeRange(range), this.getScale());
+    } // end typecheck for canvas
   }
 }
 
