@@ -171,7 +171,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
 
 type VizObject = ((options: ?Object) => VizWithOptions);
 
-function makeVizObject(component: ReactClass): VizObject {
+function makeVizObject(component: Class<React.Component<VizProps<any>, State>>): VizObject {
   return options => {
     options = _.extend({}, component.defaultOptions, options);
     return {component, options};
