@@ -42,12 +42,12 @@ var kMaxFetch = 65536 * 2;
 
 // Read a single alignment
 function readAlignment(view: jDataView, pos: number,
-                       offset: VirtualOffset, refName: string) {
+                       offset: VirtualOffset, refName: string): {read: SamRead, readLength: number } {
   var readLength = view.getInt32(pos);
   pos += 4;
 
   if (pos + readLength > view.byteLength) {
-    return null;
+    throw new Error("Read length is larger than byteLength");
   }
 
   var readSlice = view.buffer.slice(pos, pos + readLength);
@@ -133,7 +133,7 @@ function fetchAlignments(remoteFile: RemoteFile,
       alignments = [],
       deferred = Q.defer();
 
-  function fetch(chunks) {
+  function fetch(chunks: Chunk[]) {
     if (chunks.length === 0) {
       deferred.resolve(alignments);
       return;
@@ -183,8 +183,7 @@ function fetchAlignments(remoteFile: RemoteFile,
       } else {
         newChunk = null;  // This is most likely EOF
       }
-
-      fetch((newChunk ? [newChunk] : []).concat(_.rest(chunks)));
+      fetch((newChunk !== null ? [newChunk] : []).concat(_.rest(chunks)));
     });
   }
 
@@ -254,20 +253,21 @@ class Bam {
    * This is insanely inefficient and should not be used outside of testing.
    */
   readAtOffset(offset: VirtualOffset): Q.Promise<SamRead> {
-    return this.remoteFile.getBytes(offset.coffset, kMaxFetch).then(gzip => {
-      var buf = utils.inflateGzip(gzip);
+    var readPromise: Q.Promise<SamRead> = this.remoteFile.getBytes(offset.coffset, kMaxFetch).then(gzip => {
+      var buf: ArrayBuffer = utils.inflateGzip(gzip);
       var jv = new jDataView(buf, 0, buf.byteLength, true /* little endian */);
       var readData = readAlignment(jv, offset.uoffset, offset, '');
-      if (!readData) {
-        throw `Unable to read alignment at ${offset} in ${this.remoteFile.url}`;
-      } else {
-        // Attach the human-readable ref name
-        var read = readData.read;
-        return this.header.then(header => {
-          read.ref = header.references[read.refID].name;
-          return read;
-        });
-      }
+
+      // Attach the human-readable ref name
+      var read: SamRead = readData.read;
+      return read;
+    });
+
+
+    return Q.all([readPromise, this.header])
+    .then(([read, header]) => {
+      read.ref = header.references[read.refID].name;
+      return read;
     });
   }
 
