@@ -3,8 +3,6 @@
  */
 'use strict';
 
-import type {Alignment, CigarOp, MateProperties, Strand} from '../../main/Alignment';
-
 import {expect} from 'chai';
 import _ from 'underscore';
 
@@ -17,13 +15,13 @@ describe('CoverageCache', function() {
     return new ContigInterval(chr, start, end);
   }
 
-  function makeCache(args) {
+  function makeCache(args: any) {
     var cache = new CoverageCache(fakeSource);
     _.flatten(args).forEach(read => cache.addAlignment(read));
     return cache;
   }
 
-  it('should collect coverage', function() {
+  it('should collect coverage', function(done) {
     var cache = makeCache([
       makeReadPair(ci('chr1', 100, 200), ci('chr1', 800, 900)),
       makeReadPair(ci('chr1', 300, 400), ci('chr1', 750, 850)),
@@ -37,11 +35,12 @@ describe('CoverageCache', function() {
     expect(bins[850]).to.deep.equal({count: 2});
     expect(bins[851]).to.deep.equal({count: 1});
     expect(cache.maxCoverageForRef('chr1')).to.equal(2);
+    done();
   });
 
-  it('should collect mismatches', function() {
+  it('should collect mismatches', function(done) {
     var letter = '.';  // pretend the reference is this letter, repeated
-    var refSource = _.extend({}, fakeSource, {
+    var refSource = _.extend(_.clone(fakeSource), {
       getRangeAsString: function(range) {
         return letter.repeat(range.stop - range.start + 1);
       }
@@ -91,5 +90,6 @@ describe('CoverageCache', function() {
     expect(bins[15]).to.deep.equal({count: 6, ref: 'C', mismatches: {A: 4, T: 1, G: 1}});
     expect(bins[17]).to.deep.equal({count: 4, ref: 'C', mismatches: {A: 2}});
     expect(cache.maxCoverageForRef('chr1')).to.equal(6);
+    done();
   });
 });

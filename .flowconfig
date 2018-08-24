@@ -1,4 +1,5 @@
 [ignore]
+.*node_modules/config-chain/test/*
 .*node_modules/flow-bin.*
 .*node_modules/jsxhint.*
 .*node_modules/.*mocha.*
@@ -30,7 +31,7 @@
 
 [libs]
 lib
-types
 node_modules/data-canvas/flowtype
 
 [options]
+suppress_comment= \\(.\\|\n\\)*\\$FlowIgnore

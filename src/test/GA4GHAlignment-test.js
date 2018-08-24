@@ -10,17 +10,18 @@ import Bam from '../main/data/bam';
 describe('GA4GHAlignment', function() {
   var sampleAlignments = [];
 
-  before(function() {
+  before(function(): any {
     return new RemoteFile('/test-data/alignments.ga4gh.1.10000-11000.json').getAllString().then(data => {
       sampleAlignments = JSON.parse(data).alignments;
     });
   });
 
-  it('should read the sample alignments', function() {
+  it('should read the sample alignments', function(done) {
     expect(sampleAlignments).to.have.length(100);
+    done();
   });
 
-  it('should provide basic accessors', function() {
+  it('should provide basic accessors', function(done) {
     var a = new GA4GHAlignment(sampleAlignments[0]);
     expect(a.name).to.equal('ERR181329.21587964');
     expect(a.getSequence()).to.equal('ATAACCCTAACCATAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTAACCCTAA');
@@ -35,9 +36,10 @@ describe('GA4GHAlignment', function() {
       pos: 10007,
       strand: '-'
     });
+    done();
   });
 
-  it('should match SamRead', function() {
+  it('should match SamRead', function(): any {
     var bam = new Bam(new RemoteFile('/test-data/chr17.1-250.bam'));
     var json = new RemoteFile('/test-data/alignments.ga4gh.chr17.1-250.json');
 

@@ -24,7 +24,7 @@ function typeAtOffset(baseType: any, offsetFieldName: string): any {
 // TODO: write this using 'binary' type (like nullString).
 var sizedBlock = jBinary.Type({
   params: ['itemType', 'lengthField'],
-  resolve: function (getType) {
+  resolve: function(getType) {
     this.itemType = getType(this.itemType);
   },
   read: function(context) {

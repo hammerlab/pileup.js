@@ -11,20 +11,21 @@ import ContigInterval from '../../main/ContigInterval';
 import RemoteFile from '../../main/RemoteFile';
 import RecordedRemoteFile from '../RecordedRemoteFile';
 
-function chunkToString(chunk) {
-  return `${chunk.chunk_beg}-${chunk.chunk_end}`;
+function chunkToString (chunk) {
+  return `${chunk.chunk_beg.toString()}-${chunk.chunk_end.toString()}`;
 }
 
 describe('BAI', function() {
-  it('should parse virtual offsets', function() {
+  it('should parse virtual offsets', function(done) {
     var u8 = new Uint8Array([201, 121, 79, 100, 96, 92, 1, 0]);
     var vo = new jBinary(u8, bamTypes.TYPE_SET).read('VirtualOffset');
     // (expected values from dalliance)
     expect(vo.uoffset).to.equal(31177);
     expect(vo.coffset).to.equal(5844788303);
+    done();
   });
 
-  it('should parse virtual offsets near 2^32', function() {
+  it('should parse virtual offsets near 2^32', function(done) {
     // The low 32 bits of these virtual offsets are in [2^31, 2^32], which
     // could cause sign propagation bugs with incorrect implementations.
     var u8 = new Uint8Array([218, 128, 112, 239, 7, 0, 0, 0]);
@@ -34,10 +35,11 @@ describe('BAI', function() {
     u8 = new Uint8Array([230, 129, 112, 239, 7, 0, 0, 0]);
     vo = new jBinary(u8, bamTypes.TYPE_SET).read('VirtualOffset');
     expect(vo.toString()).to.equal('520048:33254');
+    done();
   });
 
   // This matches htsjdk's BamFileIndexTest.testSpecificQueries
-  it('should parse large BAI files', function() {
+  it('should parse large BAI files', function(): any {
     var bai = new BaiFile(new RemoteFile('/test-data/index_test.bam.bai'));
 
     // contig 0 = chrM
@@ -48,13 +50,13 @@ describe('BAI', function() {
     });
   });
 
-  it('should use index chunks', function() {
+  it('should use index chunks', function(): any {
     var remoteFile = new RecordedRemoteFile('/test-data/index_test.bam.bai');
     var bai = new BaiFile(remoteFile,
-                          {
-                            'chunks': [[8, 144], [144, 13776]],
-                            'minBlockIndex': 65536
-                          });
+      {
+        'chunks': [[8, 144], [144, 13776]],
+        'minBlockIndex': 65536
+      });
 
     // contig 0 = chrM
     var range = new ContigInterval(0, 10400, 10600);
@@ -68,7 +70,7 @@ describe('BAI', function() {
     });
   });
 
-  it('should compute index chunks', function() {
+  it('should compute index chunks', function(): any {
     var bai = new BaiFile(new RemoteFile('/test-data/index_test.bam.bai'));
     return bai.immediate.then(imm => {
       var chunks = imm.indexChunks;
@@ -127,7 +129,7 @@ describe('BAI', function() {
     });
   });
 
-  it('should index a small BAI file', function() {
+  it('should index a small BAI file', function(): any {
     var bai = new BaiFile(new RemoteFile('/test-data/test_input_1_b.bam.bai'));
     return bai.immediate.then(imm => {
       var chunks = imm.indexChunks;

@@ -12,7 +12,7 @@ import RemoteFile from '../../main/RemoteFile';
 describe('GA4GHVariantSource', function() {
   var server: any = null, response, source;
 
-  beforeEach(function () {
+  beforeEach(function(): any {
     source = GA4GHVariantSource.create({
       endpoint: '/v0.6.0',
       variantSetId: "WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIl0",
@@ -26,7 +26,7 @@ describe('GA4GHVariantSource', function() {
 
   });
 
-  afterEach(function () {
+  afterEach(function() {
     server.restore();
   });
 

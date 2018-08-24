@@ -1,7 +1,9 @@
 /* @flow */
 'use strict';
 
+import type {GenomeRange} from '../types';
 import type {Strand} from '../Alignment';
+import {strToStrand} from '../Alignment';
 
 import _ from 'underscore';
 import Q from 'q';
@@ -29,7 +31,7 @@ export type Gene = {
 // Flow type for export.
 export type FeatureDataSource = {
   rangeChanged: (newRange: GenomeRange) => void;
-  getFeaturesInRange: (range: ContigInterval<string>) => Feature[];
+  getFeaturesInRange: (range: ContigInterval<string>, resolution: ?number) => Feature[];
   on: (event: string, handler: Function) => void;
   off: (event: string) => void;
   trigger: (event: string, ...args:any) => void;
@@ -52,8 +54,8 @@ function parseBedFeature(f): Gene {
 
   // if no id, generate randomly for unique storage
   var id = x[0] ? x[0] : position.toString(); // e.g. ENST00000359597
-  var score = x[1] ? x[1] : 1000; // number from 0-1000
-  var strand =  x[2] ? x[2] : '.'; // either +, - or .
+  var score = x[1] ? parseInt(x[1]) : 1000; // number from 0-1000
+  var strand =  strToStrand(x[2]); // either +, - or .
   var codingRegion = (x[3] && x[4]) ? new Interval(Number(x[3]), Number(x[4])) :new Interval(f.start, f.stop);
   var geneId =  x[9] ? x[9] : id;
   var name =  x[10] ? x[10] : "";
@@ -139,7 +141,7 @@ function createFromBigBedFile(remoteSource: BigBed): BigBedSource {
     // These are here to make Flow happy.
     on: () => {},
     off: () => {},
-    trigger: () => {}
+    trigger: (status: string, param: any) => {}
   };
   _.extend(o, Events);  // Make this an event emitter
 
