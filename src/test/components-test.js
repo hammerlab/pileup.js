@@ -95,10 +95,11 @@ describe('pileup', function() {
     }
 
     var ready = ((): boolean =>
-      hasCanvasAndObjects(div, '.reference') != null &&
-      hasCanvasAndObjects(div, '.variants') != null &&
-      hasCanvasAndObjects(div, '.genes') != null &&
-      hasCanvasAndObjects(div, '.pileup') != null
+      // $FlowIgnore: TODO remove flow suppression
+      hasCanvasAndObjects(div, '.reference') &&
+      hasCanvasAndObjects(div, '.variants') &&
+      hasCanvasAndObjects(div, '.genes') &&
+      hasCanvasAndObjects(div, '.pileup')
     );
 
     return waitFor(ready, 5000)
@@ -119,12 +120,31 @@ describe('pileup', function() {
         // Note: there are 11 exons, but two are split into coding/non-coding
         expect(callsOf(div, '.genes', 'fillRect')).to.have.length(13);
 
+        // check for reference
         var selectedClass = div.querySelector('div > .a');
         expect(selectedClass).to.not.be.null;
         if (selectedClass != null) {
           expect(selectedClass.className).to.equal('track reference a');
+        }
+
+        // check for variants
+        selectedClass = div.querySelector('div > .b');
+        expect(selectedClass).to.not.be.null;
+        if (selectedClass != null) {
           expect(selectedClass.className).to.equal('track variants b');
+        }
+
+        // check for genes
+        selectedClass = div.querySelector('div > .c');
+        expect(selectedClass).to.not.be.null;
+        if (selectedClass != null) {
           expect(selectedClass.className).to.equal('track genes c');
+        }
+
+        // check for pileup
+        selectedClass = div.querySelector('div > .d');
+        expect(selectedClass).to.not.be.null;
+        if (selectedClass != null) {
           expect(selectedClass.className).to.equal('track pileup d');
         }
 

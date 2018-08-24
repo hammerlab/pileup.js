@@ -9,7 +9,7 @@ import RemoteFile from '../../main/RemoteFile';
 import LocalStringFile from '../../main/LocalStringFile';
 
 describe('VCF', function () {
-  describe('should respond to queries', function () {
+  describe('should respond to queries', function (): any {
     var testQueries = (vcf) => {
       var range = new ContigInterval('20', 63799, 69094);
       return vcf.getFeaturesInRange(range).then(features => {
@@ -38,8 +38,8 @@ describe('VCF', function () {
       testQueries(vcf);
     });
 
-    it('local file from string', function () {
-      remoteFile.getAllString().then(content => {
+    it('local file from string', function (): any {
+      return remoteFile.getAllString().then(content => {
         var localFile = new LocalStringFile(content);
         var vcf = new VcfFile(localFile);
         testQueries(vcf);
@@ -47,10 +47,10 @@ describe('VCF', function () {
     });
   });
 
-  it('should have frequency', function () {
+  it('should have frequency', function (): any {
     var vcf = new VcfFile(new RemoteFile('/test-data/allelFrequency.vcf'));
     var range = new ContigInterval('chr20', 61790, 61800);
-    vcf.getFeaturesInRange(range).then(features => {
+    return vcf.getFeaturesInRange(range).then(features => {
       expect(features).to.have.length(1);
       expect(features[0].contig).to.equal('20');
       expect(features[0].majorFrequency).to.equal(0.7);
@@ -58,10 +58,10 @@ describe('VCF', function () {
     });
   });
 
-  it('should have highest frequency', function () {
+  it('should have highest frequency', function (): any {
     var vcf = new VcfFile(new RemoteFile('/test-data/allelFrequency.vcf'));
     var range = new ContigInterval('chr20', 61730, 61740);
-    vcf.getFeaturesInRange(range).then(features => {
+    return vcf.getFeaturesInRange(range).then(features => {
       expect(features).to.have.length(1);
       expect(features[0].contig).to.equal('20');
       expect(features[0].majorFrequency).to.equal(0.6);
@@ -69,23 +69,23 @@ describe('VCF', function () {
     });
   });
 
-  it('should add chr', function () {
+  it('should add chr', function (): any {
     var vcf = new VcfFile(new RemoteFile('/test-data/snv.vcf'));
     var range = new ContigInterval('chr20', 63799, 69094);
-    vcf.getFeaturesInRange(range).then(features => {
+    return vcf.getFeaturesInRange(range).then(features => {
       expect(features).to.have.length(6);
       expect(features[0].contig).to.equal('20'); // not chr20
       expect(features[5].contig).to.equal('20');
     });
   });
 
-  it('should handle unsorted VCFs', function () {
+  it('should handle unsorted VCFs', function (): any {
     var vcf = new VcfFile(new RemoteFile('/test-data/sort-bug.vcf'));
     var chr1 = new ContigInterval('chr1', 1, 1234567890);
     // all of chr1
 
     var chr5 = new ContigInterval('chr5', 1, 1234567890);
-    vcf.getFeaturesInRange(chr1).then(features => {
+    return vcf.getFeaturesInRange(chr1).then(features => {
       expect(features).to.have.length(5);
       return vcf.getFeaturesInRange(chr5);
     }).then(features => {

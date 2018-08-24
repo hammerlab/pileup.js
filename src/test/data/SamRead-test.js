@@ -19,14 +19,14 @@ describe('SamRead', function() {
   var testReads = getSamArray('/test-data/test_input_1_a.bam');
 
   // This is more of a test for the test than for SamRead.
-  it('should pull records from a BAM file', function() {
-    testReads.then(reads => {
+  it('should pull records from a BAM file', function(): any {
+    return testReads.then(reads => {
       expect(reads).to.have.length(15);
     });
   });
 
-  it('should parse BAM records', function() {
-    testReads.then(reads => {
+  it('should parse BAM records', function(): any {
+    return testReads.then(reads => {
       // The first record in test_input_1_a.sam is:
       // r000 99 insert 50 30 10M = 80 30 ATTTAGCTAC AAAAAAAAAA RG:Z:cow PG:Z:bull
       var read = reads[0];
@@ -60,8 +60,8 @@ describe('SamRead', function() {
     });
   });
 
-  it('should read thick records', function() {
-    testReads.then(reads => {
+  it('should read thick records', function(): any {
+    return testReads.then(reads => {
       // This mirrors the "BAM > should parse BAM files" test.
       var r000 = reads[0].getFull();
       expect(r000.read_name).to.equal('r000');
@@ -89,8 +89,8 @@ describe('SamRead', function() {
     });
   });
 
-  it('should find record intersections', function() {
-    testReads.then(reads => {
+  it('should find record intersections', function(): any {
+    return testReads.then(reads => {
       var read = reads[0];
       // toString() produces a 1-based result, but ContigInterval is 0-based.
       expect(read.toString()).to.equal('insert:50-59');

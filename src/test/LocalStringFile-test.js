@@ -11,11 +11,11 @@ describe('LocalStringFile', () => {
     return new jBinary(buf).read('string');
   }
 
-  it('should fetch a subset of a file', function() {
+  it('should fetch a subset of a file', function(): any {
     var f = new LocalStringFile('0123456789\n');
     var promisedData = f.getBytes(4, 5);
 
-    promisedData.then(buf => {
+    return promisedData.then(buf => {
       expect(buf).to.not.be.null;
       if (buf != null) {
         expect(buf.byteLength).to.equal(5);
@@ -24,9 +24,9 @@ describe('LocalStringFile', () => {
     });
   });
 
-  it('should fetch subsets from cache', function() {
+  it('should fetch subsets from cache', function(): any {
     var f = new LocalStringFile('0123456789\n');
-    f.getBytes(0, 10).then(buf => {
+    return f.getBytes(0, 10).then(buf => {
       expect(buf).to.not.be.null;
       if (buf != null) {
         expect(buf.byteLength).to.equal(10);
@@ -42,9 +42,9 @@ describe('LocalStringFile', () => {
     });
   });
 
-  it('should fetch entire files', function() {
+  it('should fetch entire files', function(): any {
     var f = new LocalStringFile('0123456789\n');
-    f.getAll().then(buf => {
+    return f.getAll().then(buf => {
       expect(buf).to.not.be.null;
       if (buf != null) {
         expect(buf.byteLength).to.equal(11);
@@ -53,34 +53,34 @@ describe('LocalStringFile', () => {
     });
   });
 
-  it('should determine file lengths', function() {
+  it('should determine file lengths', function(): any {
     var f = new LocalStringFile('0123456789\n');
-    f.getSize().then(size => {
+    return f.getSize().then(size => {
       expect(size).to.equal(11);
     });
   });
 
-  it('should get file lengths from full requests', function() {
+  it('should get file lengths from full requests', function(): any {
     var f = new LocalStringFile('0123456789\n');
-    f.getAll().then(buf => {
+    return f.getAll().then(buf => {
       f.getSize().then(size => {
         expect(size).to.equal(11);
       });
     });
   });
 
-  it('should get file lengths from range requests', function() {
+  it('should get file lengths from range requests', function(): any {
     var f = new LocalStringFile('0123456789\n');
-    f.getBytes(4, 5).then(buf => {
+    return f.getBytes(4, 5).then(buf => {
       f.getSize().then(size => {
         expect(size).to.equal(11);
       });
     });
   });
 
-  it('should cache requests for full files', function() {
+  it('should cache requests for full files', function(): any {
     var f = new LocalStringFile('0123456789\n');
-    f.getAll().then(buf => {
+    return f.getAll().then(buf => {
       expect(buf).to.not.be.null;
       if (buf != null) {
         expect(buf.byteLength).to.equal(11);
@@ -96,9 +96,9 @@ describe('LocalStringFile', () => {
     });
   });
 
-  it('should serve range requests from cache after getAll', function() {
+  it('should serve range requests from cache after getAll', function(): any {
     var f = new LocalStringFile('0123456789\n');
-    f.getAll().then(buf => {
+    return f.getAll().then(buf => {
       expect(buf).to.not.be.null;
       if (buf != null) {
         expect(buf.byteLength).to.equal(11);
@@ -114,11 +114,11 @@ describe('LocalStringFile', () => {
     });
   });
 
-  it('should truncate requests past EOF', function() {
+  it('should truncate requests past EOF', function(): any {
     var f = new LocalStringFile('0123456789\n');
     var promisedData = f.getBytes(4, 100);
 
-    promisedData.then(buf => {
+    return promisedData.then(buf => {
       expect(buf).to.not.be.null;
       if (buf != null) {
         expect(buf.byteLength).to.equal(7);
@@ -134,9 +134,9 @@ describe('LocalStringFile', () => {
     });
   });
 
-  it('should fetch entire files as strings', function() {
+  it('should fetch entire files as strings', function(): any {
     var f = new LocalStringFile('0123456789\n');
-    f.getAllString().then(txt => {
+    return f.getAllString().then(txt => {
       expect(txt).to.equal('0123456789\n');
     });
   });

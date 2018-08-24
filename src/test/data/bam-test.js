@@ -10,9 +10,9 @@ import MappedRemoteFile from '../MappedRemoteFile';
 import VirtualOffset from '../../main/data/VirtualOffset';
 
 describe('BAM', function () {
-  it('should parse BAM files', function () {
+  it('should parse BAM files', function (): any {
     var bamFile = new Bam(new RemoteFile('/test-data/test_input_1_a.bam'));
-    bamFile.readAll().then(bamData => {
+    return bamFile.readAll().then(bamData => {
       var refs = bamData.header.references;
       expect(refs).to.have.length(4);
       expect(refs[0]).to.contain({l_ref: 599, name: 'insert'});
@@ -62,13 +62,13 @@ describe('BAM', function () {
   });
 
   // This matches htsjdk's BamFileIndexTest.testSpecificQueries
-  it('should find sequences using an index', function () {
+  it('should find sequences using an index', function (): any {
     var bam = new Bam(new RemoteFile('/test-data/index_test.bam'),
       new RemoteFile('/test-data/index_test.bam.bai'));
 
     // TODO: run these in parallel
     var range = new ContigInterval('chrM', 10400, 10600);
-    bam.getAlignmentsInRange(range, true).then(alignments => {
+    return bam.getAlignmentsInRange(range, true).then(alignments => {
       expect(alignments).to.have.length(1);
       expect(alignments[0].toString()).to.equal('chrM:10427-10477');
       return bam.getAlignmentsInRange(range, false).then(alignments => {
@@ -83,7 +83,7 @@ describe('BAM', function () {
     });
   });
 
-  it('should fetch alignments from chr18', function () {
+  it('should fetch alignments from chr18', function (): any {
     var bam = new Bam(new RemoteFile('/test-data/index_test.bam'),
       new RemoteFile('/test-data/index_test.bam.bai'));
     var range = new ContigInterval('chr18', 3627238, 6992285);
@@ -97,7 +97,7 @@ describe('BAM', function () {
      x = x;
      */
 
-    bam.getAlignmentsInRange(range).then(reads => {
+    return bam.getAlignmentsInRange(range).then(reads => {
       // Note: htsjdk returns contig names like 'chr18', not 18.
       expect(reads).to.have.length(14);
       expect(reads.map(r => r.toString())).to.deep.equal([
@@ -119,11 +119,11 @@ describe('BAM', function () {
     });
   });
 
-  it('should fetch alignments across a chunk boundary', function () {
+  it('should fetch alignments across a chunk boundary', function (): any {
     var bam = new Bam(new RemoteFile('/test-data/index_test.bam'),
       new RemoteFile('/test-data/index_test.bam.bai'));
     var range = new ContigInterval('chr1', 90002285, 116992285);
-    bam.getAlignmentsInRange(range).then(reads => {
+    return bam.getAlignmentsInRange(range).then(reads => {
       expect(reads).to.have.length(92);
       expect(reads.slice(0, 5).map(r => r.toString())).to.deep.equal([
         'chr1:90071452-90071502',
@@ -146,20 +146,20 @@ describe('BAM', function () {
     });
   });
 
-  it('should fetch an alignment at a specific offset', function () {
+  it('should fetch an alignment at a specific offset', function (): any {
     // This virtual offset matches the one above.
     // This verifies that alignments are tagged with the correct offset.
     var bam = new Bam(new RemoteFile('/test-data/index_test.bam'));
-    bam.readAtOffset(new VirtualOffset(28269, 2247)).then(read => {
+    return bam.readAtOffset(new VirtualOffset(28269, 2247)).then(read => {
       expect(read.toString()).to.equal('chr1:116563944-116563994');
     });
   });
 
-  it('should fetch alignments in a wide interval', function () {
+  it('should fetch alignments in a wide interval', function (): any {
     var bam = new Bam(new RemoteFile('/test-data/index_test.bam'),
       new RemoteFile('/test-data/index_test.bam.bai'));
     var range = new ContigInterval('chr20', 1, 412345678);
-    bam.getAlignmentsInRange(range).then(reads => {
+    return bam.getAlignmentsInRange(range).then(reads => {
       // This count matches what you get if you run:
       // samtools view test/data/index_test.bam | cut -f3 | grep 'chr20' | wc -l
       expect(reads).to.have.length(228);
