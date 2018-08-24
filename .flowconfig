@@ -30,7 +30,6 @@
 
 [libs]
 lib
-types
 node_modules/data-canvas/flowtype
 
 [options]

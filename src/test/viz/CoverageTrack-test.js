@@ -6,8 +6,6 @@
  */
 'use strict';
 
-import type SamRead from '../../main/data/SamRead';
-
 import {expect} from 'chai';
 
 import pileup from '../../main/pileup';
