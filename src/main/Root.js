@@ -83,6 +83,7 @@ class Root extends React.Component<Props, State> {
     this.setState({settingsMenuKey: null});
     var viz = this.props.tracks[Number(trackKey)].visualization;
     var oldOpts = viz.options;
+    // $FlowIgnore: TODO remove flow suppression
     var newOpts = viz.component.handleSelectOption(optionKey, oldOpts);
     viz.options = newOpts;
     if (newOpts != oldOpts) {
@@ -108,6 +109,7 @@ class Root extends React.Component<Props, State> {
 
     var gearIcon = null,
         settingsMenu = null;
+    // $FlowIgnore: TODO remove flow suppression
     if (track.visualization.component.getOptionsMenu) {
       gearIcon = (
           <span ref={'gear-' + key}
@@ -129,6 +131,7 @@ class Root extends React.Component<Props, State> {
         left: (gearX + gearW) + 'px',
         top: gearY + 'px'
       };
+      // $FlowIgnore: TODO remove flow suppression
       var items = track.visualization.component.getOptionsMenu(track.visualization.options);
       settingsMenu = (
         <div className='menu-container' style={menuStyle}>

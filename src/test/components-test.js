@@ -68,7 +68,7 @@ describe('pileup', function() {
     testDiv.innerHTML = '';  // avoid pollution between tests.
   });
 
-  it('should render reference genome and genes', function() {
+  it('should render reference genome and genes', function(): any {
     this.timeout(5000);
 
     var div = document.createElement('div');
@@ -101,7 +101,7 @@ describe('pileup', function() {
       hasCanvasAndObjects(div, '.pileup') != null
     );
 
-    waitFor(ready, 5000)
+    return waitFor(ready, 5000)
       .then(() => {
         var basepairs = drawnObjectsWith(div, '.reference', x => x.letter);
         expect(basepairs).to.have.length.at.least(10);

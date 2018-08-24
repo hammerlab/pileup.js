@@ -173,6 +173,7 @@ type VizObject = ((options: ?Object) => VizWithOptions);
 
 function makeVizObject(component: Class<React.Component<VizProps<any>, State>>): VizObject {
   return options => {
+    // $FlowIgnore: TODO remove flow suppression
     options = _.extend({}, component.defaultOptions, options);
     return {component, options};
   };
