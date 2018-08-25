@@ -32,7 +32,7 @@ describe('VariantTrack', function () {
         drawnObjects(testDiv, '.variants').length > 0;
   }
 
-  it('should render variants', function(): any {
+  it('should render variants', function(done): any {
     var variantClickedData = null;
     var variantClicked = function (data) {
       variantClickedData = data;
@@ -70,6 +70,7 @@ describe('VariantTrack', function () {
 
         expect(variantClickedData).to.not.be.null;
         p.destroy();
+        done();
       });
   });
 
