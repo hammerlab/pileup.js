@@ -48,7 +48,7 @@ describe('FeatureTrack', function() {
        drawnObjects(testDiv, '.features').length > 0;
   }
 
-  it('should render features with json', function(): any {
+  it('should render features with json', function(done): any {
     var featureClickedData = null;
     var featureClicked = function (data) {
       featureClickedData = data;
@@ -101,10 +101,11 @@ describe('FeatureTrack', function() {
         expect(featureClickedData).to.not.be.null;
 
         p.destroy();
+        done();
       });
   });
 
-  it('should render features with bigBed file', function(): any {
+  it('should render features with bigBed file', function(done): any {
     var featureClickedData = null;
     var featureClicked = function (data) {
       featureClickedData = data;
@@ -166,11 +167,11 @@ describe('FeatureTrack', function() {
         expect(featureClickedData).to.not.be.null;
 
         p.destroy();
-
+        done();
       });
   });
 
-  it('should not exceed parent height limits', function(): any {
+  it('should not exceed parent height limits', function(done): any {
 
     var p = pileup.create(testDiv, {
       range: {contig: 'chr22', start: 20000, stop: 21000},
@@ -211,7 +212,7 @@ describe('FeatureTrack', function() {
           expect(features.style.height).to.equal(`${expectedHeight}px`);
         }
         p.destroy();
-
+        done();
       });
   });
 
