@@ -8,13 +8,13 @@ import VcfDataSource from '../../main/sources/VcfDataSource';
 import ContigInterval from '../../main/ContigInterval';
 import RemoteFile from '../../main/RemoteFile';
 
-describe('VcfDataSource', function() {
-  function getTestSource() {
+describe('VcfDataSource', function () {
+  function getTestSource () {
     var vcf = new VcfFile(new RemoteFile('/test-data/snv.vcf'));
     return VcfDataSource.createFromVcfFile(vcf);
   }
 
-  it('should extract features in a range', function(done) {
+  it('should extract features in a range', function (done) {
     var source = getTestSource();
     var range = new ContigInterval('20', 63799, 69094);
 

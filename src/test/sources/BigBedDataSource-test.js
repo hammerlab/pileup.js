@@ -7,14 +7,14 @@ import BigBed from '../../main/data/BigBed';
 import BigBedDataSource from '../../main/sources/BigBedDataSource';
 import ContigInterval from '../../main/ContigInterval';
 
-describe('BigBedDataSource', function() {
-  function getTestSource() {
+describe('BigBedDataSource', function () {
+  function getTestSource () {
     // See test/data/README.md
     return BigBedDataSource.createFromBigBedFile(
-        new BigBed('/test-data/ensembl.chr17.bb'));
+      new BigBed('/test-data/ensembl.chr17.bb'));
   }
 
-  it('should extract features in a range', function(done) {
+  it('should extract features in a range', function (done) {
     this.timeout(5000);
     var source = getTestSource();
 

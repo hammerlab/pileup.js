@@ -5,7 +5,6 @@
 'use strict';
 
 import type {FeatureDataSource} from '../sources/BigBedDataSource';
-import type Feature from '../data/feature';
 import GenericFeature from '../data/genericFeature';
 import {GenericFeatureCache} from './GenericFeatureCache';
 import type {VisualGroup} from './AbstractCache';
@@ -25,7 +24,7 @@ import canvasUtils from './canvas-utils';
 import TiledCanvas from './TiledCanvas';
 import dataCanvas from 'data-canvas';
 import style from '../style';
-import type {State, NetworkStatus} from '../types';
+import type {State} from '../types';
 import {yForRow} from './pileuputils';
 
 
@@ -71,7 +70,7 @@ class FeatureTiledCanvas extends TiledCanvas {
 function renderFeatures(ctx: DataCanvasRenderingContext2D,
                     scale: (num: number) => number,
                     range: ContigInterval<string>,
-                    vFeatures: VisualGroup[]) {
+                    vFeatures: VisualGroup<GenericFeature>[]) {
 
     ctx.font = `${style.GENE_FONT_SIZE}px ${style.GENE_FONT}`;
     ctx.textAlign = 'center';
@@ -94,13 +93,13 @@ function renderFeatures(ctx: DataCanvasRenderingContext2D,
     });
 }
 
-class FeatureTrack extends React.Component {
-  props: VizProps & { source: FeatureDataSource };
+class FeatureTrack extends React.Component<VizProps<FeatureDataSource>, State> {
+  props: VizProps<FeatureDataSource>;
   state: State;
   tiles: FeatureTiledCanvas;
   cache: GenericFeatureCache;
 
-  constructor(props: VizProps) {
+  constructor(props: VizProps<FeatureDataSource>) {
     super(props);
     this.state = {
       networkStatus: null

@@ -6,48 +6,53 @@ import {expect} from 'chai';
 import Interval from '../main/Interval';
 
 describe('Interval', function() {
-  it('should have start/stop/length', function() {
+  it('should have start/stop/length', function(done) {
     var x = new Interval(10, 20);
     expect(x.start).to.equal(10);
     expect(x.stop).to.equal(20);
     expect(x.length()).to.equal(11);
     expect(x.toString()).to.equal('[10, 20]');
+    done();
   });
 
-  it('should determine containment', function() {
+  it('should determine containment', function(done) {
     var x = new Interval(-10, 10);
     expect(x.contains(0)).to.be.true;
     expect(x.contains(-10)).to.be.true;
     expect(x.contains(+10)).to.be.true;
     expect(x.contains(+11)).to.be.false;
     expect(x.contains(-11)).to.be.false;
+    done();
   });
 
-  it('should work with empty intervals', function() {
+  it('should work with empty intervals', function(done) {
     var empty = new Interval(5, 0),
         other = new Interval(-10, 10);
     expect(empty.contains(0)).to.be.false;
     expect(empty.length()).to.equal(0);
     expect(empty.intersect(other).length()).to.equal(0);
+    done();
   });
 
-  it('should determine intersections', function() {
+  it('should determine intersections', function(done) {
     var tp53 = new Interval(7512444, 7531643);
     var other = new Interval(7512444, 7531642);
 
     expect(tp53.intersects(other)).to.be.true;
+    done();
   });
 
-  it('should clone', function() {
+  it('should clone', function(done) {
     var x = new Interval(0, 5),
         y = x.clone();
 
     y.start = 1;
     expect(x.start).to.equal(0);
     expect(y.start).to.equal(1);
+    done();
   });
 
-  it('should intersect many intervals', function() {
+  it('should intersect many intervals', function(done) {
     var ivs = [
         new Interval(0, 10),
         new Interval(5, 15),
@@ -61,9 +66,10 @@ describe('Interval', function() {
     expect(intAll([ivs[0]        ]).toString()).to.equal('[0, 10]');
 
     expect(() => intAll([])).to.throw(/intersect zero intervals/);
+    done();
   });
 
-  it('should construct bounding intervals', function() {
+  it('should construct bounding intervals', function(done) {
     var ivs = [
         new Interval(0, 10),
         new Interval(5, 15),
@@ -77,9 +83,10 @@ describe('Interval', function() {
     expect(bound([ivs[0]        ]).toString()).to.equal('[0, 10]');
 
     expect(() => bound([])).to.throw(/bound zero intervals/);
+    done();
   });
 
-  it('should determine coverage', function() {
+  it('should determine coverage', function(done) {
     var iv = new Interval(10, 20);
     expect(iv.isCoveredBy([
       new Interval(0, 10),
@@ -120,9 +127,10 @@ describe('Interval', function() {
       new Interval(5, 15),
       new Interval(0, 10)
     ])).to.throw(/sorted ranges/);
+    done();
   });
 
-  it('should subtract intervals', function() {
+  it('should subtract intervals', function(done) {
     //   0123456789
     // a ----------
     // b ---
@@ -151,9 +159,10 @@ describe('Interval', function() {
     expect(d.subtract(b).map(x => x.toString())).to.deep.equal([d.toString()]);
     expect(d.subtract(c).map(x => x.toString())).to.deep.equal(['[3, 6]']);
     expect(d.subtract(d).map(x => x.toString())).to.deep.equal([]);
+    done();
   });
 
-  it('should compute complements', function() {
+  it('should compute complements', function(done) {
     var iv = new Interval(0, 99);
     var exons = [
         new Interval(10, 19),
@@ -167,9 +176,10 @@ describe('Interval', function() {
       '[20, 29]',
       '[50, 79]'
     ]);
+    done();
   });
 
-  it('should round interval', function() {
+  it('should round interval', function(done) {
     var interval = new Interval(1, 20);
     var rounded = interval.round(40, true);
     expect(rounded.start).to.equal(0);
@@ -177,5 +187,6 @@ describe('Interval', function() {
 
     rounded = interval.round(40, false);
     expect(rounded.start).to.equal(1);
+    done();
   });
 });

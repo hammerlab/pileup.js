@@ -12,6 +12,7 @@ import _ from 'underscore';
 import {Events} from 'backbone';
 
 import ContigInterval from '../ContigInterval';
+import type {GenomeRange} from '../types';
 
 function create(json: string): FeatureDataSource {
 
@@ -45,7 +46,7 @@ function create(json: string): FeatureDataSource {
     on: () => {},
     once: () => {},
     off: () => {},
-    trigger: () => {}
+    trigger: (string, any) => {}
   };
   _.extend(o, Events);
   return o;

@@ -12,7 +12,7 @@
 
 import type {VizProps} from '../VisualizationWrapper';
 import type {Scale} from './d3utils';
-
+import type {State} from '../types';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import EmptySource from '../sources/EmptySource';
@@ -21,12 +21,12 @@ import dataCanvas from 'data-canvas';
 import style from '../style';
 import d3utils from './d3utils';
 
-class ScaleTrack extends React.Component {
-  props: VizProps;
-  state: void;  // no state
+class ScaleTrack extends React.Component<VizProps<void>, State> {
+  props: VizProps<void>;
+  state: State;  // no state, used to make flow happy
   static defaultSource: Object;
 
-  constructor(props: Object) {
+  constructor(props: VizProps<void>) {
     super(props);
   }
 

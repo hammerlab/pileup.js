@@ -7,7 +7,7 @@ import jBinary from 'jbinary';
 import helpers from '../main/data/formats/helpers';
 
 describe('jBinary Helpers', function() {
-  it('should read sized blocks', function() {
+  it('should read sized blocks', function(done) {
     //                       5  -------------  3  -------  4  ----------
     var u8 = new Uint8Array([5, 1, 2, 3, 4, 5, 3, 1, 2, 3, 4, 1, 2, 3, 4]);
     var TYPE_SET = {
@@ -25,18 +25,20 @@ describe('jBinary Helpers', function() {
       {length: 3, contents: [1, 2, 3]},
       {length: 4, contents: [1, 2, 3, 4]}
     ]);
+    done();
   });
 
-  it('should read fixed-size null-terminated strings', function() {
+  it('should read fixed-size null-terminated strings', function(done) {
     //                        A   B   C   D      B,  C
     var u8 = new Uint8Array([65, 66, 67, 68, 0, 66, 67, 0, 0, 0]);
 
     var jb = new jBinary(u8);
     var o = jb.read(['array', [helpers.nullString, 5]]);
     expect(o).to.deep.equal(['ABCD', 'BC']);
+    done();
   });
 
-  it('should read arrays of simple types lazily', function() {
+  it('should read arrays of simple types lazily', function(done) {
     var numReads = 0;
     var countingUint8 = jBinary.Template({
       baseType: 'uint8',
@@ -57,9 +59,10 @@ describe('jBinary Helpers', function() {
     expect(numReads).to.equal(2);
     expect(o.get(9)).to.equal(6);
     expect(numReads).to.equal(3);
+    done();
   });
 
-  it('should read arrays of objects lazily', function() {
+  it('should read arrays of objects lazily', function(done) {
     var u8 = new Uint8Array([65, 66, 67, 68, 1, 2, 3, 4, 5, 6]);
     var jb = new jBinary(u8);
     var o = jb.read([helpers.lazyArray, {x: 'uint8', y: 'uint8'}, 2, 5]);
@@ -67,18 +70,20 @@ describe('jBinary Helpers', function() {
     expect(o.get(0)).to.deep.equal({x: 65, y: 66});
     expect(o.get(1)).to.deep.equal({x: 67, y: 68});
     expect(o.get(4)).to.deep.equal({x: 5, y: 6});
+    done();
   });
 
-  it('should read the entire array lazily', function() {
+  it('should read the entire array lazily', function(done) {
     //                        A   B   C   D      B,  C
     var u8 = new Uint8Array([65, 66, 67, 68, 0, 66, 67, 0, 0, 0]);
 
     var jb = new jBinary(u8);
     var o = jb.read([helpers.lazyArray, [helpers.nullString, 5], 5, 2]);
     expect(o.getAll()).to.deep.equal(['ABCD', 'BC']);
+    done();
   });
 
-  it('should read uint64s as native numbers', function() {
+  it('should read uint64s as native numbers', function(done) {
     var TYPE_SET = {
       'jBinary.littleEndian': true,
       uint64native: helpers.uint64native
@@ -90,5 +95,6 @@ describe('jBinary Helpers', function() {
 
     expect(() => u8big.read('uint64native')).to.throw(RangeError);
     expect(u8small.read('uint64native')).to.equal(21261123584);
+    done();
   });
 });

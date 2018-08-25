@@ -12,7 +12,7 @@ describe('RemoteFile', () => {
     return new jBinary(buf).read('string');
   }
 
-  it('should fetch a subset of a file', function() {
+  it('should fetch a subset of a file', function(done): any {
     var f = new RemoteFile('/test-data/0to9.txt');
     var promisedData = f.getBytes(4, 5);
 
@@ -20,10 +20,11 @@ describe('RemoteFile', () => {
     return promisedData.then(buf => {
       expect(buf.byteLength).to.equal(5);
       expect(bufferToText(buf)).to.equal('45678');
+      done();
     });
   });
 
-  it('should fetch subsets from cache', function() {
+  it('should fetch subsets from cache', function(done): any {
     var f = new RemoteFile('/test-data/0to9.txt');
     return f.getBytes(0, 10).then(buf => {
       expect(buf.byteLength).to.equal(10);
@@ -33,53 +34,58 @@ describe('RemoteFile', () => {
         expect(buf.byteLength).to.equal(5);
         expect(bufferToText(buf)).to.equal('45678');
         expect(f.numNetworkRequests).to.equal(1);  // it was cached
+        done();
       });
     });
   });
 
-  it('should fetch entire files', function() {
+  it('should fetch entire files', function(done): any {
     var f = new RemoteFile('/test-data/0to9.txt');
     return f.getAll().then(buf => {
       expect(buf.byteLength).to.equal(11);
       expect(bufferToText(buf)).to.equal('0123456789\n');
       expect(f.numNetworkRequests).to.equal(1);
+      done();
     });
   });
 
-  it('should determine file lengths', function() {
+  it('should determine file lengths', function(done): any {
     var f = new RemoteFile('/test-data/0to9.txt');
     return f.getSize().then(size => {
       expect(size).to.equal(11);
       // TODO: make sure this was a HEAD request
       expect(f.numNetworkRequests).to.equal(1);
+      done();
     });
   });
 
-  it('should get file lengths from full requests', function() {
+  it('should get file lengths from full requests', function(done): any {
     var f = new RemoteFile('/test-data/0to9.txt');
     return f.getAll().then(buf => {
       expect(f.numNetworkRequests).to.equal(1);
       return f.getSize().then(size => {
         expect(size).to.equal(11);
         expect(f.numNetworkRequests).to.equal(1);  // no additional requests
+        done();
       });
     });
   });
 
-  it('should get file lengths from range requests', function() {
+  it('should get file lengths from range requests', function(done): any {
     var f = new RemoteFile('/test-data/0to9.txt');
     return f.getBytes(4, 5).then(buf => {
       expect(f.numNetworkRequests).to.equal(1);
       return f.getSize().then(size => {
         expect(size).to.equal(11);
         expect(f.numNetworkRequests).to.equal(1);  // no additional requests
+        done();
       });
     });
   });
 
-  it('should cache requests for full files', function() {
+  it('should cache requests for full files', function(done): any {
     var f = new RemoteFile('/test-data/0to9.txt');
-    f.getAll().then(buf => {
+    return f.getAll().then(buf => {
       expect(buf.byteLength).to.equal(11);
       expect(bufferToText(buf)).to.equal('0123456789\n');
       expect(f.numNetworkRequests).to.equal(1);
@@ -87,11 +93,12 @@ describe('RemoteFile', () => {
         expect(buf.byteLength).to.equal(11);
         expect(bufferToText(buf)).to.equal('0123456789\n');
         expect(f.numNetworkRequests).to.equal(1);  // still 1
+        done();
       });
     });
   });
 
-  it('should serve range requests from cache after getAll', function() {
+  it('should serve range requests from cache after getAll', function(done): any {
     var f = new RemoteFile('/test-data/0to9.txt');
     return f.getAll().then(buf => {
       expect(buf.byteLength).to.equal(11);
@@ -101,11 +108,12 @@ describe('RemoteFile', () => {
         expect(buf.byteLength).to.equal(5);
         expect(bufferToText(buf)).to.equal('45678');
         expect(f.numNetworkRequests).to.equal(1);  // still 1
+        done();
       });
     });
   });
 
-  it('should reject requests to a non-existent file', function() {
+  it('should reject requests to a non-existent file', function(done): any {
     var f = new RemoteFile('/test-data/nonexistent-file.txt');
     return f.getAll().then(buf => {
       throw 'Requests for non-existent files should not succeed';
@@ -115,10 +123,11 @@ describe('RemoteFile', () => {
       // (more information: https://github.com/ariya/phantomjs/issues/11195)
       expect(err).to.match(/404|^Request.*failed/);
       expect(err).to.match(/nonexistent/);
+      done();
     });
   });
 
-  it('should truncate requests past EOF', function() {
+  it('should truncate requests past EOF', function(done): any {
     var f = new RemoteFile('/test-data/0to9.txt');
     var promisedData = f.getBytes(4, 100);
 
@@ -130,14 +139,16 @@ describe('RemoteFile', () => {
         expect(buf.byteLength).to.equal(5);
         expect(bufferToText(buf)).to.equal('6789\n');
         expect(f.numNetworkRequests).to.equal(1);
+        done();
       });
     });
   });
 
-  it('should fetch entire files as strings', function() {
+  it('should fetch entire files as strings', function(done): any {
     var f = new RemoteFile('/test-data/0to9.txt');
     return f.getAllString().then(txt => {
       expect(txt).to.equal('0123456789\n');
+      done();
     });
   });
 });

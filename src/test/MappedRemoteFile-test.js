@@ -13,7 +13,7 @@ describe('MappedRemoteFile', function() {
     return new jBinary(buf).read('string');
   }
 
-  it('should serve requests through the map', function() {
+  it('should serve requests through the map', function(done): any {
     var remoteFile = new MappedRemoteFile('/test-data/0to9.txt', [
       [0, 2],  // 0,1,2
       [12345678, 12345680],  // 3,4,5
@@ -46,10 +46,12 @@ describe('MappedRemoteFile', function() {
       }),
     ];
 
-    return Q.all(promises);
+    return Q.all(promises).then(r => {
+      done();
+    });
   });
 
-  it('should forget file length', function() {
+  it('should forget file length', function(done): any {
     var remoteFile = new MappedRemoteFile('/test-data/0to9.txt', [
       [0, 2],  // 0,1,2
       [12345673, 12345690]  // 3456789\n
@@ -60,6 +62,7 @@ describe('MappedRemoteFile', function() {
       // This second read would fail if the file remembered its length.
       return remoteFile.getBytes(12345673, 8).then(buf => {
         expect(bufferToText(buf)).to.equal('3456789\n');
+        done();
       });
     });
   });

@@ -1,0 +1,39 @@
+
+{
+	"parser": "babel-eslint",
+	"parserOptions": {
+		"ecmaVersion": 6,
+		"sourceType": "module",
+		"ecmaFeatures": {
+			"jsx": true,
+			"modules": true,
+			"experimentalObjectRestSpread": true
+		}
+	},
+	"plugins": [
+		"react"
+	],
+	"env": {
+    	"browser": true,
+    	"node": true,
+    	"es6": true
+	},
+	"extends": ["eslint:recommended", "plugin:react/recommended"],
+	"rules": {
+		"semi": ["error", "always"],
+		"quotes": ["off", "double"],
+		"no-tabs": "off",
+		"new-cap": "off",
+		"no-unused-vars": ["error", {"args": "none"}],
+		"no-console": ["error", { "allow": ["warn", "error", "log"] }],
+		"react/no-find-dom-node": "warn",
+		"react/no-string-refs": "warn"
+
+	},
+	"settings": {
+		"react": {
+			"pragma": "React",
+			"version": "15.6.1"
+		}
+	}
+}

@@ -48,7 +48,7 @@ var Flags = {
   SUPPLEMENTARY_ALIGNMENT: 0x800
 };
 
-var ThickAlignment = _.extend({}, ThinAlignment, {
+var ThickAlignment = _.extend(_.clone(ThinAlignment), {
   read_name: [nullString, 'l_read_name'],
   cigar: ['array', 'CigarOp', 'n_cigar_op'],
   seq: ['FourBitSequence', 'l_seq'],

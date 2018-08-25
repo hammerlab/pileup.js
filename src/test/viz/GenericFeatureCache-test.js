@@ -3,8 +3,6 @@
  */
 'use strict';
 
-import type {Alignment, CigarOp, MateProperties, Strand} from '../../main/Alignment';
-
 import {expect} from 'chai';
 import _ from 'underscore';
 
@@ -18,13 +16,13 @@ describe('GenericFeatureCache', function() {
     return new ContigInterval(chr, start, end);
   }
 
-  function makeCache(features) {
+  function makeCache(features: any) {
     var cache = new GenericFeatureCache(fakeSource);
     _.flatten(features).forEach(feature => cache.addFeature(feature));
     return cache;
   }
 
-  it('should put non-overlapping features in the same row', function() {
+  it('should put non-overlapping features in the same row', function(done) {
     var a = {id: "A",
             featureType: "Feature",
           position: new ContigInterval('chr1', 100, 200),
@@ -48,10 +46,11 @@ describe('GenericFeatureCache', function() {
     expect(groups[1].row).to.equal(0);
     expect(groups[2].row).to.equal(0);
     expect(cache.pileupHeightForRef('chr1')).to.equal(1);
+    done();
   });
 
 
-  it('should put overlapping features in the different row', function() {
+  it('should put overlapping features in the different row', function(done) {
     var a = {id: "A",
             featureType: "Feature",
           position: new ContigInterval('chr1', 100, 200),
@@ -75,9 +74,10 @@ describe('GenericFeatureCache', function() {
     expect(groups[1].row).to.equal(1);
     expect(groups[2].row).to.equal(2);
     expect(cache.pileupHeightForRef('chr1')).to.equal(3);
+    done();
   });
 
-  it('should find overlapping features', function() {
+  it('should find overlapping features', function(done) {
     var a = {id: "A",
             featureType: "Feature",
           position: new ContigInterval('chr1', 100, 200),
@@ -101,6 +101,7 @@ describe('GenericFeatureCache', function() {
 
     // 'chr'-tolerance
     expect(cache.getGroupsOverlapping(ci('chr1', 100, 200))).to.have.length(1);
+    done();
   });
 
 });

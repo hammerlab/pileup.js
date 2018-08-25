@@ -11,8 +11,9 @@ import {waitFor} from '../async';
 
 import ReactTestUtils from 'react-addons-test-utils';
 
-describe('VariantTrack', function() {
+describe('VariantTrack', function () {
   var testDiv = document.getElementById('testdiv');
+  if (!testDiv) throw new Error("Failed to match: testdiv");
 
   beforeEach(() => {
     testDiv.style.width = '700px';
@@ -31,7 +32,7 @@ describe('VariantTrack', function() {
         drawnObjects(testDiv, '.variants').length > 0;
   }
 
-  it('should render variants', function() {
+  it('should render variants', function(done): any {
     var variantClickedData = null;
     var variantClicked = function (data) {
       variantClickedData = data;
@@ -69,6 +70,7 @@ describe('VariantTrack', function() {
 
         expect(variantClickedData).to.not.be.null;
         p.destroy();
+        done();
       });
   });
 
