@@ -19,13 +19,14 @@ describe('SamRead', function() {
   var testReads = getSamArray('/test-data/test_input_1_a.bam');
 
   // This is more of a test for the test than for SamRead.
-  it('should pull records from a BAM file', function(): any {
+  it('should pull records from a BAM file', function(done): any {
     return testReads.then(reads => {
       expect(reads).to.have.length(15);
+      done();
     });
   });
 
-  it('should parse BAM records', function(): any {
+  it('should parse BAM records', function(done): any {
     return testReads.then(reads => {
       // The first record in test_input_1_a.sam is:
       // r000 99 insert 50 30 10M = 80 30 ATTTAGCTAC AAAAAAAAAA RG:Z:cow PG:Z:bull
@@ -57,10 +58,11 @@ describe('SamRead', function() {
         {op: 'M', length: 4},
         {op: 'I', length: 2}
       ]);
+      done();
     });
   });
 
-  it('should read thick records', function(): any {
+  it('should read thick records', function(done): any {
     return testReads.then(reads => {
       // This mirrors the "BAM > should parse BAM files" test.
       var r000 = reads[0].getFull();
@@ -86,10 +88,11 @@ describe('SamRead', function() {
       expect(reads).to.have.length(15);
       expect(reads[14].refID).to.equal(-1);  // unmapped read
       expect(reads[14].ref).to.equal('');
+      done();
     });
   });
 
-  it('should find record intersections', function(): any {
+  it('should find record intersections', function(done): any {
     return testReads.then(reads => {
       var read = reads[0];
       // toString() produces a 1-based result, but ContigInterval is 0-based.
@@ -99,6 +102,7 @@ describe('SamRead', function() {
       expect(read.intersects(new ContigInterval('0', 40, 55))).to.be.false;
       expect(read.intersects(new ContigInterval('insert', 58, 60))).to.be.true;
       expect(read.intersects(new ContigInterval('insert', 59, 60))).to.be.false;
+      done();
     });
   });
 });

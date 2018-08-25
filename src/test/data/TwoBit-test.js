@@ -12,45 +12,50 @@ describe('TwoBit', function () {
     return new TwoBit(new RemoteFile('/test-data/test.2bit'));
   }
 
-  it('should have the right contigs', function (): any {
+  it('should have the right contigs', function(done): any {
     var twoBit = getTestTwoBit();
     return twoBit.getContigList()
       .then(contigs => {
         expect(contigs).to.deep.equal(['chr1', 'chr17', 'chr22']);
+        done();
       });
   });
 
-  it('should extract unknowns', function (): any {
+  it('should extract unknowns', function(done): any {
     // This test mirrors dalliance's (chr22:19178140-19178170)
     var twoBit = getTestTwoBit();
     return twoBit.getFeaturesInRange('chr22', 0, 30)
       .then(basePairs => {
         expect(basePairs).to.equal('NTCACAGATCACCATACCATNTNNNGNNCNA');
+        done();
       });
   });
 
-  it('should reject invalid contigs', function (): any {
+  it('should reject invalid contigs', function(done): any {
     var twoBit = getTestTwoBit();
     return twoBit.getFeaturesInRange('chrZ', 12, 34)
       .then(() => { assert.fail('Should have thrown'); })
       .catch(err => {
         expect(err).to.match(/Invalid contig/);
+        done();
       });
   });
 
-  it('should add chr', function (): any {
+  it('should add chr', function(done): any {
     var twoBit = getTestTwoBit();
     return twoBit.getFeaturesInRange('22', 0, 4) // 22, not chr22
       .then(basePairs => {
         expect(basePairs).to.equal('NTCAC');
+        done();
       });
   });
 
-  it('should parse huge headers', function (): any {
+  it('should parse huge headers', function(done): any {
     var twoBit = new TwoBit(new RemoteFile('/test-data/susScr3-head.2bit'));
     // shouldn't throw an exception
     return twoBit.header.then(header => {
       expect(header.sequenceCount).to.equal(4583);
+      done();
     });
   });
 

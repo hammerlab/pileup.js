@@ -34,7 +34,7 @@ describe('GeneTrack', function() {
         drawnObjects(testDiv, '.genes').length > 0;
   }
 
-  it('should render genes', function(): any {
+  it('should render genes', function(done): any {
     var p = pileup.create(testDiv, {
       range: {contig: '17', start: 9386380, stop: 9537390},
       tracks: [
@@ -65,6 +65,7 @@ describe('GeneTrack', function() {
         var texts = callsOf(testDiv, '.genes', 'fillText');
         expect(texts.map(t => t[1])).to.deep.equal(['STX8', 'WDR16', 'USP43']);
         p.destroy();
+        done();
       });
   });
 

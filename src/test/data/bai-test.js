@@ -16,15 +16,16 @@ function chunkToString (chunk) {
 }
 
 describe('BAI', function () {
-  it('should parse virtual offsets', function () {
+  it('should parse virtual offsets', function(done) {
     var u8 = new Uint8Array([201, 121, 79, 100, 96, 92, 1, 0]);
     var vo = new jBinary(u8, bamTypes.TYPE_SET).read('VirtualOffset');
     // (expected values from dalliance)
     expect(vo.uoffset).to.equal(31177);
     expect(vo.coffset).to.equal(5844788303);
+    done();
   });
 
-  it('should parse virtual offsets near 2^32', function () {
+  it('should parse virtual offsets near 2^32', function(done) {
     // The low 32 bits of these virtual offsets are in [2^31, 2^32], which
     // could cause sign propagation bugs with incorrect implementations.
     var u8 = new Uint8Array([218, 128, 112, 239, 7, 0, 0, 0]);
@@ -34,10 +35,11 @@ describe('BAI', function () {
     u8 = new Uint8Array([230, 129, 112, 239, 7, 0, 0, 0]);
     vo = new jBinary(u8, bamTypes.TYPE_SET).read('VirtualOffset');
     expect(vo.toString()).to.equal('520048:33254');
+    done();
   });
 
   // This matches htsjdk's BamFileIndexTest.testSpecificQueries
-  it('should parse large BAI files', function (): any {
+  it('should parse large BAI files', function(done): any {
     var bai = new BaiFile(new RemoteFile('/test-data/index_test.bam.bai'));
 
     // contig 0 = chrM
@@ -45,10 +47,11 @@ describe('BAI', function () {
     return bai.getChunksForInterval(range).then(chunks => {
       expect(chunks).to.have.length(1);
       expect(chunkToString(chunks[0])).to.equal('0:8384-0:11328');
+      done();
     });
   });
 
-  it('should use index chunks', function (): any {
+  it('should use index chunks', function(done): any {
     var remoteFile = new RecordedRemoteFile('/test-data/index_test.bam.bai');
     var bai = new BaiFile(remoteFile,
       {
@@ -65,10 +68,11 @@ describe('BAI', function () {
       var requests = remoteFile.requests;
       expect(requests).to.have.length(1);
       expect(requests[0].toString()).to.equal('[8, 144]');
+      done();
     });
   });
 
-  it('should compute index chunks', function (): any {
+  it('should compute index chunks', function(done): any {
     var bai = new BaiFile(new RemoteFile('/test-data/index_test.bam.bai'));
     return bai.immediate.then(imm => {
       var chunks = imm.indexChunks;
@@ -124,10 +128,11 @@ describe('BAI', function () {
         ],
         "minBlockIndex": 65536
       });
+      done();
     });
   });
 
-  it('should index a small BAI file', function (): any {
+  it('should index a small BAI file', function(done): any {
     var bai = new BaiFile(new RemoteFile('/test-data/test_input_1_b.bam.bai'));
     return bai.immediate.then(imm => {
       var chunks = imm.indexChunks;
@@ -142,6 +147,7 @@ describe('BAI', function () {
         ],
         "minBlockIndex": 224
       });
+      done();
     });
   });
 });

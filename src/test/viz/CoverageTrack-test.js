@@ -81,26 +81,28 @@ describe('CoverageTrack', function() {
         findCoverageLabels().length > 1;
   };
 
-  it('should create coverage information for all bases shown in the view', function(): any {
+  it('should create coverage information for all bases shown in the view', function(done): any {
     return waitFor(hasCoverage, 2000).then(() => {
       var bins = findCoverageBins();
       expect(bins).to.have.length.at.least(range.stop - range.start + 1);
+      done();
     });
   });
 
-  it('should show mismatch information', function(): any {
+  it('should show mismatch information', function(done): any {
     return waitFor(hasCoverage, 2000).then(() => {
       var visibleMismatches = findMismatchBins()
           .filter(bin => bin.position >= range.start && bin.position <= range.stop);
       expect(visibleMismatches).to.deep.equal(
         [{position: 7500765, count: 23, base: 'C'},
          {position: 7500765, count: 22, base: 'T'}]);
+      done();
       // TODO: IGV shows counts of 20 and 20 at this locus. Whither the five reads?
       // `samtools view` reports the full 45 reads at 17:7500765
     });
   });
 
-  it('should create correct labels for coverage', function(): any {
+  it('should create correct labels for coverage', function(done): any {
     return waitFor(hasCoverage, 2000).then(() => {
       // These are the objects being used to draw labels
       var labelTexts = findCoverageLabels();
@@ -110,6 +112,7 @@ describe('CoverageTrack', function() {
       // Now let's test if they are actually being put on the screen
       var texts = callsOf(testDiv, '.coverage', 'fillText');
       expect(texts.map(t => t[1])).to.deep.equal(['0X', '25X', '50X']);
+      done();
     });
   });
 

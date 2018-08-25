@@ -17,7 +17,7 @@ describe('BigBed', function () {
     return new BigBed('/test-data/simple17unc.bb'); // See test-data/README.md
   }
 
-  it('should extract features in a range', function (): any {
+  it('should extract features in a range', function (done): any {
     var bb = getTestBigBed();
 
     return bb.getFeaturesInRange('chrX', 151077036, 151078532)
@@ -44,10 +44,11 @@ describe('BigBed', function () {
         expect(rest1[0]).to.equal('VIOLET_RED1');
         expect(rest1[2]).to.equal('-');
         expect(rest1[5]).to.equal('255,62,150');
+        done();
       });
   });
 
-  it('should extract features from an uncompressed BigBed', function (): any {
+  it('should extract features from an uncompressed BigBed', function(done): any {
     var bb = getUncompressedTestBigBed();
 
     return bb.getFeaturesInRange('chr17', 60000, 270000)
@@ -63,10 +64,11 @@ describe('BigBed', function () {
             { contig: 'chr17', start: 260433, stop: 264713, rest: "" }
           ]
         );
+        done();
       });
   });
 
-  it('should have inclusive ranges', function (): any {
+  it('should have inclusive ranges', function(done): any {
     // The matches looks like this:
     // chrX 151071196 151072363 RED
     // chrX 151094536 151095703 PeachPuff
@@ -90,10 +92,12 @@ describe('BigBed', function () {
       // but this range ends one base pair before it.
       bb.getFeaturesInRange('chrX', red[0] - 1000, red[0] - 1)
         .then(expectN(0))
-    ]);
+    ]).then(r => {
+      done();
+    });
   });
 
-  it('should add "chr" to contig names', function (): any {
+  it('should add "chr" to contig names', function(done): any {
     var bb = getTestBigBed();
 
     return bb.getFeaturesInRange('X', 151077036, 151078532)
@@ -102,10 +106,11 @@ describe('BigBed', function () {
         expect(features).to.have.length(2);
         expect(features[0].contig).to.equal('chrX');
         expect(features[1].contig).to.equal('chrX');
+        done();
       });
   });
 
-  it('should cache requests in a block', function (): any {
+  it('should cache requests in a block', function(done): any {
     var bb = getTestBigBed();
 
     var remote = bb.remoteFile;
@@ -129,10 +134,11 @@ describe('BigBed', function () {
       // But a request from another block (the 'Y' block) should.
       expect(features).to.have.length(1);
       expect(remote.numNetworkRequests).to.equal(2);
+      done();
     });
   });
 
-  it('should fetch full blocks', function (): any {
+  it('should fetch full blocks', function(done): any {
     var bb = getTestBigBed();
 
     var range = new ContigInterval('X', 151077036, 151078532);
@@ -144,6 +150,7 @@ describe('BigBed', function () {
         var rows = blockFeatures[0].rows;
         expect(rows).to.have.length(21); // all the chrX features.
         expect(range.toString()).to.equal('chrX:151071196-151095703');
+        done();
       });
   });
 

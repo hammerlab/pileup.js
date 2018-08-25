@@ -53,7 +53,7 @@ describe('GenomeTrack', function() {
     return testDiv.querySelector('canvas') !== null ;
   };
 
-  it('should tolerate non-chr ranges', function(): any {
+  it('should tolerate non-chr ranges', function(done): any {
     var p = pileup.create(testDiv, {
       range: {contig: '17', start: 7500730, stop: 7500790},
       tracks: [
@@ -79,6 +79,7 @@ describe('GenomeTrack', function() {
         stop: 7500790
       });
       p.destroy();
+      done();
     });
   });
 
@@ -93,7 +94,7 @@ describe('GenomeTrack', function() {
    * (range span is milions of nucleotides) into very narrow view
    * (tens of nucleotides).
    */
-  it('should zoom from huge zoom out', function(): any {
+  it('should zoom from huge zoom out', function(done): any {
     
     var p = pileup.create(testDiv, {
       range: { contig: '17', start: 0, stop: 114529884 },
@@ -123,10 +124,11 @@ describe('GenomeTrack', function() {
       expect(hasReference()).to.be.true;
       expect(locationTxt.value).to.equal('7,500,725-7,500,775');
       p.destroy();
+      done();
     });
   });
 
-  it('should zoom in and out', function(): any {
+  it('should zoom in and out', function(done): any {
     var p = pileup.create(testDiv, {
       range: {contig: '17', start: 7500725, stop: 7500775},
       tracks: [
@@ -166,10 +168,11 @@ describe('GenomeTrack', function() {
       });
       expect(locationTxt.value).to.equal('7,500,725-7,500,775');
       p.destroy();
+      done();
     });
   });
 
-  it('should accept user-entered locations', function(): any {
+  it('should accept user-entered locations', function(done): any {
     var p = pileup.create(testDiv, {
       range: {contig: '17', start: 7500725, stop: 7500775},
       tracks: [
@@ -197,6 +200,7 @@ describe('GenomeTrack', function() {
       });
       expect(locationTxt.value).to.equal('7,500,745-7,500,785');
       p.destroy();
+      done();
     });
   });
 });

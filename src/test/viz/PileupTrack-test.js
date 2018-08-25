@@ -168,7 +168,7 @@ describe('PileupTrack', function() {
       expect(mismatchesAtPos(7500764 - 1).length).to.equal(0);
     };
 
-  it('should indicate mismatches when the reference loads first', function(): any {
+  it('should indicate mismatches when the reference loads first', function(done): any {
     var {p, fakeTwoBit, fakeBam} = testSetup();
 
     // Release the reference first.
@@ -185,11 +185,12 @@ describe('PileupTrack', function() {
       expect(mismatches).to.have.length.below(60);
       assertHasColumnOfTs();
       p.destroy();
+      done();
     });
   });
 
   // Same as the previous test, but with the loads reversed.
-  it('should indicate mismatches when the alignments load first', function(): any {
+  it('should indicate mismatches when the alignments load first', function(done): any {
     var {p, fakeTwoBit, fakeBam} = testSetup();
 
     // Release the alignments first.
@@ -204,10 +205,11 @@ describe('PileupTrack', function() {
       expect(mismatches).to.have.length.below(60);
       assertHasColumnOfTs();
       p.destroy();
+      done();
     });
   });
 
-  it('should hide alignments', function(): any {
+  it('should hide alignments', function(done): any {
     var p = pileup.create(testDiv, {
       range: {contig: 'chr17', start: 7500734, stop: 7500796},
       tracks: [
@@ -234,10 +236,11 @@ describe('PileupTrack', function() {
       var alignments = drawnObjectsWith(testDiv, '.pileup', x => x.span);
       expect(alignments.length).to.equal(0);
       p.destroy();
+      done();
     });
   });
 
-  it('should sort reads', function(): any {
+  it('should sort reads', function(done): any {
     var p = pileup.create(testDiv, {
       range: {contig: 'chr17', start: 7500734, stop: 7500796},
       tracks: [
@@ -275,6 +278,7 @@ describe('PileupTrack', function() {
       expect(_.max(centerRows)).to.equal(centerRows.length - 1);
 
       p.destroy();
+      done();
     });
   });
 });

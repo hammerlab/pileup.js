@@ -24,7 +24,7 @@ describe('PileupCache', function() {
     return cache;
   }
 
-  it('should group read pairs', function() {
+  it('should group read pairs', function(done) {
     var cache = makeCache(makeReadPair(ci('chr1', 100, 200),
                                        ci('chr1', 300, 400)), true /* viewAsPairs */);
 
@@ -41,9 +41,10 @@ describe('PileupCache', function() {
     expect(g.span.toString()).to.equal('chr1:100-400');
     expect(cache.pileupHeightForRef('chr1')).to.equal(1);
     expect(cache.pileupHeightForRef('chr2')).to.equal(0);
+    done();
   });
 
-  it('should group pile up pairs', function() {
+  it('should group pile up pairs', function(done) {
     // A & B overlap, B & C overlap, but A & C do not. So two rows will suffice.
     var cache = makeCache([
       makeReadPair(ci('chr1', 100, 200), ci('chr1', 300, 400)),  // A
@@ -57,9 +58,10 @@ describe('PileupCache', function() {
     expect(groups[1].row).to.equal(1);
     expect(groups[2].row).to.equal(0);
     expect(cache.pileupHeightForRef('chr1')).to.equal(2);
+    done();
   });
 
-  it('should pile pairs which overlap only in their inserts', function() {
+  it('should pile pairs which overlap only in their inserts', function(done) {
     // No individual reads overlap, but they do when their inserts are included.
     var cache = makeCache([
       makeReadPair(ci('chr1', 100, 200), ci('chr1', 800, 900)),
@@ -71,9 +73,10 @@ describe('PileupCache', function() {
     expect(groups[0].row).to.equal(0);
     expect(groups[1].row).to.equal(1);
     expect(cache.pileupHeightForRef('chr1')).to.equal(2);
+    done();
   });
 
-  it('should pack unpaired reads more tightly', function() {
+  it('should pack unpaired reads more tightly', function(done) {
     // Same as the previous test, but with viewAsPairs = false.
     // When the inserts aren't rendered, the reads all fit on a single line.
     var cache = makeCache([
@@ -83,9 +86,10 @@ describe('PileupCache', function() {
     var groups = _.values(cache.groups);
     expect(groups).to.have.length(4);
     expect(cache.pileupHeightForRef('chr1')).to.equal(1);
+    done();
   });
 
-  it('should separate pairs on differing contigs', function() {
+  it('should separate pairs on differing contigs', function(done) {
     var cache = makeCache(makeReadPair(ci('chr1', 100, 200),
                                        ci('chr2', 150, 250)), true /* viewAsPairs */);
 
@@ -101,9 +105,10 @@ describe('PileupCache', function() {
     expect(cache.pileupHeightForRef('chr2')).to.equal(1);
     expect(cache.pileupHeightForRef('1')).to.equal(1);
     expect(cache.pileupHeightForRef('2')).to.equal(1);
+    done();
   });
 
-  it('should find overlapping reads', function() {
+  it('should find overlapping reads', function(done) {
     var cache = makeCache([
       makeReadPair(ci('chr1', 100, 200), ci('chr1', 800, 900)),
       makeReadPair(ci('chr1', 300, 400), ci('chr1', 500, 600)),
@@ -122,9 +127,10 @@ describe('PileupCache', function() {
     // 'chr'-tolerance
     expect(cache.getGroupsOverlapping(ci('1', 50, 150))).to.have.length(1);
     expect(cache.getGroupsOverlapping(ci('1', 50, 350))).to.have.length(2);
+    done();
   });
 
-  it('should sort reads at a locus', function() {
+  it('should sort reads at a locus', function(done) {
     var read = (start, stop) => makeRead(ci('chr1', start, stop), '+');
     var cache = makeCache([
       read(100, 200),
@@ -178,9 +184,10 @@ describe('PileupCache', function() {
       [1, 'chr2:50-150'],
       [2, 'chr2:100-200']
     ]);
+    done();             
   });
 
-  it('should sort paired reads at a locus', function() {
+  it('should sort paired reads at a locus', function(done) {
     var cache = makeCache([
       makeReadPair(ci('chr1', 100, 200), ci('chr1', 800, 900)),
       makeReadPair(ci('chr1', 300, 400), ci('chr1', 500, 600))
@@ -201,9 +208,10 @@ describe('PileupCache', function() {
 
     cache.sortReadsAt('chr1', 850);
     expect(rows()).to.deep.equal([0, 1]);
+    done();
   });
 
-  it('should sort a larger pileup of pairs', function() {
+  it('should sort a larger pileup of pairs', function(done) {
     // A:   <---        --->
     // B:        <---  --->
     // C:      <---   --->
@@ -221,9 +229,10 @@ describe('PileupCache', function() {
 
     cache.sortReadsAt('chr1', 325);  // x
     expect(rows()).to.deep.equal([2, 1, 0]);
+    done();
   });
 
-  it('should compute statistics on a BAM file', function(): any {
+  it('should compute statistics on a BAM file', function(done): any {
     this.timeout(5000);
     var bam = new Bam(
         new RemoteFile('/test-data/synth4.tumor.1.4930000-4950000.bam'),
@@ -234,6 +243,7 @@ describe('PileupCache', function() {
       var stats = cache.getInsertStats();
       expect(stats.minOutlierSize).to.be.within(1, 100);
       expect(stats.maxOutlierSize).to.be.within(500, 600);
+      done();
     });
   });
 

@@ -68,7 +68,7 @@ describe('pileup', function() {
     testDiv.innerHTML = '';  // avoid pollution between tests.
   });
 
-  it('should render reference genome and genes', function(): any {
+  it('should render reference genome and genes', function(done): any {
     this.timeout(5000);
 
     var div = document.createElement('div');
@@ -163,6 +163,7 @@ describe('pileup', function() {
         expect(visibleReads).to.have.length(4);
 
         p.destroy();
+        done();
       });
   });
 });
