@@ -112,33 +112,10 @@ describe('FeatureTrack', function() {
         ReactTestUtils.Simulate.click(canvas,{nativeEvent: {offsetX: 55, offsetY: 10}});
         expect(featureClickedData).to.not.be.null;
 
-        p.destroy();
-      });
-  });
+        // zoom to new region to test height restrictions
+        p.setRange({contig: 'chr22', start: 20000, stop: 21000});
+    }).delay(300).then(() => {
 
-  it('should not exceed parent height limits', function(): any {
-    var p = pileup.create(testDiv, {
-      range: {contig: 'chr22', start: 20000, stop: 21000},
-      tracks: [
-        {
-          viz: pileup.viz.genome(),
-          data: pileup.formats.twoBit({
-            url: '/test-data/test.2bit'
-          }),
-          isReference: true
-        },
-        {
-          viz: pileup.viz.features(),
-          data: pileup.formats.bigBed({
-            url: '/test-data/chr17.22.10000-21000.bb',
-          }),
-          name: 'Features'
-        }
-      ]
-    });
-
-    return waitFor(ready, 2000)
-      .then(() => {
         var features = drawnObjects(testDiv, '.features');
         // there can be duplicates in the case where features are
         // overlapping  more than one section of the canvas
@@ -156,6 +133,7 @@ describe('FeatureTrack', function() {
           expect(featureCanvas.style.height).to.equal(`${expectedHeight}px`);
         }
         p.destroy();
-      });
+    });
+
   });
 });
