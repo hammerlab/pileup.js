@@ -26,7 +26,7 @@ describe('pileuputils', function() {
     });
   }
 
-  it('should check the guarantee', function() {
+  it('should check the guarantee', function(done) {
     var reads = [
       new Interval(0, 9),
       new Interval(5, 14),
@@ -35,9 +35,10 @@ describe('pileuputils', function() {
     checkGuarantee(reads, [0, 1, 2]);  // ok
     checkGuarantee(reads, [0, 1, 0]);  // ok
     expect(() => checkGuarantee(reads, [0, 0, 0])).to.throw();  // not ok
+    done();
   });
 
-  it('should pile up a collection of reads', function() {
+  it('should pile up a collection of reads', function(done) {
     var reads = [
       new Interval(0, 9),
       new Interval(5, 14),
@@ -47,9 +48,10 @@ describe('pileuputils', function() {
     var rows = pileup(reads);
     checkGuarantee(reads, rows);
     expect(rows).to.deep.equal([0,1,0,1]);
+    done();
   });
 
-  it('should pile up a deep collection of reads', function() {
+  it('should pile up a deep collection of reads', function(done) {
     var reads = [
       new Interval(0, 9),
       new Interval(1, 10),
@@ -60,9 +62,10 @@ describe('pileuputils', function() {
     var rows = pileup(reads);
     checkGuarantee(reads, rows);
     expect(rows).to.deep.equal([0,1,2,3,4]);
+    done();
   });
 
-  it('should pile up around a long read', function() {
+  it('should pile up around a long read', function(done) {
     var reads = [
       new Interval(1, 9),
       new Interval(0, 100),
@@ -73,9 +76,10 @@ describe('pileuputils', function() {
     var rows = pileup(reads);
     checkGuarantee(reads, rows);
     expect(rows).to.deep.equal([0,1,2,0,2]);
+    done();
   });
 
-  it('should build a pileup progressively', function() {
+  it('should build a pileup progressively', function(done) {
     var reads = [
       new Interval(1, 9),
       new Interval(0, 100),
@@ -87,6 +91,7 @@ describe('pileuputils', function() {
     var rows = reads.map(read => addToPileup(read, pileup));
     checkGuarantee(reads, rows);
     expect(rows).to.deep.equal([0,1,2,0,2]);
+    done();
   });
 
   var ref =  // chr17:7513000-7513500
@@ -98,7 +103,7 @@ describe('pileuputils', function() {
     "GTATATATATACACACACACACACACACATATATATAAATTAGCCAGGCGTGGTGGCACATGGCTGTAACC" +
     "TCAGCTATTCAGGGTGGCTGAGATATGAGAATCACTTGAAGCCAGGAGGCAGAGGCTGCAGGGTCGTCTGG" +
     "ATTT";
-  it('should split reads into ops', function() {
+  it('should split reads into ops', function(): any {
     var bamFile = new RemoteFile('/test-data/synth3.normal.17.7500000-7515000.bam'),
         bamIndexFile = new RemoteFile('/test-data/synth3.normal.17.7500000-7515000.bam.bai'),
         bam = new Bam(bamFile, bamIndexFile);

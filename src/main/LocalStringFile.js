@@ -24,7 +24,7 @@ class LocalStringFile extends AbstractFile {
     }
   }
 
-  getBytes(start: number, length: number): Q.Promise<ArrayBuffer> {
+  getBytes(start: number, length: number): Q.Promise<?ArrayBuffer> {
     if (length < 0) {
       return Q.reject(`Requested <0 bytes (${length})`);
     }
@@ -41,7 +41,7 @@ class LocalStringFile extends AbstractFile {
   }
 
   // Read the entire file -- not recommended for large files!
-  getAll(): Q.Promise<ArrayBuffer> {
+  getAll(): Q.Promise<?ArrayBuffer> {
    var buf = this.getFromCache(0, this.fileLength - 1);
    return Q.when(buf);
   }

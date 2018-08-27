@@ -4,13 +4,11 @@
  */
 'use strict';
 
-import type {Strand, Alignment, AlignmentDataSource} from '../Alignment';
-import type {TwoBitSource} from '../sources/TwoBitDataSource';
+import type {AlignmentDataSource} from '../Alignment';
 import type {BasePair} from './pileuputils';
 import type {VisualAlignment, InsertStats} from './PileupCache';
 import type {VisualGroup} from './AbstractCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
-import type Interval from '../Interval';
 import type {VizProps} from '../VisualizationWrapper';
 import type {Scale} from './d3utils';
 import type {State, NetworkStatus} from '../types';
@@ -82,7 +80,7 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
                       range: ContigInterval<string>,
                       insertStats: ?InsertStats,
                       colorByStrand: boolean,
-                      vGroups: VisualGroup[]) {
+                      vGroups: VisualGroup<VisualAlignment>[]) {
   // Should mismatched base pairs be shown as blocks of color or as letters?
   var pxPerLetter = scale(1) - scale(0),
       mode = DisplayMode.getDisplayMode(pxPerLetter),
@@ -164,7 +162,7 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
     ctx.popObject();
   }
 
-  function drawGroup(vGroup: VisualGroup) {
+  function drawGroup(vGroup: VisualGroup<VisualAlignment>) {
     ctx.save();
     if (insertStats && vGroup.insert) {
       var len = vGroup.span.length();
@@ -229,9 +227,8 @@ function opacityForQuality(quality: number): number {
   return Math.min(1.0, alpha);
 }
 
-
-class PileupTrack extends React.Component {
-  props: VizProps & { source: AlignmentDataSource };
+class PileupTrack extends React.Component<VizProps<AlignmentDataSource>, State> {
+  props: VizProps<AlignmentDataSource>;
   state: State;
   cache: PileupCache;
   tiles: PileupTiledCanvas;
@@ -239,7 +236,7 @@ class PileupTrack extends React.Component {
   static getOptionsMenu: (options: Object) => any;
   static handleSelectOption: (key: string, oldOptions: Object) => Object;
 
-  constructor(props: VizProps) {
+  constructor(props: VizProps<AlignmentDataSource>) {
     super(props);
     this.state = {
       networkStatus: null

@@ -10,14 +10,14 @@ import RemoteFile from '../../main/RemoteFile';
 describe('GA4GHFeatureJson', function() {
   var json;
 
-  before(function () {
+  before(function(): any {
     return new RemoteFile('/test-data/features.ga4gh.chr1.120000-125000.json').getAllString().then(data => {
       json = data;
     });
   });
 
   it('should filter features from json', function(done) {
-
+    
     var source = GA4GHFeatureJson.create(json);
 
     var requestInterval = new ContigInterval('chr1', 130000, 135000);

@@ -9,7 +9,7 @@ import TwoBitDataSource from '../../main/sources/TwoBitDataSource';
 import RemoteFile from '../../main/RemoteFile';
 
 describe('TwoBitDataSource', function() {
-  function getTestSource() {
+  function getTestSource () {
     // See description of this file in TwoBit-test.js
     var tb = new TwoBit(new RemoteFile('/test-data/test.2bit'));
     return TwoBitDataSource.createFromTwoBitFile(tb);
@@ -36,19 +36,19 @@ describe('TwoBitDataSource', function() {
    * (in millions) and afterwards we set the range to small subrange
    * of the huge range. The huge range shouldn't be fetched from
    * 2bit file. But due to //github.com/hammerlab/pileup.js/issues/416
-   * every small request from the big range wasn't handled properly 
+   * every small request from the big range wasn't handled properly
    * afterwardfs.
-   * 
+   *
    */
   it('should fetch base pairs (bug 416)', function(done) {
     var source = getTestSource();
-    //this range shouldn't be fetched because is huge 
-    var hugeRange= {contig: 'chr22', start: 0, stop: 114529884};
+    // this range shouldn't be fetched because is huge
+    var hugeRange = {contig: 'chr22', start: 0, stop: 114529884};
 
-    //small range that due to bug wasn't properly handled
+    // small range that due to bug wasn't properly handled
     var smallSubRange = {contig: 'chr22', start: 0, stop: 3};
     source.on('newdata', () => {
-      //should be called only once when short chunk is requested
+      // should be called only once when short chunk is requested
       expect(source.getRange(smallSubRange)).to.deep.equal({
         'chr22:0': 'N',
         'chr22:1': 'T',
@@ -59,10 +59,10 @@ describe('TwoBitDataSource', function() {
       done();
     });
 
-    //try to fetch huge chunk of data (should be skipped)
+    // try to fetch huge chunk of data (should be skipped)
     source.rangeChanged(hugeRange);
 
-    //and now try to fetch small chunk (should be fetched and proper newdata event should be dispatched)
+    // and now try to fetch small chunk (should be fetched and proper newdata event should be dispatched)
     source.rangeChanged(smallSubRange);
   });
 
@@ -97,32 +97,34 @@ describe('TwoBitDataSource', function() {
 
     source.on('newdata', () => {
       expect(source.getRange({contig: 'chr22', start: 0, stop: 14}))
-          .to.deep.equal({
-            'chr22:0':  'N',
-            'chr22:1':  'T',
-            'chr22:2':  'C',
-            'chr22:3':  'A',
-            'chr22:4':  'C',  // start of actual request
-            'chr22:5':  'A',
-            'chr22:6':  'G',
-            'chr22:7':  'A',
-            'chr22:8':  'T',
-            'chr22:9':  'C',  // end of actual requuest
-            'chr22:10': 'A',
-            'chr22:11': 'C',
-            'chr22:12': 'C',
-            'chr22:13': 'A',
-            'chr22:14': 'T'
-          });
+        .to.deep.equal({
+          'chr22:0': 'N',
+          'chr22:1': 'T',
+          'chr22:2': 'C',
+          'chr22:3': 'A',
+          'chr22:4': 'C', // start of actual request
+          'chr22:5': 'A',
+          'chr22:6': 'G',
+          'chr22:7': 'A',
+          'chr22:8': 'T',
+          'chr22:9': 'C', // end of actual requuest
+          'chr22:10': 'A',
+          'chr22:11': 'C',
+          'chr22:12': 'C',
+          'chr22:13': 'A',
+          'chr22:14': 'T'
+        });
       done();
     });
     source.rangeChanged({contig: 'chr22', start: 4, stop: 9});
   });
 
   it('should not fetch data twice', function(done) {
-    var file = new RemoteFile('/test-data/test.2bit'),
-        tb = new TwoBit(file),
-        source = TwoBitDataSource.createFromTwoBitFile(tb);
+    var file = new RemoteFile('/test-data/test.2bit');
+
+    var tb = new TwoBit(file);
+
+    var source = TwoBitDataSource.createFromTwoBitFile(tb);
 
     // pre-load headers & the data.
     tb.getFeaturesInRange('chr22', 5, 10).then(function() {
@@ -135,8 +137,8 @@ describe('TwoBitDataSource', function() {
         // do the same request again.
         source.rangeChanged({contig: 'chr22', start: 5, stop: 10});
 
-        Q.delay(100 /*ms*/).then(function() {
-          expect(newDataCount).to.equal(1);  // no new requests
+        Q.delay(100 /* ms */).then(function() {
+          expect(newDataCount).to.equal(1); // no new requests
           done();
         }).done();
       });
@@ -163,8 +165,9 @@ describe('TwoBitDataSource', function() {
 
   it('should allow a mix of chr and non-chr', function(done) {
     var source = getTestSource();
-    var chrRange = {contig: 'chr22', start: 0, stop: 3},
-        range = {contig: '22', start: 0, stop: 3};
+    var chrRange = {contig: 'chr22', start: 0, stop: 3};
+
+    var range = {contig: '22', start: 0, stop: 3};
 
     source.on('newdata', () => {
       expect(source.getRange(range)).to.deep.equal({
@@ -181,11 +184,12 @@ describe('TwoBitDataSource', function() {
 
   it('should only report newly-fetched ranges', function(done) {
     TwoBitDataSource.testBasePairsToFetch(10);
-    var initRange = {contig: 'chr22', start: 5, stop: 8},
-        secondRange = {contig: 'chr22', start: 8, stop: 15};
+    var initRange = {contig: 'chr22', start: 5, stop: 8};
+
+    var secondRange = {contig: 'chr22', start: 8, stop: 15};
     var source = getTestSource();
     source.once('newdata', newRange => {
-      expect(newRange.toString()).to.equal('chr22:0-10');  // expanded range
+      expect(newRange.toString()).to.equal('chr22:0-10'); // expanded range
 
       source.once('newdata', newRange => {
         // This expanded range excludes previously-fetched data.

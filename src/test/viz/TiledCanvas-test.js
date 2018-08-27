@@ -13,7 +13,7 @@ describe('TiledCanvas', function() {
     var getNewTileRanges = TiledCanvas.getNewTileRanges;
     var iv = (a, b) => new Interval(a, b);
 
-    it('should tile new ranges', function() {
+    it('should tile new ranges', function(done) {
       // The 0-100bp range gets enlarged & covered by a 0-500bp buffer.
       expect(getNewTileRanges([], iv(0, 100), 1))
           .to.deep.equal([iv(0, 499)]);
@@ -30,6 +30,7 @@ describe('TiledCanvas', function() {
       // There's an existing tile in the middle of the new range.
       expect(getNewTileRanges([iv(0, 200), iv(400, 700)], iv(350, 750), 1))
           .to.deep.equal([iv(201, 399), iv(701, 999)]);
+      done();
     });
 
     function intervalsAfterPanning(seq: Interval[], pxPerBase: number): Interval[] {
@@ -41,7 +42,7 @@ describe('TiledCanvas', function() {
       return tiles;
     }
 
-    it('should generate a small number of tiles while panning', function() {
+    it('should generate a small number of tiles while panning', function(done) {
       // This simulates a sequence of views that might result from panning.
       // Start at [100, 500], pan to the left, then over to the right.
       expect(intervalsAfterPanning(
@@ -57,9 +58,10 @@ describe('TiledCanvas', function() {
              iv(600, 1000),
              iv(610, 1010)], 1))
           .to.deep.equal([iv(0, 499), iv(500, 999), iv(1000, 1499)]);
+      done();
     });
 
-    it('should not leave gaps with non-integer pixels per base', function() {
+    it('should not leave gaps with non-integer pixels per base', function(done) {
       var pxPerBase = 1100 / 181;  // ~6.077 px/bp -- very awkward!
       expect(intervalsAfterPanning(
             [iv(100, 300),
@@ -84,6 +86,7 @@ describe('TiledCanvas', function() {
               iv(664, 746),
               iv(747, 829)
             ]);
+        done();
     });
   });
 });

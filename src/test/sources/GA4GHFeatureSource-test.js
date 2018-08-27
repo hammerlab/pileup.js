@@ -12,7 +12,7 @@ import RemoteFile from '../../main/RemoteFile';
 describe('GA4GHFeatureSource', function() {
   var server: any = null, response, source;
 
-  beforeEach(function () {
+  beforeEach(function(): any {
     source = GA4GHFeatureSource.create({
       endpoint: '/v0.6.0',
       featureSetId: "WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIl0",
@@ -25,7 +25,7 @@ describe('GA4GHFeatureSource', function() {
 
   });
 
-  afterEach(function () {
+  afterEach(function() {
     server.restore();
   });
 

@@ -5,33 +5,37 @@ import {expect} from 'chai';
 
 import ContigInterval from '../main/ContigInterval';
 
-describe('ContigInterval', function() {
-  it('should have basic accessors', function() {
+describe('ContigInterval', function(done) {
+
+  it('should have basic accessors', function(done) {
     var tp53 = new ContigInterval(10, 7512444, 7531643);
     expect(tp53.toString()).to.equal('10:7512444-7531643');
     expect(tp53.contig).to.equal(10);
     expect(tp53.start()).to.equal(7512444);
     expect(tp53.stop()).to.equal(7531643);
     expect(tp53.length()).to.equal(19200);
+    done();
   });
 
-  it('should determine intersections', function() {
+  it('should determine intersections', function(done) {
     var tp53 = new ContigInterval(10, 7512444, 7531643);
     var other = new ContigInterval(10, 7512444, 7531642);
 
     expect(tp53.intersects(other)).to.be.true;
+    done();
   });
 
-  it('should determine containment', function() {
+  it('should determine containment', function(done) {
     var ci = new ContigInterval('20', 1000, 2000);
     expect(ci.containsLocus('20', 999)).to.be.false;
     expect(ci.containsLocus('20', 1000)).to.be.true;
     expect(ci.containsLocus('20', 2000)).to.be.true;
     expect(ci.containsLocus('20', 2001)).to.be.false;
     expect(ci.containsLocus('21', 1500)).to.be.false;
+    done();
   });
 
-  it('should coalesce lists of intervals', function() {
+  it('should coalesce lists of intervals', function(done) {
     var ci = (a, b, c) => new ContigInterval(a, b, c);
 
     var coalesceToString =
@@ -83,9 +87,10 @@ describe('ContigInterval', function() {
     expect(ci1.toString()).to.equal('0:20-30');
     expect(ci2.toString()).to.equal('0:5-18');
     expect(ci3.toString()).to.equal('0:0-10');
+    done();
   });
 
-  it('should determine coverage', function() {
+  it('should determine coverage', function(done) {
     var iv = new ContigInterval(1, 10, 20);
     expect(iv.isCoveredBy([
       new ContigInterval(1, 0, 10),
@@ -133,5 +138,6 @@ describe('ContigInterval', function() {
       new ContigInterval(1, 5, 15),
       new ContigInterval(1, 0, 10)
     ]))).to.be.false;
+    done();
   });
 });

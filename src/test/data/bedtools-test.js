@@ -11,7 +11,7 @@ describe('bedtools', function() {
     var splitCodingExons = bedtools.splitCodingExons;
     var CodingInterval = bedtools.CodingInterval;
 
-    it('should split one exon', function() {
+    it('should split one exon', function(done) {
       var exon = new Interval(10, 20);
 
       expect(splitCodingExons([exon], new Interval(13, 17))).to.deep.equal([
@@ -39,9 +39,10 @@ describe('bedtools', function() {
         new CodingInterval(10, 14, false),
         new CodingInterval(15, 20, true)
       ]);
+      done();
     });
 
-    it('should handle purely coding or non-coding exons', function() {
+    it('should handle purely coding or non-coding exons', function(done) {
       var exon = new Interval(10, 20);
 
       expect(splitCodingExons([exon], new Interval(0, 9))).to.deep.equal([
@@ -53,6 +54,7 @@ describe('bedtools', function() {
       expect(splitCodingExons([exon], new Interval(10, 20))).to.deep.equal([
         new CodingInterval(10, 20, true)
       ]);
+      done();
     });
   });
 });

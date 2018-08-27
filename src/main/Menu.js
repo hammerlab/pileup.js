@@ -30,10 +30,10 @@ type Props = {
   onSelect: (key: string) => void;
 };
 
-class Menu extends React.Component<void, Props, void> {
+class Menu extends React.Component<Props> {
   props: Props;
 
-  clickHandler(idx: number, e: SyntheticMouseEvent) {
+  clickHandler(idx: number, e: SyntheticMouseEvent<>) {
     e.preventDefault();
     var item = this.props.items[idx];
     if (typeof(item) == 'string') return;  // for flow

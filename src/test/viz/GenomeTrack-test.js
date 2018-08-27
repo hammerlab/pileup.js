@@ -20,7 +20,8 @@ import {waitFor} from '../async';
 
 describe('GenomeTrack', function() {
   var testDiv = document.getElementById('testdiv');
-
+  if (!testDiv) throw new Error("Failed to match: testdiv");
+  
   beforeEach(() => {
     // A fixed width container results in predictable x-positions for mismatches.
     testDiv.style.width = '800px';
@@ -40,19 +41,19 @@ describe('GenomeTrack', function() {
       referenceSource = TwoBitDataSource.createFromTwoBitFile(new TwoBit(twoBitFile));
 
   var {drawnObjects} = dataCanvas.RecordingContext;
-  var hasReference = () => {
+  var hasReference = (): boolean => {
       // The reference initially shows "unknown" base pairs, so we have to
       // check for a specific known one to ensure that it's really loaded.
-      return testDiv.querySelector('canvas') &&
+      return testDiv.querySelector('canvas') != null &&
           drawnObjects(testDiv, '.reference').length > 0;
     };
 
-  var referenceTrackLoaded = () => {
+  var referenceTrackLoaded = (): boolean => {
     //this can be done in a preatier way
     return testDiv.querySelector('canvas') !== null ;
   };
 
-  it('should tolerate non-chr ranges', function() {
+  it('should tolerate non-chr ranges', function(): any {
     var p = pileup.create(testDiv, {
       range: {contig: '17', start: 7500730, stop: 7500790},
       tracks: [
@@ -92,7 +93,7 @@ describe('GenomeTrack', function() {
    * (range span is milions of nucleotides) into very narrow view
    * (tens of nucleotides).
    */
-  it('should zoom from huge zoom out', function() {
+  it('should zoom from huge zoom out', function(): any {
     
     var p = pileup.create(testDiv, {
       range: { contig: '17', start: 0, stop: 114529884 },
@@ -125,7 +126,7 @@ describe('GenomeTrack', function() {
     });
   });
 
-  it('should zoom in and out', function() {
+  it('should zoom in and out', function(): any {
     var p = pileup.create(testDiv, {
       range: {contig: '17', start: 7500725, stop: 7500775},
       tracks: [
@@ -168,7 +169,7 @@ describe('GenomeTrack', function() {
     });
   });
 
-  it('should accept user-entered locations', function() {
+  it('should accept user-entered locations', function(): any {
     var p = pileup.create(testDiv, {
       range: {contig: '17', start: 7500725, stop: 7500775},
       tracks: [
