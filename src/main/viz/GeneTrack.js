@@ -81,6 +81,9 @@ class GeneTrack extends React.Component<VizProps<BigBedSource>, State> {
 
   constructor(props: VizProps<BigBedSource>) {
     super(props);
+    this.state = {
+      networkStatus: null
+    };
   }
 
   render(): any {

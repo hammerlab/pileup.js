@@ -101,7 +101,4 @@ describe('GeneTrack', function() {
         p.destroy();
       });
   });
-
-
-
 });
