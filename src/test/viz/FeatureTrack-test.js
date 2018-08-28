@@ -25,20 +25,9 @@ describe('FeatureTrack', function() {
   var drawnObjects = dataCanvas.RecordingContext.drawnObjects;
 
   function ready(): boolean {
-    if (testDiv.querySelector('canvas') != null &&
-       drawnObjects(testDiv, '.features').length > 0) {
-      // for flow to be happy. Need to check whether
-      // feature selector exists before checking its height
-      var featureSelector = testDiv.querySelector('.features');
-      if (featureSelector != null) {
-       return parseInt(featureSelector.style.height) > 0;        
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
-
+      return testDiv.querySelector('.features canvas') !== null &&
+          testDiv.querySelector('.features canvas') !== undefined &&
+          drawnObjects(testDiv, '.features').length > 0;
   }
 
   describe('jsonFeatures', function() {

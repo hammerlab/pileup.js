@@ -232,7 +232,7 @@ describe('PileupCache', function() {
     done();
   });
 
-  it('should compute statistics on a BAM file', function(done): any {
+  it('should compute statistics on a BAM file', function(): any {
     this.timeout(5000);
     var bam = new Bam(
         new RemoteFile('/test-data/synth4.tumor.1.4930000-4950000.bam'),
@@ -243,7 +243,6 @@ describe('PileupCache', function() {
       var stats = cache.getInsertStats();
       expect(stats.minOutlierSize).to.be.within(1, 100);
       expect(stats.maxOutlierSize).to.be.within(500, 600);
-      done();
     });
   });
 
