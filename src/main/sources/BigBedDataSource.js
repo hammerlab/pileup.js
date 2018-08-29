@@ -126,9 +126,10 @@ function createFromBigBedFile(remoteSource: BigBed): BigBedSource {
         coveredRanges = ContigInterval.coalesce(coveredRanges);
         var genes = fb.rows.map(parseBedFeature);
         genes.forEach(gene => addGene(gene));
-        //we have new data from our internal block range
-        o.trigger('newdata', fb.range);
       });
+      //we have new data from our internal block range
+      o.trigger('newdata', interval);
+      o.trigger('networkdone');
     });
   }
 

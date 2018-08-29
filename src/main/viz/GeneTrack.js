@@ -24,6 +24,7 @@ import d3utils from './d3utils';
 import scale from '../scale';
 import ContigInterval from '../ContigInterval';
 import canvasUtils from './canvas-utils';
+import utils from '../utils';
 import dataCanvas from 'data-canvas';
 import style from '../style';
 
@@ -61,7 +62,8 @@ function drawGeneName(ctx: CanvasRenderingContext2D,
                       textIntervals: Interval[]) {
   var p = gene.position,
       centerX = 0.5 * (clampedScale(1 + p.start()) + clampedScale(1 + p.stop()));
-  var name = gene.name || gene.id;
+  // do not use gene name if it is null or empty
+  var name =  !_.isEmpty(utils.stringToLiteral(gene.name)) ? gene.name : gene.id;
   var textWidth = ctx.measureText(name).width;
   var textInterval = new Interval(centerX - 0.5 * textWidth,
                                   centerX + 0.5 * textWidth);
@@ -79,6 +81,9 @@ class GeneTrack extends React.Component<VizProps<BigBedSource>, State> {
 
   constructor(props: VizProps<BigBedSource>) {
     super(props);
+    this.state = {
+      networkStatus: null
+    };
   }
 
   render(): any {
