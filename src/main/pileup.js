@@ -209,7 +209,7 @@ var pileup = {
       allelFrequencyStrategy: AllelFrequencyStrategy,
     },
   },
-  version: '0.6.9'
+  version: '0.6.10'
 };
 
 module.exports = pileup;
