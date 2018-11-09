@@ -90,6 +90,9 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
     throw new Error('You must include at least one track with type=reference');
   }
 
+  // creates and renders react element which contains the visualization;
+  // the element is rendered in the element passed as a parameter to the create function
+  // details on the rendered element in Root.js
   var reactElement =
       ReactDOM.render(<Root referenceSource={referenceTrack.source}
                             tracks={vizTracks}
@@ -212,6 +215,9 @@ var pileup = {
   version: '0.6.10'
 };
 
+// this exported object pileup contains many objects, including, importantly,
+// the create function defined previously in this file.
+// this is exported into the global window object so it can be accessed by other files
 module.exports = pileup;
 
 // Export a global until the distributed package works with CommonJS
