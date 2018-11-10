@@ -54,7 +54,7 @@ class VisualizationWrapper extends React.Component<Props, State> {
   }
 
   updateSize(): any {
-    var thisNode = ReactDOM.findDOMNode(this)
+    var thisNode = ReactDOM.findDOMNode(this) // note that this construction is discouraged on the react website
     if (thisNode && thisNode instanceof Element) { // check for getContext
       var parentDiv = thisNode.parentNode;  
       if (parentDiv && parentDiv instanceof HTMLElement) { // check for getContext

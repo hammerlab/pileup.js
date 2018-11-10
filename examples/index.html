@@ -16,6 +16,15 @@
 <script src="../dist/pileup.min.js"></script>
 -->
 
+<!-- The data.js file loads in data but also does much more.
+  It creates an object called "sources" (see the file for the code)
+  which specifies all of the little regions with appear on the webpage;
+  ie. it specifies the webpage should have a Reference genome,
+  a Scale, specify the Location the user is looking at, show
+  the Variant bar, etc.
+  This object is then loaded in by the playground.js file below,
+  which renders the specified things onto the webpage.
+-->
 <script src="data.js"></script>
 <!--
 The playground.js file actually loads the visualization into the web browser.

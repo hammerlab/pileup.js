@@ -6,6 +6,12 @@ var bamSource = pileup.formats.bam({
   indexUrl: '/test-data/synth3.normal.17.7500000-7515000.bam.bai'
 });
 
+// it looks like this sources object specifies what should be displayed
+// on the webpage; each seems to include a name and a "viz",
+// or the object which should be used to render the data.
+// these viz objects can be found in the /src/main/viz
+// folder, and contain the code which displays the HTML
+// canvases what display the genome, etc.
 var sources = [
   {
     viz: pileup.viz.genome(),

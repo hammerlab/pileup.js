@@ -16,6 +16,11 @@ if (pos) {
   // use default range from, e.g. data.js
 }
 
+// this adds the feature that if you add a url parameter colorByStrand
+// and set it to some value (looks like pretty much any value
+// counts as true at this point), this causes the gene "strands"
+// displayed to be colored red and blue; I'm not sure what it signifies;
+// update this if you figure it out
 var colorByStrand = getParameterByName('colorByStrand');
 if (colorByStrand) {
   sources.forEach(source => {
@@ -32,6 +37,11 @@ var p = pileup.create(document.getElementById('pileup'), {
   tracks: sources
 });
 
+// it looks like the rest of this file is this "jiggling" stuff
+// which basically just does some simple test for the FPS
+// with which the website is rendering; it does this by
+// "jiggling" the genome displayed.
+// not relevant beyond testing
 function jiggle() {
   var r = p.getRange();
   if (r.start % 10 == 0) {
