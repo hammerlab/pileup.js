@@ -1,6 +1,6 @@
-While reading through this code, I've noticed many things we could improve.
+# While reading through this code, I've noticed many things we could improve.
 
-Visualization items:
+## Visualization items:
 - When zooming in, we get to a point where letters are displayed instead of
 just colors for the base pair letters.  The way they are currently displayed, they
 get cut off, so only half of the letter is visible.
@@ -17,7 +17,7 @@ thing to add.  (It may already exist and I just missed it.)
 in the data?  In other words, without looking at the whole genome track, we could see on a
 dashboard if there is a common variation.
 
-Code maintnance:
+## Code maintnance:
 - Npm reports many security vulnerabilities in the project; we should deal with these.
 - I've noticed a react construct used which the official react website says is better
 to avoid (and I think it is deprecated in new versions of react).  This is the
@@ -27,9 +27,12 @@ a long time to compile.  It is probably worth seeing if there is some way to hav
 procedure only rebuild files which have been modified.  I suspect this is easier said than done.
 
 
-Major inefficiency in visualization:
+## Major inefficiency in visualization:
 - Right now, when viewing large DNA tracks, the visualization runs extremely slowly.  I think
 it is trying to load in every base pair individually and display it very zoomed out; it would be
 much better to have the server simply create some sort of overview which it sends to the client
 so the client doesn't have to do so much work.  Probably something like this is what Alyssa & the
 team are working on, so we probably don't need to fix it in pileup.
+
+## Potential Bugs:
+- intersect and intersectall in interval.js

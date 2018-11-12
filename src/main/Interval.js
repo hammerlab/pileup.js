@@ -4,6 +4,7 @@
  * @flow
  */
 
+//Kavi: This is base file: it is not dependent on any other file.
 "use strict";
 
 class Interval {
@@ -19,9 +20,12 @@ class Interval {
 
   // TODO: make this a getter method & switch to Babel.
   length(): number {
-    return Math.max(0, this.stop - this.start + 1);
-  }
+    return Math.max(0, this.stop - this.start + 1); // Kavi: makes sure that
+  // length is never negative
+}
 
+  // Kavi: this could be a potential source of a bug. It is possible that then
+  // other may not be  intersecting at all. we need to use intersects here.
   intersect(other: Interval): Interval {
     return new Interval(Math.max(this.start, other.start),
                         Math.min(this.stop, other.stop));
@@ -35,6 +39,7 @@ class Interval {
     return value >= this.start && value <= this.stop;
   }
 
+  // Kavi: This basically works as a subset.
   containsInterval(other: Interval): boolean {
     return this.contains(other.start) && this.contains(other.stop);
   }
@@ -44,7 +49,7 @@ class Interval {
   // possible value for the start of the resulting Interval.
   round(size: number, zeroBased: boolean): Interval {
     var minimum = zeroBased ? 0 : 1;
-    var roundDown = x => x - x % size;
+    var roundDown = x => x - x % size; //Kavi: This acts as a lambda function in python
     var newStart = Math.max(minimum, roundDown(this.start)),
         newStop = roundDown(this.stop + size - 1);
 
@@ -121,6 +126,8 @@ class Interval {
     return comps;
   }
 
+  // Kavi: Should not this have the same issues that we had with the other
+  //function?
   static intersectAll(intervals: Array<Interval>): Interval {
     if (!intervals.length) {
       throw new Error('Tried to intersect zero intervals');

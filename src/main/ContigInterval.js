@@ -13,7 +13,8 @@ import {flatMap} from './utils';
  * are indexed, for example).
  */
 class ContigInterval<T: (number|string)> {
-  contig: T;
+  //Kavi: Contig is then the idtification of the genome
+  contig: T; // Kavi: These are just declarations of what the values should be.
   interval: Interval;
 
   constructor(contig: T, start: number, stop: number) {
@@ -61,6 +62,7 @@ class ContigInterval<T: (number|string)> {
   }
 
   // Is this read on the given contig? (allowing for chr17 vs 17-style mismatches)
+  // Kavi: makes sure that the chromosome is the one that we need to see.
   chrOnContig(contig: T): boolean {
     return (this.contig === contig ||
             this.contig === 'chr' + contig ||

@@ -12,7 +12,8 @@ import _ from 'underscore';
 
 import Interval from './Interval';
 
-// Compare two tuples of equal length. Is t1 <= t2?
+// Compare two tuples of equal length. Is t1 <= t2? Kavi: Here, the first variables
+// are given most importance.
 // TODO: make this tupleLessOrEqual<T> -- it works with strings or booleans, too.
 function tupleLessOrEqual(t1: Array<number>, t2: Array<number>): boolean {
   if (t1.length != t2.length) throw new Error('Comparing non-equal length tuples');
