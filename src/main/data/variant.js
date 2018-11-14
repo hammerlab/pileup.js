@@ -56,7 +56,20 @@ function intersects(variant: Variant, range: ContigInterval<string>): boolean {
   return range.intersects(new ContigInterval(variant.contig, variant.position, variant.position + 1));
 }
 
+
+// holds variant and genotype sample ids
+class VariantContext {
+  variant: Variant;
+  sampleIds: string[];
+
+  constructor(variant: Object, sampleIds: string[]) {
+    this.variant = variant;
+    this.sampleIds = sampleIds;
+  }
+}
+
 module.exports = {
   Variant,
+  VariantContext,
   intersects
 };

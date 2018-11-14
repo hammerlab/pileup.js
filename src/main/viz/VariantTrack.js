@@ -75,7 +75,7 @@ class VariantTrack extends React.Component<VizProps<VcfDataSource>, State> {
   renderScene(ctx: DataCanvasRenderingContext2D) {
     var range = this.props.range,
         interval = new ContigInterval(range.contig, range.start, range.stop),
-        variants = this.props.source.getFeaturesInRange(interval),
+        variants = this.props.source.getVariantsInRange(interval),
         scale = this.getScale(),
         height = this.props.height,
         y = height - style.VARIANT_HEIGHT - 1;

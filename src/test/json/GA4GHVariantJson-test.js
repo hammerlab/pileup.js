@@ -22,7 +22,7 @@ describe('GA4GHVariantJson', function() {
 
     var requestInterval = new ContigInterval('1', 10000, 10500);
 
-    var variants = source.getFeaturesInRange(requestInterval);
+    var variants = source.getVariantsInRange(requestInterval);
     expect(variants).to.have.length(3);
     done();
 
@@ -34,7 +34,7 @@ describe('GA4GHVariantJson', function() {
 
     var requestInterval = new ContigInterval('1', 10, 20);
 
-    var variants = source.getFeaturesInRange(requestInterval);
+    var variants = source.getVariantsInRange(requestInterval);
     expect(variants).to.have.length(0);
     done();
 

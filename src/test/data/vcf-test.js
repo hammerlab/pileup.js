@@ -15,9 +15,9 @@ describe('VCF', function() {
       return vcf.getFeaturesInRange(range).then(features => {
         expect(features).to.have.length(6);
 
-        var v0 = features[0];
+        var v0 = features[0].variant;
 
-        var v5 = features[5];
+        var v5 = features[5].variant;
 
         expect(v0.contig).to.equal('20');
         expect(v0.position).to.equal(63799);
@@ -53,9 +53,9 @@ describe('VCF', function() {
     var range = new ContigInterval('chr20', 61790, 61800);
     return vcf.getFeaturesInRange(range).then(features => {
       expect(features).to.have.length(1);
-      expect(features[0].contig).to.equal('20');
-      expect(features[0].majorFrequency).to.equal(0.7);
-      expect(features[0].minorFrequency).to.equal(0.7);
+      expect(features[0].variant.contig).to.equal('20');
+      expect(features[0].variant.majorFrequency).to.equal(0.7);
+      expect(features[0].variant.minorFrequency).to.equal(0.7);
     });
   });
 
@@ -64,9 +64,9 @@ describe('VCF', function() {
     var range = new ContigInterval('chr20', 61730, 61740);
     return vcf.getFeaturesInRange(range).then(features => {
       expect(features).to.have.length(1);
-      expect(features[0].contig).to.equal('20');
-      expect(features[0].majorFrequency).to.equal(0.6);
-      expect(features[0].minorFrequency).to.equal(0.3);
+      expect(features[0].variant.contig).to.equal('20');
+      expect(features[0].variant.majorFrequency).to.equal(0.6);
+      expect(features[0].variant.minorFrequency).to.equal(0.3);
     });
   });
 
@@ -75,8 +75,8 @@ describe('VCF', function() {
     var range = new ContigInterval('chr20', 63799, 69094);
     return vcf.getFeaturesInRange(range).then(features => {
       expect(features).to.have.length(6);
-      expect(features[0].contig).to.equal('20'); // not chr20
-      expect(features[5].contig).to.equal('20');
+      expect(features[0].variant.contig).to.equal('20'); // not chr20
+      expect(features[5].variant.contig).to.equal('20');
     });
   });
 
@@ -91,6 +91,14 @@ describe('VCF', function() {
       return vcf.getFeaturesInRange(chr5);
     }).then(features => {
       expect(features).to.have.length(5);
+    });
+  });
+
+  it('should get samples', function(): any {
+    var vcf = new VcfFile(new RemoteFile('/test-data/sort-bug.vcf'));
+
+    return vcf.getSamples().then(samples => {
+      expect(samples).to.have.length(2);
     });
   });
 });

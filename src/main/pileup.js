@@ -39,6 +39,7 @@ import LocationTrack from './viz/LocationTrack';
 import PileupTrack from './viz/PileupTrack';
 import ScaleTrack from './viz/ScaleTrack';
 import VariantTrack from './viz/VariantTrack';
+import GenotypeTrack from './viz/GenotypeTrack';
 import Root from './Root';
 
 type GenomeRange = {
@@ -202,6 +203,7 @@ var pileup = {
     location: makeVizObject(LocationTrack),
     scale:    makeVizObject(ScaleTrack),
     variants: makeVizObject(VariantTrack),
+    genotypes: makeVizObject(GenotypeTrack),
     pileup:   makeVizObject(PileupTrack)
   },
   enum: {
