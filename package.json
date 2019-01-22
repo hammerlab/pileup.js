@@ -92,7 +92,7 @@
     "mocha-phantomjs-istanbul": "0.0.2",
     "number-to-locale-string": "^1.0.0",
     "parse-data-uri": "^0.2.0",
-    "phantomjs-prebuilt": "2.1.16",
+    "phantomjs": "1.9.17",
     "prepush-hook": "^0.1.0",
     "react-addons-test-utils": "^0.14.0",
     "sinon": "^1.12.2",
