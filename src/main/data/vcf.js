@@ -9,13 +9,26 @@
 
 import type AbstractFile from '../AbstractFile';
 import type Q from 'q';
+import _ from 'underscore';
 import ContigInterval from '../ContigInterval';
+import {Variant, VariantContext} from "./variant";
+
 
 // This is a minimally-parsed line for facilitating binary search.
 type LocusLine = {
   contig: string;
   position: number;
   line: string;
+}
+
+function extractSamples(header: string[]): string[] {
+
+  var line = _.filter(header, h => h.startsWith("#CHROM"))[0].split('\t');
+
+  // drop first 8 titles. See vcf header specification 1.3: https://samtools.github.io/hts-specs/VCFv4.2.pdf
+  var samples = line.splice(9);
+
+  return samples;
 }
 
 
@@ -31,12 +44,14 @@ function extractLocusLine(vcfLine: string): LocusLine {
 }
 
 
-function extractVariant(vcfLine: string): Variant {
+function extractVariantContext(samples: string[], vcfLine: string): VariantContext {
   var parts = vcfLine.split('\t');
   var maxFrequency = null;
   var minFrequency = null;
+  var genotypeSamples = [];
+
   if (parts.length>=7){
-    var params = parts[7].split(';');
+    var params = parts[7].split(';'); // process INFO field
     for (var i=0;i<params.length;i++) {
       var param = params[i];
       if (param.startsWith("AF=")) {
@@ -50,11 +65,26 @@ function extractVariant(vcfLine: string): Variant {
         }
       }
     }
+
+    // process genotype information for each sample
+    if (parts.length > 9) {
+      var sample_i = 0; // keeps track of which sample we are processing
+      for (i = 9; i < parts.length; i++) {
+        var genotype = parts[i].split(':')[0].split("/");
+        if (genotype.length == 2) {
+          if (parseInt(genotype[0]) == 1 || parseInt(genotype[1]) == 1) {
+            // TODO do you have to overwrite with concat?
+            genotypeSamples = genotypeSamples.concat(samples[sample_i]);
+          }
+        }
+        sample_i++;
+      }
+    }
   }
   var contig = parts[0];
   var position = Number(parts[1]);
 
-  return new Variant({
+  return new VariantContext(new Variant({
     contig: contig,
     position: position,
     id: parts[2],
@@ -63,7 +93,7 @@ function extractVariant(vcfLine: string): Variant {
     majorFrequency: maxFrequency,
     minorFrequency: minFrequency,
     vcfLine,
-  });
+  }), genotypeSamples);
 }
 
 
@@ -99,8 +129,10 @@ function lowestIndex<T>(haystack: T[], needle: T, compare: (a: T, b: T)=>number)
 class ImmediateVcfFile {
   lines: LocusLine[];
   contigMap: {[key:string]:string};  // canonical map
+  samples: string[];
 
-  constructor(lines: LocusLine[]) {
+  constructor(samples: string[], lines: LocusLine[]) {
+    this.samples = samples;
     this.lines = lines;
     this.contigMap = this.extractContigs();
   }
@@ -127,7 +159,7 @@ class ImmediateVcfFile {
     return contigMap;
   }
 
-  getFeaturesInRange(range: ContigInterval<string>): Variant[] {
+  getFeaturesInRange(range: ContigInterval<string>): VariantContext[] {
     var lines = this.lines;
     var contig = this.contigMap[range.contig];
     if (!contig) {
@@ -155,7 +187,7 @@ class ImmediateVcfFile {
       result.push(lines[i]);
     }
 
-    return result.map(line => extractVariant(line.line));
+    return result.map(line => extractVariantContext(this.samples, line.line));
   }
 }
 
@@ -169,76 +201,39 @@ class VcfFile {
 
     this.immediate = this.remoteFile.getAllString().then(txt => {
       // Running this on a 12MB string takes ~80ms on my 2014 Macbook Pro
-      var lines = txt.split('\n')
+      var txtLines = txt.split('\n');
+      var lines =  txtLines
                      .filter(line => (line.length && line[0] != '#'))
                      .map(extractLocusLine);
-      return lines;
-    }).then(lines => {
+
+      var header = txtLines.filter(line => (line.length && line[0] == '#'));
+
+      var samples = extractSamples(header);
+
+      return [samples, lines];
+    }).then(results => {
+      var samples = results[0];
+      var lines = results[1];
       // Sorting this structure from the 12MB VCF file takes ~60ms
       lines.sort(compareLocusLine);
-      return new ImmediateVcfFile(lines);
+      return new ImmediateVcfFile(samples, lines);
     });
     this.immediate.done();
   }
 
-  getFeaturesInRange(range: ContigInterval<string>): Q.Promise<Variant[]> {
+  getSamples(): Q.Promise<string[]> {
+    return this.immediate.then(immediate => {
+      return immediate.samples;
+    });
+  }
+
+  getFeaturesInRange(range: ContigInterval<string>): Q.Promise<VariantContext[]> {
     return this.immediate.then(immediate => {
       return immediate.getFeaturesInRange(range);
     });
   }
 }
 
-class Variant {
-  contig: string;
-  position: number;
-  ref: string;
-  alt: string;
-  id: string;
-  //this is the bigest allel frequency for single vcf entry
-  //single vcf entry might contain more than one variant like the example below
-  //20 1110696 rs6040355 A G,T 67 PASS NS=2;DP=10;AF=0.333,0.667;AA=T;DB
-  majorFrequency: ?number;
-  //this is the smallest allel frequency for single vcf entry
-  minorFrequency: ?number;
-  vcfLine: string;
-
-
-  constructor(variant: Object) {
-   this.contig = variant.contig;
-   this.position = variant.position;
-   this.ref = variant.ref;
-   this.alt = variant.alt;
-   this.id = variant.id;
-   this.majorFrequency = variant.majorFrequency;
-   this.minorFrequency = variant.minorFrequency;
-   this.vcfLine = variant.vcfLine;
-  }
-
-  static fromGA4GH(ga4ghVariant: Object): Variant {
-   return new Variant(
-    {
-     contig: ga4ghVariant.referenceName,
-     position: ga4ghVariant.start,
-     id: ga4ghVariant.id,
-     ref: ga4ghVariant.referenceBases,
-     alt: ga4ghVariant.alternateBases,
-     majorFrequency: 0,
-     minorFrequency: 0, // TODO extract these
-     vcfLine: "" // TODO
-   });
-  }
-
-  intersects(range: ContigInterval<string>): boolean {
-    return intersects(this, range);
-  }
-
-}
-
-function intersects(variant: Variant, range: ContigInterval<string>): boolean {
-  return range.intersects(new ContigInterval(variant.contig, variant.position, variant.position + 1));
-}
-
 module.exports = {
-  VcfFile,
-  Variant
+  VcfFile
 };

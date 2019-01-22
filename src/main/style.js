@@ -68,4 +68,10 @@ module.exports = {
   VARIANT_FILL: '#ddd',
   VARIANT_HEIGHT: 14,
 
+  // Genotype Track
+  GENOTYPE_SPACING: 1,
+  GENOTYPE_HEIGHT: 10,
+  GENOTYPE_FILL: '#999999',
+  BACKGROUND_FILL: '#f2f2f2',
+
 };

@@ -35,14 +35,14 @@ describe('GA4GHVariantSource', function() {
                        [200, { "Content-Type": "application/json" }, response]);
 
     var requestInterval = new ContigInterval('1', 10000, 10500);
-    expect(source.getFeaturesInRange(requestInterval))
+    expect(source.getVariantsInRange(requestInterval))
         .to.deep.equal([]);
 
     var progress = [];
     source.on('networkprogress', e => { progress.push(e); });
     source.on('networkdone', e => { progress.push('done'); });
     source.on('newdata', () => {
-      var variants = source.getFeaturesInRange(requestInterval);
+      var variants = source.getVariantsInRange(requestInterval);
       expect(variants).to.have.length(3);
       done();
     });
@@ -56,14 +56,14 @@ describe('GA4GHVariantSource', function() {
                        [200, { "Content-Type": "application/json" }, response]);
 
     var requestInterval = new ContigInterval('2', 10000, 20000);
-    expect(source.getFeaturesInRange(requestInterval))
+    expect(source.getVariantsInRange(requestInterval))
         .to.deep.equal([]);
 
     var progress = [];
     source.on('networkprogress', e => { progress.push(e); });
     source.on('networkdone', e => { progress.push('done'); });
     source.on('newdata', () => {
-      var variants = source.getFeaturesInRange(requestInterval);
+      var variants = source.getVariantsInRange(requestInterval);
       expect(variants).to.have.length(0);
       done();
     });

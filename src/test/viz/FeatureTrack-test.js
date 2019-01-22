@@ -69,7 +69,7 @@ describe('FeatureTrack', function() {
           {
             viz: pileup.viz.features(),
             data: pileup.formats.featureJson(json),
-            options: {onFeatureClicked: featureClicked},  
+            options: {onFeatureClicked: featureClicked},
           }
         ]
       });
@@ -87,16 +87,16 @@ describe('FeatureTrack', function() {
           expect(features.map(f => f.position.start())).to.deep.equal(
               [89295, 92230, 110953, 120725]);
 
-          var height = yForRow(4) * window.devicePixelRatio; // should be 4 rows
+          var height = Math.round(yForRow(4) * window.devicePixelRatio); // should be 4 rows
           features = testDiv.querySelector('.features');
           expect(features).to.not.be.null;
           if (features != null) {
             expect(features.style.height).to.equal(`${height}px`);
           }
 
-          // check clicking on feature TODO
+          // check clicking on feature
           var canvasList =  testDiv.getElementsByTagName('canvas');
-          var canvas = canvasList[1]; 
+          var canvas = canvasList[1];
           expect(featureClickedData).to.be.null;
           ReactTestUtils.Simulate.click(canvas,{nativeEvent: {offsetX: 430, offsetY: 50 * window.devicePixelRatio}});
           expect(featureClickedData).to.not.be.null;
@@ -164,7 +164,7 @@ describe('FeatureTrack', function() {
         expect(features).to.have.length(10);
 
         // canvas height should be maxed out, should not exceed parent height limits
-        var expectedHeight = 150 * window.devicePixelRatio;
+        var expectedHeight = Math.round(150 * window.devicePixelRatio);
         var featureCanvas = testDiv.querySelector('.features');
         expect(featureCanvas).to.not.be.null;
         if (featureCanvas != null) {

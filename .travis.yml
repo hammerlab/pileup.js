@@ -1,7 +1,7 @@
 sudo: false  # Use container-based infrastructure
 language: node_js
 node_js:
-  - "6.14"
+  - "8.9"
 
 script: >
     npm run build &&
