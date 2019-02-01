@@ -24,7 +24,7 @@ to avoid (and I think it is deprecated in new versions of react).  This is the
 `findDOMNode()` function.  We may want to restructure the code so this is not used.
 - When running `npm run build`, it appears that all files are recompiled, so even small changes take
 a long time to compile.  It is probably worth seeing if there is some way to have the build
-procedure only rebuild files which have been modified.  I suspect this is easier said than done.
+procedure only rebuild files which have been modified.  I suspect this is easier said than done. ** _Solved:_ We have to run `npm run watch` so that we can change the code, refresh and run it again.**
 
 
 ## Major inefficiency in visualization:
@@ -33,6 +33,7 @@ it is trying to load in every base pair individually and display it very zoomed 
 much better to have the server simply create some sort of overview which it sends to the client
 so the client doesn't have to do so much work.  Probably something like this is what Alyssa & the
 team are working on, so we probably don't need to fix it in pileup.
+- The scrolling based on click is extremely slow. 
 
 ## Potential Bugs:
 - intersect and intersectall in interval.js

@@ -13,9 +13,10 @@ import Controls from './Controls';
 import Menu from './Menu';
 import VisualizationWrapper from './VisualizationWrapper';
 
+//Kavi: This seems to be a class initialization
 type Props = {
-  referenceSource: TwoBitSource;
-  tracks: VisualizedTrack[];
+  referenceSource: TwoBitSource; //Kavi: Has the Base pairs that we need.
+  tracks: VisualizedTrack[]; 
   initialRange: GenomeRange;
 };
 
@@ -94,7 +95,7 @@ class Root extends React.Component<Props, State> {
   makeDivForTrack(key: string, track: VisualizedTrack): React$Element<'div'> {
     //this should be improved, but I have no idea how (when trying to
     //access this.trackReactElements with string key, flow complains)
-    var intKey = parseInt(key); 
+    var intKey = parseInt(key);
     var trackEl = (
         <VisualizationWrapper visualization={track.visualization}
             range={this.state.range}

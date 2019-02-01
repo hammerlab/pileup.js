@@ -73,7 +73,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
   }
 
   var vizTracks = params.tracks.map(function(track: Track): VisualizedTrack {
-    var source = track.data ? track.data : track.viz.component.defaultSource;
+  var source = track.data ? track.data : track.viz.component.defaultSource;
     if(!source) {
       var displayName = track.viz.component.displayName != null ? track.viz.component.displayName : 'track';
       throw new Error(
@@ -150,7 +150,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
       } else {
         throw 'Cannot call setRange on non-existent range';
       }
-      
+
     },
     destroy(): void {
       if (!vizTracks) {

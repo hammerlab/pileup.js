@@ -32,7 +32,7 @@ if (colorByStrand) {
 
 // here a pileup element is created and added to the document in the
 // #pileup div; see /src/main/pileup.js for more information
-var p = pileup.create(document.getElementById('pileup'), {
+var p = pileup.create(document.getElementById('pileup'), { //'pileup' object is elOrId
   range: range,
   tracks: sources
 });

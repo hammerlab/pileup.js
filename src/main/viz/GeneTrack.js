@@ -164,6 +164,7 @@ class GeneTrack extends React.Component<VizProps<BigBedSource>, State> {
         ctx.pushObject(gene);
         ctx.lineWidth = 1;
         ctx.strokeStyle = style.GENE_COLOR;
+
         ctx.fillStyle = style.GENE_COLOR;
 
         canvasUtils.drawLine(ctx, clampedScale(1 + gene.position.start()), geneLineY + 0.5,

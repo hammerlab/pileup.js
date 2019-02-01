@@ -33,12 +33,18 @@ function renderGenome(ctx: DataCanvasRenderingContext2D,
   var showText = DisplayMode.isText(mode);
 
   if (mode != DisplayMode.HIDDEN) {
+
     ctx.textAlign = 'center';
     if (mode == DisplayMode.LOOSE) {
-      ctx.font = style.LOOSE_TEXT_STYLE;
+      //ctx.font = style.LOOSE_TEXT_STYLE;
     } else if (mode == DisplayMode.TIGHT) {
-      ctx.font = style.TIGHT_TEXT_STYLE;
+      //ctx.font = style.TIGHT_TEXT_STYLE;
     }
+    console.log("pxPerLetter is", pxPerLetter);
+    console.log("font size will be", pxPerLetter*10/window.screen.width);
+    ctx.font = String(Math.min(pxPerLetter, 12)) + "px" + ` 'Helvetica Neue', Helvetica, Arial, sans-serif`;
+    //console.log("font loose is ", style.LOOSE_TEXT_STYLE);
+    //console.log("font tight is ", style.TIGHT_TEXT_STYLE)
 
     var previousBase = null;
     var start = range.start(),
@@ -54,18 +60,22 @@ function renderGenome(ctx: DataCanvasRenderingContext2D,
         // We only push objects in the text case as it involves creating a
         // new object & can become a performance issue.
         // 0.5 = centered
-        ctx.fillText(letter, scale(1 + 0.5 + pos), height - 1);
+        console.log("font size is ", ctx.font);
+        ctx.fillText(letter, scale(1 + 0.5 + pos), height - 10);
       } else {
         if (pxPerLetter >= style.COVERAGE_MIN_BAR_WIDTH_FOR_GAP) {
           // We want a white space between blocks at this size, so we can see
           // the difference between bases.
+
           ctx.fillRect(scale(1 + pos) + 0.5, 0,  pxPerLetter - 1.5, height);
         } else if (previousBase === letter) {
           // Otherwise, we want runs of colors to be completely solid ...
+          //console.log("we are in the else if statemet")
           ctx.fillRect(scale(1 + pos) - 1.5, 0, pxPerLetter + 1.5, height);
         } else {
           // ... and minimize the amount of smudging and whitespace between
           // bases.
+          //pconsole.log("we are in the else statement")
           ctx.fillRect(scale(1 + pos) - 0.5, 0,  pxPerLetter + 1.5, height);
         }
       }
@@ -81,6 +91,7 @@ function renderGenome(ctx: DataCanvasRenderingContext2D,
 class GenomeTiledCanvas extends TiledCanvas {
   source: TwoBitSource;
   height: number;
+
 
   constructor(source: TwoBitSource, height: number) {
     super();
@@ -156,7 +167,7 @@ class GenomeTrack extends React.Component<VizProps<TwoBitSource>, State> {
 
     if (canvas && canvas instanceof Element) { // check for getContext
       if (canvas instanceof HTMLCanvasElement) { // check for sizeCanvas
-        d3utils.sizeCanvas(canvas, width, height);
+        d3utils.sizeCanvas(canvas, width,height);
       }
       var ctx = dataCanvas.getDataContext(canvasUtils.getContext(canvas));
 
