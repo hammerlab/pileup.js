@@ -47,29 +47,45 @@ class Variant {
   }
 
   intersects(range: ContigInterval<string>): boolean {
-    return intersects(this, range);
+    return range.intersects(new ContigInterval(this.contig, this.position, this.position + 1));
   }
 
 }
 
-function intersects(variant: Variant, range: ContigInterval<string>): boolean {
-  return range.intersects(new ContigInterval(variant.contig, variant.position, variant.position + 1));
-}
+// GA4GH Genotype Call
+class Call {
+  callSetName: string;
+  genotype: number[];
+  callSetId: string;
+  phaseset: string;
 
+  constructor(callSetName: string, genotype: number[],
+      callSetId: string, phaseset: string) {
+      this.callSetName = callSetName;
+      this.genotype = genotype;
+      this.callSetId = callSetId;
+      this.phaseset = phaseset;
+  }
+}
 
 // holds variant and genotype sample ids
 class VariantContext {
   variant: Variant;
-  sampleIds: string[];
+  calls: Call[];
 
-  constructor(variant: Object, sampleIds: string[]) {
+  constructor(variant: Object, calls: Call[]) {
     this.variant = variant;
-    this.sampleIds = sampleIds;
+    this.calls = calls;
+  }
+
+  intersects(range: ContigInterval<string>): boolean {
+    var thisRange = new ContigInterval(this.variant.contig, this.variant.position, this.variant.position + 1);
+    return range.intersects(thisRange);
   }
 }
 
 module.exports = {
+  Call,
   Variant,
-  VariantContext,
-  intersects
+  VariantContext
 };

@@ -18,11 +18,13 @@ function create(json: string): VcfDataSource {
 
   // parse json
   var parsedJson = JSON.parse(json);
-  var variants: Variant[] = [];
+  var variants: VariantContext[] = [];
+  var callSetNames: string[] = [];
 
   // fill variants with json
   if (!_.isEmpty(parsedJson)) {
-      variants = _.values(parsedJson.variants).map(variant => Variant.fromGA4GH(variant));
+      variants = _.values(parsedJson.variants).map(variant => new VariantContext(Variant.fromGA4GH(variant),variant.calls));
+      callSetNames = _.map(variants[0].calls, c => c.callSetName);
   }
 
   function rangeChanged(newRange: GenomeRange) {
@@ -35,23 +37,25 @@ function create(json: string): VcfDataSource {
 
   function getVariantsInRange(range: ContigInterval<string>): Variant[] {
     if (!range) return [];
-    var r = _.filter(variants, variant => variant.intersects(range));
-    return r;
+    var filtered = _.filter(variants, variant => variant.intersects(range));
+    return _.map(filtered, f => f.variant);
   }
 
   function getGenotypesInRange(range: ContigInterval<string>): VariantContext[] {
-      throw new TypeError("Method getGenotypesInRange is not implemented");
+      if (!range) return [];
+
+      return _.filter(variants, variant => variant.intersects(range));
   }
 
-  function getSamples(): Q.Promise<string[]> {
-      throw new TypeError("Method getSamples is not implemented");
+  function getCallNames(): Q.Promise<string[]> {
+      return Q.Promise.resolve(callSetNames);
   }
 
   var o = {
     rangeChanged,
     getVariantsInRange,
     getGenotypesInRange,
-    getSamples,
+    getCallNames,
 
     on: () => {},
     once: () => {},

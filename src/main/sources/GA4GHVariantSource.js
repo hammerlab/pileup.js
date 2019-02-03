@@ -21,6 +21,9 @@ type GA4GHVariantSpec = {
   endpoint: string;
   variantSetId: string;
   callSetIds: string[];
+  callSetNames: ?string[]; // optional parameter for displaying call set names.
+                           // Without this parameter, users must make extra http
+                           // request for call set names for Genotype Track display
 };
 
 function create(spec: GA4GHVariantSpec): VcfDataSource {
@@ -41,7 +44,7 @@ function create(spec: GA4GHVariantSpec): VcfDataSource {
       var key = ga4ghVariant.id;
       if (key in variants) return;
 
-      var variant = new VariantContext(Variant.fromGA4GH(ga4ghVariant), []);
+      var variant = new VariantContext(Variant.fromGA4GH(ga4ghVariant), ga4ghVariant.calls);
       variants[key] = variant;
     });
   }
@@ -117,25 +120,30 @@ function create(spec: GA4GHVariantSpec): VcfDataSource {
   function getVariantsInRange(range: ContigInterval<string>): Variant[] {
     if (!range) return [];
 
-    range = new ContigInterval(range.contig, range.start(), range.stop());
-
-    var filtered = _.filter(variants, variant => intersects(variant, range));
+    var filtered = _.filter(variants, variant => variant.intersects(range));
     return _.map(filtered, f => f.variant);
   }
 
   function getGenotypesInRange(range: ContigInterval<string>): VariantContext[] {
-      throw new TypeError("Method getGenotypesInRange is not implemented");
+      if (!range) return [];
+
+      return _.filter(variants, variant => variant.intersects(range));
   }
 
-  function getSamples(): Q.Promise<string[]> {
-    throw new TypeError("Method getSamples is not implemented");
+  function getCallNames(): Q.Promise<string[]> {
+    if (spec.callSetNames) {
+      return Q.Promise.resolve(spec.callSetNames);
+    } else {
+      return Q.Promise.resolve(spec.callSetIds);
+    }
+
   }
 
   var o = {
     rangeChanged,
     getVariantsInRange,
     getGenotypesInRange,
-    getSamples,
+    getCallNames,
 
     // These are here to make Flow happy.
     on: () => {},
@@ -147,12 +155,6 @@ function create(spec: GA4GHVariantSpec): VcfDataSource {
   return o;
 }
 
-function intersects(variantContext: VariantContext, range: ContigInterval<string>): boolean {
-  var thisRange = new ContigInterval(variantContext.variant.contig, variantContext.variant.position, variantContext.variant.position + 1);
-  return range.intersects(thisRange);
-}
-
 module.exports = {
-  create,
-  intersects
+  create
 };

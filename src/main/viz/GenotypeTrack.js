@@ -30,13 +30,13 @@ var LABEL_WIDTH = 100;
 class GenotypeTiledCanvas extends TiledCanvas {
   options: Object;
   source: VcfDataSource;
-  sampleIds: string[];
+  callSetNames: string[];
 
-  constructor(source: VcfDataSource, sampleIds: string[], options: Object) {
+  constructor(source: VcfDataSource, callSetNames: string[], options: Object) {
     super();
     this.source = source;
     this.options = options;
-    this.sampleIds = sampleIds;
+    this.callSetNames = callSetNames;
   }
 
   update(newOptions: Object) {
@@ -44,7 +44,7 @@ class GenotypeTiledCanvas extends TiledCanvas {
   }
 
   heightForRef(ref: string): number {
-    return yForRow(this.sampleIds.length);
+    return yForRow(this.callSetNames.length);
   }
 
   render(ctx: DataCanvasRenderingContext2D,
@@ -56,26 +56,26 @@ class GenotypeTiledCanvas extends TiledCanvas {
 
     // relaxed range is just for this tile
     var vGenotypes = this.source.getGenotypesInRange(relaxedRange);
-    renderGenotypes(ctx, scale, relaxedRange, vGenotypes, this.sampleIds);
+    renderGenotypes(ctx, scale, relaxedRange, vGenotypes, this.callSetNames);
   }
 }
 // Draw genotypes
 function renderGenotypes(ctx: DataCanvasRenderingContext2D,
                     scale: (num: number) => number,
                     range: ContigInterval<string>,
-                    genotypes: VariantContext[],
-                    sampleIds) {
+                    vcs: VariantContext[],
+                    callSetNames: string[]) {
     // draw genotypes
-    genotypes.forEach(genotype => {
-        var variant = genotype.variant;
-        var keys = genotype.sampleIds;
+    vcs.forEach(vc => {
+        var variant = vc.variant;
         ctx.pushObject(variant);
-        ctx.fillStyle = style.GENOTYPE_FILL;
-        ctx.strokeStyle = style.GENOTYPE_FILL;
+
         var x = Math.round(scale(variant.position));
         var width = Math.max(1, Math.round(scale(variant.position + 1) - scale(variant.position)));
-        keys.forEach(sampleId => {
-          var y = yForRow(sampleIds.indexOf(sampleId));
+        vc.calls.forEach(call => {
+          var y = yForRow(callSetNames.indexOf(call.callSetName));
+          ctx.fillStyle = call.genotype.reduce((a, b) => a + b, 0) == 1 ? style.GENOTYPE_FILL_HET : style.GENOTYPE_FILL_HOM;
+          ctx.strokeStyle = ctx.fillStyle;
           ctx.fillRect(x - 0.2, y, width, style.GENOTYPE_HEIGHT);
           ctx.strokeRect(x - 0.2, y, width, style.GENOTYPE_HEIGHT);
         });
@@ -91,17 +91,17 @@ class GenotypeTrack extends React.Component<VizProps<VcfDataSource>, State> {
   props: VizProps<VcfDataSource>;
   state: State;
   tiles: GenotypeTiledCanvas;
-  sampleIds: string[];
+  callSetNames: string[];
 
   constructor(props: Object) {
     super(props);
-    this.sampleIds = [];
+    this.callSetNames = [];
     this.state = {
       networkStatus: null
     };
-    props.source.getSamples().then(samples => {
-      this.sampleIds = samples;
-      this.tiles.sampleIds = samples;
+    props.source.getCallNames().then(samples => {
+      this.callSetNames = samples;
+      this.tiles.callSetNames = samples;
       this.tiles.invalidateAll();
       this.updateVisualization();
     });
@@ -163,7 +163,7 @@ class GenotypeTrack extends React.Component<VizProps<VcfDataSource>, State> {
 
   componentDidMount() {
         this.tiles = new GenotypeTiledCanvas(this.props.source,
-        this.sampleIds, this.props.options);
+        this.callSetNames, this.props.options);
 
         // Visualize new data as it comes in from the network.
         this.props.source.on('newdata', (range) => {
@@ -198,11 +198,11 @@ class GenotypeTrack extends React.Component<VizProps<VcfDataSource>, State> {
     var width = this.props.width;
 
     // draw background for each row
-    if (this.sampleIds !== null) {
+    if (this.callSetNames !== null) {
       ctx.font = "9px Arial";
-      this.sampleIds.forEach(sampleId => {
+      this.callSetNames.forEach(sampleId => {
         ctx.pushObject(sampleId);
-        var y = yForRow(this.sampleIds.indexOf(sampleId));
+        var y = yForRow(this.callSetNames.indexOf(sampleId));
         ctx.fillStyle = style.BACKGROUND_FILL;
         ctx.fillRect(0, y, width, style.GENOTYPE_HEIGHT);
         ctx.popObject();
@@ -219,7 +219,7 @@ class GenotypeTrack extends React.Component<VizProps<VcfDataSource>, State> {
     // Hold off until height & width are known.
     if (width === 0 || typeof labelCanvas == 'undefined') return;
 
-    var height = yForRow(this.sampleIds.length);
+    var height = yForRow(this.callSetNames.length);
 
 
     // only render once on load.
@@ -228,11 +228,11 @@ class GenotypeTrack extends React.Component<VizProps<VcfDataSource>, State> {
       d3utils.sizeCanvas(labelCanvas, LABEL_WIDTH, height);
 
       // draw label for each row
-      if (this.sampleIds !== null) {
+      if (this.callSetNames !== null) {
         labelCtx.font = "9px Arial";
-        this.sampleIds.forEach(sampleId => {
+        this.callSetNames.forEach(sampleId => {
           labelCtx.pushObject(sampleId);
-          var y = yForRow(this.sampleIds.indexOf(sampleId));
+          var y = yForRow(this.callSetNames.indexOf(sampleId));
           labelCtx.fillStyle = "black";
           labelCtx.fillText(sampleId, 0, y+style.GENOTYPE_HEIGHT);
           labelCtx.popObject();
@@ -248,7 +248,7 @@ class GenotypeTrack extends React.Component<VizProps<VcfDataSource>, State> {
     // Hold off until height & width are known.
     if (width === 0 || typeof canvas == 'undefined') return;
 
-    var height = yForRow(this.sampleIds.length);
+    var height = yForRow(this.callSetNames.length);
     d3utils.sizeCanvas(canvas, width - LABEL_WIDTH, height);
 
     var ctx = dataCanvas.getDataContext(canvasUtils.getContext(canvas));
@@ -290,7 +290,8 @@ class GenotypeTrack extends React.Component<VizProps<VcfDataSource>, State> {
     var alert = window.alert || console.log;
     if (genotype) {
       var variantString = `variant: ${JSON.stringify(genotype.variant)}`;
-      var samples = `samples with variant: ${JSON.stringify(genotype.sampleIds)}`;
+      var callSetNames = genotype.calls.map(r => r.callSetName);
+      var samples = `samples with variant: ${JSON.stringify(callSetNames)}`;
       alert(`${variantString}\n${samples}`);
     }
   }
