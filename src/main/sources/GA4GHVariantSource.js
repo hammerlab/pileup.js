@@ -21,7 +21,7 @@ type GA4GHVariantSpec = {
   endpoint: string;
   variantSetId: string;
   callSetIds: string[];
-  callSetNames: ?string[]; // optional parameter for displaying call set names.
+  callSetNames?: string[]; // optional parameter for displaying call set names.
                            // Without this parameter, users must make extra http
                            // request for call set names for Genotype Track display
 };
@@ -132,9 +132,9 @@ function create(spec: GA4GHVariantSpec): VcfDataSource {
 
   function getCallNames(): Q.Promise<string[]> {
     if (spec.callSetNames) {
-      return Q.Promise.resolve(spec.callSetNames);
+      return Q.resolve(spec.callSetNames);
     } else {
-      return Q.Promise.resolve(spec.callSetIds);
+      return Q.resolve(spec.callSetIds);
     }
 
   }

@@ -48,7 +48,7 @@ function create(json: string): VcfDataSource {
   }
 
   function getCallNames(): Q.Promise<string[]> {
-      return Q.Promise.resolve(callSetNames);
+      return Q.resolve(callSetNames);
   }
 
   var o = {
