@@ -97,8 +97,22 @@ describe('VCF', function() {
   it('should get samples', function(): any {
     var vcf = new VcfFile(new RemoteFile('/test-data/sort-bug.vcf'));
 
-    return vcf.getSamples().then(samples => {
+    return vcf.getCallNames().then(samples => {
       expect(samples).to.have.length(2);
     });
   });
+
+  it('should get genotypes', function(): any {
+    var vcf = new VcfFile(new RemoteFile('/test-data/snv.vcf'));
+    var range = new ContigInterval('chr20', 63799, 69094);
+    return vcf.getFeaturesInRange(range).then(features => {
+      expect(features[0].calls).to.have.length(2);
+      expect(features[0].calls[0].genotype).to.deep.equal([0,1]);
+      expect(features[0].calls[0].callSetName).to.equal("NORMAL");
+
+      expect(features[0].calls[1].genotype).to.deep.equal([0,1]);
+      expect(features[0].calls[1].callSetName).to.equal("TUMOR");
+    });
+  });
+
 });

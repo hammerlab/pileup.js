@@ -20,7 +20,7 @@ describe('Variant', function() {
     var parsedJson = JSON.parse(json);
     var variants = _.values(parsedJson.variants).map(variant => Variant.fromGA4GH(variant));
 
-    expect(variants).to.have.length(11);
+    expect(variants).to.have.length(12);
     expect(variants[0].contig).to.equal("1");
     expect(variants[0].position).to.equal(10176);
     expect(variants[0].ref).to.equal("A");

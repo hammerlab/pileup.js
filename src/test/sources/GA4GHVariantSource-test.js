@@ -72,4 +72,35 @@ describe('GA4GHVariantSource', function() {
     server.respond();
   });
 
+  it('should return genotype information', function(done) {
+    server.respondWith('POST', '/v0.6.0/variants/search',
+                       [200, { "Content-Type": "application/json" }, response]);
+
+    var requestInterval = new ContigInterval('1', 10000, 10500);
+    expect(source.getGenotypesInRange(requestInterval))
+        .to.deep.equal([]);
+
+    var progress = [];
+    source.on('networkprogress', e => { progress.push(e); });
+    source.on('networkdone', e => { progress.push('done'); });
+    source.on('newdata', () => {
+      var variants = source.getGenotypesInRange(requestInterval);
+      expect(variants[0].calls).to.have.length(1);
+      var call = variants[0].calls[0];
+      expect(call.genotype).to.have.length(2);
+      expect(call.callSetName).to.equal("HG00096");
+      expect(call.phaseset).to.equal("True");
+      done();
+    });
+
+    source.rangeChanged({contig: '1', start: 10000, stop: 10500});
+    server.respond();
+  });
+
+  it('should genotype IDs after data is loaded', function(done) {
+    source.getCallNames().then(samples => {
+        expect(samples).to.have.length(1);
+        done();
+      });
+  });
 });
