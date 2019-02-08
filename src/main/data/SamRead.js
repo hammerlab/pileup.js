@@ -20,6 +20,8 @@ import jBinary from 'jbinary';
 import _ from 'underscore';
 import bamTypes from './formats/bamTypes';
 import ContigInterval from '../ContigInterval';
+import type {CoverageCount} from '../viz/pileuputils';
+import {getOpInfo} from '../viz/pileuputils';
 
 // TODO: Make more extensive use of the jBinary specs.
 
@@ -192,6 +194,13 @@ class SamRead /* implements Alignment */ {
   // Returns the length of the alignment from first aligned read to last aligned read.
   getReferenceLength(): number {
     return SamRead.referenceLengthFromOps(this.cigarOps);
+  }
+
+  getCoverage(referenceSource: Object): CoverageCount {
+    return {
+      range: this.getInterval(),
+      opInfo: getOpInfo(this, referenceSource)
+    };
   }
 
   getMateProperties(): ?MateProperties {

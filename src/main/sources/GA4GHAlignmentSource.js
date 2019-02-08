@@ -6,7 +6,8 @@
 'use strict';
 
 import type {GenomeRange} from '../types';
-import type {Alignment, AlignmentDataSource} from '../Alignment';
+import type {Alignment} from '../Alignment';
+import type {DataSource} from './DataSource';
 
 import _ from 'underscore';
 import {Events} from 'backbone';
@@ -34,7 +35,7 @@ type GA4GHSpec = {
   forcedReferenceId: ?string;
 };
 
-function create(spec: GA4GHSpec): AlignmentDataSource {
+function create(spec: GA4GHSpec): DataSource<Alignment> {
   var url = spec.endpoint + '/reads/search';
 
   var reads: {[key:string]: Alignment} = {};

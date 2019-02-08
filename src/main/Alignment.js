@@ -6,6 +6,7 @@
  
 import type {GenomeRange} from './types';
 import type ContigInterval from './ContigInterval';
+import type {CoverageCount} from './viz/pileuputils';
 
 // "CIGAR" operations express how a sequence aligns to the reference: does it
 // have insertions? deletions? For more background, see the SAM/BAM paper.
@@ -44,14 +45,8 @@ export type Alignment = {
   getReferenceLength(): number;
   getMateProperties(): ?MateProperties;
   getInferredInsertSize(): number;
-};
+  getCoverage(referenceSource: Object): CoverageCount;
 
-export type AlignmentDataSource = {
-  rangeChanged: (newRange: GenomeRange) => void;
-  getFeaturesInRange: (range: ContigInterval<string>) => Alignment[];
-  on: (event: string, handler: Function) => void;  // really => AlignmentDataSource
-  once: (event: string, handler: Function) => void;
-  off: (event: string) => void;
 };
 
 module.exports = {

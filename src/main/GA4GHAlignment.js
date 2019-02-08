@@ -6,6 +6,8 @@
 'use strict';
 
 import type {CigarOp, MateProperties, Strand} from './Alignment';
+import type {CoverageCount} from './viz/pileuputils';
+import {getOpInfo} from './viz/pileuputils';
 
 import ContigInterval from './ContigInterval';
 import SamRead from './data/SamRead';
@@ -100,6 +102,13 @@ class GA4GHAlignment /* implements Alignment */ {
       return Math.max(stop1, stop2) - Math.min(start1, start2);
     } else {
       return 0;
+    }
+  }
+
+  getCoverage(referenceSource: Object): CoverageCount {
+    return {
+      range: this.getInterval(),
+      opInfo: getOpInfo(this, referenceSource)
     }
   }
 

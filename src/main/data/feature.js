@@ -5,6 +5,7 @@
 'use strict';
 
 import ContigInterval from '../ContigInterval';
+import type {CoverageCount} from '../viz/pileuputils';
 
 class Feature {
   id: string;
@@ -25,6 +26,13 @@ class Feature {
 
   getInterval(): ContigInterval<string> {
     return this.position;
+  }
+
+  getCoverage(referenceSource: Object): CoverageCount {
+    return {
+      range: this.getInterval(),
+      opInfo: null
+    };
   }
 
 

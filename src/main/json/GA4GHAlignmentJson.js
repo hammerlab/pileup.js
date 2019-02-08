@@ -5,7 +5,8 @@
  */
 'use strict';
 
-import type {Alignment, AlignmentDataSource} from '../Alignment';
+import type {Alignment} from '../Alignment';
+import type {DataSource} from '../sources/DataSource';
 import type {GenomeRange} from '../types';
 
 import _ from 'underscore';
@@ -14,7 +15,7 @@ import {Events} from 'backbone';
 import ContigInterval from '../ContigInterval';
 import GA4GHAlignment from '../GA4GHAlignment';
 
-function create(json: string): AlignmentDataSource {
+function create(json: string): DataSource<Alignment> {
 
   // parse json
   var parsedJson = JSON.parse(json);

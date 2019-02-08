@@ -4,8 +4,8 @@
  */
 'use strict';
 
-import type {Alignment, AlignmentDataSource} from '../Alignment';
-import type {FeatureDataSource} from '../sources/BigBedDataSource';
+import type {Alignment} from '../Alignment';
+import type {DataSource} from '../sources/DataSource';
 import Feature from '../data/feature';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {BinSummary} from './CoverageCache';
@@ -36,7 +36,7 @@ const MISMATCH_THRESHOLD = 1;
 class CoverageTiledCanvas extends TiledCanvas {
   height: number;
   options: Object;
-  cache: CoverageCache<Alignment | Feature> ;
+  cache: CoverageCache< Alignment | Feature> ;
 
   constructor(cache: CoverageCache<(Alignment | Feature)>, height: number, options: Object) {
     super();
@@ -170,14 +170,14 @@ function renderBars(ctx: DataCanvasRenderingContext2D,
   });
 }
 
-class CoverageTrack extends React.Component<VizProps<AlignmentDataSource | FeatureDataSource>, State> {
-  props: VizProps<AlignmentDataSource | FeatureDataSource >;
+class CoverageTrack extends React.Component<VizProps<DataSource<Alignment | Feature>>, State> {
+  props: VizProps<DataSource<Alignment | Feature >>;
   state: State; // no state, used to make flow happy
   cache: CoverageCache< Alignment | Feature >;
   tiles: CoverageTiledCanvas;
   static defaultOptions: Object;
 
-  constructor(props: VizProps<AlignmentDataSource | FeatureDataSource>) {
+  constructor(props: VizProps<DataSource<Alignment | Feature>>) {
     super(props);
   }
 
