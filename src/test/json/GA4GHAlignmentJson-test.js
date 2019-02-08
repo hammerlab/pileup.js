@@ -22,7 +22,7 @@ describe('GA4GHAlignmentJson', function() {
 
     var requestInterval = new ContigInterval('chr17', 10, 20);
 
-    var reads = source.getAlignmentsInRange(requestInterval);
+    var reads = source.getFeaturesInRange(requestInterval);
     expect(reads).to.have.length(2);
     done();
     
@@ -34,7 +34,7 @@ describe('GA4GHAlignmentJson', function() {
 
     var requestInterval = new ContigInterval('chr17', 10, 20);
 
-    var reads = source.getAlignmentsInRange(requestInterval);
+    var reads = source.getFeaturesInRange(requestInterval);
     expect(reads).to.have.length(0);
     done();
 

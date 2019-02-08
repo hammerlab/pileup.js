@@ -10,7 +10,7 @@ describe('Feature', function() {
   var json;
 
   before(function(): any {
-    return new RemoteFile('/test-data/features.ga4gh.chr1.120000-125000.json').getAllString().then(data => {
+    return new RemoteFile('/test-data/features.ga4gh.chr1.120000-125000.chr17.7500000-7515100.json').getAllString().then(data => {
       json = data;
     });
   });
@@ -20,7 +20,7 @@ describe('Feature', function() {
     var parsedJson = JSON.parse(json);
     var features = _.values(parsedJson.features).map(feature => Feature.fromGA4GH(feature));
 
-    expect(features).to.have.length(9);
+    expect(features).to.have.length(10);
     expect(features[0].position.contig).to.equal("chr1");
     expect(features[0].position.start()).to.equal(89295);
     expect(features[0].position.stop()).to.equal(120932);

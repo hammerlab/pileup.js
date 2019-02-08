@@ -77,7 +77,7 @@ function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
       coveredRanges = ContigInterval.coalesce(coveredRanges);
 
       return Q.all(newRanges.map(range =>
-          remoteSource.getAlignmentsInRange(range)
+          remoteSource.getFeaturesInRange(range)
             .progress(progressEvent => {
               o.trigger('networkprogress', progressEvent);
             })
@@ -89,7 +89,7 @@ function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
     });
   }
 
-  function getAlignmentsInRange(range: ContigInterval<string>): Alignment[] {
+  function getFeaturesInRange(range: ContigInterval<string>): Alignment[] {
     if (!range) return [];
     if (_.isEmpty(contigNames)) return [];
 
@@ -103,7 +103,7 @@ function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
     rangeChanged: function(newRange: GenomeRange) {
       fetch(newRange).done();
     },
-    getAlignmentsInRange,
+    getFeaturesInRange,
 
     // These are here to make Flow happy.
     on: () => {},

@@ -33,7 +33,7 @@ function create(json: string): AlignmentDataSource {
     return;
   }
 
-  function getAlignmentsInRange(range: ContigInterval<string>): Alignment[] {
+  function getFeaturesInRange(range: ContigInterval<string>): Alignment[] {
     if (!range) return [];
     var r = _.filter(reads, read => read.intersects(range));
     return r;
@@ -41,7 +41,7 @@ function create(json: string): AlignmentDataSource {
 
   var o = {
     rangeChanged,
-    getAlignmentsInRange,
+    getFeaturesInRange,
 
     on: () => {},
     once: () => {},

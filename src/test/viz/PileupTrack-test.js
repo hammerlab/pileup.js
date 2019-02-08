@@ -56,7 +56,7 @@ class FakeBam extends Bam {
     this.deferred = Q.defer();
   }
 
-  getAlignmentsInRange(): Q.Promise<SamRead[]> {
+  getFeaturesInRange(): Q.Promise<SamRead[]> {
     return this.deferred.promise;
   }
 
@@ -98,7 +98,7 @@ describe('PileupTrack', function() {
         bam = new Bam(bamFile, bamIndexFile);
     return twoBit.getFeaturesInRange('chr17', 7500000, 7510000).then(seq => {
       reference = seq;
-      return bam.getAlignmentsInRange(new ContigInterval('chr17', 7500734, 7500795));
+      return bam.getFeaturesInRange(new ContigInterval('chr17', 7500734, 7500795));
     }).then(result => {
       expect(result).to.have.length.above(0);
       alignments = result;

@@ -19,6 +19,15 @@ class Feature {
     this.score = feature.score;
   }
 
+  getKey(): string {
+    return this.id;
+  }
+
+  getInterval(): ContigInterval<string> {
+    return this.position;
+  }
+
+
   static fromGA4GH(ga4ghFeature: Object): Feature {
     var position = new ContigInterval(ga4ghFeature.referenceName, parseInt(ga4ghFeature.start), parseInt(ga4ghFeature.end));
     return new Feature(

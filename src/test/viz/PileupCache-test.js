@@ -237,7 +237,7 @@ describe('PileupCache', function() {
     var bam = new Bam(
         new RemoteFile('/test-data/synth4.tumor.1.4930000-4950000.bam'),
         new RemoteFile('/test-data/synth4.tumor.1.4930000-4950000.bam.bai'));
-    return bam.getAlignmentsInRange(ci('chr1', 4930382, 4946898)).then(reads => {
+    return bam.getFeaturesInRange(ci('chr1', 4930382, 4946898)).then(reads => {
       expect(reads).to.have.length.above(1000);
       var cache = makeCache(reads, true /* viewAsPairs */);
       var stats = cache.getInsertStats();

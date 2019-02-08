@@ -4,7 +4,9 @@
  */
 'use strict';
 
-import type {AlignmentDataSource} from '../Alignment';
+import type {Alignment, AlignmentDataSource} from '../Alignment';
+import type {FeatureDataSource} from '../sources/BigBedDataSource';
+import Feature from '../data/feature';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {BinSummary} from './CoverageCache';
 import type {Scale} from './d3utils';
@@ -34,9 +36,9 @@ const MISMATCH_THRESHOLD = 1;
 class CoverageTiledCanvas extends TiledCanvas {
   height: number;
   options: Object;
-  cache: CoverageCache;
+  cache: CoverageCache<Alignment | Feature> ;
 
-  constructor(cache: CoverageCache, height: number, options: Object) {
+  constructor(cache: CoverageCache<(Alignment | Feature)>, height: number, options: Object) {
     super();
 
     this.cache = cache;
@@ -66,7 +68,7 @@ class CoverageTiledCanvas extends TiledCanvas {
          xScale: (x: number)=>number,
          range: ContigInterval<string>) {
     var bins = this.cache.binsForRef(range.contig);
-    var yScale = this.yScaleForRef(range.contig, 0, 30);
+    var yScale = this.yScaleForRef(range.contig, 10, 10);
     var relaxedRange = new ContigInterval(
         range.contig, range.start() - 1, range.stop() + 1);
     renderBars(ctx, xScale, yScale, relaxedRange, bins, this.options);
@@ -168,14 +170,14 @@ function renderBars(ctx: DataCanvasRenderingContext2D,
   });
 }
 
-class CoverageTrack extends React.Component<VizProps<AlignmentDataSource>, State> {
-  props: VizProps<AlignmentDataSource>;
+class CoverageTrack extends React.Component<VizProps<AlignmentDataSource | FeatureDataSource>, State> {
+  props: VizProps<AlignmentDataSource | FeatureDataSource >;
   state: State; // no state, used to make flow happy
-  cache: CoverageCache;
+  cache: CoverageCache< Alignment | Feature >;
   tiles: CoverageTiledCanvas;
   static defaultOptions: Object;
-  
-  constructor(props: VizProps<AlignmentDataSource>) {
+
+  constructor(props: VizProps<AlignmentDataSource | FeatureDataSource>) {
     super(props);
   }
 
@@ -193,8 +195,8 @@ class CoverageTrack extends React.Component<VizProps<AlignmentDataSource>, State
 
     this.props.source.on('newdata', range => {
       var oldMax = this.cache.maxCoverageForRef(range.contig);
-      this.props.source.getAlignmentsInRange(range)
-                       .forEach(read => this.cache.addAlignment(read));
+      this.props.source.getFeaturesInRange(range)
+                       .forEach(read => this.cache.addItem(read));
       var newMax = this.cache.maxCoverageForRef(range.contig);
 
       if (oldMax != newMax) {

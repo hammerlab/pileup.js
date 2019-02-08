@@ -33,11 +33,11 @@ describe('BamDataSource', function() {
 
     // This range matches the "large, dense" test in bam-test.js
     var range = new ContigInterval('20', 31511349, 31514172);
-    var reads = source.getAlignmentsInRange(range);
+    var reads = source.getFeaturesInRange(range);
     expect(reads).to.deep.equal([]);
 
     source.on('newdata', () => {
-      var reads = source.getAlignmentsInRange(range);
+      var reads = source.getFeaturesInRange(range);
       expect(reads).to.have.length(1112);
       expect(reads[0].toString()).to.equal('20:31511251-31511351');
       expect(reads[1111].toString()).to.equal('20:31514171-31514271');
@@ -61,7 +61,7 @@ describe('BamDataSource', function() {
 
     var rangeAfter = new ContigInterval('chr20', 31512150, 31512199);
 
-    var reads = source.getAlignmentsInRange(range);
+    var reads = source.getFeaturesInRange(range);
     expect(reads).to.deep.equal([]);
 
     var networkEvents = [];
@@ -70,14 +70,14 @@ describe('BamDataSource', function() {
 
     // Fetching [50, 150] should cache [0, 200]
     source.on('newdata', () => {
-      var reads = source.getAlignmentsInRange(range);
+      var reads = source.getFeaturesInRange(range);
       expect(reads).to.have.length(18);
       expect(reads[0].toString()).to.equal('20:31511951-31512051');
       expect(reads[17].toString()).to.equal('20:31512146-31512246');
 
-      var readsBefore = source.getAlignmentsInRange(rangeBefore);
+      var readsBefore = source.getFeaturesInRange(rangeBefore);
 
-      var readsAfter = source.getAlignmentsInRange(rangeAfter);
+      var readsAfter = source.getFeaturesInRange(rangeAfter);
 
       expect(readsBefore).to.have.length(26);
       expect(readsAfter).to.have.length(12);
