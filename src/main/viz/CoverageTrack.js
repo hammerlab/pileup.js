@@ -101,13 +101,22 @@ function renderBars(ctx: DataCanvasRenderingContext2D,
   var vBasePosY = yScale(0);  // the very bottom of the canvas
   var start = range.start(),
       stop = range.stop();
-  let {barX1} = binPos(start, (start in bins) ? bins[start].count : 0);
-  ctx.fillStyle = style.COVERAGE_BIN_COLOR;
-  ctx.beginPath();
-  ctx.moveTo(barX1, vBasePosY);
+
+  // track last genomic position
+  var lastPos = null;
+
   for (var pos = start; pos < stop; pos++) {
     var bin = bins[pos];
     if (!bin) continue;
+
+
+    if (!lastPos) {
+      let {barX1} = binPos(pos, bin.count);
+      ctx.fillStyle = style.COVERAGE_BIN_COLOR;
+      ctx.beginPath();
+      ctx.moveTo(barX1, vBasePosY);
+    }
+
     ctx.pushObject(bin);
     let {barX1, barX2, barY} = binPos(pos, bin.count);
     ctx.lineTo(barX1, barY);
@@ -120,13 +129,16 @@ function renderBars(ctx: DataCanvasRenderingContext2D,
     if (SHOW_MISMATCHES && !_.isEmpty(bin.mismatches)) {
       mismatchBins[pos] = bin;
     }
-
+    lastPos = pos;
     ctx.popObject();
   }
-  let {barX2} = binPos(stop, (stop in bins) ? bins[stop].count : 0);
-  ctx.lineTo(barX2, vBasePosY);  // right edge of the right bar.
-  ctx.closePath();
-  ctx.fill();
+
+  if (lastPos) {
+    let {barX2} = binPos(lastPos, 0); // count does not matter, drawing vBasePosY
+    ctx.lineTo(barX2, vBasePosY);  // right edge of the right bar.
+    ctx.closePath();
+    ctx.fill();
+  }
 
   // Now render the mismatches
   _.each(mismatchBins, (bin, pos) => {

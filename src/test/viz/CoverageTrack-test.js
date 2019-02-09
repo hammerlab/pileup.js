@@ -22,12 +22,13 @@ describe('CoverageTrack', function() {
   var testDiv = document.getElementById('testdiv');
   if (!testDiv) throw new Error("Failed to match: testdiv");
   var range = {contig: '17', start: 7500730, stop: 7500790};
+
   var p;
   var server: any = null, response;
 
-  before(() => {
+  before((): any => {
     // server for coverage features
-    new RemoteFile('/test-data/features.ga4gh.chr1.120000-125000.chr17.7500000-7515100.json').getAllString().then(data => {
+    return new RemoteFile('/test-data/features.ga4gh.chr1.120000-125000.chr17.7500000-7515100.json').getAllString().then(data => {
       response = data;
       server = sinon.fakeServer.create();
 
@@ -50,6 +51,10 @@ describe('CoverageTrack', function() {
     });
   });
 
+  after(function(): any {
+      server.restore();
+  });
+
   beforeEach(() => {
     dataCanvas.RecordingContext.recordAll();
     // A fixed width container results in predictable x-positions for mismatches.
@@ -64,9 +69,7 @@ describe('CoverageTrack', function() {
     testDiv.style.width = '';
   });
 
-  after(function(): any {
-      server.restore();
-  });
+
 
   var twoBitFile = new MappedRemoteFile(
       '/test-data/hg19.2bit.mapped',
@@ -86,14 +89,6 @@ describe('CoverageTrack', function() {
   var findCoverageLabels = () => {
     return drawnObjectsWith(testDiv, '.coverage', l => l.type == 'label');
   };
-
-  // var hasCoverage = (): boolean => {
-  //   // Check whether the coverage bins are loaded yet
-  //   return testDiv.querySelector('canvas') != null &&
-  //       findCoverageBins().length > 1 &&
-  //       findMismatchBins().length > 0 &&
-  //       findCoverageLabels().length > 1;
-  // };
 
   function createAlignmentPileup() {
     p = pileup.create(testDiv, {
@@ -191,7 +186,6 @@ describe('CoverageTrack', function() {
   });
 
   it('should create coverage from features', function(): any {
-
     createFeaturePileup();
     server.respondWith('POST', '/v0.6.0/features/search',
                        [200, { "Content-Type": "application/json" }, response]);
