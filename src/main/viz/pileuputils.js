@@ -4,6 +4,7 @@
 import type {Alignment, CigarSymbol} from '../Alignment';
 import type Interval from '../Interval';
 import style from '../style';
+import ContigInterval from '../ContigInterval';
 
 /**
  * Calculate row height for pileup
@@ -145,6 +146,11 @@ type Op = {
 export type OpInfo = {
   ops: Op[],
   mismatches: BasePair[]
+}
+
+export type CoverageCount = {
+  range: ContigInterval<string>,
+  opInfo: ?OpInfo
 }
 
 // Breaks the read down into Cigar Ops suitable for display

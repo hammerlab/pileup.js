@@ -5,7 +5,7 @@
  */
 'use strict';
 
-import type {FeatureDataSource} from '../sources/BigBedDataSource';
+import type {DataSource} from '../sources/DataSource';
 import Feature from '../data/feature';
 
 import _ from 'underscore';
@@ -14,7 +14,7 @@ import {Events} from 'backbone';
 import ContigInterval from '../ContigInterval';
 import type {GenomeRange} from '../types';
 
-function create(json: string): FeatureDataSource {
+function create(json: string): DataSource<Feature> {
 
   // parse json
   var parsedJson = JSON.parse(json);

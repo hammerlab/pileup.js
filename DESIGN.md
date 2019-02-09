@@ -7,7 +7,7 @@ At a high level, pileup contains three types of classes:
 1. *Data classes* These live in the `/data` directory.
    They provide an asynchronous API for remote data sources, hiding
    all the complexities of network access and parsing. For example, the `BAM`
-   class provides a `getAlignmentsInRange` method which takes a genomic
+   class provides a `getFeaturesInRange` method which takes a genomic
    interval and returns a list of alignments.
    
    These classes are useful for anyone interested in working with genome data
@@ -91,7 +91,7 @@ var bam = new Bam(new RemoteFile('alignments.bam'),
 
 // Fetch the reads. This returns a Promise object.
 var range = new ContigInterval('chr17', 10000, 11000);
-var promise = bam.getAlignmentsInRange(range);
+var promise = bam.getFeaturesInRange(range);
 
 // The alignments will be available when the Promise resolves.
 promise.then(function(alignments) {
@@ -112,7 +112,7 @@ var range = new ContigInterval('chr17', 10000, 11000);
 
 // Register a listener for new data.
 function countAlignments() {
-  console.log(source.getAlignmentsInRange(range).length);
+  console.log(source.getFeaturesInRange(range).length);
 }
 source.on('newdata', countAlignments);
 

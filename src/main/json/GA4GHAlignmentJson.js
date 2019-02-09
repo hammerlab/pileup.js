@@ -5,7 +5,8 @@
  */
 'use strict';
 
-import type {Alignment, AlignmentDataSource} from '../Alignment';
+import type {Alignment} from '../Alignment';
+import type {DataSource} from '../sources/DataSource';
 import type {GenomeRange} from '../types';
 
 import _ from 'underscore';
@@ -14,7 +15,7 @@ import {Events} from 'backbone';
 import ContigInterval from '../ContigInterval';
 import GA4GHAlignment from '../GA4GHAlignment';
 
-function create(json: string): AlignmentDataSource {
+function create(json: string): DataSource<Alignment> {
 
   // parse json
   var parsedJson = JSON.parse(json);
@@ -33,7 +34,7 @@ function create(json: string): AlignmentDataSource {
     return;
   }
 
-  function getAlignmentsInRange(range: ContigInterval<string>): Alignment[] {
+  function getFeaturesInRange(range: ContigInterval<string>): Alignment[] {
     if (!range) return [];
     var r = _.filter(reads, read => read.intersects(range));
     return r;
@@ -41,7 +42,7 @@ function create(json: string): AlignmentDataSource {
 
   var o = {
     rangeChanged,
-    getAlignmentsInRange,
+    getFeaturesInRange,
 
     on: () => {},
     once: () => {},

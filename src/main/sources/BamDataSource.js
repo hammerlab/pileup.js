@@ -10,8 +10,8 @@ import BamFile from '../data/bam';
 import RemoteFile from '../RemoteFile';
 
 import type {GenomeRange} from '../types';
-import type {Alignment, AlignmentDataSource} from '../Alignment';
-
+import type {Alignment} from '../Alignment';
+import type  {DataSource} from './DataSource';
 // Genome ranges are rounded to multiples of this for fetching.
 // This reduces network activity while fetching.
 // TODO: tune this value
@@ -19,7 +19,7 @@ var BASE_PAIRS_PER_FETCH = 100;
 var ZERO_BASED = false;
 
 
-function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
+function createFromBamFile(remoteSource: BamFile): DataSource<Alignment> {
   var reads: {[key:string]: Alignment} = {};
 
   // Mapping from contig name to canonical contig name.
@@ -77,7 +77,7 @@ function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
       coveredRanges = ContigInterval.coalesce(coveredRanges);
 
       return Q.all(newRanges.map(range =>
-          remoteSource.getAlignmentsInRange(range)
+          remoteSource.getFeaturesInRange(range)
             .progress(progressEvent => {
               o.trigger('networkprogress', progressEvent);
             })
@@ -89,7 +89,7 @@ function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
     });
   }
 
-  function getAlignmentsInRange(range: ContigInterval<string>): Alignment[] {
+  function getFeaturesInRange(range: ContigInterval<string>): Alignment[] {
     if (!range) return [];
     if (_.isEmpty(contigNames)) return [];
 
@@ -103,7 +103,7 @@ function createFromBamFile(remoteSource: BamFile): AlignmentDataSource {
     rangeChanged: function(newRange: GenomeRange) {
       fetch(newRange).done();
     },
-    getAlignmentsInRange,
+    getFeaturesInRange,
 
     // These are here to make Flow happy.
     on: () => {},
@@ -122,7 +122,7 @@ type BamSpec = {
   indexChunks?: Object;
 }
 
-function create(spec: BamSpec): AlignmentDataSource {
+function create(spec: BamSpec): DataSource<Alignment> {
   var url = spec.url;
   if (!url) {
     throw new Error(`Missing URL from track data: ${JSON.stringify(spec)}`);

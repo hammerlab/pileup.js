@@ -4,7 +4,9 @@
  */
 'use strict';
 
-import type {AlignmentDataSource} from '../Alignment';
+import type {Alignment} from '../Alignment';
+import type {DataSource} from '../sources/DataSource';
+import Feature from '../data/feature';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {BinSummary} from './CoverageCache';
 import type {Scale} from './d3utils';
@@ -34,9 +36,9 @@ const MISMATCH_THRESHOLD = 1;
 class CoverageTiledCanvas extends TiledCanvas {
   height: number;
   options: Object;
-  cache: CoverageCache;
+  cache: CoverageCache< Alignment | Feature> ;
 
-  constructor(cache: CoverageCache, height: number, options: Object) {
+  constructor(cache: CoverageCache<(Alignment | Feature)>, height: number, options: Object) {
     super();
 
     this.cache = cache;
@@ -66,7 +68,7 @@ class CoverageTiledCanvas extends TiledCanvas {
          xScale: (x: number)=>number,
          range: ContigInterval<string>) {
     var bins = this.cache.binsForRef(range.contig);
-    var yScale = this.yScaleForRef(range.contig, 0, 30);
+    var yScale = this.yScaleForRef(range.contig, 10, 10);
     var relaxedRange = new ContigInterval(
         range.contig, range.start() - 1, range.stop() + 1);
     renderBars(ctx, xScale, yScale, relaxedRange, bins, this.options);
@@ -99,13 +101,22 @@ function renderBars(ctx: DataCanvasRenderingContext2D,
   var vBasePosY = yScale(0);  // the very bottom of the canvas
   var start = range.start(),
       stop = range.stop();
-  let {barX1} = binPos(start, (start in bins) ? bins[start].count : 0);
-  ctx.fillStyle = style.COVERAGE_BIN_COLOR;
-  ctx.beginPath();
-  ctx.moveTo(barX1, vBasePosY);
+
+  // track last genomic position
+  var lastPos = null;
+
   for (var pos = start; pos < stop; pos++) {
     var bin = bins[pos];
     if (!bin) continue;
+
+
+    if (!lastPos) {
+      let {barX1} = binPos(pos, bin.count);
+      ctx.fillStyle = style.COVERAGE_BIN_COLOR;
+      ctx.beginPath();
+      ctx.moveTo(barX1, vBasePosY);
+    }
+
     ctx.pushObject(bin);
     let {barX1, barX2, barY} = binPos(pos, bin.count);
     ctx.lineTo(barX1, barY);
@@ -118,13 +129,16 @@ function renderBars(ctx: DataCanvasRenderingContext2D,
     if (SHOW_MISMATCHES && !_.isEmpty(bin.mismatches)) {
       mismatchBins[pos] = bin;
     }
-
+    lastPos = pos;
     ctx.popObject();
   }
-  let {barX2} = binPos(stop, (stop in bins) ? bins[stop].count : 0);
-  ctx.lineTo(barX2, vBasePosY);  // right edge of the right bar.
-  ctx.closePath();
-  ctx.fill();
+
+  if (lastPos) {
+    let {barX2} = binPos(lastPos, 0); // count does not matter, drawing vBasePosY
+    ctx.lineTo(barX2, vBasePosY);  // right edge of the right bar.
+    ctx.closePath();
+    ctx.fill();
+  }
 
   // Now render the mismatches
   _.each(mismatchBins, (bin, pos) => {
@@ -168,14 +182,14 @@ function renderBars(ctx: DataCanvasRenderingContext2D,
   });
 }
 
-class CoverageTrack extends React.Component<VizProps<AlignmentDataSource>, State> {
-  props: VizProps<AlignmentDataSource>;
+class CoverageTrack extends React.Component<VizProps<DataSource<Alignment | Feature>>, State> {
+  props: VizProps<DataSource<Alignment | Feature >>;
   state: State; // no state, used to make flow happy
-  cache: CoverageCache;
+  cache: CoverageCache< Alignment | Feature >;
   tiles: CoverageTiledCanvas;
   static defaultOptions: Object;
-  
-  constructor(props: VizProps<AlignmentDataSource>) {
+
+  constructor(props: VizProps<DataSource<Alignment | Feature>>) {
     super(props);
   }
 
@@ -193,8 +207,8 @@ class CoverageTrack extends React.Component<VizProps<AlignmentDataSource>, State
 
     this.props.source.on('newdata', range => {
       var oldMax = this.cache.maxCoverageForRef(range.contig);
-      this.props.source.getAlignmentsInRange(range)
-                       .forEach(read => this.cache.addAlignment(read));
+      this.props.source.getFeaturesInRange(range)
+                       .forEach(read => this.cache.addItem(read));
       var newMax = this.cache.maxCoverageForRef(range.contig);
 
       if (oldMax != newMax) {

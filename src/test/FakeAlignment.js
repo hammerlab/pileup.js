@@ -8,6 +8,8 @@ import type {Alignment, CigarOp, MateProperties, Strand} from '../main/Alignment
 import type ContigInterval from '../main/ContigInterval';
 import Q from 'q';
 import type {GenomeRange} from '../main/types';
+import type {CoverageCount} from '../main/viz/pileuputils';
+import {getOpInfo} from '../main/viz/pileuputils';
 
 var numAlignments = 1;
 class FakeAlignment /* implements Alignment */ {
@@ -38,6 +40,14 @@ class FakeAlignment /* implements Alignment */ {
   getInterval(): ContigInterval<string> { return this.interval; }
   getReferenceLength(): number { return this.interval.length(); }
   getMateProperties(): ?MateProperties { return this.mateProps; }
+
+  getCoverage(referenceSource: Object): CoverageCount {
+    return {
+      range: this.getInterval(),
+      opInfo: getOpInfo(this, referenceSource)
+    }
+  }
+
 
   intersects(interval: ContigInterval<string>): boolean {
     return interval.intersects(this.getInterval());

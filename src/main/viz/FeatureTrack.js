@@ -4,7 +4,8 @@
  */
 'use strict';
 
-import type {FeatureDataSource} from '../sources/BigBedDataSource';
+import type {DataSource} from '../sources/DataSource';
+import Feature from '../data/feature';
 import GenericFeature from '../data/genericFeature';
 import {GenericFeatureCache} from './GenericFeatureCache';
 import type {VisualGroup} from './AbstractCache';
@@ -30,10 +31,10 @@ import {yForRow} from './pileuputils';
 
 class FeatureTiledCanvas extends TiledCanvas {
   options: Object;
-  source: FeatureDataSource;
+  source: DataSource<Feature>;
   cache: GenericFeatureCache;
 
-  constructor(source: FeatureDataSource, cache: GenericFeatureCache, options: Object) {
+  constructor(source: DataSource<Feature>, cache: GenericFeatureCache, options: Object) {
     super();
     this.source = source;
     this.cache = cache;
@@ -59,8 +60,8 @@ class FeatureTiledCanvas extends TiledCanvas {
     // get features and put in cache
     var features = this.source.getFeaturesInRange(relaxedRange, resolution);
     features.forEach(f => this.cache.addFeature(new GenericFeature(f.id, f.position, f)));
-    
-    // get visual features with assigned rows    
+
+    // get visual features with assigned rows
     var vFeatures = this.cache.getGroupsOverlapping(relaxedRange);
     renderFeatures(ctx, scale, relaxedRange, vFeatures);
   }
@@ -93,13 +94,13 @@ function renderFeatures(ctx: DataCanvasRenderingContext2D,
     });
 }
 
-class FeatureTrack extends React.Component<VizProps<FeatureDataSource>, State> {
-  props: VizProps<FeatureDataSource>;
+class FeatureTrack extends React.Component<VizProps<DataSource<Feature>>, State> {
+  props: VizProps<DataSource<Feature>>;
   state: State;
   tiles: FeatureTiledCanvas;
   cache: GenericFeatureCache;
 
-  constructor(props: VizProps<FeatureDataSource>) {
+  constructor(props: VizProps<DataSource<Feature>>) {
     super(props);
     this.state = {
       networkStatus: null
@@ -214,7 +215,7 @@ class FeatureTrack extends React.Component<VizProps<FeatureDataSource>, State> {
     // set height for parent div to include all features
     if (parent) parent.style.height = `${height}px`;
 
-    d3utils.sizeCanvas(canvas, width, height);  
+    d3utils.sizeCanvas(canvas, width, height);
 
     this.tiles.renderToScreen(ctx, range, this.getScale());
   }

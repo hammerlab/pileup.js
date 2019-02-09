@@ -5,6 +5,7 @@
 'use strict';
 
 import ContigInterval from '../ContigInterval';
+import type {CoverageCount} from '../viz/pileuputils';
 
 class Feature {
   id: string;
@@ -18,6 +19,22 @@ class Feature {
     this.position = feature.position;
     this.score = feature.score;
   }
+
+  getKey(): string {
+    return this.id;
+  }
+
+  getInterval(): ContigInterval<string> {
+    return this.position;
+  }
+
+  getCoverage(referenceSource: Object): CoverageCount {
+    return {
+      range: this.getInterval(),
+      opInfo: null
+    };
+  }
+
 
   static fromGA4GH(ga4ghFeature: Object): Feature {
     var position = new ContigInterval(ga4ghFeature.referenceName, parseInt(ga4ghFeature.start), parseInt(ga4ghFeature.end));

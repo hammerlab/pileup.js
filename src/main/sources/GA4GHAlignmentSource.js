@@ -6,7 +6,8 @@
 'use strict';
 
 import type {GenomeRange} from '../types';
-import type {Alignment, AlignmentDataSource} from '../Alignment';
+import type {Alignment} from '../Alignment';
+import type {DataSource} from './DataSource';
 
 import _ from 'underscore';
 import {Events} from 'backbone';
@@ -34,7 +35,7 @@ type GA4GHSpec = {
   forcedReferenceId: ?string;
 };
 
-function create(spec: GA4GHSpec): AlignmentDataSource {
+function create(spec: GA4GHSpec): DataSource<Alignment> {
   var url = spec.endpoint + '/reads/search';
 
   var reads: {[key:string]: Alignment} = {};
@@ -132,7 +133,7 @@ function create(spec: GA4GHSpec): AlignmentDataSource {
     }));
   }
 
-  function getAlignmentsInRange(range: ContigInterval<string>): Alignment[] {
+  function getFeaturesInRange(range: ContigInterval<string>): Alignment[] {
     if (!range) return [];
 
     range = new ContigInterval(range.contig, range.start(), range.stop());
@@ -142,7 +143,7 @@ function create(spec: GA4GHSpec): AlignmentDataSource {
 
   var o = {
     rangeChanged,
-    getAlignmentsInRange,
+    getFeaturesInRange,
 
     // These are here to make Flow happy.
     on: () => {},
