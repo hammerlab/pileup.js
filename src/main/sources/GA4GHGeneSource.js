@@ -1,5 +1,5 @@
 /**
- * A data source which implements the GA4GH Feature protocol.
+ * A data source which reads genes from a GA4GH Feature protocol.
  * @flow
  */
 'use strict';
@@ -8,23 +8,20 @@ import _ from 'underscore';
 import {Events} from 'backbone';
 import type {GenomeRange} from '../types';
 import ContigInterval from '../ContigInterval';
+import type {GA4GHFeatureSpec}  from './GA4GHFeatureSource';
 
 import type {DataSource} from './DataSource';
-import Feature from '../data/feature';
+import Gene from '../data/gene';
 
 var BASE_PAIRS_PER_FETCH = 100;
-var FEATURES_PER_REQUEST = 400;
+var GENES_PER_REQUEST = 400;
 var ZERO_BASED = false;
 
-export type GA4GHFeatureSpec = {
-  endpoint: string;
-  featureSetId: string;
-};
 
-function create(spec: GA4GHFeatureSpec): DataSource<Feature> {
+function create(spec: GA4GHFeatureSpec): DataSource<Gene> {
   var url = spec.endpoint + '/features/search';
 
-  var features: {[key:string]: Feature} = {};
+  var genes: {[key:string]: Gene} = {};
 
   // Ranges for which we have complete information -- no need to hit network.
   var coveredRanges: ContigInterval<string>[] = [];
@@ -38,9 +35,9 @@ function create(spec: GA4GHFeatureSpec): DataSource<Feature> {
       var contigInterval = new ContigInterval(ga4ghFeature.referenceName, ga4ghFeature.start, ga4ghFeature.end);
 
       var key = ga4ghFeature.id + contigInterval.toString();
-      if (key in features) return;
-      var feature = Feature.fromGA4GH(ga4ghFeature);
-      features[key] = feature;
+      if (key in genes) return;
+      var gene = Gene.fromGA4GH(ga4ghFeature);
+      genes[key] = gene;
     });
   }
 
@@ -59,7 +56,7 @@ function create(spec: GA4GHFeatureSpec): DataSource<Feature> {
     coveredRanges = ContigInterval.coalesce(coveredRanges);
 
     intervals.forEach(i => {
-      fetchFeaturesForInterval(i, null, 1 /* first request */);
+      fetchFeaturesForInterval(i, null, 1);
     });
   }
 
@@ -103,16 +100,16 @@ function create(spec: GA4GHFeatureSpec): DataSource<Feature> {
     xhr.send(JSON.stringify({
       featureSetId: spec.featureSetId,
       pageToken: pageToken,
-      pageSize: FEATURES_PER_REQUEST,
+      pageSize: GENES_PER_REQUEST,
       referenceName: range.contig,
       start: range.start(),
       end: range.stop()
     }));
   }
 
-  function getFeaturesInRange(range: ContigInterval<string>): Feature[] {
+  function getFeaturesInRange(range: ContigInterval<string>): Gene[] {
     if (!range) return [];
-    return _.filter(features, feature => feature.intersects(range));
+    return _.filter(genes, gene => gene.intersects(range));
   }
 
   var o = {

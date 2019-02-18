@@ -24,6 +24,12 @@ function strToStrand(str: string): Strand {
 
 export type Strand = '-' | '+' | '.';
 
+// converts a GA4GH Strand to a string of  ga4gh.Common.strand.POS_STRAND,
+// NEG_STRAND, or STRAND_UNSPECIFIED to Strand type.
+function ga4ghStrandToStrand(str: string): Strand {
+  return str && str == 'POS_STRAND' ? '+' : (str && str == 'NEG_STRAND' ? '-' : '.'); // either +, - or .
+}
+
 export type MateProperties = {
   ref: ?string;
   pos: number;
@@ -50,5 +56,6 @@ export type Alignment = {
 };
 
 module.exports = {
-  strToStrand
+  strToStrand,
+  ga4ghStrandToStrand
 };

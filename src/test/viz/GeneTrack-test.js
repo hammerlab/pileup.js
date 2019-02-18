@@ -7,16 +7,48 @@
 
 'use strict';
 
+import sinon from 'sinon';
 import {expect} from 'chai';
 
 import pileup from '../../main/pileup';
 import dataCanvas from 'data-canvas';
 import {waitFor} from '../async';
 
+import RemoteFile from '../../main/RemoteFile';
+
+
 describe('GeneTrack', function() {
   var testDiv = document.getElementById('testdiv');
   if (!testDiv) throw new Error("Failed to match: testdiv");
-  
+
+  var server: any = null, response;
+
+  before((): any => {
+    // server for genes
+    return new RemoteFile('/test-data/refSeqGenes.chr17.75000000-75100000.json').getAllString().then(data => {
+      response = data;
+      server = sinon.fakeServer.create();
+
+      server.autoRespond = true;
+
+      // Sinon should ignore 2bit request. RemoteFile handles this request.
+      sinon.fakeServer.xhr.useFilters = true;
+      sinon.fakeServer.xhr.addFilter(function (method, url) {
+          return url === '/test-data/test.2bit';
+      });
+      sinon.fakeServer.xhr.addFilter(function (method, url) {
+          return url === '/test-data/hg19.2bit.mapped';
+      });
+      sinon.fakeServer.xhr.addFilter(function (method, url) {
+          return url === '/test-data/ensembl.chr17.bb';
+      });
+    });
+  });
+
+  after(function(): any {
+      server.restore();
+  });
+
   beforeEach(() => {
     testDiv.style.width = '800px';
     dataCanvas.RecordingContext.recordAll();
@@ -64,6 +96,42 @@ describe('GeneTrack', function() {
         // Only one WDR16 gets drawn (they're overlapping)
         var texts = callsOf(testDiv, '.genes', 'fillText');
         expect(texts.map(t => t[1])).to.deep.equal(['STX8', 'WDR16', 'USP43']);
+        p.destroy();
+      });
+  });
+
+  it('should render genes from GA4GH Features', function(): any {
+
+    server.respondWith('POST', '/v0.6.0/features/search',
+                       [200, { "Content-Type": "application/json" }, response]);
+
+    var p = pileup.create(testDiv, {
+      range: {contig: '17', start: 75000000, stop: 75100000},
+      tracks: [
+        {
+          viz: pileup.viz.genome(),
+          data: pileup.formats.twoBit({
+            url: '/test-data/test.2bit'
+          }),
+          isReference: true
+        },
+        {
+          data: pileup.formats.GAGene({
+            endpoint: '/v0.6.0',
+            featureSetId: "WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIl0",
+          }),
+          viz: pileup.viz.genes(),
+        }
+      ]
+    });
+
+    return waitFor(ready, 2000)
+      .then(() => {
+        var genes = drawnObjects(testDiv, '.genes');
+        expect(genes).to.have.length(3);
+        expect(genes.map(g => g.name)).to.deep.equal(
+            [ 'SNHG20', 'MIR6516', 'SCARNA16']);
+
         p.destroy();
       });
   });

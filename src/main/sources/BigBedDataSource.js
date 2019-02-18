@@ -2,7 +2,6 @@
 'use strict';
 
 import type {GenomeRange} from '../types';
-import type {Strand} from '../Alignment';
 import {strToStrand} from '../Alignment';
 
 import _ from 'underscore';
@@ -12,18 +11,9 @@ import {Events} from 'backbone';
 import ContigInterval from '../ContigInterval';
 import Interval from '../Interval';
 import BigBed from '../data/BigBed';
-import type {DataSource} from './DataSource';
+import Gene from '../data/gene';
 
-export type Gene = {
-  position: ContigInterval<string>;
-  id: string;  // transcript ID, e.g. "ENST00000269305"
-  score: number;
-  strand: Strand;
-  codingRegion: Interval;  // locus of coding start
-  exons: Array<Interval>;
-  geneId: string;  // ensembl gene ID
-  name: string;  // human-readable name, e.g. "TP53"
-}
+import type {DataSource} from './DataSource';
 
 // The fields are described at http://genome.ucsc.edu/FAQ/FAQformat#format1
 // Fields 4-12 are optional
@@ -52,7 +42,7 @@ function parseBedFeature(f): Gene {
              });
   }
 
-  return {
+  return new Gene({
     position,
     id: id,
     score: score,
@@ -61,7 +51,7 @@ function parseBedFeature(f): Gene {
     geneId: geneId,
     name: name,
     exons
-  };
+  });
 }
 
 function createFromBigBedFile(remoteSource: BigBed): DataSource<Gene> {

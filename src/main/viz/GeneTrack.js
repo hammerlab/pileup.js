@@ -5,7 +5,7 @@
 'use strict';
 
 import type {Strand} from '../Alignment';
-import type {Gene} from '../sources/BigBedDataSource';
+import Gene from '../data/gene';
 import type {DataSource} from '../sources/DataSource';
 import type {VizProps} from '../VisualizationWrapper';
 import type {Scale} from './d3utils';
