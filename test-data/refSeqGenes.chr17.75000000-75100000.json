@@ -1,0 +1,199 @@
+{
+  "features": [{
+    "id": "NR_027058",
+    "name": "SNHG20",
+    "geneSymbol": "NR_027058",
+    "parentId": "",
+    "childIds": [],
+    "featureSetId": "",
+    "referenceName": "chr17",
+    "start": "75084724",
+    "end": "75091068",
+    "strand": "STRAND_UNSPECIFIED",
+    "attributes": {
+      "attr": {
+        "blockCount": {
+          "values": [{
+            "stringValue": "3",
+            "int64Value": "0",
+            "int32Value": 0,
+            "boolValue": false,
+            "doubleValue": 0.0,
+            "nullValue": "NULL_VALUE"
+          }]
+        },
+        "thickStart": {
+          "values": [{
+            "stringValue": "75091068",
+            "int64Value": "0",
+            "int32Value": 0,
+            "boolValue": false,
+            "doubleValue": 0.0,
+            "nullValue": "NULL_VALUE"
+          }]
+        },
+        "blockSizes": {
+          "values": [{
+            "stringValue": "307,119,1743",
+            "int64Value": "0",
+            "int32Value": 0,
+            "boolValue": false,
+            "doubleValue": 0.0,
+            "nullValue": "NULL_VALUE"
+          }]
+        },
+        "blockStarts": {
+          "values": [{
+            "stringValue": "0,510,4601",
+            "int64Value": "0",
+            "int32Value": 0,
+            "boolValue": false,
+            "doubleValue": 0.0,
+            "nullValue": "NULL_VALUE"
+          }]
+        },
+        "thickEnd": {
+          "values": [{
+            "stringValue": "75091068",
+            "int64Value": "0",
+            "int32Value": 0,
+            "boolValue": false,
+            "doubleValue": 0.0,
+            "nullValue": "NULL_VALUE"
+          }]
+        }
+      }
+    }
+  }, {
+    "id": "NR_106997",
+    "name": "MIR6516",
+    "geneSymbol": "NR_106997",
+    "parentId": "",
+    "childIds": [],
+    "featureSetId": "",
+    "referenceName": "chr17",
+    "start": "75085498",
+    "end": "75085579",
+    "strand": "STRAND_UNSPECIFIED",
+    "attributes": {
+      "attr": {
+        "blockCount": {
+          "values": [{
+            "stringValue": "1",
+            "int64Value": "0",
+            "int32Value": 0,
+            "boolValue": false,
+            "doubleValue": 0.0,
+            "nullValue": "NULL_VALUE"
+          }]
+        },
+        "thickStart": {
+          "values": [{
+            "stringValue": "75085579",
+            "int64Value": "0",
+            "int32Value": 0,
+            "boolValue": false,
+            "doubleValue": 0.0,
+            "nullValue": "NULL_VALUE"
+          }]
+        },
+        "blockSizes": {
+          "values": [{
+            "stringValue": "81",
+            "int64Value": "0",
+            "int32Value": 0,
+            "boolValue": false,
+            "doubleValue": 0.0,
+            "nullValue": "NULL_VALUE"
+          }]
+        },
+        "blockStarts": {
+          "values": [{
+            "stringValue": "0",
+            "int64Value": "0",
+            "int32Value": 0,
+            "boolValue": false,
+            "doubleValue": 0.0,
+            "nullValue": "NULL_VALUE"
+          }]
+        },
+        "thickEnd": {
+          "values": [{
+            "stringValue": "75085579",
+            "int64Value": "0",
+            "int32Value": 0,
+            "boolValue": false,
+            "doubleValue": 0.0,
+            "nullValue": "NULL_VALUE"
+          }]
+        }
+      }
+    }
+  }, {
+    "id": "NR_003013",
+    "name": "SCARNA16",
+    "geneSymbol": "NR_003013",
+    "parentId": "",
+    "childIds": [],
+    "featureSetId": "",
+    "referenceName": "chr17",
+    "start": "75085388",
+    "end": "75085575",
+    "strand": "STRAND_UNSPECIFIED",
+    "attributes": {
+      "attr": {
+        "blockCount": {
+          "values": [{
+            "stringValue": "1",
+            "int64Value": "0",
+            "int32Value": 0,
+            "boolValue": false,
+            "doubleValue": 0.0,
+            "nullValue": "NULL_VALUE"
+          }]
+        },
+        "thickStart": {
+          "values": [{
+            "stringValue": "75085575",
+            "int64Value": "0",
+            "int32Value": 0,
+            "boolValue": false,
+            "doubleValue": 0.0,
+            "nullValue": "NULL_VALUE"
+          }]
+        },
+        "blockSizes": {
+          "values": [{
+            "stringValue": "187",
+            "int64Value": "0",
+            "int32Value": 0,
+            "boolValue": false,
+            "doubleValue": 0.0,
+            "nullValue": "NULL_VALUE"
+          }]
+        },
+        "blockStarts": {
+          "values": [{
+            "stringValue": "0",
+            "int64Value": "0",
+            "int32Value": 0,
+            "boolValue": false,
+            "doubleValue": 0.0,
+            "nullValue": "NULL_VALUE"
+          }]
+        },
+        "thickEnd": {
+          "values": [{
+            "stringValue": "75085575",
+            "int64Value": "0",
+            "int32Value": 0,
+            "boolValue": false,
+            "doubleValue": 0.0,
+            "nullValue": "NULL_VALUE"
+          }]
+        }
+      }
+    }
+  }],
+  "nextPageToken": ""
+}

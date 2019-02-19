@@ -29,6 +29,7 @@ import GA4GHFeatureJson from './json/GA4GHFeatureJson';
 import GA4GHAlignmentSource from './sources/GA4GHAlignmentSource';
 import GA4GHVariantSource from './sources/GA4GHVariantSource';
 import GA4GHFeatureSource from './sources/GA4GHFeatureSource';
+import GA4GHGeneSource from './sources/GA4GHGeneSource';
 
 // Visualizations
 import CoverageTrack from './viz/CoverageTrack';
@@ -193,6 +194,7 @@ var pileup = {
     GAReadAlignment: GA4GHAlignmentSource.create,
     GAVariant: GA4GHVariantSource.create,
     GAFeature: GA4GHFeatureSource.create,
+    GAGene: GA4GHGeneSource.create,
     empty: EmptySource.create
   },
   viz: {

@@ -8,7 +8,7 @@ import type ContigInterval from '../ContigInterval';
 
 import type {Alignment} from '../Alignment';
 import Feature from '../data/feature';
-import type {Gene} from './BigBedDataSource';
+import Gene from '../data/gene';
 
 // Flow type for export.
 export type DataSource<T: ( Gene | Feature | Alignment )> = {
