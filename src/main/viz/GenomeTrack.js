@@ -35,10 +35,11 @@ function renderGenome(ctx: DataCanvasRenderingContext2D,
   if (mode != DisplayMode.HIDDEN) {
     ctx.textAlign = 'center';
     if (mode == DisplayMode.LOOSE) {
-      ctx.font = style.LOOSE_TEXT_STYLE;
+      //ctx.font = style.LOOSE_TEXT_STYLE;
     } else if (mode == DisplayMode.TIGHT) {
-      ctx.font = style.TIGHT_TEXT_STYLE;
+      //ctx.font = style.TIGHT_TEXT_STYLE;
     }
+    ctx.font = String(Math.min(pxPerLetter, 12)) + "px" + ` 'Helvetica Neue', Helvetica, Arial, sans-serif`;
 
     var previousBase = null;
     var start = range.start(),
