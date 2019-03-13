@@ -7,11 +7,12 @@ import type {GenomeRange} from '../types';
 import type ContigInterval from '../ContigInterval';
 
 import type {Alignment} from '../Alignment';
+import Chromosome from '../data/chromosome';
 import Feature from '../data/feature';
 import Gene from '../data/gene';
 
 // Flow type for export.
-export type DataSource<T: ( Gene | Feature | Alignment )> = {
+export type DataSource<T: ( Gene | Feature | Alignment | Chromosome)> = {
   rangeChanged: (newRange: GenomeRange) => void;
   getFeaturesInRange: (range: ContigInterval<string>, resolution: ?number) => T[];
   on: (event: string, handler: Function) => void;
