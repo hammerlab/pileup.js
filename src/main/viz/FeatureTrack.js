@@ -45,7 +45,7 @@ class FeatureTiledCanvas extends TiledCanvas {
   }
 
   heightForRef(ref: string): number {
-    return this.cache.pileupHeightForRef(ref) *
+    return Math.max(this.cache.pileupHeightForRef(ref),1) *
                     (style.READ_HEIGHT + style.READ_SPACING);
   }
 

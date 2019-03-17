@@ -6,6 +6,10 @@ var bamSource = pileup.formats.bam({
   indexUrl: '/test-data/synth3.normal.17.7500000-7515000.bam.bai'
 });
 
+var featureSource = pileup.formats.bigBed({
+  url: '/test-data/simple17.bb'
+})
+
 var sources = [
   {
     viz: pileup.viz.genome(),
@@ -52,6 +56,12 @@ var sources = [
     data: bamSource,
     cssClass: 'normal',
     name: 'Coverage'
+  },
+  {
+    viz: pileup.viz.features(),
+    data: featureSource,
+    cssClass: 'normal',
+    name: 'Features'
   },
   {
     viz: pileup.viz.pileup(),
