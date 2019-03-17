@@ -149,7 +149,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
       } else {
         throw 'Cannot call setRange on non-existent range';
       }
-      
+
     },
     destroy(): void {
       if (!vizTracks) {
@@ -213,7 +213,7 @@ var pileup = {
       allelFrequencyStrategy: AllelFrequencyStrategy,
     },
   },
-  version: '0.6.10'
+  version: '0.6.11'
 };
 
 module.exports = pileup;
