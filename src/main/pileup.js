@@ -35,6 +35,7 @@ import CoverageTrack from './viz/CoverageTrack';
 import GenomeTrack from './viz/GenomeTrack';
 import GeneTrack from './viz/GeneTrack';
 import FeatureTrack from './viz/FeatureTrack';
+import KaryogramTrack from './viz/KaryogramTrack';
 import LocationTrack from './viz/LocationTrack';
 import PileupTrack from './viz/PileupTrack';
 import ScaleTrack from './viz/ScaleTrack';
@@ -200,6 +201,7 @@ var pileup = {
     genome:   makeVizObject(GenomeTrack),
     genes:    makeVizObject(GeneTrack),
     features: makeVizObject(FeatureTrack),
+    karyogram:  makeVizObject(KaryogramTrack),
     location: makeVizObject(LocationTrack),
     scale:    makeVizObject(ScaleTrack),
     variants: makeVizObject(VariantTrack),
