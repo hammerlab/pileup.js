@@ -7,7 +7,29 @@
 
 "use strict";
 
+import DisplayMode from './viz/DisplayMode';
+
+
+/**
+ * Computes styles for base pairs which are rendered as letters.
+  *
+ * @param mode DisplayMode to render text.
+ * @param fontSize font size.
+ */
+function TEXT_STYLE(mode: number, fontSize: number): string {
+
+  if (mode == DisplayMode.LOOSE) {
+    return  `${fontSize}px 'Helvetica Neue', Helvetica, Arial, sans-serif`;
+  } else if (mode == DisplayMode.TIGHT) {
+    return `bold ${fontSize}px 'Helvetica Neue', Helvetica, Arial, sans-serif`;
+  } else {
+    return `${fontSize}px`;
+  }
+}
+
 module.exports = {
+  TEXT_STYLE,
+
   // Colors for individual base pairs
   BASE_COLORS: {
     'A': '#188712',
@@ -18,9 +40,6 @@ module.exports = {
     'N': 'black'
   },
 
-  // Styles for base pairs which are rendered as letters
-  LOOSE_TEXT_STYLE: `24px 'Helvetica Neue', Helvetica, Arial, sans-serif`,
-  TIGHT_TEXT_STYLE: `bold 12px 'Helvetica Neue', Helvetica, Arial, sans-serif`,
 
   // Gene track
   GENE_ARROW_SIZE: 4,

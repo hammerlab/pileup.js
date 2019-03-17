@@ -209,7 +209,7 @@ function renderPileup(ctx: DataCanvasRenderingContext2D,
     ctx.popObject();
   }
 
-  ctx.font = style.TIGHT_TEXT_STYLE;
+  ctx.font = style.TEXT_STYLE(DisplayMode.TIGHT, style.READ_HEIGHT - 1);
   vGroups.forEach(vGroup => drawGroup(vGroup));
 }
 

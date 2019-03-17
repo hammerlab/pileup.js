@@ -32,13 +32,12 @@ function renderGenome(ctx: DataCanvasRenderingContext2D,
   var mode = DisplayMode.getDisplayMode(pxPerLetter);
   var showText = DisplayMode.isText(mode);
 
+  // get adjusted canvas height for drawing letters and rects
+  var adjustedHeight = height/window.devicePixelRatio;
+
   if (mode != DisplayMode.HIDDEN) {
     ctx.textAlign = 'center';
-    if (mode == DisplayMode.LOOSE) {
-      ctx.font = style.LOOSE_TEXT_STYLE;
-    } else if (mode == DisplayMode.TIGHT) {
-      ctx.font = style.TIGHT_TEXT_STYLE;
-    }
+    ctx.font = style.TEXT_STYLE(mode, adjustedHeight);
 
     var previousBase = null;
     var start = range.start(),
@@ -54,19 +53,19 @@ function renderGenome(ctx: DataCanvasRenderingContext2D,
         // We only push objects in the text case as it involves creating a
         // new object & can become a performance issue.
         // 0.5 = centered
-        ctx.fillText(letter, scale(1 + 0.5 + pos), height - 1);
+        ctx.fillText(letter, scale(1 + 0.5 + pos), adjustedHeight);
       } else {
         if (pxPerLetter >= style.COVERAGE_MIN_BAR_WIDTH_FOR_GAP) {
           // We want a white space between blocks at this size, so we can see
           // the difference between bases.
-          ctx.fillRect(scale(1 + pos) + 0.5, 0,  pxPerLetter - 1.5, height);
+          ctx.fillRect(scale(1 + pos) + 0.5, 0,  pxPerLetter - 1.5, adjustedHeight);
         } else if (previousBase === letter) {
           // Otherwise, we want runs of colors to be completely solid ...
-          ctx.fillRect(scale(1 + pos) - 1.5, 0, pxPerLetter + 1.5, height);
+          ctx.fillRect(scale(1 + pos) - 1.5, 0, pxPerLetter + 1.5, adjustedHeight);
         } else {
           // ... and minimize the amount of smudging and whitespace between
           // bases.
-          ctx.fillRect(scale(1 + pos) - 0.5, 0,  pxPerLetter + 1.5, height);
+          ctx.fillRect(scale(1 + pos) - 0.5, 0,  pxPerLetter + 1.5, adjustedHeight);
         }
       }
 
