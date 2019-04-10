@@ -57,15 +57,15 @@ var sources = [
     cssClass: 'normal',
     name: 'Coverage'
   },
-  {
-    viz: pileup.viz.features(),
-    data: featureSource,
-    cssClass: 'normal',
-    name: 'Features'
-  },
+  // {
+  //   viz: pileup.viz.features(),
+  //   data: featureSource,
+  //   cssClass: 'normal',
+  //   name: 'Features'
+  // },
   {
     viz: pileup.viz.karyogram(),
-    data: featureSource,
+    // data: featureSource,
     cssClass: 'normal',
     name: 'Karyogram'
   },
