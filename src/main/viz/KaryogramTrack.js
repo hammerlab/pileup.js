@@ -20,19 +20,9 @@ import canvasUtils from './canvas-utils';
 import dataCanvas from 'data-canvas';
 import style from '../style';
 import d3utils from './d3utils';
-// import idiogrammatik from '../../node_modules/idiogrammatik.js/idiogrammatik';
-
-
-
-// d3.json('data/gstrained-chromosomes.json', function(err, chromosomes) {
-//   if (err) return console.error(err);
-
-//   d3.select('body')
-//       .datum(chromosomes)
-//       .call(idiogrammatik());
-// });
-
-
+import d3 from 'd3';
+// import d3 from '../../../node_modules/idiogrammatik.js/d3'
+import idiogrammatik from '../../../node_modules/idiogrammatik.js/idiogrammatik';
 
 
 class KaryogramTrack extends React.Component<VizProps<void>, State> {
@@ -44,15 +34,46 @@ class KaryogramTrack extends React.Component<VizProps<void>, State> {
     super(props);
   }
 
-  getScale(): Scale {
-    return d3utils.getTrackScale(this.props.range, this.props.width);
-  }
-
   render(): any {
-    return <canvas ref='canvas' />;
+    return <div id="karyogram"></div>;
   }
 
   componentDidMount() {
+    var _d3;
+    if (typeof d3 === 'undefined') {
+      if (typeof require === 'function') {
+        // Don't overwrite a global d3 instance.
+        _d3 = require('d3');
+      } else {
+        throw new Error("d3.js must be included before idiogrammatik.js.");
+      }
+    } else {
+      _d3 = d3;
+    }
+
+    var kgram = idiogrammatik();
+      //   .on('click', function(evt) {
+      //   var position = kgram.position(this);
+      //   console.log(position);
+      // })
+      // .on('mouseover', function(evt) {
+      //   var position = kgram.position(this);
+      //   console.log(position);
+      // });
+
+    kgram.width([1320]);
+    kgram.height([20]);
+    kgram.margin({'top': 5, 'bottom': 10, 'left': 20, 'right': 20});
+    kgram.idiogramHeight([10]);
+
+    d3.json("../../../test-data/gstained_chromosomes_data.json", function(err, data) {
+      console.log(data);
+      console.log(err);
+
+      d3.select('#karyogram')
+        .datum(data)
+        .call(kgram);
+    });
     this.updateVisualization();
   }
 
@@ -60,63 +81,16 @@ class KaryogramTrack extends React.Component<VizProps<void>, State> {
     this.updateVisualization();
   }
 
-  getDOMNode(): any {
-    return ReactDOM.findDOMNode(this);
-  }
+  // getDOMNode(): any {
+  //   return ReactDOM.findDOMNode(this);
+  // }
 
   updateVisualization() {
-    var canvas = this.getDOMNode(),
-        {range, width, height} = this.props;
 
-    d3utils.sizeCanvas(canvas, width, height);
-
-    var ctx = dataCanvas.getDataContext(canvasUtils.getContext(canvas));
-    ctx.save();
-    ctx.reset();
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-    var viewSize = range.stop - range.start + 1,
-        midX = Math.round(width / 2),
-        midY = Math.round(height / 2);
-
-    // Mid label
-    var {prefix, unit} = d3utils.formatRange(viewSize);
-    ctx.lineWidth = 1;
-    ctx.fillStyle = style.SCALE_FONT_COLOR;
-    ctx.font = style.SCALE_FONT_STYLE;
-    ctx.textAlign = "center";
-    ctx.fillText(prefix + " " + unit,
-                 midX,
-                 midY + style.SCALE_TEXT_Y_OFFSET);
-
-    // Left line
-    canvasUtils.drawLine(ctx, 0.5, midY - 0.5, midX - style.SCALE_LINE_PADDING - 0.5, midY - 0.5);
-    // Left arrow
-    ctx.beginPath();
-    ctx.moveTo(0.5 + style.SCALE_ARROW_SIZE, midY - style.SCALE_ARROW_SIZE - 0.5);
-    ctx.lineTo(0.5, midY - 0.5);
-    ctx.lineTo(0.5 + style.SCALE_ARROW_SIZE, midY + style.SCALE_ARROW_SIZE - 0.5);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    // Right line
-    canvasUtils.drawLine(ctx, midX + style.SCALE_LINE_PADDING - 0.5, midY - 0.5, width - 0.5, midY - 0.5);
-    // Right arrow
-    ctx.beginPath();
-    ctx.moveTo(width - style.SCALE_ARROW_SIZE - 0.5, midY - style.SCALE_ARROW_SIZE - 0.5);
-    ctx.lineTo(width - 0.5, midY - 0.5);
-    ctx.lineTo(width - style.SCALE_ARROW_SIZE - 0.5, midY + style.SCALE_ARROW_SIZE - 0.5);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    // Clean up afterwards
-    ctx.restore();
   }
 }
 
-KaryogramTrack.displayName = 'scale';
+KaryogramTrack.displayName = 'karyogram';
 KaryogramTrack.defaultSource = EmptySource.create();
 
 module.exports = KaryogramTrack;
