@@ -5,7 +5,8 @@
 'use strict';
 
 import type {Strand} from '../Alignment';
-import type {Gene, BigBedSource} from '../sources/BigBedDataSource';
+import Gene from '../data/gene';
+import type {DataSource} from '../sources/DataSource';
 import type {VizProps} from '../VisualizationWrapper';
 import type {Scale} from './d3utils';
 import type {State} from '../types';
@@ -74,12 +75,12 @@ function drawGeneName(ctx: CanvasRenderingContext2D,
   }
 }
 
-class GeneTrack extends React.Component<VizProps<BigBedSource>, State> {
-  props: VizProps<BigBedSource>;
+class GeneTrack extends React.Component<VizProps<DataSource<Gene>>, State> {
+  props: VizProps<DataSource<Gene>>;
   state: State;
   cache: GenericFeatureCache;
 
-  constructor(props: VizProps<BigBedSource>) {
+  constructor(props: VizProps<DataSource<Gene>>) {
     super(props);
     this.state = {
       networkStatus: null

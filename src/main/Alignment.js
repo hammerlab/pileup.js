@@ -6,6 +6,7 @@
  
 import type {GenomeRange} from './types';
 import type ContigInterval from './ContigInterval';
+import type {CoverageCount} from './viz/pileuputils';
 
 // "CIGAR" operations express how a sequence aligns to the reference: does it
 // have insertions? deletions? For more background, see the SAM/BAM paper.
@@ -22,6 +23,12 @@ function strToStrand(str: string): Strand {
 }
 
 export type Strand = '-' | '+' | '.';
+
+// converts a GA4GH Strand to a string of  ga4gh.Common.strand.POS_STRAND,
+// NEG_STRAND, or STRAND_UNSPECIFIED to Strand type.
+function ga4ghStrandToStrand(str: string): Strand {
+  return str && str == 'POS_STRAND' ? '+' : (str && str == 'NEG_STRAND' ? '-' : '.'); // either +, - or .
+}
 
 export type MateProperties = {
   ref: ?string;
@@ -44,16 +51,11 @@ export type Alignment = {
   getReferenceLength(): number;
   getMateProperties(): ?MateProperties;
   getInferredInsertSize(): number;
-};
+  getCoverage(referenceSource: Object): CoverageCount;
 
-export type AlignmentDataSource = {
-  rangeChanged: (newRange: GenomeRange) => void;
-  getAlignmentsInRange: (range: ContigInterval<string>) => Alignment[];
-  on: (event: string, handler: Function) => void;  // really => AlignmentDataSource
-  once: (event: string, handler: Function) => void;
-  off: (event: string) => void;
 };
 
 module.exports = {
-  strToStrand
+  strToStrand,
+  ga4ghStrandToStrand
 };

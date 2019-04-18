@@ -1,63 +1,43 @@
 /**
- * A data source which implements the GA4GH protocol.
- * Currently only used to load alignments.
+ * A data source which reads genes from a GA4GH Feature protocol.
  * @flow
  */
 'use strict';
 
-import type {GenomeRange} from '../types';
-import type {Alignment} from '../Alignment';
-import type {DataSource} from './DataSource';
-
 import _ from 'underscore';
 import {Events} from 'backbone';
-
+import type {GenomeRange} from '../types';
 import ContigInterval from '../ContigInterval';
-import GA4GHAlignment from '../GA4GHAlignment';
+import type {GA4GHFeatureSpec}  from './GA4GHFeatureSource';
 
-var ALIGNMENTS_PER_REQUEST = 200;  // TODO: explain this choice.
+import type {DataSource} from './DataSource';
+import Gene from '../data/gene';
+
+var BASE_PAIRS_PER_FETCH = 100;
+var GENES_PER_REQUEST = 400;
 var ZERO_BASED = false;
 
 
-// Genome ranges are rounded to multiples of this for fetching.
-// This reduces network activity while fetching.
-// TODO: tune this value -- setting it close to the read length will result in
-// lots of reads being fetched twice, but setting it too large will result in
-// bulkier requests.
-var BASE_PAIRS_PER_FETCH = 100;
+function create(spec: GA4GHFeatureSpec): DataSource<Gene> {
+  var url = spec.endpoint + '/features/search';
 
-type GA4GHSpec = {
-  endpoint: string;
-  readGroupId: string;
-  // HACK for demo. If set, will always use this reference id.
-  // This is for fetching referenceIds specified in GA4GH reference
-  // server
-  forcedReferenceId: ?string;
-};
-
-function create(spec: GA4GHSpec): DataSource<Alignment> {
-  var url = spec.endpoint + '/reads/search';
-
-  var reads: {[key:string]: Alignment} = {};
+  var genes: {[key:string]: Gene} = {};
 
   // Ranges for which we have complete information -- no need to hit network.
   var coveredRanges: ContigInterval<string>[] = [];
 
-  function addReadsFromResponse(response: Object) {
-    if (response.alignments === undefined) {
+  function addFeaturesFromResponse(response: Object) {
+    if (response.features === undefined) {
       return;
     }
-    response.alignments.forEach(alignment => {
-      // optimization: don't bother constructing a GA4GHAlignment unless it's new.
-      var key = GA4GHAlignment.keyFromGA4GHResponse(alignment);
-      if (key in reads) return;
-      try {
-        var ga4ghAlignment = new GA4GHAlignment(alignment);
-        reads[key] = ga4ghAlignment;
-      } catch (e) {
-        // sometimes, data from the server does not have an alignment.
-        // this will catch an exception in the GA4GHAlignment constructor
-      }
+
+    response.features.forEach(ga4ghFeature => {
+      var contigInterval = new ContigInterval(ga4ghFeature.referenceName, ga4ghFeature.start, ga4ghFeature.end);
+
+      var key = ga4ghFeature.id + contigInterval.toString();
+      if (key in genes) return;
+      var gene = Gene.fromGA4GH(ga4ghFeature);
+      genes[key] = gene;
     });
   }
 
@@ -76,7 +56,7 @@ function create(spec: GA4GHSpec): DataSource<Alignment> {
     coveredRanges = ContigInterval.coalesce(coveredRanges);
 
     intervals.forEach(i => {
-      fetchAlignmentsForInterval(i, null, 1 /* first request */);
+      fetchFeaturesForInterval(i, null, 1);
     });
   }
 
@@ -86,7 +66,7 @@ function create(spec: GA4GHSpec): DataSource<Alignment> {
     console.warn(message);
   }
 
-  function fetchAlignmentsForInterval(range: ContigInterval<string>,
+  function fetchFeaturesForInterval(range: ContigInterval<string>,
                                       pageToken: ?string,
                                       numRequests: number) {
     var xhr = new XMLHttpRequest();
@@ -100,12 +80,12 @@ function create(spec: GA4GHSpec): DataSource<Alignment> {
         notifyFailure(this.status + ' ' + this.statusText + ' ' + JSON.stringify(response));
       } else {
         if (response.errorCode) {
-          notifyFailure('Error from GA4GH endpoint: ' + JSON.stringify(response));
+          notifyFailure('Error from GA4GH Feature endpoint: ' + JSON.stringify(response));
         } else {
-          addReadsFromResponse(response);
+          addFeaturesFromResponse(response);
           o.trigger('newdata', range);  // display data as it comes in.
           if (response.nextPageToken) {
-            fetchAlignmentsForInterval(range, response.nextPageToken, numRequests + 1);
+            fetchFeaturesForInterval(range, response.nextPageToken, numRequests + 1);
           } else {
             o.trigger('networkdone');
           }
@@ -117,28 +97,19 @@ function create(spec: GA4GHSpec): DataSource<Alignment> {
     });
 
     o.trigger('networkprogress', {numRequests});
-    // hack for DEMO. force GA4GH reference ID
-    var contig = range.contig;
-    if (spec.forcedReferenceId !== undefined)
-    {
-      contig = spec.forcedReferenceId;
-    }
     xhr.send(JSON.stringify({
+      featureSetId: spec.featureSetId,
       pageToken: pageToken,
-      pageSize: ALIGNMENTS_PER_REQUEST,
-      readGroupIds: [spec.readGroupId],
-      referenceId: contig,
+      pageSize: GENES_PER_REQUEST,
+      referenceName: range.contig,
       start: range.start(),
       end: range.stop()
     }));
   }
 
-  function getFeaturesInRange(range: ContigInterval<string>): Alignment[] {
+  function getFeaturesInRange(range: ContigInterval<string>): Gene[] {
     if (!range) return [];
-
-    range = new ContigInterval(range.contig, range.start(), range.stop());
-
-    return _.filter(reads, read => read.intersects(range));
+    return _.filter(genes, gene => gene.intersects(range));
   }
 
   var o = {

@@ -2,7 +2,6 @@
 'use strict';
 
 import type {GenomeRange} from '../types';
-import type {Strand} from '../Alignment';
 import {strToStrand} from '../Alignment';
 
 import _ from 'underscore';
@@ -12,39 +11,9 @@ import {Events} from 'backbone';
 import ContigInterval from '../ContigInterval';
 import Interval from '../Interval';
 import BigBed from '../data/BigBed';
-// requirement for jshint to pass
-/* exported Feature */
-import Feature from '../data/feature';
+import Gene from '../data/gene';
 
-
-export type Gene = {
-  position: ContigInterval<string>;
-  id: string;  // transcript ID, e.g. "ENST00000269305"
-  score: number;
-  strand: Strand;
-  codingRegion: Interval;  // locus of coding start
-  exons: Array<Interval>;
-  geneId: string;  // ensembl gene ID
-  name: string;  // human-readable name, e.g. "TP53"
-}
-
-// Flow type for export.
-export type FeatureDataSource = {
-  rangeChanged: (newRange: GenomeRange) => void;
-  getFeaturesInRange: (range: ContigInterval<string>, resolution: ?number) => Feature[];
-  on: (event: string, handler: Function) => void;
-  off: (event: string) => void;
-  trigger: (event: string, ...args:any) => void;
-}
-
-// Flow type for export.
-export type BigBedSource = {
-  rangeChanged: (newRange: GenomeRange) => void;
-  getFeaturesInRange: (range: ContigInterval<string>) => Gene[];
-  on: (event: string, handler: Function) => void;
-  off: (event: string) => void;
-  trigger: (event: string, ...args:any) => void;
-}
+import type {DataSource} from './DataSource';
 
 // The fields are described at http://genome.ucsc.edu/FAQ/FAQformat#format1
 // Fields 4-12 are optional
@@ -73,7 +42,7 @@ function parseBedFeature(f): Gene {
              });
   }
 
-  return {
+  return new Gene({
     position,
     id: id,
     score: score,
@@ -82,10 +51,10 @@ function parseBedFeature(f): Gene {
     geneId: geneId,
     name: name,
     exons
-  };
+  });
 }
 
-function createFromBigBedFile(remoteSource: BigBed): BigBedSource {
+function createFromBigBedFile(remoteSource: BigBed): DataSource<Gene> {
   // Collection of genes that have already been loaded.
   var genes: {[key:string]: Gene} = {};
 
@@ -141,6 +110,7 @@ function createFromBigBedFile(remoteSource: BigBed): BigBedSource {
 
     // These are here to make Flow happy.
     on: () => {},
+    once: () => {},
     off: () => {},
     trigger: (status: string, param: any) => {}
   };
@@ -149,7 +119,7 @@ function createFromBigBedFile(remoteSource: BigBed): BigBedSource {
   return o;
 }
 
-function create(data: {url:string}): BigBedSource {
+function create(data: {url:string}): DataSource<Gene> {
   var url = data.url;
   if (!url) {
     throw new Error(`Missing URL from track: ${JSON.stringify(data)}`);

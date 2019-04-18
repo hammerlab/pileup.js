@@ -67,10 +67,10 @@ describe('BAM', function() {
 
     // TODO: run these in parallel
     var range = new ContigInterval('chrM', 10400, 10600);
-    return bam.getAlignmentsInRange(range, true).then(alignments => {
+    return bam.getFeaturesInRange(range, true).then(alignments => {
       expect(alignments).to.have.length(1);
       expect(alignments[0].toString()).to.equal('chrM:10427-10477');
-      return bam.getAlignmentsInRange(range, false).then(alignments => {
+      return bam.getFeaturesInRange(range, false).then(alignments => {
         expect(alignments).to.have.length(2);
         expect(alignments[0].toString()).to.equal('chrM:10388-10438');
         expect(alignments[1].toString()).to.equal('chrM:10427-10477');
@@ -96,7 +96,7 @@ describe('BAM', function() {
      x = x;
      */
 
-    return bam.getAlignmentsInRange(range).then(reads => {
+    return bam.getFeaturesInRange(range).then(reads => {
       // Note: htsjdk returns contig names like 'chr18', not 18.
       expect(reads).to.have.length(14);
       expect(reads.map(r => r.toString())).to.deep.equal([
@@ -122,7 +122,7 @@ describe('BAM', function() {
     var bam = new Bam(new RemoteFile('/test-data/index_test.bam'),
       new RemoteFile('/test-data/index_test.bam.bai'));
     var range = new ContigInterval('chr1', 90002285, 116992285);
-    return bam.getAlignmentsInRange(range).then(reads => {
+    return bam.getFeaturesInRange(range).then(reads => {
       expect(reads).to.have.length(92);
       expect(reads.slice(0, 5).map(r => r.toString())).to.deep.equal([
         'chr1:90071452-90071502',
@@ -158,7 +158,7 @@ describe('BAM', function() {
     var bam = new Bam(new RemoteFile('/test-data/index_test.bam'),
       new RemoteFile('/test-data/index_test.bam.bai'));
     var range = new ContigInterval('chr20', 1, 412345678);
-    return bam.getAlignmentsInRange(range).then(reads => {
+    return bam.getFeaturesInRange(range).then(reads => {
       // This count matches what you get if you run:
       // samtools view test/data/index_test.bam | cut -f3 | grep 'chr20' | wc -l
       expect(reads).to.have.length(228);
@@ -184,7 +184,7 @@ describe('BAM', function() {
 
     var range = new ContigInterval('chr20', 31511349, 31514172);
 
-    return bam.getAlignmentsInRange(range).then(reads => {
+    return bam.getFeaturesInRange(range).then(reads => {
       expect(reads).to.have.length(1114);
       expect(reads[0].toString()).to.equal('20:31511251-31511351');
       expect(reads[1113].toString()).to.equal('20:31514171-31514271');
@@ -198,7 +198,7 @@ describe('BAM', function() {
     var bam = new Bam(bamFile, baiFile);
 
     var range = new ContigInterval('chr17', 7514800, 7515100);
-    return bam.getAlignmentsInRange(range).then(reads => {
+    return bam.getFeaturesInRange(range).then(reads => {
       // TODO: samtools says 128. Figure out why there's a difference.
       expect(reads).to.have.length(130);
     });
@@ -213,7 +213,7 @@ describe('BAM', function() {
     var bam = new Bam(bamFile, baiFile, chunks);
 
     var range = new ContigInterval('chr20', 2684600, 2684800);
-    return bam.getAlignmentsInRange(range).then(reads => {
+    return bam.getFeaturesInRange(range).then(reads => {
       expect(reads).to.have.length(7);
     });
   });
@@ -226,7 +226,7 @@ describe('BAM', function() {
 
     var range = new ContigInterval('chr20', 2684600, 2684800);
     var progressEvents = [];
-    return bam.getAlignmentsInRange(range).progress(event => {
+    return bam.getFeaturesInRange(range).progress(event => {
       progressEvents.push(event);
     }).then(reads => {
       expect(progressEvents).to.deep.equal([

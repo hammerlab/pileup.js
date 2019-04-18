@@ -35,14 +35,14 @@ describe('GA4GHAlignmentSource', function() {
     });
 
     var requestInterval = new ContigInterval('1', 10000, 10007);
-    expect(source.getAlignmentsInRange(requestInterval))
+    expect(source.getFeaturesInRange(requestInterval))
         .to.deep.equal([]);
 
     var progress = [];
     source.on('networkprogress', e => { progress.push(e); });
     source.on('networkdone', e => { progress.push('done'); });
     source.on('newdata', () => {
-      var reads = source.getAlignmentsInRange(requestInterval);
+      var reads = source.getFeaturesInRange(requestInterval);
       expect(reads).to.have.length(16);
       done();
     });

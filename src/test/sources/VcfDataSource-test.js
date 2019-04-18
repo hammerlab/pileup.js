@@ -53,6 +53,9 @@ describe('VcfDataSource', function() {
       expect(variants[0].variant.position).to.equal(63799);
       expect(variants[0].variant.ref).to.equal('C');
       expect(variants[0].variant.alt).to.equal('T');
+      expect(variants[0].calls).to.have.length(2);
+      expect(variants[0].calls[0].genotype).to.deep.equal([0,1]);
+      expect(variants[0].calls[0].callSetName).to.equal("NORMAL");
       done();
     });
     source.rangeChanged({
@@ -65,7 +68,7 @@ describe('VcfDataSource', function() {
   it('should extract samples from a vcf file', function(done) {
     var source = getTestSource();
 
-    source.getSamples().then(samples => {
+    source.getCallNames().then(samples => {
       expect(samples).to.have.length(2);
       done();
     });

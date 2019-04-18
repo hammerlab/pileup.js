@@ -71,7 +71,8 @@ module.exports = {
   // Genotype Track
   GENOTYPE_SPACING: 1,
   GENOTYPE_HEIGHT: 10,
-  GENOTYPE_FILL: '#999999',
+  GENOTYPE_FILL_HET: '#0015ff',
+  GENOTYPE_FILL_HOM: '#00f1f9',
   BACKGROUND_FILL: '#f2f2f2',
 
 };

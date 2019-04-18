@@ -6,19 +6,19 @@ import {expect} from 'chai';
 import sinon from 'sinon';
 
 import ContigInterval from '../../main/ContigInterval';
-import GA4GHFeatureSource from '../../main/sources/GA4GHFeatureSource';
+import GA4GHGeneSource from '../../main/sources/GA4GHGeneSource';
 import RemoteFile from '../../main/RemoteFile';
 
-describe('GA4GHFeatureSource', function() {
+describe('GA4GHGeneSource', function() {
   var server: any = null, response, source;
 
   beforeEach(function(): any {
-    source = GA4GHFeatureSource.create({
+    source = GA4GHGeneSource.create({
       endpoint: '/v0.6.0',
       featureSetId: "WyIxa2dlbm9tZXMiLCJ2cyIsInBoYXNlMy1yZWxlYXNlIl0",
     });
 
-    return new RemoteFile('/test-data/features.ga4gh.chr1.120000-125000.chr17.7500000-7515100.json').getAllString().then(data => {
+    return new RemoteFile('/test-data/refSeqGenes.chr17.75000000-75100000.json').getAllString().then(data => {
       response = data;
       server = sinon.fakeServer.create();
     });
@@ -29,11 +29,11 @@ describe('GA4GHFeatureSource', function() {
     server.restore();
   });
 
-  it('should fetch features from a server', function(done) {
+  it('should fetch genes from a server', function(done) {
     server.respondWith('POST', '/v0.6.0/features/search',
                        [200, { "Content-Type": "application/json" }, response]);
 
-    var requestInterval = new ContigInterval('chr1', 130000, 135000);
+    var requestInterval = new ContigInterval('chr17', 75000000, 75100000);
     expect(source.getFeaturesInRange(requestInterval))
         .to.deep.equal([]);
 
@@ -42,7 +42,7 @@ describe('GA4GHFeatureSource', function() {
     source.on('networkdone', e => { progress.push('done'); });
     source.on('newdata', () => {
       var features = source.getFeaturesInRange(requestInterval);
-      expect(features).to.have.length(2);
+      expect(features).to.have.length(3);
       done();
     });
 

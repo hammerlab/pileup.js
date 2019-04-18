@@ -9,19 +9,19 @@ import {Events} from 'backbone';
 import type {GenomeRange} from '../types';
 import ContigInterval from '../ContigInterval';
 
-import type {FeatureDataSource} from './BigBedDataSource';
+import type {DataSource} from './DataSource';
 import Feature from '../data/feature';
 
 var BASE_PAIRS_PER_FETCH = 100;
 var FEATURES_PER_REQUEST = 400;
 var ZERO_BASED = false;
 
-type GA4GHFeatureSpec = {
+export type GA4GHFeatureSpec = {
   endpoint: string;
   featureSetId: string;
 };
 
-function create(spec: GA4GHFeatureSpec): FeatureDataSource {
+function create(spec: GA4GHFeatureSpec): DataSource<Feature> {
   var url = spec.endpoint + '/features/search';
 
   var features: {[key:string]: Feature} = {};

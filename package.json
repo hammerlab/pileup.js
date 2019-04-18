@@ -96,7 +96,7 @@
     "phantomjs": "1.9.17",
     "prepush-hook": "^0.1.0",
     "react-addons-test-utils": "^0.14.0",
-    "sinon": "^1.12.2",
+    "sinon": "^7.2.3",
     "smash": "0.0.14",
     "source-map": "^0.3.0",
     "stats.js": "^1.0.0",

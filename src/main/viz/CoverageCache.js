@@ -8,11 +8,10 @@
 'use strict';
 
 import type {Alignment} from '../Alignment';
+import Feature from '../data/feature';
 import type {TwoBitSource} from '../sources/TwoBitDataSource';
-import type {OpInfo} from './pileuputils';
 import type ContigInterval from '../ContigInterval';
-
-import {getOpInfo} from './pileuputils';
+import type {CoverageCount} from './pileuputils';
 import utils from '../utils';
 
 export type BinSummary = {
@@ -24,16 +23,16 @@ export type BinSummary = {
 
 // This class provides data management for the visualization, grouping paired
 // reads and managing the pileup.
-class CoverageCache {
+class CoverageCache<T: (Alignment | Feature)> {
   // maps groupKey to VisualGroup
-  reads: {[key: string]: Alignment};
+  items: {[key: string]: T};
   // ref --> position --> BinSummary
   refToCounts: {[key: string]: {[key: number]: BinSummary}};
   refToMaxCoverage: {[key: string]: number};
   referenceSource: TwoBitSource;
 
   constructor(referenceSource: TwoBitSource) {
-    this.reads = {};
+    this.items = {};
     this.refToCounts = {};
     this.refToMaxCoverage = {};
     this.referenceSource = referenceSource;
@@ -41,14 +40,12 @@ class CoverageCache {
 
   // Load a new read into the visualization cache.
   // Calling this multiple times with the same read is a no-op.
-  addAlignment(read: Alignment) {
-    var key = read.getKey();
-    if (key in this.reads) return;  // we've already seen this one.
-    this.reads[key] = read;
-
-    var opInfo = getOpInfo(read, this.referenceSource);
-
-    this.addReadToCoverage(read, opInfo);
+  addItem(item: T) {
+    var key = item.getKey();
+    if (key in this.items) return;  // we've already seen this one.
+    this.items[key] = item;
+    var coverageCount = item.getCoverage(this.referenceSource);
+    this.addToCoverage(coverageCount);
   }
 
   // Updates reference mismatch information for previously-loaded reads.
@@ -56,27 +53,29 @@ class CoverageCache {
     var ref = this._canonicalRef(range.contig);
     this.refToCounts[ref] = {};  // TODO: could be more efficient
     this.refToMaxCoverage[ref] = 0;
-    for (var k in this.reads) {
-      var read = this.reads[k];
-      if (read.getInterval().chrOnContig(range.contig)) {
-        var opInfo = getOpInfo(read, this.referenceSource);
-        this.addReadToCoverage(read, opInfo);
+
+    for (var k in this.items) {
+      var item: (Feature | Alignment) = this.items[k];
+      if (item.getInterval().chrOnContig(range.contig)) {
+        var coverageCount = item.getCoverage(this.referenceSource);
+        this.addToCoverage(coverageCount);
       }
     }
   }
 
-  addReadToCoverage(read: Alignment, opInfo: OpInfo) {
+  addToCoverage(coverageCount: CoverageCount) {
+
     // Add coverage/mismatch information
-    var ref = this._canonicalRef(read.ref);
+    var ref = this._canonicalRef(coverageCount.range.contig);
     if (!(ref in this.refToCounts)) {
       this.refToCounts[ref] = {};
       this.refToMaxCoverage[ref] = 0;
     }
     var counts = this.refToCounts[ref],
         max = this.refToMaxCoverage[ref],
-        range = read.getInterval(),
-        start = range.start(),
-        stop = range.stop();
+        contig = coverageCount.range,
+        start = contig.start(),
+        stop = contig.stop();
     for (var pos = start; pos <= stop; pos++) {
       let c = counts[pos];
       if (!c) {
@@ -85,21 +84,24 @@ class CoverageCache {
       c.count += 1;
       if (c.count > max) max = c.count;
     }
-    for (var mm of opInfo.mismatches) {
-      var bin = counts[mm.pos];
-      var mismatches;
-      if (bin.mismatches) {
-        mismatches = bin.mismatches;
-      } else {
-        mismatches = bin.mismatches = {};
-        bin.ref = this.referenceSource.getRangeAsString({
-          contig: ref, start: mm.pos, stop: mm.pos});
-      }
-      let c = mismatches[mm.basePair] || 0;
-      mismatches[mm.basePair] = 1 + c;
-    }
 
+    if (coverageCount.opInfo) {
+      for (var mm of coverageCount.opInfo.mismatches) {
+        var bin = counts[mm.pos];
+        var mismatches;
+        if (bin.mismatches) {
+          mismatches = bin.mismatches;
+        } else {
+          mismatches = bin.mismatches = {};
+          bin.ref = this.referenceSource.getRangeAsString({
+            contig: ref, start: mm.pos, stop: mm.pos});
+        }
+        let c = mismatches[mm.basePair] || 0;
+        mismatches[mm.basePair] = 1 + c;
+      }
+    }
     this.refToMaxCoverage[ref] = max;
+
   }
 
   maxCoverageForRef(ref: string): number {

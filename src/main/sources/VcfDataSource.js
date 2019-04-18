@@ -23,7 +23,7 @@ export type VcfDataSource = {
   rangeChanged: (newRange: GenomeRange) => void;
   getVariantsInRange: (range: ContigInterval<string>) => Variant[];
   getGenotypesInRange: (range: ContigInterval<string>) => VariantContext[];
-  getSamples: () => Q.Promise<string[]>;
+  getCallNames: () => Q.Promise<string[]>;
   on: (event: string, handler: Function) => void;
   off: (event: string) => void;
   trigger: (event: string, ...args:any) => void;
@@ -80,8 +80,8 @@ function createFromVcfFile(remoteSource: VcfFile): VcfDataSource {
     return _.filter(variants, v => range.containsLocus(v.variant.contig, v.variant.position));
   }
 
-  function getSamples(): Q.Promise<string[]> {
-    return remoteSource.getSamples().then(samples => {
+  function getCallNames(): Q.Promise<string[]> {
+    return remoteSource.getCallNames().then(samples => {
       return samples;
     });
   }
@@ -92,7 +92,7 @@ function createFromVcfFile(remoteSource: VcfFile): VcfDataSource {
     },
     getVariantsInRange,
     getGenotypesInRange,
-    getSamples,
+    getCallNames,
 
     // These are here to make Flow happy.
     on: () => {},

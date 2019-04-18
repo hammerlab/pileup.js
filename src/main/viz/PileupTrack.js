@@ -4,7 +4,8 @@
  */
 'use strict';
 
-import type {AlignmentDataSource} from '../Alignment';
+import type {DataSource} from '../sources/DataSource';
+import type {Alignment} from '../Alignment';
 import type {BasePair} from './pileuputils';
 import type {VisualAlignment, InsertStats} from './PileupCache';
 import type {VisualGroup} from './AbstractCache';
@@ -227,8 +228,8 @@ function opacityForQuality(quality: number): number {
   return Math.min(1.0, alpha);
 }
 
-class PileupTrack extends React.Component<VizProps<AlignmentDataSource>, State> {
-  props: VizProps<AlignmentDataSource>;
+class PileupTrack extends React.Component<VizProps<DataSource<Alignment>>, State> {
+  props: VizProps<DataSource<Alignment>>;
   state: State;
   cache: PileupCache;
   tiles: PileupTiledCanvas;
@@ -236,7 +237,7 @@ class PileupTrack extends React.Component<VizProps<AlignmentDataSource>, State> 
   static getOptionsMenu: (options: Object) => any;
   static handleSelectOption: (key: string, oldOptions: Object) => Object;
 
-  constructor(props: VizProps<AlignmentDataSource>) {
+  constructor(props: VizProps<DataSource<Alignment>>) {
     super(props);
     this.state = {
       networkStatus: null
@@ -351,7 +352,7 @@ class PileupTrack extends React.Component<VizProps<AlignmentDataSource>, State> 
   // Load new reads into the visualization cache.
   updateReads(range: ContigInterval<string>) {
     var anyBefore = this.cache.anyGroupsOverlapping(range);
-    this.props.source.getAlignmentsInRange(range)
+    this.props.source.getFeaturesInRange(range)
                      .forEach(read => this.cache.addAlignment(read));
 
     if (!anyBefore && this.cache.anyGroupsOverlapping(range)) {

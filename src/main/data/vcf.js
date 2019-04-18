@@ -11,7 +11,7 @@ import type AbstractFile from '../AbstractFile';
 import type Q from 'q';
 import _ from 'underscore';
 import ContigInterval from '../ContigInterval';
-import {Variant, VariantContext} from "./variant";
+import {Call, Variant, VariantContext} from "./variant";
 
 
 // This is a minimally-parsed line for facilitating binary search.
@@ -48,7 +48,7 @@ function extractVariantContext(samples: string[], vcfLine: string): VariantConte
   var parts = vcfLine.split('\t');
   var maxFrequency = null;
   var minFrequency = null;
-  var genotypeSamples = [];
+  var calls = [];
 
   if (parts.length>=7){
     var params = parts[7].split(';'); // process INFO field
@@ -70,11 +70,14 @@ function extractVariantContext(samples: string[], vcfLine: string): VariantConte
     if (parts.length > 9) {
       var sample_i = 0; // keeps track of which sample we are processing
       for (i = 9; i < parts.length; i++) {
-        var genotype = parts[i].split(':')[0].split("/");
+        var genotype = parts[i].split(':')[0].split("/").map(i => parseInt(i));
+        // TODO is it ever not 2?
         if (genotype.length == 2) {
           if (parseInt(genotype[0]) == 1 || parseInt(genotype[1]) == 1) {
             // TODO do you have to overwrite with concat?
-            genotypeSamples = genotypeSamples.concat(samples[sample_i]);
+            var call = new Call(samples[sample_i], genotype,
+                samples[sample_i], "True"); // currently not doing anything with phasing
+            calls = calls.concat(call);
           }
         }
         sample_i++;
@@ -93,7 +96,7 @@ function extractVariantContext(samples: string[], vcfLine: string): VariantConte
     majorFrequency: maxFrequency,
     minorFrequency: minFrequency,
     vcfLine,
-  }), genotypeSamples);
+  }), calls);
 }
 
 
@@ -221,7 +224,7 @@ class VcfFile {
     this.immediate.done();
   }
 
-  getSamples(): Q.Promise<string[]> {
+  getCallNames(): Q.Promise<string[]> {
     return this.immediate.then(immediate => {
       return immediate.samples;
     });

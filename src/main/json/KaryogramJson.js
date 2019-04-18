@@ -6,7 +6,7 @@
 'use strict';
 
 import type {DataSource} from '../sources/DataSource';
-import Feature from '../data/feature';
+import Chromosome from '../data/chromosome';
 
 import _ from 'underscore';
 import {Events} from 'backbone';
@@ -14,15 +14,15 @@ import {Events} from 'backbone';
 import ContigInterval from '../ContigInterval';
 import type {GenomeRange} from '../types';
 
-function create(json: string): DataSource<Feature> {
+function create(json: string): DataSource<Chromosome> {
 
   // parse json
   var parsedJson = JSON.parse(json);
-  var features: Feature[] = [];
+  var chromosomes: Chromosome[] = [];
 
-  // fill features with json
+  // fill chromosomes with json
   if (!_.isEmpty(parsedJson)) {
-      features = _.values(parsedJson.features).map(feature => Feature.fromGA4GH(feature));
+      chromosomes = _.values(parsedJson).map(chr => new Chromosome(chr));
   }
 
   function rangeChanged(newRange: GenomeRange) {
@@ -33,9 +33,10 @@ function create(json: string): DataSource<Feature> {
     return;
   }
 
-  function getFeaturesInRange(range: ContigInterval<string>): Feature[] {
+  function getFeaturesInRange(range: ContigInterval<string>): Chromosome[] {
     if (!range) return [];
-    var r = _.filter(features, feature => feature.intersects(range));
+    // TODO this is just getting the whole chromosome, maybe don't need this
+    var r = _.filter(chromosomes, chromosome => chromosome.intersects(range));
     return r;
   }
 

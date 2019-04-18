@@ -28,6 +28,28 @@ describe('GA4GHVariantJson', function() {
 
   });
 
+  it('should filter genotypes from json', function(done) {
+
+    var source = GA4GHVariantJson.create(json);
+
+    var requestInterval = new ContigInterval('1', 10000, 10500);
+
+    var variants = source.getGenotypesInRange(requestInterval);
+    expect(variants).to.have.length(3);
+    done();
+
+  });
+
+  it('should get call names from json', function(done) {
+
+    var source = GA4GHVariantJson.create(json);
+
+    source.getCallNames().then(samples => {
+        expect(samples).to.have.length(1);
+        done();
+      });
+  });
+
   it('should not fail on empty json string', function(done) {
 
     var source = GA4GHVariantJson.create("{}");
