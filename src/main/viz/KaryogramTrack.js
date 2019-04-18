@@ -29,9 +29,19 @@ class KaryogramTrack extends React.Component<VizProps<void>, State> {
   props: VizProps<void>;
   state: State;  // no state, used to make flow happy
   static defaultSource: Object;
+  kgram: Object;
+  data: Object;
 
   constructor(props: VizProps<void>) {
     super(props);
+    this.kgram  = {};
+
+    // TODO  rm when implemented dat asources
+    // var x  =  d3.json("../../../test-data/gstained_chromosomes_data.json", function(err, data) {
+    //   console.log(data);
+    //   console.log(err);
+      this.data  = {};
+    // });
   }
 
   render(): any {
@@ -51,33 +61,39 @@ class KaryogramTrack extends React.Component<VizProps<void>, State> {
       _d3 = d3;
     }
 
-    var kgram = idiogrammatik();
-      //   .on('click', function(evt) {
-      //   var position = kgram.position(this);
-      //   console.log(position);
-      // })
-      // .on('mouseover', function(evt) {
-      //   var position = kgram.position(this);
-      //   console.log(position);
-      // });
+    this.kgram = idiogrammatik();
 
-    kgram.width([1320]);
-    kgram.height([20]);
-    kgram.margin({'top': 5, 'bottom': 10, 'left': 20, 'right': 20});
-    kgram.idiogramHeight([10]);
+    this.kgram.width([1320]);
+    this.kgram.height([20]);
+    this.kgram.margin({'top': 5, 'bottom': 10, 'left': 20, 'right': 20});
+    this.kgram.idiogramHeight([10]);
+    console.log(this);  
 
-    d3.json("../../../test-data/gstained_chromosomes_data.json", function(err, data) {
-      console.log(data);
-      console.log(err);
+
+    // var x  =  d3.json("../../../test-data/gstained_chromosomes_data.json", function(err, data) {
+      // console.log(data);
+      // console.log(err);
+
+
+    // d3.select('#karyogram')
+    //     .datum(data)
+    //     .call(this.kgram);
 
       d3.select('#karyogram')
-        .datum(data)
-        .call(kgram);
-    });
+          .datum(this.data)
+          .call(this.kgram);
+    // });
+
     this.updateVisualization();
   }
 
   componentDidUpdate(prevProps: any, prevState: any) {
+    var range = this.props.range;
+    var kgram = idiogrammatik();
+
+    this.kgram.zoom(range['contig'],range['start'],range['stop']);
+
+
     this.updateVisualization();
   }
 
