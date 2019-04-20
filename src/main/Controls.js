@@ -62,6 +62,7 @@ class Controls extends React.Component<Props> {
     e.preventDefault();
     var range = this.completeRange(utils.parseRange(this.refs.position.value));
     this.props.onChange(range);
+    this.updateSlider(range);
   }
 
   handleSliderOnInput(){
@@ -115,8 +116,8 @@ class Controls extends React.Component<Props> {
       start: iv.start,
       stop: iv.stop
     });
+    this.updateSlider(iv);
   }
-  this.updateSlider(iv);
 
   updateSlider(newInterval: Interval) {
     var newSpan = (newInterval.stop - newInterval.start);
