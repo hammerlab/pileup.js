@@ -182,6 +182,20 @@ function scaleRange(range: Interval, factor: number): Interval {
   return new Interval(start, stop);
 }
 
+function absScaleRange(range: Interval, level: number, halfSpan: number): Interval {
+  var center = Math.floor((range.start + range.stop) / 2),
+      newHalfSpan = Math.round(halfSpan**(level + 1) / 2),
+      start = center - newHalfSpan,
+      stop = center + newHalfSpan;  // TODO: clamp
+
+   if (start < 0) {
+    // Shift to the right so that the range starts at zero.
+    stop -= start;
+    start = 0;
+  }
+  return new Interval(start, stop);
+}
+
 /**
  * Parse a user-specified range into a range.
  * Only the specified portions of the range will be filled out in the returned object.
@@ -299,6 +313,7 @@ module.exports = {
   altContigName,
   pipePromise,
   scaleRange,
+  absScaleRange,
   parseRange,
   formatInterval,
   isChrMatch,
