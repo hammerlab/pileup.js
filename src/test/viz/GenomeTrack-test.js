@@ -182,8 +182,8 @@ describe('GenomeTrack', function() {
     });
 
     expect(testDiv.querySelectorAll('.zoom-controls')).to.have.length(1);
-    expect(testDiv.querySelectorAll('.zoomRange')).to.have.length(1);
-    var slider = testDiv.querySelectorAll('.zoomRange')[0];
+    expect(testDiv.querySelectorAll('.zoom-slider')).to.have.length(1);
+    var slider = testDiv.querySelectorAll('.zoom-slider')[0];
     var [locationTxt] = getInputs('.controls input[type="text"]');
 
      return waitFor(hasReference, 2000).then(() => {
