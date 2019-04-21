@@ -21,7 +21,7 @@ import {waitFor} from '../async';
 describe('GenomeTrack', function() {
   var testDiv = document.getElementById('testdiv');
   if (!testDiv) throw new Error("Failed to match: testdiv");
-  
+
   beforeEach(() => {
     // A fixed width container results in predictable x-positions for mismatches.
     testDiv.style.width = '800px';
@@ -94,7 +94,7 @@ describe('GenomeTrack', function() {
    * (tens of nucleotides).
    */
   it('should zoom from huge zoom out', function(): any {
-    
+
     var p = pileup.create(testDiv, {
       range: { contig: '17', start: 0, stop: 114529884 },
       tracks: [{
@@ -165,6 +165,59 @@ describe('GenomeTrack', function() {
         stop: 7500775
       });
       expect(locationTxt.value).to.equal('7,500,725-7,500,775');
+      p.destroy();
+    });
+  });
+
+  it('should zoom according to the value of the slider', function(): any {
+    var p = pileup.create(testDiv, {
+      range: {contig: '17', start: 7500725, stop: 7500775},
+      tracks: [
+        {
+          data: referenceSource,
+          viz: pileup.viz.genome(),
+          isReference: true
+        }
+      ]
+    });
+
+    expect(testDiv.querySelectorAll('.zoom-controls')).to.have.length(1);
+    expect(testDiv.querySelectorAll('.zoom-slider')).to.have.length(1);
+    // querySelectorAll returns HTMLElement
+    // cast to any and then to HTMLInputElement to make flow happy
+    var slider = ((testDiv.querySelectorAll('.zoom-slider')[0]: any): HTMLInputElement);
+    var [locationTxt] = getInputs('.controls input[type="text"]');
+
+     return waitFor(hasReference, 2000).then(() => {
+      slider.value = "-1";
+      ReactTestUtils.Simulate.input(slider);
+
+     }).delay(50).then(() => {
+
+       expect(p.getRange()).to.deep.equal({
+        contig: 'chr17',
+        start: 7500748,
+        stop: 7500752
+      });
+      expect(locationTxt.value).to.equal('7,500,748-7,500,752');
+      slider.value = "-2";
+      ReactTestUtils.Simulate.input(slider);
+    }).delay(50).then(() => {
+      expect(p.getRange()).to.deep.equal({
+        contig: 'chr17',
+        start: 7500746,
+        stop: 7500754
+      });
+      expect(locationTxt.value).to.equal('7,500,746-7,500,754');
+      slider.value = "-5";
+      ReactTestUtils.Simulate.input(slider);
+    }).delay(50).then(() => {
+      expect(p.getRange()).to.deep.equal({
+        contig: 'chr17',
+        start: 7500718,
+        stop: 7500782
+      });
+      expect(locationTxt.value).to.equal('7,500,718-7,500,782');
       p.destroy();
     });
   });

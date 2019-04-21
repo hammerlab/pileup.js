@@ -18,12 +18,20 @@ type Props = {
   onChange: (newRange: GenomeRange)=>void;
 };
 
-class Controls extends React.Component<Props> {
+type State = {
+  // the base number to be used for absolute zoom
+  // new ranges become 2*defaultHalfInterval**zoomLevel + 1
+  // half interval is simply the span cut in half and excluding the center
+  defaultHalfInterval: number;
+};
+
+class Controls extends React.Component<Props, State> {
   props: Props;
-  state: void;  // no state
+  state: State;
 
   constructor(props: Object) {
     super(props);
+    this.state = {defaultHalfInterval:2};
   }
 
   makeRange(): GenomeRange {
@@ -61,6 +69,13 @@ class Controls extends React.Component<Props> {
     e.preventDefault();
     var range = this.completeRange(utils.parseRange(this.refs.position.value));
     this.props.onChange(range);
+    this.updateSlider(new Interval(range.start, range.stop));
+  }
+
+  handleSliderOnInput(){
+    // value is a string, want valueAsNumber
+    // slider has negative values to reverse its direction so we need to negate
+    this.zoomAbs(-this.refs.slider.valueAsNumber);
   }
 
   // Sets the values of the input elements to match `props.range`.
@@ -86,6 +101,20 @@ class Controls extends React.Component<Props> {
     this.zoomByFactor(2.0);
   }
 
+  // Updates the range using absScaleRange and a given zoom level
+  // Abs or absolute because it doesn't rely on scaling the current range
+  zoomAbs(level: number) {
+    var r = this.props.range;
+    if (!r) return;
+
+    var iv = utils.absScaleRange(new Interval(r.start, r.stop), level, this.state.defaultHalfInterval);
+    this.props.onChange({
+      contig: r.contig,
+      start: iv.start,
+      stop: iv.stop
+    });
+  }
+
   zoomByFactor(factor: number) {
     var r = this.props.range;
     if (!r) return;
@@ -96,6 +125,14 @@ class Controls extends React.Component<Props> {
       start: iv.start,
       stop: iv.stop
     });
+    this.updateSlider(iv);
+  }
+
+  // To be used if the range changes through a control besides the slider
+  // Slider value is changed to roughly reflect the new range
+  updateSlider(newInterval: Interval) {
+    var newSpan = (newInterval.stop - newInterval.start);
+    this.refs.slider.valueAsNumber = Math.ceil(-Math.log2(newSpan) + 1);
   }
 
   render(): any {
@@ -114,6 +151,7 @@ class Controls extends React.Component<Props> {
         <div className='zoom-controls'>
           <button className='btn-zoom-out' onClick={this.zoomOut.bind(this)}></button>{' '}
           <button className='btn-zoom-in' onClick={this.zoomIn.bind(this)}></button>
+          <input className='zoom-slider' ref ='slider' type="range" min="-15" max="0" onInput={this.handleSliderOnInput.bind(this)} class="slider"></input>
         </div>
       </form>
     );
