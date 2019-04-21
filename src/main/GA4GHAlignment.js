@@ -104,6 +104,16 @@ class GA4GHAlignment /* implements Alignment */ {
       return 0;
     }
   }
+  debugString(): string {
+    return `Name: ${this.name}
+    Position: ${this.pos.toString()}
+    CIGAR: ${this.getCigarString()}
+    Sequence: ${this.alignment.alignedSequence}
+    Quality:  ${this.alignment.alignedQuality} `;
+  }
+  getCigarString(): string {
+    return makeCigarString(this.cigarOps);
+  }
 
   getCoverage(referenceSource: Object): CoverageCount {
     return {
@@ -117,6 +127,9 @@ class GA4GHAlignment /* implements Alignment */ {
     // this.alignment.id would be appealing here, but it's not actually unique!
     return alignment.fragmentName + ':' + alignment.readNumber;
   }
+}
+function makeCigarString(cigarOps: Array<CigarOp>) {
+  return cigarOps.map(({op, length}) => length + op).join('');
 }
 
 module.exports = GA4GHAlignment;

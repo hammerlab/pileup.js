@@ -52,6 +52,9 @@ export type Alignment = {
   getMateProperties(): ?MateProperties;
   getInferredInsertSize(): number;
   getCoverage(referenceSource: Object): CoverageCount;
+  debugString(): string;
+};
+
 
 };
 
