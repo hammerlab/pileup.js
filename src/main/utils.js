@@ -182,9 +182,14 @@ function scaleRange(range: Interval, factor: number): Interval {
   return new Interval(start, stop);
 }
 
+/**
+ * Changes the range span to 2*halfSpan**level + 1
+ * New range looks like | halfSpan**level | center | halfSpan**level |
+ * An invariant is that the center value will be identical before and after.
+ */
 function absScaleRange(range: Interval, level: number, halfSpan: number): Interval {
   var center = Math.floor((range.start + range.stop) / 2),
-      newHalfSpan = Math.round(halfSpan**(level + 1) / 2),
+      newHalfSpan = halfSpan**level,
       start = center - newHalfSpan,
       stop = center + newHalfSpan;  // TODO: clamp
 

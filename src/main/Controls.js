@@ -18,9 +18,16 @@ type Props = {
   onChange: (newRange: GenomeRange)=>void;
 };
 
-class Controls extends React.Component<Props> {
+type State = {
+  // the base number to be used for absolute zoom
+  // new ranges become 2*defaultHalfInterval**zoomLevel + 1
+  // half interval is simply the span cut in half and excluding the center
+  defaultHalfInterval: number;
+};
+
+class Controls extends React.Component<Props, State> {
   props: Props;
-  state: void;  // no state
+  state: State;
 
   constructor(props: Object) {
     super(props);
@@ -62,7 +69,7 @@ class Controls extends React.Component<Props> {
     e.preventDefault();
     var range = this.completeRange(utils.parseRange(this.refs.position.value));
     this.props.onChange(range);
-    this.updateSlider(range);
+    this.updateSlider(new Interval(range.start, range.stop));
   }
 
   handleSliderOnInput(){
@@ -94,6 +101,8 @@ class Controls extends React.Component<Props> {
     this.zoomByFactor(2.0);
   }
 
+  // Updates the range using absScaleRange and a given zoom level
+  // Abs or absolute because it doesn't rely on scaling the current range
   zoomAbs(level: number) {
     var r = this.props.range;
     if (!r) return;
@@ -119,6 +128,8 @@ class Controls extends React.Component<Props> {
     this.updateSlider(iv);
   }
 
+  // To be used if the range changes through a control besides the slider
+  // Slider value is changed to roughly reflect the new range
   updateSlider(newInterval: Interval) {
     var newSpan = (newInterval.stop - newInterval.start);
     this.refs.slider.valueAsNumber = Math.ceil(-Math.log2(newSpan) + 1);

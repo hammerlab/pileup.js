@@ -183,11 +183,13 @@ describe('GenomeTrack', function() {
 
     expect(testDiv.querySelectorAll('.zoom-controls')).to.have.length(1);
     expect(testDiv.querySelectorAll('.zoom-slider')).to.have.length(1);
-    var slider = testDiv.querySelectorAll('.zoom-slider')[0];
+    // querySelectorAll returns HTMLElement
+    // cast to any and then to HTMLInputElement to make flow happy
+    var slider = ((testDiv.querySelectorAll('.zoom-slider')[0]: any): HTMLInputElement);
     var [locationTxt] = getInputs('.controls input[type="text"]');
 
      return waitFor(hasReference, 2000).then(() => {
-      slider.value = -1;
+      slider.value = "-1";
       ReactTestUtils.Simulate.input(slider);
 
      }).delay(50).then(() => {
@@ -198,7 +200,7 @@ describe('GenomeTrack', function() {
         stop: 7500752
       });
       expect(locationTxt.value).to.equal('7,500,748-7,500,752');
-      slider.value = -2;
+      slider.value = "-2";
       ReactTestUtils.Simulate.input(slider);
     }).delay(50).then(() => {
       expect(p.getRange()).to.deep.equal({
@@ -207,7 +209,7 @@ describe('GenomeTrack', function() {
         stop: 7500754
       });
       expect(locationTxt.value).to.equal('7,500,746-7,500,754');
-      slider.value = -5;
+      slider.value = "-5";
       ReactTestUtils.Simulate.input(slider);
     }).delay(50).then(() => {
       expect(p.getRange()).to.deep.equal({
