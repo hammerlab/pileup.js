@@ -37,7 +37,6 @@ describe('GA4GHAlignment', function() {
       strand: '-'
     });
     expect(a.debugString().length).to.be.above(0);
-    console.log("GA4GHAlignment : " + a.debugString());
     done();
   });
 

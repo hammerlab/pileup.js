@@ -55,9 +55,6 @@ export type Alignment = {
   debugString(): string;
 };
 
-
-};
-
 module.exports = {
   strToStrand,
   ga4ghStrandToStrand
