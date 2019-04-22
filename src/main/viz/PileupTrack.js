@@ -393,9 +393,9 @@ class PileupTrack extends React.Component<VizProps<DataSource<Alignment>>, State
     var parent = ((d3utils.findParent(canvas, "pileup") : any) : HTMLCanvasElement);
 
     if (this.props.options.hideAlignments) {
-      d3utils.sizeCanvas(canvas, width, 0);
-      // if alignments are hidden, set parent div to 0px
-      if (parent) parent.style.minHeight = "0px";
+      d3utils.sizeCanvas(canvas, width, 60);
+      // if alignments are hidden, set parent div to 60px to leave room for gear
+      if (parent) parent.style.minHeight = "60px";
       return;
     }
 
