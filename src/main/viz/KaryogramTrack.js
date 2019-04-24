@@ -28,7 +28,7 @@ import idiogrammatik from '../../../node_modules/idiogrammatik.js/idiogrammatik'
 class KaryogramTrack extends React.Component<VizProps<void>, State> {
   props: VizProps<void>;
   state: State;  // no state, used to make flow happy
-  static defaultSource: Object;
+  source: DataSource<Chromosome>;
   kgram: Object;
   data: Object;
 
