@@ -6,6 +6,7 @@
 'use strict';
 
 import type {CigarOp, MateProperties, Strand} from './Alignment';
+import {makeCigarString} from './Alignment';
 import type {CoverageCount} from './viz/pileuputils';
 import {getOpInfo} from './viz/pileuputils';
 
@@ -103,6 +104,13 @@ class GA4GHAlignment /* implements Alignment */ {
     } else {
       return 0;
     }
+  }
+  debugString(): string {
+    return `Name: ${this.name}
+    Position: ${this.pos.toString()}
+    CIGAR: ${makeCigarString(this.cigarOps)}
+    Sequence: ${this.alignment.alignedSequence}
+    Quality:  ${this.alignment.alignedQuality} `;
   }
 
   getCoverage(referenceSource: Object): CoverageCount {

@@ -36,6 +36,7 @@ describe('GA4GHAlignment', function() {
       pos: 10007,
       strand: '-'
     });
+    expect(a.debugString().length).to.be.above(0);
     done();
   });
 

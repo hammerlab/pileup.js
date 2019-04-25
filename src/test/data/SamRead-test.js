@@ -44,6 +44,7 @@ describe('SamRead', function() {
         pos: 79,
         strand: '-'
       });
+      expect(read.debugString().length).to.be.above(0);
 
       // This one has a more interesting Cigar string
       expect(reads[3].cigarOps).to.deep.equal([

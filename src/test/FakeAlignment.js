@@ -40,6 +40,7 @@ class FakeAlignment /* implements Alignment */ {
   getInterval(): ContigInterval<string> { return this.interval; }
   getReferenceLength(): number { return this.interval.length(); }
   getMateProperties(): ?MateProperties { return this.mateProps; }
+  debugString(): string { return this.name; }
 
   getCoverage(referenceSource: Object): CoverageCount {
     return {
