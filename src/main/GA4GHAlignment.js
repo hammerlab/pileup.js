@@ -6,6 +6,7 @@
 'use strict';
 
 import type {CigarOp, MateProperties, Strand} from './Alignment';
+import {makeCigarString} from './Alignment';
 import type {CoverageCount} from './viz/pileuputils';
 import {getOpInfo} from './viz/pileuputils';
 
@@ -107,12 +108,9 @@ class GA4GHAlignment /* implements Alignment */ {
   debugString(): string {
     return `Name: ${this.name}
     Position: ${this.pos.toString()}
-    CIGAR: ${this.getCigarString()}
+    CIGAR: ${makeCigarString(this.cigarOps)}
     Sequence: ${this.alignment.alignedSequence}
     Quality:  ${this.alignment.alignedQuality} `;
-  }
-  getCigarString(): string {
-    return makeCigarString(this.cigarOps);
   }
 
   getCoverage(referenceSource: Object): CoverageCount {
@@ -127,9 +125,6 @@ class GA4GHAlignment /* implements Alignment */ {
     // this.alignment.id would be appealing here, but it's not actually unique!
     return alignment.fragmentName + ':' + alignment.readNumber;
   }
-}
-function makeCigarString(cigarOps: Array<CigarOp>) {
-  return cigarOps.map(({op, length}) => length + op).join('');
 }
 
 module.exports = GA4GHAlignment;

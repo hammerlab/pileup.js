@@ -30,6 +30,11 @@ function ga4ghStrandToStrand(str: string): Strand {
   return str && str == 'POS_STRAND' ? '+' : (str && str == 'NEG_STRAND' ? '-' : '.'); // either +, - or .
 }
 
+// builds a cigarString string that is useful to users.
+function makeCigarString(cigarOps: Array<CigarOp>) {
+  return cigarOps.map(({op, length}) => length + op).join('');
+}
+
 export type MateProperties = {
   ref: ?string;
   pos: number;
@@ -52,10 +57,11 @@ export type Alignment = {
   getMateProperties(): ?MateProperties;
   getInferredInsertSize(): number;
   getCoverage(referenceSource: Object): CoverageCount;
-  debugString(): string;
+  debugString(): string; 
 };
 
 module.exports = {
   strToStrand,
-  ga4ghStrandToStrand
+  ga4ghStrandToStrand,
+  makeCigarString
 };

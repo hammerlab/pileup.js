@@ -14,6 +14,7 @@
 
 import type VirtualOffset from './VirtualOffset';
 import type {Strand, CigarOp, MateProperties} from '../Alignment';
+import {makeCigarString} from '../Alignment';
 
 import jDataView from 'jdataview';
 import jBinary from 'jbinary';
@@ -161,7 +162,7 @@ class SamRead /* implements Alignment */ {
   }
 
   getCigarString(): string {
-    return makeCigarString(this.getFull().cigar);
+    return makeCigarString(this.cigarOps);
   }
 
   getQualPhred(): string {
@@ -247,11 +248,6 @@ Tags: ${JSON.stringify(f.auxiliary, null, '  ')}
     });
     return refLength;
   }
-}
-
-// Convert a structured Cigar object into the string format we all love.
-function makeCigarString(cigarOps: Array<{op:string; length:number}>) {
-  return cigarOps.map(({op, length}) => length + op).join('');
 }
 
 // Convert an array of Phred scores to a printable string.
