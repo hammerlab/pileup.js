@@ -166,7 +166,7 @@ function parseWithException(parseFunc: Function) {
   try {
     return parseFunc();
   } catch(error) {
-    // Chrome-like browsers: RangeError; phantomjs: DOMException
+    // Chrome-like browsers: RangeError; DOMException
     if (error.name == "RangeError" || error.name == "INDEX_SIZE_ERR") {
         console.log(`Error name: ${error.name}`);
         throw new IncompleteChunkError(error);

@@ -66,7 +66,7 @@ describe('VariantTrack', function() {
         expect(variantClickedData).to.be.null;
 
         //check clicking on variant
-        ReactTestUtils.Simulate.click(canvas,{nativeEvent: {offsetX: -0.5, offsetY: -15.5}});
+        ReactTestUtils.Simulate.click(canvas,{nativeEvent: {offsetX: 0, offsetY: 17}});
 
         expect(variantClickedData).to.not.be.null;
         p.destroy();
