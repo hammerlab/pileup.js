@@ -34,10 +34,8 @@ function create(json: string): DataSource<Chromosome> {
   }
 
   function getFeaturesInRange(range: ContigInterval<string>): Chromosome[] {
-    if (!range) return [];
-    // TODO this is just getting the whole chromosome, maybe don't need this
-    var r = _.filter(chromosomes, chromosome => chromosome.intersects(range));
-    return r;
+    // this is abusing the function name TODO
+    return chromosomes;
   }
 
   var o = {
@@ -51,7 +49,7 @@ function create(json: string): DataSource<Chromosome> {
   };
   _.extend(o, Events);
   return o;
-}
+};
 
 module.exports = {
   create

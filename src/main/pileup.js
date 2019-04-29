@@ -29,6 +29,7 @@ import Interval from './Interval';
 import GA4GHAlignmentJson from './json/GA4GHAlignmentJson';
 import GA4GHVariantJson from './json/GA4GHVariantJson';
 import GA4GHFeatureJson from './json/GA4GHFeatureJson';
+import KaryogramJson from './json/KaryogramJson';
 
 // GA4GH sources
 import GA4GHAlignmentSource from './sources/GA4GHAlignmentSource';
@@ -237,6 +238,7 @@ var pileup = {
     alignmentJson: GA4GHAlignmentJson.create,
     variantJson: GA4GHVariantJson.create,
     featureJson: GA4GHFeatureJson.create,
+    karyogramJson: KaryogramJson.create,
     vcf: VcfDataSource.create,
     twoBit: TwoBitDataSource.create,
     bigBed: BigBedDataSource.create,
