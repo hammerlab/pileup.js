@@ -18,4 +18,4 @@ trap finish EXIT
 sleep 1
 
 # Start the tests
-mocha-chrome http://localhost:8081/src/test/runner.html "$@"
+mocha-headless-chrome -f http://localhost:8081/src/test/runner.html
