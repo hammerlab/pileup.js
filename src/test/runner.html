@@ -9,10 +9,10 @@
   <div id="testdiv"></div>
   <div id="mocha"></div>
 
-  <!-- Polyfills for PhantomJS -->
-  <script src="../../node_modules/arraybuffer-slice/index.js"></script>
+  <!-- TODO AM Polyfills for PhantomJS -->
+  <!-- <script src="../../node_modules/arraybuffer-slice/index.js"></script>
   <script src="../../node_modules/number-to-locale-string/polyfill.number.toLocaleString.js"></script>
-  <script src="../../node_modules/babel-core/browser-polyfill.js"></script>
+  <script src="../../node_modules/babel-core/browser-polyfill.js"></script> -->
 
   <!-- Mocha -->
   <script src="../../node_modules/mocha/mocha.js"></script>
@@ -21,11 +21,12 @@
 
   <script>
     mocha.checkLeaks();
-    if (window.mochaPhantomJS) {
-      mochaPhantomJS.run();
-    } else {
-      mocha.run();
-    }
+    mocha.run();
+    // if (window.mochaPhantomJS) {
+    //   mochaPhantomJS.run();
+    // } else {
+    //
+    // }
   </script>
 </body>
 </html>
