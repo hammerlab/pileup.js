@@ -13,53 +13,50 @@
 import type {VizProps} from '../VisualizationWrapper';
 import type {Scale} from './d3utils';
 import type {State} from '../types';
+import type {DataSource} from '../sources/DataSource';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import EmptySource from '../sources/EmptySource';
 import canvasUtils from './canvas-utils';
+import TiledCanvas from './TiledCanvas';
 import dataCanvas from 'data-canvas';
 import style from '../style';
 import d3utils from './d3utils';
 import d3 from 'd3';
 // import d3 from '../../../node_modules/idiogrammatik.js/d3'
 import idiogrammatik from '../../../node_modules/idiogrammatik.js/idiogrammatik';
+import ContigInterval from '../ContigInterval';
+import Chromosome from '../data/chromosome';
 
 
-class KaryogramTrack extends React.Component<VizProps<void>, State> {
-  props: VizProps<void>;
+// class KaryoTiledCanvas extends TiledCanvas {
+//   options: Object;
+//   source: DataSource<Chromosome>;
+
+//   constructor(source: DataSource<Chromosome>) {
+//     super();
+//     this.source = source;
+//     console.log('SOURCE', source)
+//   }
+// }
+
+
+class KaryogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, State> {
+  props: VizProps<DataSource<Chromosome>>;
   state: State;  // no state, used to make flow happy
   source: DataSource<Chromosome>;
   kgram: Object;
   data: Object;
 
-  constructor(props: VizProps<void>) {
+  constructor(props: VizProps<DataSource<Chromosome>>) {
     super(props);
-    this.kgram  = {};
-
-    // TODO  rm when implemented dat asources
-    // var x  =  d3.json("../../../test-data/gstained_chromosomes_data.json", function(err, data) {
-    //   console.log(data);
-    //   console.log(err);
-      this.data  = {};
-    // });
+    this.source = this.props.source;
+    this.kgram = {};
+    this.data = {};
   }
 
-  render(): any {
-    return <div id="karyogram"></div>;
-  }
 
   componentDidMount() {
-    var _d3;
-    if (typeof d3 === 'undefined') {
-      if (typeof require === 'function') {
-        // Don't overwrite a global d3 instance.
-        _d3 = require('d3');
-      } else {
-        throw new Error("d3.js must be included before idiogrammatik.js.");
-      }
-    } else {
-      _d3 = d3;
-    }
 
     this.kgram = idiogrammatik();
 
@@ -67,42 +64,38 @@ class KaryogramTrack extends React.Component<VizProps<void>, State> {
     this.kgram.height([20]);
     this.kgram.margin({'top': 5, 'bottom': 10, 'left': 20, 'right': 20});
     this.kgram.idiogramHeight([10]);
-    console.log(this);  
+
+    var range = this.props.range
+    var relaxedRange =
+        new ContigInterval(range.contig, range.start, range.stop);
+    this.data = this.source.getFeaturesInRange(relaxedRange);
+    console.log('DATA', this.data);
+    console.log('KGRAM', this.kgram);
 
 
-    // var x  =  d3.json("../../../test-data/gstained_chromosomes_data.json", function(err, data) {
-      // console.log(data);
-      // console.log(err);
-
-
-    // d3.select('#karyogram')
-    //     .datum(data)
-    //     .call(this.kgram);
-
-      d3.select('#karyogram')
-          .datum(this.data)
-          .call(this.kgram);
-    // });
+    d3.select('#karyogram')
+      .datum(this.data)
+      .call(this.kgram);
 
     this.updateVisualization();
   }
 
   componentDidUpdate(prevProps: any, prevState: any) {
     var range = this.props.range;
-    var kgram = idiogrammatik();
+    console.log('UPDATEKGRAM', this.kgram);
 
-    this.kgram.zoom(range['contig'],range['start'],range['stop']);
-
+    this.kgram.zoom(range.contig,range.start,range.stop);
+    console.log('updated');
 
     this.updateVisualization();
   }
 
-  // getDOMNode(): any {
-  //   return ReactDOM.findDOMNode(this);
-  // }
-
   updateVisualization() {
 
+  }
+
+  render(): any {
+    return <div id="karyogram"></div>;
   }
 }
 
