@@ -31,9 +31,6 @@ sleep 1
 mocha-headless-chrome \
   -f http://localhost:8080/src/test/coverage.html \
   -c coverage/coverage.json
-  #spec '{"hooks": "mocha-phantomjs-istanbul", "coverageFile": "coverage/coverage.json"}'
-
-
 
 if [ $CI ]; then
   # Convert the JSON coverage to LCOV for coveralls.
@@ -44,6 +41,7 @@ if [ $CI ]; then
   echo ''  # reset exit code -- failure to post coverage shouldn't be an error.
 
 else
+  # Convert the JSON coverage to HTML for viewing
   istanbul report --include coverage/*.json html
   set +x
 
