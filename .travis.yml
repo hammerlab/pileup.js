@@ -1,8 +1,10 @@
 sudo: false  # Use container-based infrastructure
 language: node_js
 node_js:
-  - "8.9"
-
+  - "10.15"
+dist: trusty # chrome addon needs trusty
+addons:
+  chrome: stable
 script: >
     npm run build &&
     npm run test &&

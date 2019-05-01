@@ -89,13 +89,13 @@ class TiledCanvas {
       var left = Math.round(scale(tile.range.start())),
           nextLeft = Math.round(scale(tile.range.stop() + 1)),
           width = nextLeft - left;
-      // Drawing a 0px tall canvas throws in Firefox and PhantomJS.
+      // Drawing a 0px tall canvas throws in Firefox.
       if (tile.buffer.height === 0) return;
       // We can't just throw the images on the screen without scaling due to
       // rounding issues, which can result in 1px gaps or overdrawing.
       // We always have:
       //   width - tile.buffer.width \in {-1, 0, +1}
-      ctx.drawImage(tile.buffer, 
+      ctx.drawImage(tile.buffer,
                     0, 0, tile.buffer.width, tile.buffer.height,
                     left, 0, width, tile.buffer.height);
 

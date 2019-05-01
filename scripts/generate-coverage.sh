@@ -26,12 +26,11 @@ trap finish EXIT
 # Give the server a chance to start up
 sleep 1
 
-# Run the tests using mocha-phantomjs & mocha-phantomjs-istanbul
+# Run the tests using mocha-headless-chrom
 # This produces coverage/coverage.json
-phantomjs \
-  ./node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee \
-  http://localhost:8080/src/test/coverage.html \
-  spec '{"hooks": "mocha-phantomjs-istanbul", "coverageFile": "coverage/coverage.json"}'
+mocha-headless-chrome \
+  -f http://localhost:8080/src/test/coverage.html \
+  -c coverage/coverage.json
 
 if [ $CI ]; then
   # Convert the JSON coverage to LCOV for coveralls.
@@ -42,7 +41,6 @@ if [ $CI ]; then
   echo ''  # reset exit code -- failure to post coverage shouldn't be an error.
 
 else
-
   # Convert the JSON coverage to HTML for viewing
   istanbul report --include coverage/*.json html
   set +x

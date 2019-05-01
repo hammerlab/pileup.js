@@ -1,5 +1,5 @@
 #!/bin/bash
-# Starts the http-server and runs mocha-phantomjs-based tests
+# Starts the http-server and runs mocha-chrome-based tests
 # Note that you must run `npm run build` or `npm run watch` before running this.
 set -o errexit
 
@@ -18,4 +18,4 @@ trap finish EXIT
 sleep 1
 
 # Start the tests
-mocha-phantomjs http://localhost:8081/src/test/runner.html "$@"
+mocha-headless-chrome -f http://localhost:8081/src/test/runner.html
