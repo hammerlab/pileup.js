@@ -7,6 +7,7 @@ import Q from 'q';
 
 import BigBed from '../../main/data/BigBed';
 import ContigInterval from '../../main/ContigInterval';
+import _ from "underscore";
 
 describe('BigBed', function() {
   function getTestBigBed () {
@@ -145,6 +146,13 @@ describe('BigBed', function() {
         expect(rows).to.have.length(21); // all the chrX features.
         expect(range.toString()).to.equal('chrX:151071196-151095703');
       });
+  });
+
+  it('file with 257 contigs', function () {
+    var bigBed = new BigBed('/test-data/257-contigs.bb');
+    return bigBed.contigMap.then(contigs => {
+      expect(_.keys(contigs).length).to.equal(257);
+    })
   });
 
   // Things left to test:
