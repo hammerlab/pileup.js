@@ -17,5 +17,19 @@ trap finish EXIT
 # possible racing conditions
 sleep 1
 
+# extract parameters passed to "npm test" method
+grep_param=''
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --grep=*)
+      grep_param="${1#*=}"
+      ;;
+    *)
+      printf "Error: Invalid argument: $1\n"
+      exit 1
+  esac
+  shift
+done
+
 # Start the tests
-mocha-headless-chrome -f http://localhost:8081/src/test/runner.html
+mocha-headless-chrome -f http://localhost:8081/src/test/runner.html?grep=$grep_param
