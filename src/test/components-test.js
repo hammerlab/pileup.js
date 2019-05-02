@@ -9,52 +9,54 @@ import dataCanvas from 'data-canvas';
 import pileup from '../main/pileup';
 import ContigInterval from '../main/ContigInterval';
 import {waitFor} from './async';
-    
+
 describe('pileup', function() {
-  var tracks = [
-    {
-      viz: pileup.viz.scale(),
-      data: pileup.formats.empty(),
-      name: 'Scale'
-    },
-    {
-      viz: pileup.viz.location(),
-      data: pileup.formats.empty(),
-      name: 'Location'
-    },
-    {
-      viz: pileup.viz.genome(),
-      isReference: true,
-      data: pileup.formats.twoBit({
-        url: '/test-data/test.2bit'
-      }),
-      cssClass: 'a'
-    },
-    {
-      viz: pileup.viz.variants(),
-      data: pileup.formats.vcf({
-        url: '/test-data/snv.chr17.vcf'
-      }),
-      cssClass: 'b'
-    },
-    {
-      viz: pileup.viz.genes(),
-      data: pileup.formats.bigBed({
-        // This file contains just TP53, shifted so that it starts at the
-        // beginning of chr17 (to match test.2bit). See test/data/README.md.
-        url: '/test-data/tp53.shifted.bb'
-      }),
-      cssClass: 'c'
-    },
-    {
-      viz: pileup.viz.pileup(),
-      data: pileup.formats.bam({
-        url: '/test-data/chr17.1-250.bam',
-        indexUrl: '/test-data/chr17.1-250.bam.bai'
-      }),
-      cssClass: 'd'
-    }
-  ];
+  function getTracks() {
+    return [
+      {
+        viz: pileup.viz.scale(),
+        data: pileup.formats.empty(),
+        name: 'Scale'
+      },
+      {
+        viz: pileup.viz.location(),
+        data: pileup.formats.empty(),
+        name: 'Location'
+      },
+      {
+        viz: pileup.viz.genome(),
+        isReference: true,
+        data: pileup.formats.twoBit({
+          url: '/test-data/test.2bit'
+        }),
+        cssClass: 'a'
+      },
+      {
+        viz: pileup.viz.variants(),
+        data: pileup.formats.vcf({
+          url: '/test-data/snv.chr17.vcf'
+        }),
+        cssClass: 'b'
+      },
+      {
+        viz: pileup.viz.genes(),
+        data: pileup.formats.bigBed({
+          // This file contains just TP53, shifted so that it starts at the
+          // beginning of chr17 (to match test.2bit). See test/data/README.md.
+          url: '/test-data/tp53.shifted.bb'
+        }),
+        cssClass: 'c'
+      },
+      {
+        viz: pileup.viz.pileup(),
+        data: pileup.formats.bam({
+          url: '/test-data/chr17.1-250.bam',
+          indexUrl: '/test-data/chr17.1-250.bam.bai'
+        }),
+        cssClass: 'd'
+      }
+    ]
+  }
 
   var testDiv = document.getElementById('testdiv');
   if (!testDiv) throw new Error("Failed to match: testdiv");
@@ -77,7 +79,7 @@ describe('pileup', function() {
 
     var p = pileup.create(div, {
       range: {contig: 'chr17', start: 100, stop: 150},
-      tracks: tracks
+      tracks: getTracks()
     });
 
     var {drawnObjects, drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
