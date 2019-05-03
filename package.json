@@ -82,7 +82,7 @@
     "eslint-plugin-react": "7.11.1",
     "exorcist": "^0.4.0",
     "flow-bin": "^0.79.1",
-    "http-server": "^0.8.0",
+    "http-server": "^0.11.0",
     "istanbul": "^0.4.5",
     "jsxhint": "git://github.com/strml/JSXHint.git",
     "lcov-parse": "0.0.9",
