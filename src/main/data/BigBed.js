@@ -307,7 +307,7 @@ class BigBed {
     this.remoteFile = new RemoteFile(url);
     this.header = this.remoteFile.getBytes(0, 64 * 1024).then(parseHeader);
     this.contigMap = this.header.then(header => {
-      return generateContigMap(header, this.remoteFile)
+      return generateContigMap(header, this.remoteFile);
     });
 
     // Next: fetch the block index and parse out the "CIR" tree.

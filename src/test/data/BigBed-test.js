@@ -152,7 +152,7 @@ describe('BigBed', function() {
     var bigBed = new BigBed('/test-data/257-contigs.bb');
     return bigBed.contigMap.then(contigs => {
       expect(_.keys(contigs).length).to.equal(257);
-    })
+    });
   });
 
   // Things left to test:
