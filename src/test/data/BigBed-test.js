@@ -148,7 +148,7 @@ describe('BigBed', function() {
       });
   });
 
-  it('file with 257 contigs', function () {
+  it('file with 257 contigs', function (): any {
     var bigBed = new BigBed('/test-data/257-contigs.bb');
     return bigBed.contigMap.then(contigs => {
       expect(_.keys(contigs).length).to.equal(257);
