@@ -82,7 +82,7 @@ function parseNodeLeaf(buffer: ArrayBuffer, keySize: number) {
 }
 
 // Generate the reverse map from contig ID --> contig name.
-function reverseContigMap(contigMap: { [key: string]: number }): Array<string> {
+function reverseContigMap(contigMap: {[key:string]: number}): Array<string> {
   var ary = [];
   _.each(contigMap, (index, name) => {
     ary[index] = name;
@@ -96,14 +96,14 @@ function extractFeaturesFromBlock(buffer: ArrayBuffer,
                                   block: LeafData,
                                   isCompressed: boolean): ChrIdBedRow[] {
   var blockOffset = block.offset - dataRange.start,
-    blockLimit = blockOffset + block.size,
+      blockLimit = blockOffset + block.size,
 
-    blockBuffer =
-      // NOTE: "+ 2" skips over two bytes of gzip header (0x8b1f), which pako.inflateRaw will not handle.
-      buffer.slice(
-        blockOffset + (isCompressed ? 2 : 0),
-        blockLimit
-      );
+      blockBuffer =
+        // NOTE: "+ 2" skips over two bytes of gzip header (0x8b1f), which pako.inflateRaw will not handle.
+        buffer.slice(
+          blockOffset + (isCompressed ? 2 : 0),
+          blockLimit
+        );
 
   var inflatedBuffer =
     isCompressed ?
@@ -159,10 +159,10 @@ class ImmediateBigBed {
   remoteFile: RemoteFile;
   header: Object;
   cirTree: Object;
-  contigMap: { [key: string]: number };
+  contigMap: {[key:string]: number};
   chrIdToContig: string[];
 
-  constructor(remoteFile, header, cirTree, contigMap: { [key: string]: number }) {
+  constructor(remoteFile, header, cirTree, contigMap: {[key:string]: number}) {
     this.remoteFile = remoteFile;
     this.header = header;
     this.cirTree = cirTree;
@@ -180,12 +180,12 @@ class ImmediateBigBed {
 
   getChrIdInterval(range: ContigInterval<string>): ContigInterval<number> {
     return new ContigInterval(
-      this.getContigId(range.contig), range.start(), range.stop());
+        this.getContigId(range.contig), range.start(), range.stop());
   }
 
   getContigInterval(range: ContigInterval<number>): ContigInterval<string> {
     return new ContigInterval(
-      this.chrIdToContig[range.contig], range.start(), range.stop());
+        this.chrIdToContig[range.contig], range.start(), range.stop());
   }
 
   // Bed entries have a chromosome ID. This converts that to a contig string.
@@ -203,8 +203,8 @@ class ImmediateBigBed {
     // Do a recursive search through the index tree
     var matchingBlocks = [];
     var tupleRange = [[range.contig, range.start()],
-      [range.contig, range.stop()]];
-    var find = function (node) {
+                      [range.contig, range.stop()]];
+    var find = function(node) {
       if (node.contents) {
         node.contents.forEach(find);
       } else {
@@ -234,23 +234,23 @@ class ImmediateBigBed {
     // Find the range in the file which contains all relevant blocks.
     // In theory there could be gaps between blocks, but it's hard to see how.
     var byteRange = Interval.boundingInterval(
-      blocks.map(n => new Interval(+n.offset, n.offset + n.size)));
+        blocks.map(n => new Interval(+n.offset, n.offset+n.size)));
 
     var isCompressed = (this.header.uncompressBufSize > 0);
     return this.remoteFile.getBytes(byteRange.start, byteRange.length())
-      .then(buffer => {
-        return blocks.map(block => {
-          var beds = extractFeaturesFromBlock(buffer, byteRange, block, isCompressed);
-          if (block.startChromIx != block.endChromIx) {
-            throw `Can't handle blocks which span chromosomes!`;
-          }
+        .then(buffer => {
+          return blocks.map(block => {
+            var beds = extractFeaturesFromBlock(buffer, byteRange, block, isCompressed);
+            if (block.startChromIx != block.endChromIx) {
+              throw `Can't handle blocks which span chromosomes!`;
+            }
 
-          return {
-            range: new ContigInterval(block.startChromIx, block.startBase, block.endBase),
-            rows: beds
-          };
+            return {
+              range: new ContigInterval(block.startChromIx, block.startBase, block.endBase),
+              rows: beds
+            };
+          });
         });
-      });
   }
 
   // TODO: merge this into getFeaturesInRange
@@ -258,18 +258,18 @@ class ImmediateBigBed {
   // which overlap the given range.
   fetchFeatures(contigRange: ContigInterval<number>): Q.Promise<BedRow[]> {
     return this.fetchFeaturesByBlock(contigRange)
-      .then(bedsByBlock => {
-        var beds = _.flatten(bedsByBlock.map(b => b.rows));
+        .then(bedsByBlock => {
+          var beds = _.flatten(bedsByBlock.map(b => b.rows));
 
-        beds = beds.filter(function (bed) {
-          // Note: BED intervals are explicitly half-open.
-          // The "- 1" converts them to closed intervals for ContigInterval.
-          var bedInterval = new ContigInterval(bed.chrId, bed.start, bed.stop - 1);
-          return contigRange.intersects(bedInterval);
+          beds = beds.filter(function(bed) {
+            // Note: BED intervals are explicitly half-open.
+            // The "- 1" converts them to closed intervals for ContigInterval.
+            var bedInterval = new ContigInterval(bed.chrId, bed.start, bed.stop - 1);
+            return contigRange.intersects(bedInterval);
+          });
+
+          return this.attachContigToBedRows(beds);
         });
-
-        return this.attachContigToBedRows(beds);
-      });
   }
 
   getFeaturesInRange(range: ContigInterval<string>): Q.Promise<BedRow[]> {
@@ -279,13 +279,13 @@ class ImmediateBigBed {
   getFeatureBlocksOverlapping(range: ContigInterval<string>): Q.Promise<BedBlock[]> {
     var indexRange = this.getChrIdInterval(range);
     return this.fetchFeaturesByBlock(indexRange)
-      .then(featureBlocks => {
-        // Convert chrIds to contig strings.
-        return featureBlocks.map(fb => ({
-          range: this.getContigInterval(fb.range),
-          rows: this.attachContigToBedRows(fb.rows)
-        }));
-      });
+        .then(featureBlocks => {
+          // Convert chrIds to contig strings.
+          return featureBlocks.map(fb => ({
+            range: this.getContigInterval(fb.range),
+            rows: this.attachContigToBedRows(fb.rows)
+          }));
+        });
   }
 
 }
@@ -295,7 +295,7 @@ class BigBed {
   remoteFile: RemoteFile;
   header: Q.Promise<any>;
   cirTree: Q.Promise<any>;
-  contigMap: Q.Promise<{ [key: string]: number }>;
+  contigMap: Q.Promise<{[key:string]: number}>;
   immediate: Q.Promise<ImmediateBigBed>;
 
   /**
@@ -305,7 +305,7 @@ class BigBed {
    */
   constructor(url: string) {
     this.remoteFile = new RemoteFile(url);
-    this.header = this.remoteFile.getBytes(0, 64 * 1024).then(parseHeader);
+    this.header = this.remoteFile.getBytes(0, 64*1024).then(parseHeader);
     this.contigMap = this.header.then(header => {
       return generateContigMap(header, this.remoteFile);
     });
@@ -317,16 +317,16 @@ class BigBed {
       // Lacking zoom headers, assume it's 4k.
       // TODO: fetch more than 4k if necessary
       var start = header.unzoomedIndexOffset,
-        zoomHeader = header.zoomHeaders[0],
-        length = zoomHeader ? zoomHeader.dataOffset - start : 4096;
+          zoomHeader = header.zoomHeaders[0],
+          length = zoomHeader ? zoomHeader.dataOffset - start : 4096;
       return this.remoteFile.getBytes(start, length).then(parseCirTree);
     });
 
     this.immediate = Q.all([this.header, this.cirTree, this.contigMap])
-      .then(([header, cirTree, contigMap]) => {
-        var cm: { [key: string]: number } = contigMap;
-        return new ImmediateBigBed(this.remoteFile, header, cirTree, cm);
-      });
+        .then(([header, cirTree, contigMap]) => {
+          var cm: {[key:string]: number} = contigMap;
+          return new ImmediateBigBed(this.remoteFile, header, cirTree, cm);
+        });
 
     // Bubble up errors
     this.immediate.done();
