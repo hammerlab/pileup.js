@@ -63,7 +63,9 @@ var TYPE_SET = {
     _reserved3: ['skip', 4],
     nodes: 'BPlusTreeNode'  // ['array', 'BPlusTreeNode', 'itemCount']
   },
-  
+
+  // TODO: non-leaf nodes are pointing only to the place in memory, maybe there is a better way to do it with jBinary
+  //  instead of manually parsing the tree later on (check generateContigMap method in BigBed)
   'BPlusTreeNode': {
     isLeaf: 'uint8',  // 1 = yes, 0 = no
     _reserved: 'uint8',

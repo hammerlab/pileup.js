@@ -9,7 +9,6 @@ import Q from 'q';
 import _ from 'underscore';
 import jBinary from 'jbinary';
 import pako from 'pako/lib/inflate';  // for gzip inflation
-
 import RemoteFile from '../RemoteFile';
 import Interval from '../Interval';
 import ContigInterval from '../ContigInterval';
@@ -22,6 +21,7 @@ function parseHeader(buffer) {
   // to flip the endianness for jBinary consumption.
   // NB: dalliance doesn't support big endian formats.
   return new jBinary(buffer, bbi.TYPE_SET).read('Header');
+
 }
 
 // The "CIR" tree contains a mapping from sequence -> block offsets.
@@ -30,17 +30,55 @@ function parseCirTree(buffer) {
   return new jBinary(buffer, bbi.TYPE_SET).read('CirTree');
 }
 
-// Extract a map from contig name --> contig ID from the bigBed header.
-function generateContigMap(header): {[key:string]: number} {
-  // Just assume it's a flat "tree" for now.
-  var nodes = header.chromosomeTree.nodes.contents;
+//
+//Extract a map from contig name --> contig ID from the bigBed header.
+//
+function generateContigMap(header, remoteFile): Q.Promise<{ [key: string]: number }> {
+  return generateContigMapNodes(header.chromosomeTree.nodes, header.chromosomeTree.keySize, remoteFile);
+}
+
+//Transforms nodes into contig name --> contig ID
+function generateContigMapNodes(nodes, keySize, remoteFile): Q.Promise<{ [key: string]: number }> {
+  if (nodes.isLeaf) {
+    return generateContigMapFromLeafNode(nodes.contents);
+  } else {
+    return generateContigMapFromNonLeafNode(nodes.contents, keySize, remoteFile);
+  }
+}
+
+//Transforms leaf nodes into contig name --> contig ID
+function generateContigMapFromLeafNode(nodes): Q.Promise<{ [key: string]: number }> {
   if (!nodes) {
     throw 'Invalid chromosome tree';
   }
-  return _.object(nodes.map(function({id, key}) {
+  return Q.resolve(_.object(nodes.map(function ({id, key}) {
     // remove trailing nulls from the key string
     return [key.replace(/\0.*/, ''), id];
-  }));
+  })));
+}
+
+//Transforms non leaf nodes into contig name --> contig ID. It requires fetching data for all children nodes.
+function generateContigMapFromNonLeafNode(nodes, keySize, remoteFile): Q.Promise<{ [key: string]: number }> {
+  return Q.all(nodes.map(function ({key, offset}) {
+    return remoteFile.getBytes(offset, 64 * 1024).then(buffer => {
+      return parseNodeLeaf(buffer, keySize);
+    }).then(childNodeData => generateContigMapNodes(childNodeData, keySize, remoteFile));
+  })).then(data => {
+    return _.reduce(data, function (memo, item) {
+      return _.extend(memo, item);
+    }, {});
+  });
+}
+
+//
+// Parse Contig Tree Node assuming that we know the keySize. This method is used for recursive parsing of the tree.
+//
+function parseNodeLeaf(buffer: ArrayBuffer, keySize: number) {
+  //use a copy of the global definition and replace variable with constant (this variable would be unavailable here)
+  var typeCopy = _.extend({}, bbi.TYPE_SET);
+  typeCopy['BPlusTreeNode']['contents'][1][2]['key'][1] = keySize;
+  typeCopy['BPlusTreeNode']['contents'][1][3]['key'][1] = keySize;
+  return new jBinary(buffer, typeCopy).read('BPlusTreeNode');
 }
 
 // Generate the reverse map from contig ID --> contig name.
@@ -268,7 +306,9 @@ class BigBed {
   constructor(url: string) {
     this.remoteFile = new RemoteFile(url);
     this.header = this.remoteFile.getBytes(0, 64*1024).then(parseHeader);
-    this.contigMap = this.header.then(generateContigMap);
+    this.contigMap = this.header.then(header => {
+      return generateContigMap(header, this.remoteFile);
+    });
 
     // Next: fetch the block index and parse out the "CIR" tree.
     this.cirTree = this.header.then(header => {
