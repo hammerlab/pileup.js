@@ -49,7 +49,7 @@ function create(json: string): DataSource<Chromosome> {
   };
   _.extend(o, Events);
   return o;
-};
+}
 
 module.exports = {
   create

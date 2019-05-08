@@ -6,17 +6,10 @@
  */
 'use strict';
 
-import {expect} from 'chai';
-
-import _ from 'underscore';
 import RemoteFile from '../../main/RemoteFile';
 import pileup from '../../main/pileup';
 import dataCanvas from 'data-canvas';
 import {waitFor} from '../async';
-
-import {yForRow} from '../../main/viz/pileuputils';
-
-import ReactTestUtils from 'react-addons-test-utils';
 
 describe('KaryogramTrack', function() {
   var testDiv= document.getElementById('testdiv');
@@ -28,7 +21,6 @@ describe('KaryogramTrack', function() {
   }
 
   describe('KaryogramTrack', function() {
-    var json;
 
     beforeEach(() => {
       testDiv.style.width = '800px';
@@ -43,12 +35,12 @@ describe('KaryogramTrack', function() {
 
     before(function(): any {
       return new RemoteFile('/test-data/basic-chromosomes.json').getAllString().then(data => {
-        json = data;
+        // json = data;
       });
     });
 
     it('should render karyogram with json', function(): any {
-      var p = pileup.create(testDiv, {
+      pileup.create(testDiv, {
         range: {contig: 'chr17', start: 7500000, stop: 7500500},
         tracks: [
           {
