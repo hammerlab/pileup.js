@@ -11,17 +11,10 @@
 'use strict';
 
 import type {VizProps} from '../VisualizationWrapper';
-import type {Scale} from './d3utils';
 import type {State} from '../types';
 import type {DataSource} from '../sources/DataSource';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import EmptySource from '../sources/EmptySource';
-import canvasUtils from './canvas-utils';
-import TiledCanvas from './TiledCanvas';
-import dataCanvas from 'data-canvas';
-import style from '../style';
-import d3utils from './d3utils';
 import d3 from 'd3';
 import idiogrammatik from '../../../node_modules/idiogrammatik.js/idiogrammatik';
 import ContigInterval from '../ContigInterval';
@@ -46,7 +39,7 @@ class KaryogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, S
 
   componentDidMount() {
 
-    this.kgram = idiogrammatik()
+    this.kgram = idiogrammatik();
 
     this.kgram.width([1320]);
     this.kgram.height([20]);
@@ -63,7 +56,6 @@ class KaryogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, S
       .call(this.kgram);
 
     this.updateVisualization(this.props.range);
-    console.log('HERE')
   }
 
   componentDidUpdate(prevProps: any, prevState: any) {
@@ -71,7 +63,7 @@ class KaryogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, S
   }
 
   updateVisualization(range: '') {
-    this.kgram.zoom(range.contig, range.start, range.stop)
+    this.kgram.zoom(range.contig, range.start, range.stop);
   }
 
   render(): any {
