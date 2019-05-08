@@ -1,5 +1,5 @@
 /**
- * Class for parsing chromosome bands for karyograms.
+ * Class for parsing chromosome bands for idiograms.
  * Taken from https://github.com/hammerlab/idiogrammatik.
  * @flow
  */
