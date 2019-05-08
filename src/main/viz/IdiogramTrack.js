@@ -1,12 +1,6 @@
 /**
- * A track which shows a scale proportional to slice of the genome being
- * shown by the reference track. This track tries to show a scale in kbp,
- * mbp or gbp depending on the size of the view and also tries to round the
- * scale size (e.g. prefers "1,000 bp", "1,000 kbp" over "1 kbp" and "1 mbp")
- *
- *           <---------- 30 bp ---------->
- *
- * @flow
+ * A track which shows an idiogram corresponding to the genome being
+ * shown by the reference track. 
  */
 'use strict';
 
@@ -22,7 +16,7 @@ import Chromosome from '../data/chromosome';
 
 
 
-class KaryogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, State> {
+class IdiogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, State> {
   props: VizProps<DataSource<Chromosome>>;
   state: State;  // no state, used to make flow happy
   source: DataSource<Chromosome>;
@@ -51,7 +45,7 @@ class KaryogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, S
         new ContigInterval(range.contig, range.start, range.stop);
     this.data = this.source.getFeaturesInRange(relaxedRange);
 
-    d3.select('#karyogram')
+    d3.select('#idiogram')
       .datum(this.data)
       .call(this.kgram);
 
@@ -67,11 +61,11 @@ class KaryogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, S
   }
 
   render(): any {
-    return <div id="karyogram"></div>;
+    return <div id="idiogram"></div>;
   }
 }
 
-KaryogramTrack.displayName = 'karyogram';
-KaryogramTrack.defaultSource = EmptySource.create();
+IdiogramTrack.displayName = 'idiogram';
+IdiogramTrack.defaultSource = EmptySource.create();
 
-module.exports = KaryogramTrack;
+module.exports = IdiogramTrack;

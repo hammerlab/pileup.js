@@ -29,7 +29,7 @@ import Interval from './Interval';
 import GA4GHAlignmentJson from './json/GA4GHAlignmentJson';
 import GA4GHVariantJson from './json/GA4GHVariantJson';
 import GA4GHFeatureJson from './json/GA4GHFeatureJson';
-import KaryogramJson from './json/KaryogramJson';
+import IdiogramJson from './json/IdiogramJson';
 
 // GA4GH sources
 import GA4GHAlignmentSource from './sources/GA4GHAlignmentSource';
@@ -42,7 +42,7 @@ import CoverageTrack from './viz/CoverageTrack';
 import GenomeTrack from './viz/GenomeTrack';
 import GeneTrack from './viz/GeneTrack';
 import FeatureTrack from './viz/FeatureTrack';
-import KaryogramTrack from './viz/KaryogramTrack';
+import IdiogramTrack from './viz/IdiogramTrack';
 import LocationTrack from './viz/LocationTrack';
 import PileupTrack from './viz/PileupTrack';
 import ScaleTrack from './viz/ScaleTrack';
@@ -238,7 +238,7 @@ var pileup = {
     alignmentJson: GA4GHAlignmentJson.create,
     variantJson: GA4GHVariantJson.create,
     featureJson: GA4GHFeatureJson.create,
-    karyogramJson: KaryogramJson.create,
+    idiogramJson: IdiogramJson.create,
     vcf: VcfDataSource.create,
     twoBit: TwoBitDataSource.create,
     bigBed: BigBedDataSource.create,
@@ -253,7 +253,7 @@ var pileup = {
     genome:   makeVizObject(GenomeTrack),
     genes:    makeVizObject(GeneTrack),
     features: makeVizObject(FeatureTrack),
-    karyogram:  makeVizObject(KaryogramTrack),
+    idiogram:  makeVizObject(IdiogramTrack),
     location: makeVizObject(LocationTrack),
     scale:    makeVizObject(ScaleTrack),
     variants: makeVizObject(VariantTrack),
