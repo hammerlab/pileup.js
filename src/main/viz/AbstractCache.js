@@ -54,7 +54,7 @@ class AbstractCache<T: (VisualAlignment | GenericFeature)> {
   // maximum read depth. This is 'chr'-agnostic.
   pileupHeightForRef(ref: string): number {
     var pileup = this.pileupForRef(ref);
-    return pileup ? Math.max(pileup.length,1) : 0;
+    return pileup ? pileup.length : 0;
   }
 
   // Find groups overlapping the range. This is 'chr'-agnostic.

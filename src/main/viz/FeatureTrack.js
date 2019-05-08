@@ -206,7 +206,7 @@ class FeatureTrack extends React.Component<VizProps<FeatureDataSource>, State> {
     var parent = ((d3utils.findParent(canvas, "features") : any) : HTMLCanvasElement);
     
     // Height can only be computed after the pileup has been updated.
-    var height = yForRow(this.cache.pileupHeightForRef(this.props.range.contig));
+    var height = this.tiles.heightForRef(this.props.range.contig);
 
     // resize height for device
     height = d3utils.heightForCanvas(canvas, height);
