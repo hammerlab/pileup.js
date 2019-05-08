@@ -11,7 +11,7 @@ describe('KaryogramJson', function() {
   var json;
 
   before(function(): any {
-    return new RemoteFile('/test-data/basic-chromosomes.json').getAllString().then(data => {
+    return new RemoteFile('/test-data/gstained_chromosomes_data.json').getAllString().then(data => {
       json = data;
     });
   });

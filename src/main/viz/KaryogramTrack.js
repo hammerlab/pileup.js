@@ -23,22 +23,10 @@ import dataCanvas from 'data-canvas';
 import style from '../style';
 import d3utils from './d3utils';
 import d3 from 'd3';
-// import d3 from '../../../node_modules/idiogrammatik.js/d3'
 import idiogrammatik from '../../../node_modules/idiogrammatik.js/idiogrammatik';
 import ContigInterval from '../ContigInterval';
 import Chromosome from '../data/chromosome';
 
-
-// class KaryoTiledCanvas extends TiledCanvas {
-//   options: Object;
-//   source: DataSource<Chromosome>;
-
-//   constructor(source: DataSource<Chromosome>) {
-//     super();
-//     this.source = source;
-//     console.log('SOURCE', source)
-//   }
-// }
 
 
 class KaryogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, State> {
@@ -58,40 +46,32 @@ class KaryogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, S
 
   componentDidMount() {
 
-    this.kgram = idiogrammatik();
+    this.kgram = idiogrammatik()
 
     this.kgram.width([1320]);
     this.kgram.height([20]);
     this.kgram.margin({'top': 5, 'bottom': 10, 'left': 20, 'right': 20});
     this.kgram.idiogramHeight([10]);
 
-    var range = this.props.range
+    var range = this.props.range;
     var relaxedRange =
         new ContigInterval(range.contig, range.start, range.stop);
     this.data = this.source.getFeaturesInRange(relaxedRange);
-    console.log('DATA', this.data);
-    console.log('KGRAM', this.kgram);
-
 
     d3.select('#karyogram')
       .datum(this.data)
       .call(this.kgram);
 
-    this.updateVisualization();
+    this.updateVisualization(this.props.range);
+    console.log('HERE')
   }
 
   componentDidUpdate(prevProps: any, prevState: any) {
-    var range = this.props.range;
-    console.log('UPDATEKGRAM', this.kgram);
-
-    this.kgram.zoom(range.contig,range.start,range.stop);
-    console.log('updated');
-
-    this.updateVisualization();
+    this.updateVisualization(this.props.range);
   }
 
-  updateVisualization() {
-
+  updateVisualization(range: '') {
+    this.kgram.zoom(range.contig, range.start, range.stop)
   }
 
   render(): any {
