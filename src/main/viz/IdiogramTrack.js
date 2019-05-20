@@ -1,6 +1,7 @@
 /**
  * A track which shows an idiogram corresponding to the genome being
  * shown by the reference track. 
+ * @flow
  */
 'use strict';
 

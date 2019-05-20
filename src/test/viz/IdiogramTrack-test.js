@@ -6,7 +6,6 @@
  */
 'use strict';
 
-import RemoteFile from '../../main/RemoteFile';
 import pileup from '../../main/pileup';
 import dataCanvas from 'data-canvas';
 import {waitFor} from '../async';
@@ -22,8 +21,6 @@ describe('IdiogramTrack', function() {
   }
 
   describe('IdiogramTrack', function() {
-    var json;
-
     beforeEach(() => {
       testDiv.style.width = '800px';
       dataCanvas.RecordingContext.recordAll();
@@ -33,12 +30,6 @@ describe('IdiogramTrack', function() {
       dataCanvas.RecordingContext.reset();
       // avoid pollution between tests.
       testDiv.innerHTML = '';
-    });
-
-    before(function(): any {
-      return new RemoteFile('/test-data/gstained_chromosomes_data.json').getAllString().then(data => {
-        json = data;
-      });
     });
 
     it('should render idiogram with json', function(): any {
