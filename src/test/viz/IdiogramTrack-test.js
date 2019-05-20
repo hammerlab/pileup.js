@@ -63,7 +63,7 @@ describe('IdiogramTrack', function() {
       return waitFor(ready, 2000)
         .then(() => {
           // TODO: check. testDiv.querySelector('#idiogram') contains 24 .chromosome classes
-          var idiogram = testDiv.querySelector('#idiogram');      
+          var idiogram = testDiv.querySelector('#idiogram');
           expect(idiogram.__data__).to.have.length(24);
           p.destroy();
         });
