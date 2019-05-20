@@ -4,10 +4,10 @@
 import {expect} from 'chai';
 
 import ContigInterval from '../../main/ContigInterval';
-import KaryogramJson from '../../main/json/KaryogramJson';
+import IdiogramJson from '../../main/json/IdiogramJson';
 import RemoteFile from '../../main/RemoteFile';
 
-describe('KaryogramJson', function() {
+describe('IdiogramJson', function() {
   var json;
 
   before(function(): any {
@@ -18,19 +18,19 @@ describe('KaryogramJson', function() {
 
   it('should filter features from json', function(done) {
 
-    var source = KaryogramJson.create(json);
+    var source = IdiogramJson.create(json);
 
     var requestInterval = new ContigInterval('chr1', 130000, 135000);
 
     var features = source.getFeaturesInRange(requestInterval);
-    expect(features).to.have.length(1); 
+    expect(features).to.have.length(24); 
     done();
 
   });
 
   it('should not fail on empty json string', function(done) {
 
-    var source = KaryogramJson.create("{}");
+    var source = IdiogramJson.create("{}");
 
     var requestInterval = new ContigInterval('chr17', 10, 20);
 
