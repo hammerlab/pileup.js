@@ -191,7 +191,6 @@
 
 /* features track */
 .pileup-root > .features {
-  /*flex: 1;*/
   flex-basis: auto; /* sets track size based on track height */
   max-height: 200px; /* prevents track from becoming too large */
 }
