@@ -24,7 +24,9 @@ function create(json: string): VcfDataSource {
   // fill variants with json
   if (!_.isEmpty(parsedJson)) {
       variants = _.values(parsedJson.variants).map(variant => new VariantContext(Variant.fromGA4GH(variant),variant.calls));
-      callSetNames = _.map(variants[0].calls, c => c.callSetName);
+      if (variants.length > 0) { // only call variants if non-empty
+          callSetNames = _.map(variants[0].calls, c => c.callSetName);
+      }
   }
 
   function rangeChanged(newRange: GenomeRange) {

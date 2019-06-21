@@ -17,7 +17,7 @@ describe('GA4GHVariantJson', function() {
   });
 
   it('should filter variants from json', function(done) {
-    
+
     var source = GA4GHVariantJson.create(json);
 
     var requestInterval = new ContigInterval('1', 10000, 10500);
@@ -53,6 +53,18 @@ describe('GA4GHVariantJson', function() {
   it('should not fail on empty json string', function(done) {
 
     var source = GA4GHVariantJson.create("{}");
+
+    var requestInterval = new ContigInterval('1', 10, 20);
+
+    var variants = source.getVariantsInRange(requestInterval);
+    expect(variants).to.have.length(0);
+    done();
+
+  });
+
+  it('should not fail when there are no variants', function(done) {
+
+    var source = GA4GHVariantJson.create("{\"variants\": []}");
 
     var requestInterval = new ContigInterval('1', 10, 20);
 
