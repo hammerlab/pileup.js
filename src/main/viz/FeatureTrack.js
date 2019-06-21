@@ -46,7 +46,7 @@ class FeatureTiledCanvas extends TiledCanvas {
   }
 
   heightForRef(ref: string): number {
-    return this.cache.pileupHeightForRef(ref) *
+    return Math.max(this.cache.pileupHeightForRef(ref),1) *
                     (style.READ_HEIGHT + style.READ_SPACING);
   }
 
@@ -207,7 +207,7 @@ class FeatureTrack extends React.Component<VizProps<DataSource<Feature>>, State>
     var parent = ((d3utils.findParent(canvas, "features") : any) : HTMLCanvasElement);
     
     // Height can only be computed after the pileup has been updated.
-    var height = yForRow(this.cache.pileupHeightForRef(this.props.range.contig));
+    var height = this.tiles.heightForRef(this.props.range.contig);
 
     // resize height for device
     height = d3utils.heightForCanvas(canvas, height);

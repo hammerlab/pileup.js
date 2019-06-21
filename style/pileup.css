@@ -7,7 +7,7 @@
 .pileup-root {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: inherit; /* height 100% makes featureTrack too small */
 }
 
 .pileup-root > .track {
@@ -201,6 +201,7 @@
 
 /* features track */
 .pileup-root > .features {
+  flex-basis: auto; /* sets track size based on track height */
   max-height: 200px; /* prevents track from becoming too large */
 }
 
