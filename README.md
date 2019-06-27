@@ -140,7 +140,7 @@ To cut a new release:
 - Update `version` in both `package.json` and `pileup.js`. Commit this change.
 - Run `scripts/publish.sh`
 - Run `npm publish`
-- Push to github and tag a release there. Add release notes.
+- Push to github and [tag a release][tagRelease] there. Add release notes.
 
 ## License
 
@@ -151,3 +151,4 @@ pileup.js is [Apache v2](/LICENSE) licensed.
 [flexbox]: https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Flexible_boxes
 [demo]: http://www.hammerlab.org/pileup/
 [biorxiv]: http://biorxiv.org/content/early/2016/01/26/036962
+[tagRelease]: https://help.github.com/en/articles/creating-releases
