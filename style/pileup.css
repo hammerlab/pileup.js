@@ -13,6 +13,7 @@
 .pileup-root > .track {
   display: flex;
   flex-direction: row;
+  margin-bottom: 4px;
 }
 .pileup-root text, .track-label {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -26,6 +27,7 @@
   text-align: right;
   font-size: 0.9em;
   position: relative;  /* make this an offset parent for positioning the label. */
+
 }
 .track-label > span {
   padding-right: 5px;
@@ -59,6 +61,14 @@
   overflow-x: hidden;
   position: relative;
 }
+.features > .track-content, .pileup > .track-content, .genes > .track-content,
+.variants > .track-content, .coverage > .track-content {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-color: #bcbbbb;
+    border-left: 7px solid #bcbbbb;
+}
+
 .track-content > div {
   position: absolute; /* Gets the child of the flex-item to fill height 100% */
 }
@@ -101,7 +111,7 @@
 }
 .gear {
   margin-left: 0.5em;
-  font-size: 2em;
+  font-size: 1.2em;
   color: #666;
   line-height: normal;  /* avoid cutting off gear icon */
 }

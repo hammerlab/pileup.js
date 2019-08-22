@@ -40,6 +40,8 @@ class Root extends React.Component<Props, State> {
       settingsMenuKey: null
     };
     this.trackReactElements = [];
+
+    this.outsideClickHandler = this.handleOutsideClick.bind(this);
   }
 
   componentDidMount() {
@@ -72,15 +74,41 @@ class Root extends React.Component<Props, State> {
   }
 
   toggleSettingsMenu(key: string, e: SyntheticEvent<>) {
+      console.log("toggle", this.state.settingsMenuKey, key);
     if (this.state.settingsMenuKey == key) {
       this.setState({settingsMenuKey: null});
     } else {
       this.setState({settingsMenuKey: key});
+      // remove event listener for clicking off of menu
+      document.addEventListener('click', this.outsideClickHandler, false);
+    }
+  }
+
+  handleOutsideClick(e: SyntheticEvent<>) {
+    // if menu is visible and click is outside of menu component,
+    // toggle view off
+    console.log("outside"); // TODO not being turned off
+
+    if (this.state.settingsMenuKey != null) {
+        if (!this.node.contains(e.target)) {
+            console.log("outside click setting null");
+            this.setState({settingsMenuKey: null});
+            // TODO remove duplicate eventlistener code by calling toggleSettingsMenu
+            // remove click handler if menu is not visible
+            console.log("remove")
+            document.removeEventListener('click', this.outsideClickHandler, false);
+        }
     }
   }
 
   handleSelectOption(trackKey: string, optionKey: string) {
-    this.setState({settingsMenuKey: null});
+    console.log("handleSelectOption", trackKey, optionKey, this.state.settingsMenuKey)
+    if (this.state.settingsMenuKey) {
+        console.log("adding listener");
+        // attach/remove event handler if menu is visible
+        document.addEventListener('click', this.outsideClickHandler, false);
+    }
+
     var viz = this.props.tracks[Number(trackKey)].visualization;
     var oldOpts = viz.options;
     // $FlowIgnore: TODO remove flow suppression
@@ -94,7 +122,7 @@ class Root extends React.Component<Props, State> {
   makeDivForTrack(key: string, track: VisualizedTrack): React$Element<'div'> {
     //this should be improved, but I have no idea how (when trying to
     //access this.trackReactElements with string key, flow complains)
-    var intKey = parseInt(key); 
+    var intKey = parseInt(key);
     var trackEl = (
         <VisualizationWrapper visualization={track.visualization}
             range={this.state.range}
@@ -119,7 +147,6 @@ class Root extends React.Component<Props, State> {
           </span>
       );
     }
-
     if (this.state.settingsMenuKey == key) {
       var gear = this.refs['gear-' + key],
           gearX = gear.offsetLeft,
@@ -134,18 +161,19 @@ class Root extends React.Component<Props, State> {
       // $FlowIgnore: TODO remove flow suppression
       var items = track.visualization.component.getOptionsMenu(track.visualization.options);
       settingsMenu = (
-        <div className='menu-container' style={menuStyle}>
-          <Menu header={trackName} items={items} onSelect={this.handleSelectOption.bind(this, key)} />
+        <div className='menu-container' style={menuStyle} ref={node => { this.node = node; }}>
+          <Menu header={trackName} items={items}
+          onClick={this.handleSelectOption.bind(this, key)}
+         />
         </div>
       );
     }
-
     var className = ['track', track.visualization.component.displayName || '', track.track.cssClass || ''].join(' ');
 
     return (
       <div key={key} className={className}>
         <div className='track-label'>
-          <span>{trackName}</span>
+          <span onDoubleClick={this.handleSelectOption.bind(this, key)}>{track.track.name}</span>
           <br/>
           {gearIcon}
           {settingsMenu}
@@ -155,6 +183,14 @@ class Root extends React.Component<Props, State> {
         </div>
       </div>
     );
+  }
+
+  changeName(reactEvent: any) {
+      // TODO: update text
+      console.log(reactEvent);
+      reactEvent.track.name = "NEW";
+      console.log(reactEvent.track.name);
+
   }
 
   render(): any {
