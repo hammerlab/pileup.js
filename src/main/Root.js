@@ -8,6 +8,8 @@ import type {GenomeRange} from './types';
 import type {TwoBitSource} from './sources/TwoBitDataSource';
 import type {VisualizedTrack, VizWithOptions} from './types';
 
+import _ from 'underscore';
+
 import React from 'react';
 import Controls from './Controls';
 import Menu from './Menu';
@@ -30,6 +32,8 @@ class Root extends React.Component<Props, State> {
   props: Props;
   state: State;
   trackReactElements: Array<Object>; //it's an array of reactelement that are created for tracks
+  outsideClickHandler: (a: any) => void;
+  node: any;
 
   constructor(props: Object) {
     super(props);
@@ -40,7 +44,7 @@ class Root extends React.Component<Props, State> {
       settingsMenuKey: null
     };
     this.trackReactElements = [];
-
+    this.node = null;
     this.outsideClickHandler = this.handleOutsideClick.bind(this);
   }
 
@@ -73,10 +77,11 @@ class Root extends React.Component<Props, State> {
     }).done();
   }
 
-  toggleSettingsMenu(key: string, e: SyntheticEvent<>) {
-      console.log("toggle", this.state.settingsMenuKey, key);
+  // key can be string or null
+  toggleSettingsMenu(key: any, e: SyntheticEvent<>) {
     if (this.state.settingsMenuKey == key) {
       this.setState({settingsMenuKey: null});
+      document.removeEventListener('click', this.outsideClickHandler, false);
     } else {
       this.setState({settingsMenuKey: key});
       // remove event listener for clicking off of menu
@@ -87,32 +92,18 @@ class Root extends React.Component<Props, State> {
   handleOutsideClick(e: SyntheticEvent<>) {
     // if menu is visible and click is outside of menu component,
     // toggle view off
-    console.log("outside"); // TODO not being turned off
-
-    if (this.state.settingsMenuKey != null) {
+    if (this.state.settingsMenuKey != null && this.state.settingsMenuKey != undefined) {
         if (!this.node.contains(e.target)) {
-            console.log("outside click setting null");
-            this.setState({settingsMenuKey: null});
-            // TODO remove duplicate eventlistener code by calling toggleSettingsMenu
-            // remove click handler if menu is not visible
-            console.log("remove")
-            document.removeEventListener('click', this.outsideClickHandler, false);
+            this.toggleSettingsMenu(this.state.settingsMenuKey, e);
         }
     }
   }
 
-  handleSelectOption(trackKey: string, optionKey: string) {
-    console.log("handleSelectOption", trackKey, optionKey, this.state.settingsMenuKey)
-    if (this.state.settingsMenuKey) {
-        console.log("adding listener");
-        // attach/remove event handler if menu is visible
-        document.addEventListener('click', this.outsideClickHandler, false);
-    }
-
+  handleSelectOption(trackKey: string, item: Object) {
     var viz = this.props.tracks[Number(trackKey)].visualization;
     var oldOpts = viz.options;
     // $FlowIgnore: TODO remove flow suppression
-    var newOpts = viz.component.handleSelectOption(optionKey, oldOpts);
+    var newOpts = viz.component.handleSelectOption(item, oldOpts);
     viz.options = newOpts;
     if (newOpts != oldOpts) {
       this.forceUpdate();
@@ -159,7 +150,8 @@ class Root extends React.Component<Props, State> {
         top: gearY + 'px'
       };
       // $FlowIgnore: TODO remove flow suppression
-      var items = track.visualization.component.getOptionsMenu(track.visualization.options);
+      // TODO need to update with track.track.options (configurable options)
+      var items = _.clone(track.visualization.component.getOptionsMenu(track.visualization.options));
       settingsMenu = (
         <div className='menu-container' style={menuStyle} ref={node => { this.node = node; }}>
           <Menu header={trackName} items={items}
@@ -173,7 +165,7 @@ class Root extends React.Component<Props, State> {
     return (
       <div key={key} className={className}>
         <div className='track-label'>
-          <span onDoubleClick={this.handleSelectOption.bind(this, key)}>{track.track.name}</span>
+          <span>{track.track.name}</span>
           <br/>
           {gearIcon}
           {settingsMenu}
@@ -183,14 +175,6 @@ class Root extends React.Component<Props, State> {
         </div>
       </div>
     );
-  }
-
-  changeName(reactEvent: any) {
-      // TODO: update text
-      console.log(reactEvent);
-      reactEvent.track.name = "NEW";
-      console.log(reactEvent.track.name);
-
   }
 
   render(): any {

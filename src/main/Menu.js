@@ -17,33 +17,39 @@
 'use strict';
 
 
-import { SwatchesPicker } from 'react-color';
-// https://casesandberg.github.io/react-color/
+import { SketchPicker } from 'react-color';
 import React from 'react';
+
+// some color pickers require hex as color input,
+// others require rgb
+type ColorItem = {
+    hex: string,
+    rgb: RGBA
+}
 
 type MenuItem = {
   key: string;
   label: string;
   checked?: boolean;
-  color?: string;
+  color?: ColorItem;
 };
 
 type Props = {
   header: string;
   items: Array<MenuItem|'-'>;
-  onClick: (key: string) => void;
+  onClick: (item: Object) => void;
 };
 
-type ColorItem = {
-    hex: string
+type RGBA = {
+    r: number, g: number, b: number, a: number
 }
 
-
 type State = {
+  // list of booleans determining whether to show color palette for MenuItem
   showPalette: boolean[];
 };
 
-class Menu extends React.Component<Props> {
+class Menu extends React.Component<Props, State> {
   props: Props;
   state: State;
 
@@ -54,7 +60,7 @@ class Menu extends React.Component<Props> {
       };
   }
 
-  toggleColorPicker(key: string, e: SyntheticEvent<>) {
+  toggleColorPicker(key: number, e: SyntheticEvent<>) {
     if (this.state.showPalette[key] == false) {
       this.state.showPalette[key] = true
       this.setState({showPalette: this.state.showPalette});
@@ -65,22 +71,29 @@ class Menu extends React.Component<Props> {
   }
 
   clickHandler(idx: number, e: SyntheticMouseEvent<>, togglePicker: boolean = true) {
-    e.preventDefault();
+    // do not call preventDefault on nullified events to avoid warnings
+    if (e.eventPhase != null) {
+        e.preventDefault();
+    }
     var item = this.props.items[idx];
     if (typeof(item) == 'string') return;  // for flow
-    this.props.onClick(item.key);
+
+    // propogate root update if new opts do not == old opts
+    this.props.onClick(item);
 
     if (item.color && togglePicker) {
         this.toggleColorPicker(idx, e)
     }
-    console.log("change color 3", this.props.items[idx].color);
   }
 
   handleColorChange(idx: number, color: Object, e: SyntheticMouseEvent<>) {
-      console.log("change color", color);
-      //  TODO: this is not updating the object
-      this.props.items[idx].color.hex = color.hex;
-      console.log("change color 2", this.props.items[idx].color);
+      // update both hex and rgb values
+      if (typeof(this.props.items[idx]) == 'string') return;  // for flow not working
+      if (typeof(this.props.items[idx]) === 'undefined') return;  // for flow not working
+      this.props.items[idx].color = {
+          'hex': color.hex,
+          'rgb': color.rgb
+      };
       this.clickHandler(idx, e, false);
   };
 
@@ -99,19 +112,19 @@ class Menu extends React.Component<Props> {
       } else {
         var checkClass = 'check' + (item.checked ? ' checked' : '');
         // initially hide color picker
-        if (item.color) {
+        if (typeof(item) != 'string' && item.color) {
             var colorPicker = null
 
             if (this.state.showPalette[i]) {
                 colorPicker = (
-                    <SwatchesPicker
-                        color={item.color.hex}
+                    <SketchPicker
+                        color={item.color.rgb}
                         onChangeComplete={ makeColorPickerHandler(i) }
                     />)
             }
 
             return (
-              <div  className='menu-item' >
+              <div key={i} className='menu-item' >
                 <span className={checkClass}></span>
                 <span key={i} onClick={makeHandler(i)} className='menu-item-label'>{item.label}</span>
                 {colorPicker}

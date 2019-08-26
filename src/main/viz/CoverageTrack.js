@@ -112,7 +112,7 @@ function renderBars(ctx: DataCanvasRenderingContext2D,
 
     if (!lastPos) {
       let {barX1} = binPos(pos, bin.count);
-      ctx.fillStyle = style.COVERAGE_BIN_COLOR;
+      ctx.fillStyle = `rgba(${options.color.rgb.r}, ${options.color.rgb.g}, ${options.color.rgb.b}, ${options.color.rgb.a})`;
       ctx.beginPath();
       ctx.moveTo(barX1, vBasePosY);
     }
@@ -188,6 +188,8 @@ class CoverageTrack extends React.Component<VizProps<DataSource<Alignment | Feat
   cache: CoverageCache< Alignment | Feature >;
   tiles: CoverageTiledCanvas;
   static defaultOptions: Object;
+  static getOptionsMenu: (options: Object) => any;
+  static handleSelectOption: (item: Object, oldOptions: Object) => Object;
 
   constructor(props: VizProps<DataSource<Alignment | Feature>>) {
     super(props);
@@ -333,7 +335,25 @@ CoverageTrack.defaultOptions = {
   // exceeds this amount. When there are >=2 agreeing mismatches, they are
   // always rendered. But for mismatches below this threshold, the reference is
   // not colored in the bar chart. This draws attention to high-VAF mismatches.
-  vafColorThreshold: 0.2
+  vafColorThreshold: 0.2,
+  color: style.DEFAULT_COLORPICKER
 };
+
+CoverageTrack.getOptionsMenu = function(options: Object): any {
+  return [
+    {key: 'pick-color', label: 'Change track color', color: options.color}
+  ];
+};
+
+CoverageTrack.handleSelectOption = function(item: Object, oldOptions: Object): Object {
+    var opts = _.clone(oldOptions);
+    if (item.key == "pick-color") {
+      // This is all handled by the menu. Do nothing.
+      opts.color = item.color;
+      return opts;
+    }
+    return oldOptions;  // no change
+};
+
 
 module.exports = CoverageTrack;

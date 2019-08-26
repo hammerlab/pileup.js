@@ -85,12 +85,9 @@ function renderFeatures(ctx: DataCanvasRenderingContext2D,
       ctx.lineWidth = 1;
 
       // Create transparency value based on score. Score of <= 200 is the same transparency.
-      var alphaScore = Math.max(feature.score / 1000.0, 0.2); //TODO add back in alpha
-      // ctx.fillStyle = 'rgba(0, 0, 0, ' + alphaScore + ')';
-      console.log("in Featuretrack", options.color);
-      ctx.globalAlpha=alphaScore
-      ctx.fillStyle = options.color.hex;
-
+      var alphaScore = Math.max(feature.score / 1000.0, 0.2);
+      options.color.rgb.a=alphaScore;
+      ctx.fillStyle = `rgba(${options.color.rgb.r}, ${options.color.rgb.g}, ${options.color.rgb.b}, ${options.color.rgb.a})`;
       var x = Math.round(scale(vFeature.span.start()));
       var width = Math.ceil(scale(vFeature.span.stop()) - scale(vFeature.span.start()));
       // if collapse mode, render everything in a single row
@@ -105,9 +102,9 @@ class FeatureTrack extends React.Component<VizProps<DataSource<Feature>>, State>
   state: State;
   tiles: FeatureTiledCanvas;
   cache: GenericFeatureCache;
-  static defaultOptions: { collapse: false };
+  static defaultOptions: Object;
   static getOptionsMenu: (options: Object) => any;
-  static handleSelectOption: (key: string, oldOptions: Object) => Object;
+  static handleSelectOption: (item: Object, oldOptions: Object) => Object;
 
   constructor(props: VizProps<DataSource<Feature>>) {
     super(props);
@@ -236,10 +233,9 @@ class FeatureTrack extends React.Component<VizProps<DataSource<Feature>>, State>
     var parent = ((d3utils.findParent(canvas, "features") : any) : HTMLCanvasElement);
 
     // Height can only be computed after the pileup has been updated.
-    if (this.props.options.collapse) {
-        var height = style.READ_HEIGHT + style.READ_SPACING;
-    } else {
-        var height = this.tiles.heightForRef(this.props.range.contig);
+    var height = style.READ_HEIGHT + style.READ_SPACING;
+    if (!this.props.options.collapse) {
+        height = this.tiles.heightForRef(this.props.range.contig);
     }
 
     // resize height for device
@@ -291,10 +287,11 @@ class FeatureTrack extends React.Component<VizProps<DataSource<Feature>>, State>
 }
 
 FeatureTrack.displayName = 'features';
+
 FeatureTrack.defaultOptions = {
   collapse: false,
-  color: {hex: '#969696'}
-}
+  color: style.DEFAULT_COLORPICKER
+};
 
 FeatureTrack.getOptionsMenu = function(options: Object): any {
   return [
@@ -303,14 +300,14 @@ FeatureTrack.getOptionsMenu = function(options: Object): any {
   ];
 };
 
-FeatureTrack.handleSelectOption = function(key: string, oldOptions: Object): Object {
+FeatureTrack.handleSelectOption = function(item: Object, oldOptions: Object): Object {
   var opts = _.clone(oldOptions);
-  if (key == 'collapse') {
+  if (item.key == 'collapse') {
     opts.collapse = !opts.collapse;
     return opts;
-  } else if (key == "pick-color") {
+  } else if (item.key == "pick-color") {
     // This is all handled by the menu. Do nothing.
-    console.log()
+    opts.color = item.color;
     return opts;
   }
   return oldOptions;  // no change
