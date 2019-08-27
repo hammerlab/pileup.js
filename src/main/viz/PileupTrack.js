@@ -235,7 +235,7 @@ class PileupTrack extends React.Component<VizProps<DataSource<Alignment>>, State
   tiles: PileupTiledCanvas;
   static defaultOptions: { viewAsPairs: boolean };
   static getOptionsMenu: (options: Object) => any;
-  static handleSelectOption: (key: string, oldOptions: Object) => Object;
+  static handleSelectOption: (item: Object, oldOptions: Object) => Object;
 
   constructor(props: VizProps<DataSource<Alignment>>) {
     super(props);
@@ -494,23 +494,23 @@ PileupTrack.getOptionsMenu = function(options: Object): any {
 
 var messageId = 1;
 
-PileupTrack.handleSelectOption = function(key: string, oldOptions: Object): Object {
+PileupTrack.handleSelectOption = function(item: Object, oldOptions: Object): Object {
   var opts = _.clone(oldOptions);
-  if (key == 'view-pairs') {
+  if (item.key == 'view-pairs') {
     opts.viewAsPairs = !opts.viewAsPairs;
     return opts;
-  } else if (key == 'color-insert') {
+  } else if (item.key == 'color-insert') {
     opts.colorByInsert = !opts.colorByInsert;
     if (opts.colorByInsert) opts.colorByStrand = false;
     return opts;
-  } else if (key == 'color-strand') {
+  } else if (item.key == 'color-strand') {
     opts.colorByStrand = !opts.colorByStrand;
     if (opts.colorByStrand) opts.colorByInsert = false;
     return opts;
-  } else if (key == 'hide-alignments') {
+  } else if (item.key == 'hide-alignments') {
     opts.hideAlignments = !opts.hideAlignments;
     return opts;
-  } else if (key == 'sort') {
+  } else if (item.key == 'sort') {
     opts.sort = (messageId++);
     return opts;
   }

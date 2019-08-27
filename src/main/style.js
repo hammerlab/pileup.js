@@ -29,6 +29,7 @@ function TEXT_STYLE(mode: number, fontSize: number): string {
 
 module.exports = {
   TEXT_STYLE,
+  DEFAULT_COLORPICKER: {hex: '#969696', rgb: {r: 150, g: 150, b: 150, a: 1}}, // grey in hex/rgb
 
   // Colors for individual base pairs
   BASE_COLORS: {

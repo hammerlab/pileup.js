@@ -8,6 +8,8 @@ import type {GenomeRange} from './types';
 import type {TwoBitSource} from './sources/TwoBitDataSource';
 import type {VisualizedTrack, VizWithOptions} from './types';
 
+import _ from 'underscore';
+
 import React from 'react';
 import Controls from './Controls';
 import Menu from './Menu';
@@ -30,6 +32,8 @@ class Root extends React.Component<Props, State> {
   props: Props;
   state: State;
   trackReactElements: Array<Object>; //it's an array of reactelement that are created for tracks
+  outsideClickHandler: (a: any) => void;
+  node: any; // used to track clicking outside this component
 
   constructor(props: Object) {
     super(props);
@@ -40,6 +44,8 @@ class Root extends React.Component<Props, State> {
       settingsMenuKey: null
     };
     this.trackReactElements = [];
+    this.node = null;
+    this.outsideClickHandler = this.handleOutsideClick.bind(this);
   }
 
   componentDidMount() {
@@ -71,20 +77,33 @@ class Root extends React.Component<Props, State> {
     }).done();
   }
 
-  toggleSettingsMenu(key: string, e: SyntheticEvent<>) {
+  // key can be string or null
+  toggleSettingsMenu(key: any, e: SyntheticEvent<>) {
     if (this.state.settingsMenuKey == key) {
       this.setState({settingsMenuKey: null});
+      document.removeEventListener('click', this.outsideClickHandler, false);
     } else {
       this.setState({settingsMenuKey: key});
+      // remove event listener for clicking off of menu
+      document.addEventListener('click', this.outsideClickHandler, false);
     }
   }
 
-  handleSelectOption(trackKey: string, optionKey: string) {
-    this.setState({settingsMenuKey: null});
+  handleOutsideClick(e: SyntheticEvent<>) {
+    // if menu is visible and click is outside of menu component,
+    // toggle view off
+    if (this.state.settingsMenuKey != null && this.state.settingsMenuKey != undefined) {
+        if (!this.node.contains(e.target)) {
+            this.toggleSettingsMenu(this.state.settingsMenuKey, e);
+        }
+    }
+  }
+
+  handleSelectOption(trackKey: string, item: Object) {
     var viz = this.props.tracks[Number(trackKey)].visualization;
     var oldOpts = viz.options;
     // $FlowIgnore: TODO remove flow suppression
-    var newOpts = viz.component.handleSelectOption(optionKey, oldOpts);
+    var newOpts = viz.component.handleSelectOption(item, oldOpts);
     viz.options = newOpts;
     if (newOpts != oldOpts) {
       this.forceUpdate();
@@ -94,7 +113,7 @@ class Root extends React.Component<Props, State> {
   makeDivForTrack(key: string, track: VisualizedTrack): React$Element<'div'> {
     //this should be improved, but I have no idea how (when trying to
     //access this.trackReactElements with string key, flow complains)
-    var intKey = parseInt(key); 
+    var intKey = parseInt(key);
     var trackEl = (
         <VisualizationWrapper visualization={track.visualization}
             range={this.state.range}
@@ -132,14 +151,16 @@ class Root extends React.Component<Props, State> {
         top: gearY + 'px'
       };
       // $FlowIgnore: TODO remove flow suppression
-      var items = track.visualization.component.getOptionsMenu(track.visualization.options);
+      var items = _.clone(track.visualization.component.getOptionsMenu(track.visualization.options));
       settingsMenu = (
-        <div className='menu-container' style={menuStyle}>
-          <Menu header={trackName} items={items} onSelect={this.handleSelectOption.bind(this, key)} />
+        <div className='menu-container' style={menuStyle} ref={node => { this.node = node; }}>
+          <Menu header={trackName} items={items}
+          onClick={this.handleSelectOption.bind(this, key)}
+         />
         </div>
       );
     }
-
+    
     var className = ['track', track.visualization.component.displayName || '', track.track.cssClass || ''].join(' ');
 
     return (

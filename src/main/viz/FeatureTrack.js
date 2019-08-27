@@ -63,7 +63,7 @@ class FeatureTiledCanvas extends TiledCanvas {
 
     // get visual features with assigned rows
     var vFeatures = this.cache.getGroupsOverlapping(relaxedRange);
-    renderFeatures(ctx, scale, relaxedRange, vFeatures);
+    renderFeatures(ctx, scale, relaxedRange, vFeatures, this.options);
   }
 }
 
@@ -71,7 +71,8 @@ class FeatureTiledCanvas extends TiledCanvas {
 function renderFeatures(ctx: DataCanvasRenderingContext2D,
                     scale: (num: number) => number,
                     range: ContigInterval<string>,
-                    vFeatures: VisualGroup<GenericFeature>[]) {
+                    vFeatures: VisualGroup<GenericFeature>[],
+                    options: Object) {
 
     ctx.font = `${style.GENE_FONT_SIZE}px ${style.GENE_FONT}`;
     ctx.textAlign = 'center';
@@ -84,11 +85,12 @@ function renderFeatures(ctx: DataCanvasRenderingContext2D,
 
       // Create transparency value based on score. Score of <= 200 is the same transparency.
       var alphaScore = Math.max(feature.score / 1000.0, 0.2);
-      ctx.fillStyle = 'rgba(0, 0, 0, ' + alphaScore + ')';
-
+      options.color.rgb.a=alphaScore;
+      ctx.fillStyle = `rgba(${options.color.rgb.r}, ${options.color.rgb.g}, ${options.color.rgb.b}, ${options.color.rgb.a})`;
       var x = Math.round(scale(vFeature.span.start()));
       var width = Math.ceil(scale(vFeature.span.stop()) - scale(vFeature.span.start()));
-      var y = yForRow(vFeature.row);
+      // if collapse mode, render everything in a single row
+      var y = options.collapse ? yForRow(0) : yForRow(vFeature.row);
       ctx.fillRect(x - 0.5, y, width, style.READ_HEIGHT);
       ctx.popObject();
     });
@@ -99,6 +101,9 @@ class FeatureTrack extends React.Component<VizProps<DataSource<Feature>>, State>
   state: State;
   tiles: FeatureTiledCanvas;
   cache: GenericFeatureCache;
+  static defaultOptions: Object;
+  static getOptionsMenu: (options: Object) => any;
+  static handleSelectOption: (item: Object, oldOptions: Object) => Object;
 
   constructor(props: VizProps<DataSource<Feature>>) {
     super(props);
@@ -178,8 +183,28 @@ class FeatureTrack extends React.Component<VizProps<DataSource<Feature>>, State>
   }
 
   componentDidUpdate(prevProps: any, prevState: any) {
+    var shouldUpdate = false;
+    if (this.props.options != prevProps.options) {
+        this.handleOptionsChange(prevProps.options);
+        shouldUpdate = true;
+    }
+
     if (!shallowEquals(this.props, prevProps) ||
-        !shallowEquals(this.state, prevState)) {
+        !shallowEquals(this.state, prevState)||
+        shouldUpdate) {
+        this.tiles.update(this.props.options);
+        this.tiles.invalidateAll();
+        this.updateVisualization();
+    }
+  }
+
+  handleOptionsChange(oldOpts: Object) {
+    this.tiles.invalidateAll();
+    if (oldOpts.collapse != this.props.options.collapse) {
+        this.tiles.update(this.props.options);
+        this.tiles.invalidateAll();
+        this.updateVisualization();
+    } else if (oldOpts.color != this.props.options.color) {
         this.tiles.update(this.props.options);
         this.tiles.invalidateAll();
         this.updateVisualization();
@@ -198,16 +223,18 @@ class FeatureTrack extends React.Component<VizProps<DataSource<Feature>>, State>
 
     var ctx = dataCanvas.getDataContext(canvasUtils.getContext(canvas));
 
-
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     // get parent of canvas
     // The typecasts through `any` are to fool flow.
     var parent = ((d3utils.findParent(canvas, "features") : any) : HTMLCanvasElement);
-    
+
     // Height can only be computed after the pileup has been updated.
-    var height = this.tiles.heightForRef(this.props.range.contig);
+    var height = style.READ_HEIGHT + style.READ_SPACING;
+    if (!this.props.options.collapse) {
+        height = this.tiles.heightForRef(this.props.range.contig);
+    }
 
     // resize height for device
     height = d3utils.heightForCanvas(canvas, height);
@@ -235,7 +262,7 @@ class FeatureTrack extends React.Component<VizProps<DataSource<Feature>>, State>
         scale = this.getScale(),
         vFeatures = this.cache.getGroupsOverlapping(range);
 
-    renderFeatures(trackingCtx, scale, range, vFeatures);
+    renderFeatures(trackingCtx, scale, range, vFeatures, this.props.options);
     var feature = _.find(trackingCtx.hits[0], hit => hit);
 
     if (feature) {
@@ -258,5 +285,30 @@ class FeatureTrack extends React.Component<VizProps<DataSource<Feature>>, State>
 }
 
 FeatureTrack.displayName = 'features';
+
+FeatureTrack.defaultOptions = {
+  collapse: false,
+  color: style.DEFAULT_COLORPICKER
+};
+
+FeatureTrack.getOptionsMenu = function(options: Object): any {
+  return [
+    {key: 'collapse', label: 'Collapse track', checked: options.collapse},
+    {key: 'pick-color', label: 'Change track color', color: options.color}
+  ];
+};
+
+FeatureTrack.handleSelectOption = function(item: Object, oldOptions: Object): Object {
+  var opts = _.clone(oldOptions);
+  if (item.key == 'collapse') {
+    opts.collapse = !opts.collapse;
+    return opts;
+  } else if (item.key == "pick-color") {
+    // This is all handled by the menu. Do nothing.
+    opts.color = item.color;
+    return opts;
+  }
+  return oldOptions;  // no change
+};
 
 module.exports = FeatureTrack;
