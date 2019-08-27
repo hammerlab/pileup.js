@@ -20,12 +20,18 @@
 import { SketchPicker } from 'react-color';
 import React from 'react';
 
+// RGBA = red, green, blue, alpha
+// each value is between 0 and 1
+type RGBA = {
+    r: number, g: number, b: number, a: number
+};
+
 // some color pickers require hex as color input,
 // others require rgb
 type ColorItem = {
     hex: string,
     rgb: RGBA
-}
+};
 
 type MenuItem = {
   key: string;
@@ -39,10 +45,6 @@ type Props = {
   items: Array<MenuItem|'-'>;
   onClick: (item: Object) => void;
 };
-
-type RGBA = {
-    r: number, g: number, b: number, a: number
-}
 
 type State = {
   // list of booleans determining whether to show color palette for MenuItem
@@ -60,6 +62,7 @@ class Menu extends React.Component<Props, State> {
       };
   }
 
+  // toggle color picker for menu items that have color enabled
   toggleColorPicker(key: number, e: SyntheticEvent<>) {
     if (this.state.showPalette[key] == false) {
       this.state.showPalette[key] = true
@@ -97,7 +100,6 @@ class Menu extends React.Component<Props, State> {
       this.clickHandler(idx, e, false);
   };
 
-  // is called whenever you re-click on the gear
   render(): any {
     var makeHandler = i => this.clickHandler.bind(this, i);
     var makeColorPickerHandler = i => this.handleColorChange.bind(this, i);

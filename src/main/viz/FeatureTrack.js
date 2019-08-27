@@ -4,7 +4,6 @@
  */
 'use strict';
 
-
 import type {DataSource} from '../sources/DataSource';
 import Feature from '../data/feature';
 import GenericFeature from '../data/genericFeature';
@@ -133,7 +132,6 @@ class FeatureTrack extends React.Component<VizProps<DataSource<Feature>>, State>
         </div>
       );
     }
-
     var rangeLength = this.props.range.stop - this.props.range.start;
     // If range is too large, do not render 'canvas'
     if (rangeLength > RemoteRequest.MONSTER_REQUEST) {

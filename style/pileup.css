@@ -27,7 +27,6 @@
   text-align: right;
   font-size: 0.9em;
   position: relative;  /* make this an offset parent for positioning the label. */
-
 }
 .track-label > span {
   padding-right: 5px;

@@ -150,7 +150,6 @@ class Root extends React.Component<Props, State> {
         top: gearY + 'px'
       };
       // $FlowIgnore: TODO remove flow suppression
-      // TODO need to update with track.track.options (configurable options)
       var items = _.clone(track.visualization.component.getOptionsMenu(track.visualization.options));
       settingsMenu = (
         <div className='menu-container' style={menuStyle} ref={node => { this.node = node; }}>
@@ -165,7 +164,7 @@ class Root extends React.Component<Props, State> {
     return (
       <div key={key} className={className}>
         <div className='track-label'>
-          <span>{track.track.name}</span>
+          <span>{trackName}</span>
           <br/>
           {gearIcon}
           {settingsMenu}
