@@ -33,7 +33,7 @@ class Root extends React.Component<Props, State> {
   state: State;
   trackReactElements: Array<Object>; //it's an array of reactelement that are created for tracks
   outsideClickHandler: (a: any) => void;
-  node: any;
+  node: any; // used to track clicking outside this component
 
   constructor(props: Object) {
     super(props);
@@ -138,6 +138,7 @@ class Root extends React.Component<Props, State> {
           </span>
       );
     }
+
     if (this.state.settingsMenuKey == key) {
       var gear = this.refs['gear-' + key],
           gearX = gear.offsetLeft,
@@ -159,6 +160,7 @@ class Root extends React.Component<Props, State> {
         </div>
       );
     }
+    
     var className = ['track', track.visualization.component.displayName || '', track.track.cssClass || ''].join(' ');
 
     return (
