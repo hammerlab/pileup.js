@@ -74,10 +74,14 @@ function renderGenotypes(ctx: DataCanvasRenderingContext2D,
         var width = Math.max(1, Math.round(scale(variant.position + 1) - scale(variant.position)));
         vc.calls.forEach(call => {
           var y = yForRow(callSetNames.indexOf(call.callSetName));
-          ctx.fillStyle = call.genotype.reduce((a, b) => a + b, 0) == 1 ? style.GENOTYPE_FILL_HET : style.GENOTYPE_FILL_HOM;
-          ctx.strokeStyle = ctx.fillStyle;
-          ctx.fillRect(x - 0.2, y, width, style.GENOTYPE_HEIGHT);
-          ctx.strokeRect(x - 0.2, y, width, style.GENOTYPE_HEIGHT);
+          var callSum = call.genotype.reduce((a, b) => a + b, 0);
+          // do not display 0,0 calls
+          if (callSum > 0) {
+              ctx.fillStyle = callSum == 1 ? style.GENOTYPE_FILL_HET : style.GENOTYPE_FILL_HOM;
+              ctx.strokeStyle = ctx.fillStyle;
+              ctx.fillRect(x - 0.2, y, width, style.GENOTYPE_HEIGHT);
+              ctx.strokeRect(x - 0.2, y, width, style.GENOTYPE_HEIGHT);
+          }
         });
         ctx.popObject();
     });
