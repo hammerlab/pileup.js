@@ -324,5 +324,9 @@ module.exports = {
   isChrMatch,
   flatMap,
   computePercentile,
-  stringToLiteral
+  stringToLiteral,
+  ZOOM_FACTOR: {
+    'IN': 0.5,
+    'OUT': 2.0,
+  }
 };

@@ -75,6 +75,9 @@ The pileup object returned by `pileup.create` has these methods:
   coordinates are 1-based and the range is inclusive on both ends.
 * `getRange`: Returns the currently-visible range. This is a `GenomeRange`
   object (see description in `setRange`).
+* `zoomIn`: Zooms current range in by a factor of 2.
+* `zoomOut`: Zooms current range out by a factor of 2.
+* `toSvg`: Converts pileup object to SVG data URL.
 * `destroy`: Tears down the pileup and releases references to allow proper
   garbage collection.
 

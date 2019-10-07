@@ -11,6 +11,13 @@ import ContigInterval from '../main/ContigInterval';
 import {waitFor} from './async';
 
 describe('pileup', function() {
+
+  var p;
+  var testDiv = document.getElementById('testdiv');
+  if (!testDiv) throw new Error("Failed to match: testDiv");
+
+  var initialRange = {contig: 'chr17', start: 100, stop: 150}
+
   function getTracks() {
     return [
       {
@@ -58,98 +65,100 @@ describe('pileup', function() {
     ]
   }
 
-  var testDiv = document.getElementById('testdiv');
-  if (!testDiv) throw new Error("Failed to match: testdiv");
+  function makePileup(): Object {
+      p = pileup.create(testDiv, {
+        range: initialRange,
+        tracks: getTracks()
+      });
+  }
 
-  beforeEach(() => {
-    dataCanvas.RecordingContext.recordAll();  // record all data canvases
-  });
 
-  afterEach(function() {
-    dataCanvas.RecordingContext.reset();
-    testDiv.innerHTML = '';  // avoid pollution between tests.
-  });
+  var {drawnObjects, drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
 
-  it('should render reference genome and genes', function(): any {
-    this.timeout(5000);
-
-    var div = document.createElement('div');
-    div.setAttribute('style', 'width: 800px; height: 200px;');
-    testDiv.appendChild(div);
-    var initialRange = {contig: 'chr17', start: 100, stop: 150}
-    var p = pileup.create(div, {
-      range: initialRange,
-      tracks: getTracks()
-    });
-
-    var {drawnObjects, drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
-
-    var uniqDrawnObjectsWith = function(div: any, name: string, f: any) {
+  var uniqDrawnObjectsWith = function(div: any, name: string, f: any) {
       return _.uniq(
           drawnObjectsWith(div, name, f),
           false,  // not sorted
           x => x.key);
-    };
+  };
 
-    // TODO: consider moving this into the data-canvas library
-    function hasCanvasAndObjects(div, selector) {
-      return div.querySelector(selector + ' canvas') && drawnObjects(div, selector).length > 0;
-    }
+  // TODO: consider moving this into the data-canvas library
+  function hasCanvasAndObjects(div, selector) {
+    return div.querySelector(selector + ' canvas') && drawnObjects(div, selector).length > 0;
+  }
 
-    var ready = ((): boolean =>
-      // $FlowIgnore: TODO remove flow suppression
-      hasCanvasAndObjects(div, '.reference') &&
-      hasCanvasAndObjects(div, '.variants') &&
-      hasCanvasAndObjects(div, '.genes') &&
-      hasCanvasAndObjects(div, '.pileup')
-    );
+  var ready = ((): boolean =>
+    // $FlowIgnore: TODO remove flow suppression
+    hasCanvasAndObjects(testDiv, '.reference') &&
+    hasCanvasAndObjects(testDiv, '.variants') &&
+    hasCanvasAndObjects(testDiv, '.genes') &&
+    hasCanvasAndObjects(testDiv, '.pileup')
+  );
 
-    var rangeChanged = ((): boolean =>
-      // $FlowIgnore: TODO remove flow suppression
-      initialRange != p.getRange()
-    );
+  var rangeChanged = ((): boolean =>
+    // $FlowIgnore: TODO remove flow suppression
+    initialRange != p.getRange()
+  );
 
-    return waitFor(ready, 5000)
+
+  beforeEach(() => {
+    dataCanvas.RecordingContext.recordAll();  // record all data canvases
+    testDiv.style.width = '800px';
+  });
+
+  afterEach(function() {
+    dataCanvas.RecordingContext.reset();
+    if (p) p.destroy();
+    testDiv.innerHTML = '';
+    testDiv.style.width = '';
+  });
+
+  it('should render reference genome and genes', function(done): any {
+    this.timeout(5000);
+
+    makePileup();
+
+    waitFor(ready, 5000)
       .then(() => {
-        var basepairs = drawnObjectsWith(div, '.reference', x => x.letter);
+        var basepairs = drawnObjectsWith(testDiv, '.reference', x => x.letter);
         expect(basepairs).to.have.length.at.least(10);
 
-        var variants = drawnObjectsWith(div, '.variants', x => x.alt);
+        var variants = drawnObjectsWith(testDiv, '.variants', x => x.alt);
         expect(variants).to.have.length(1);
         expect(variants[0].position).to.equal(125);
         expect(variants[0].ref).to.equal('G');
         expect(variants[0].alt).to.equal('T');
 
-        var geneTexts = callsOf(div, '.genes', 'fillText');
+        var geneTexts = callsOf(testDiv, '.genes', 'fillText');
         expect(geneTexts).to.have.length(1);
         expect(geneTexts[0][1]).to.equal('TP53');
 
         // Note: there are 11 exons, but two are split into coding/non-coding
-        expect(callsOf(div, '.genes', 'fillRect')).to.have.length(13);
+        expect(callsOf(testDiv, '.genes', 'fillRect')).to.have.length(13);
 
         // check for reference
-        var selectedClass = div.querySelector('div > .a');
+        var selectedClass = testDiv.querySelector('div > .a');
         expect(selectedClass).to.not.be.null;
         if (selectedClass != null) {
           expect(selectedClass.className).to.equal('track reference a');
         }
 
         // check for variants
-        selectedClass = div.querySelector('div > .b');
+        selectedClass = testDiv.querySelector('div > .b');
         expect(selectedClass).to.not.be.null;
         if (selectedClass != null) {
           expect(selectedClass.className).to.equal('track variants b');
         }
 
         // check for genes
-        selectedClass = div.querySelector('div > .c');
+        selectedClass = testDiv.querySelector('div > .c');
         expect(selectedClass).to.not.be.null;
         if (selectedClass != null) {
           expect(selectedClass.className).to.equal('track genes c');
         }
 
         // check for pileup
-        selectedClass = div.querySelector('div > .d');
+        selectedClass = testDiv.querySelector('div > .d');
         expect(selectedClass).to.not.be.null;
         if (selectedClass != null) {
           expect(selectedClass.className).to.equal('track pileup d');
@@ -165,53 +174,24 @@ describe('pileup', function() {
         // Due to tiling, some rendered reads may be off-screen.
         var range = p.getRange();
         var cRange = new ContigInterval(range.contig, range.start, range.stop);
-        var visibleReads = uniqDrawnObjectsWith(div, '.pileup', x => x.span)
+        var visibleReads = uniqDrawnObjectsWith(testDiv, '.pileup', x => x.span)
               .filter(x => x.span.intersects(cRange));
         expect(visibleReads).to.have.length(4);
-
-        p.destroy();
+        done();
       });
   });
 
-  it('should save SVG', function(): any {
+  it('should save SVG', function(done): any {
     this.timeout(5000);
 
-    var div = document.createElement('div');
-    div.setAttribute('style', 'width: 800px; height: 200px;');
-    testDiv.appendChild(div);
-    var initialRange = {contig: 'chr17', start: 100, stop: 150}
-    var p = pileup.create(div, {
-      range: initialRange,
-      tracks: getTracks()
-    });
+    makePileup();
 
-    var {drawnObjects, drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
-
-    // TODO move for sharing
-    // TODO: consider moving this into the data-canvas library
-    function hasCanvasAndObjects(div, selector) {
-      return div.querySelector(selector + ' canvas') && drawnObjects(div, selector).length > 0;
-    }
-
-    var ready = ((): boolean =>
-      // $FlowIgnore: TODO remove flow suppression
-      hasCanvasAndObjects(div, '.reference') &&
-      hasCanvasAndObjects(div, '.variants') &&
-      hasCanvasAndObjects(div, '.genes') &&
-      hasCanvasAndObjects(div, '.pileup')
-    );
-
-    var rangeChanged = ((): boolean =>
-      // $FlowIgnore: TODO remove flow suppression
-      initialRange != p.getRange()
-    );
-
-    return waitFor(ready, 5000)
+    waitFor(ready, 5000)
       .then(() => {
 
-        // TODO test zoom in, out and svg
+        // test zoom in, out and svg
         p.zoomIn();
-        return waitFor(rangeChanged, 5000)
+        waitFor(rangeChanged, 5000)
           .then(() => {
             // not waiting
             expect(p.getRange()).to.deep.equal({
@@ -221,12 +201,12 @@ describe('pileup', function() {
             });
 
             // test conversion to SVG
-            return p.saveSVG().then(svg => {
+            p.toSVG().then(svg => {
                 expect(svg).to.contain("svg");
                 expect(svg).to.contain("chr17");
                 expect(svg).to.contain("Location");
                 expect(svg).to.contain("Scale");
-                p.destroy();
+                done();
             });
         })
       });

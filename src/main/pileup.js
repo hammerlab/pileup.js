@@ -59,7 +59,7 @@ type Pileup = {
   getRange(): GenomeRange;
   zoomIn(): void;
   zoomOut(): void;
-  saveSVG(): Promise<string>;
+  toSVG(): Promise<string>;
   destroy(): void;
 }
 
@@ -163,7 +163,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
           throw 'Cannot call zoomIn on a destroyed pileup';
         }
         var r = this.getRange();
-        var iv = utils.scaleRange(new Interval(r.start, r.stop), 0.5); // TODO constant copied from Controls.js
+        var iv = utils.scaleRange(new Interval(r.start, r.stop), utils.ZOOM_FACTOR.IN); 
         var newRange = {
           contig: r.contig,
           start: iv.start,
@@ -176,7 +176,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
           throw 'Cannot call zoomOut on a destroyed pileup';
         }
         var r = this.getRange();
-        var iv = utils.scaleRange(new Interval(r.start, r.stop), 2.0); // TODO constant copied from Controls.js
+        var iv = utils.scaleRange(new Interval(r.start, r.stop), utils.ZOOM_FACTOR.OUT);
         var newRange = {
           contig: r.contig,
           start: iv.start,
@@ -184,9 +184,9 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
         }
         this.setRange(newRange);
     },
-    saveSVG(filepath: ?string): Promise<string> {
+    toSVG(filepath: ?string): Promise<string> {
         if (reactElement === null) {
-          throw 'Cannot call saveSVG on a destroyed pileup';
+          throw 'Cannot call toSVG on a destroyed pileup';
         }
 
         return htmlToImage.toSvgDataURL(el)
