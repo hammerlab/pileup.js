@@ -65,7 +65,7 @@ describe('pileup', function() {
     ]
   }
 
-  function makePileup(): Object {
+  function makePileup() {
       p = pileup.create(testDiv, {
         range: initialRange,
         tracks: getTracks()
