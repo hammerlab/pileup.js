@@ -76,9 +76,9 @@ describe('pileup', function() {
     var div = document.createElement('div');
     div.setAttribute('style', 'width: 800px; height: 200px;');
     testDiv.appendChild(div);
-
+    var initialRange = {contig: 'chr17', start: 100, stop: 150}
     var p = pileup.create(div, {
-      range: {contig: 'chr17', start: 100, stop: 150},
+      range: initialRange,
       tracks: getTracks()
     });
 
@@ -102,6 +102,11 @@ describe('pileup', function() {
       hasCanvasAndObjects(div, '.variants') &&
       hasCanvasAndObjects(div, '.genes') &&
       hasCanvasAndObjects(div, '.pileup')
+    );
+
+    var rangeChanged = ((): boolean =>
+      // $FlowIgnore: TODO remove flow suppression
+      initialRange != p.getRange()
     );
 
     return waitFor(ready, 5000)
@@ -165,6 +170,65 @@ describe('pileup', function() {
         expect(visibleReads).to.have.length(4);
 
         p.destroy();
+      });
+  });
+
+  it('should save SVG', function(): any {
+    this.timeout(5000);
+
+    var div = document.createElement('div');
+    div.setAttribute('style', 'width: 800px; height: 200px;');
+    testDiv.appendChild(div);
+    var initialRange = {contig: 'chr17', start: 100, stop: 150}
+    var p = pileup.create(div, {
+      range: initialRange,
+      tracks: getTracks()
+    });
+
+    var {drawnObjects, drawnObjectsWith, callsOf} = dataCanvas.RecordingContext;
+
+    // TODO move for sharing
+    // TODO: consider moving this into the data-canvas library
+    function hasCanvasAndObjects(div, selector) {
+      return div.querySelector(selector + ' canvas') && drawnObjects(div, selector).length > 0;
+    }
+
+    var ready = ((): boolean =>
+      // $FlowIgnore: TODO remove flow suppression
+      hasCanvasAndObjects(div, '.reference') &&
+      hasCanvasAndObjects(div, '.variants') &&
+      hasCanvasAndObjects(div, '.genes') &&
+      hasCanvasAndObjects(div, '.pileup')
+    );
+
+    var rangeChanged = ((): boolean =>
+      // $FlowIgnore: TODO remove flow suppression
+      initialRange != p.getRange()
+    );
+
+    return waitFor(ready, 5000)
+      .then(() => {
+
+        // TODO test zoom in, out and svg
+        p.zoomIn();
+        return waitFor(rangeChanged, 5000)
+          .then(() => {
+            // not waiting
+            expect(p.getRange()).to.deep.equal({
+              contig: 'chr17',
+              start: 112,
+              stop: 138
+            });
+
+            // test conversion to SVG
+            return p.saveSVG().then(svg => {
+                expect(svg).to.contain("svg");
+                expect(svg).to.contain("chr17");
+                expect(svg).to.contain("Location");
+                expect(svg).to.contain("Scale");
+                p.destroy();
+            });
+        })
       });
   });
 });
