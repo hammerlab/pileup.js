@@ -93,12 +93,12 @@ class Controls extends React.Component<Props, State> {
 
   zoomIn(e: any) {
     e.preventDefault();
-    this.zoomByFactor(0.5);
+    this.zoomByFactor(utils.ZOOM_FACTOR.IN);
   }
 
   zoomOut(e: any) {
     e.preventDefault();
-    this.zoomByFactor(2.0);
+    this.zoomByFactor(utils.ZOOM_FACTOR.OUT);
   }
 
   // Updates the range using absScaleRange and a given zoom level

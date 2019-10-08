@@ -12,6 +12,8 @@ import type {VizProps} from './VisualizationWrapper';
 import _ from 'underscore';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import htmlToImage from 'html-to-image';
+import saveAs from 'file-saver';
 
 // Data sources
 import TwoBitDataSource from './sources/TwoBitDataSource';
@@ -19,6 +21,9 @@ import BigBedDataSource from './sources/BigBedDataSource';
 import VcfDataSource from './sources/VcfDataSource';
 import BamDataSource from './sources/BamDataSource';
 import EmptySource from './sources/EmptySource';
+
+import utils from './utils';
+import Interval from './Interval';
 
 // Data sources from json
 import GA4GHAlignmentJson from './json/GA4GHAlignmentJson';
@@ -52,6 +57,9 @@ type GenomeRange = {
 type Pileup = {
   setRange(range: GenomeRange): void;
   getRange(): GenomeRange;
+  zoomIn(): void;
+  zoomOut(): void;
+  toSVG(): Promise<string>;
   destroy(): void;
 }
 
@@ -147,9 +155,47 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
       if (reactElement.state.range != null) {
         return _.clone(reactElement.state.range);
       } else {
-        throw 'Cannot call setRange on non-existent range';
+        throw 'Cannot call getRange on non-existent range';
       }
+    },
+    zoomIn() {
+        if (reactElement === null) {
+          throw 'Cannot call zoomIn on a destroyed pileup';
+        }
+        var r = this.getRange();
+        var iv = utils.scaleRange(new Interval(r.start, r.stop), utils.ZOOM_FACTOR.IN); 
+        var newRange = {
+          contig: r.contig,
+          start: iv.start,
+          stop: iv.stop
+        }
+        this.setRange(newRange);
+    },
+    zoomOut() {
+        if (reactElement === null) {
+          throw 'Cannot call zoomOut on a destroyed pileup';
+        }
+        var r = this.getRange();
+        var iv = utils.scaleRange(new Interval(r.start, r.stop), utils.ZOOM_FACTOR.OUT);
+        var newRange = {
+          contig: r.contig,
+          start: iv.start,
+          stop: iv.stop
+        }
+        this.setRange(newRange);
+    },
+    toSVG(filepath: ?string): Promise<string> {
+        if (reactElement === null) {
+          throw 'Cannot call toSVG on a destroyed pileup';
+        }
 
+        return htmlToImage.toSvgDataURL(el)
+          .then(function (svg) {
+              if (filepath != null) {
+                  window.saveAs(svg, filepath);
+              }
+              return svg;
+          });
     },
     destroy(): void {
       if (!vizTracks) {

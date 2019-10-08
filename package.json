@@ -62,7 +62,9 @@
     "react-color": "^2.17.3",
     "shallow-equals": "0.0.0",
     "underscore": "^1.7.0",
-    "memory-cache": "0.1.6"
+    "memory-cache": "0.1.6",
+    "html-to-image": "0.1.1",
+    "file-saver": "2.0.2"
   },
   "devDependencies": {
     "arraybuffer-slice": "^0.1.2",
