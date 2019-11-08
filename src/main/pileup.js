@@ -57,8 +57,8 @@ type GenomeRange = {
 type Pileup = {
   setRange(range: GenomeRange): void;
   getRange(): GenomeRange;
-  zoomIn(): void;
-  zoomOut(): void;
+  zoomIn(): GenomeRange;
+  zoomOut(): GenomeRange;
   toSVG(): Promise<string>;
   destroy(): void;
 }
@@ -158,20 +158,21 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
         throw 'Cannot call getRange on non-existent range';
       }
     },
-    zoomIn() {
+    zoomIn(): GenomeRange {
         if (reactElement === null) {
           throw 'Cannot call zoomIn on a destroyed pileup';
         }
         var r = this.getRange();
-        var iv = utils.scaleRange(new Interval(r.start, r.stop), utils.ZOOM_FACTOR.IN); 
+        var iv = utils.scaleRange(new Interval(r.start, r.stop), utils.ZOOM_FACTOR.IN);
         var newRange = {
           contig: r.contig,
           start: iv.start,
           stop: iv.stop
         }
         this.setRange(newRange);
+        return newRange;
     },
-    zoomOut() {
+    zoomOut(): GenomeRange {
         if (reactElement === null) {
           throw 'Cannot call zoomOut on a destroyed pileup';
         }
@@ -183,6 +184,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
           stop: iv.stop
         }
         this.setRange(newRange);
+        return newRange;
     },
     toSVG(filepath: ?string): Promise<string> {
         if (reactElement === null) {
