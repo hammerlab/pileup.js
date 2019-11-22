@@ -1,6 +1,6 @@
 /**
  * A track which shows an idiogram corresponding to the genome being
- * shown by the reference track. 
+ * shown by the reference track.
  * @flow
  */
 'use strict';
@@ -11,11 +11,9 @@ import type {DataSource} from '../sources/DataSource';
 import React from 'react';
 import EmptySource from '../sources/EmptySource';
 import d3 from 'd3';
-import idiogrammatik from '../../../node_modules/idiogrammatik.js/idiogrammatik';
+import idiogrammatik from 'idiogrammatik.js';
 import ContigInterval from '../ContigInterval';
 import Chromosome from '../data/chromosome';
-
-
 
 class IdiogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, State> {
   props: VizProps<DataSource<Chromosome>>;
@@ -36,10 +34,10 @@ class IdiogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, St
 
     this.kgram = idiogrammatik();
 
-    this.kgram.width([1320]);
-    this.kgram.height([20]);
-    this.kgram.margin({'top': 5, 'bottom': 10, 'left': 20, 'right': 20});
-    this.kgram.idiogramHeight([10]);
+    this.kgram.width([this.props.width]);
+    this.kgram.height([this.props.height]);
+    this.kgram.margin({'top': 5, 'bottom': 10, 'left': 20, 'right': 20}); // TODO what?
+    this.kgram.idiogramHeight(this.props.height);
 
     var range = this.props.range;
     var relaxedRange =
@@ -57,7 +55,7 @@ class IdiogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, St
     this.updateVisualization(this.props.range);
   }
 
-  updateVisualization(range: '') {
+  updateVisualization(range: GenomeRange) {
     this.kgram.zoom(range.contig, range.start, range.stop);
   }
 
