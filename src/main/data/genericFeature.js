@@ -15,8 +15,8 @@ class GenericFeature {
   gFeature: Object;
 
   constructor(id: string, position: ContigInterval<string>, genericFeature: Object) {
-    this.id = genericFeature.id;
-    this.position = genericFeature.position;
+    this.id = id;
+    this.position = position;
     this.gFeature = genericFeature;
   }
 }

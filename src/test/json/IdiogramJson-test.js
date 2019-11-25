@@ -22,8 +22,8 @@ describe('IdiogramJson', function() {
 
     var requestInterval = new ContigInterval('chr1', 130000, 135000);
 
-    var features = source.getFeaturesInRange(requestInterval);
-    expect(features).to.have.length(24); 
+    var features = source.getFeaturesInRange(requestInterval)[0];
+    expect(features.bands).to.have.length(63);
     done();
 
   });

@@ -59,6 +59,9 @@ module.exports = {
   READ_SPACING: 2, // vertical spacing between reads
   READ_HEIGHT: 13, // Height of read
 
+  // Idiogram track
+  IDIOGRAM_LINEWIDTH: 1,
+
 
   // Coverage track
   COVERAGE_FONT_STYLE: `bold 9px 'Helvetica Neue', Helvetica, Arial, sans-serif`,

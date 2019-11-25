@@ -33,9 +33,8 @@ function create(json: string): DataSource<Chromosome> {
     return;
   }
 
-  function getFeaturesInRange(range: ContigInterval<string>): Chromosome[] {
-    // this is abusing the function name TODO
-    return chromosomes;
+  function getFeaturesInRange(range: ContigInterval<string>): Chromosome {
+    return _.filter(chromosomes, chr => range.chrOnContig(chr.name));
   }
 
   var o = {
