@@ -19,11 +19,9 @@ import type {DataSource} from '../sources/DataSource';
 import RemoteFile from '../RemoteFile';
 import utils from '../utils';
 
-
 var createFromCytoBandFile = function(remoteSource: CytoBandFile): DataSource<Chromosome> {
   // Local cache of genomic data.
   var contigMap: {[key:string]: Chromosome} = {};
-
 
   // This either adds or removes a 'chr' as needed.
   function normalizeRange(range: ContigInterval<string>): ContigInterval<string> {
@@ -38,8 +36,6 @@ var createFromCytoBandFile = function(remoteSource: CytoBandFile): DataSource<Ch
   }
 
   function fetch(range: ContigInterval<string>) {
-    //now we can add region to covered regions
-    //doing it earlier would provide inconsistency
     remoteSource.getFeaturesInRange(range)
       .then(chr => {
         contigMap[chr.name] = chr;
@@ -77,11 +73,7 @@ function create(url:string): DataSource<Chromosome> {
   if (!url) {
     throw new Error(`Missing URL from track: ${url}`);
   }
-
-  var r =new RemoteFile(url);
-  var c = new CytoBandFile(r);
-  return createFromCytoBandFile(c);
-  // return createFromCytoBandFile(new CytoBandFile(new RemoteFile(url)));
+  return createFromCytoBandFile(new CytoBandFile(new RemoteFile(url)));
 }
 
 

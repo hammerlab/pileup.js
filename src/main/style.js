@@ -42,7 +42,6 @@ module.exports = {
   },
 
 
-
   // Gene track
   GENE_ARROW_SIZE: 4,
   GENE_COLOR: 'blue',  // color of the gene line, exons, text, etc.

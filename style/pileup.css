@@ -334,8 +334,3 @@
   dominant-baseline: central;
   text-anchor: middle;
 }
-
-/* idiogram track */
-.pileup-root > .karyogram {
-  flex: 0 0 20px;
-}

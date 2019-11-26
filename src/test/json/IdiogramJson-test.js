@@ -39,5 +39,4 @@ describe('IdiogramJson', function() {
     done();
 
   });
-
 });

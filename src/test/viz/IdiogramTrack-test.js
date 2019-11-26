@@ -24,7 +24,6 @@ describe('IdiogramTrack', function() {
           drawnObjects(testDiv, '.idiogram').length > 0;
   }
 
-
   beforeEach(() => {
     testDiv.style.width = '800px';
     dataCanvas.RecordingContext.recordAll();

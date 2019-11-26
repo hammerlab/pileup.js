@@ -1,15 +1,13 @@
 /**
  * Class for parsing chromosome bands for idiograms.
- * Taken from https://github.com/hammerlab/idiogrammatik.
+ * Format taken from https://github.com/hammerlab/idiogrammatik.
  * @flow
  */
 'use strict';
 
 import ContigInterval from '../ContigInterval';
 import type {CoverageCount} from '../viz/pileuputils';
-
 import _ from 'underscore';
-
 
 // chromosomal band (see https://github.com/hammerlab/idiogrammatik/blob/master/data/basic-chromosomes.json)
 // for an example
