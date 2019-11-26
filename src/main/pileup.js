@@ -17,6 +17,8 @@ import saveAs from 'file-saver';
 
 // Data sources
 import TwoBitDataSource from './sources/TwoBitDataSource';
+import CytoBandDataSource from './sources/CytoBandDataSource';
+
 import BigBedDataSource from './sources/BigBedDataSource';
 import VcfDataSource from './sources/VcfDataSource';
 import BamDataSource from './sources/BamDataSource';
@@ -239,6 +241,7 @@ var pileup = {
     variantJson: GA4GHVariantJson.create,
     featureJson: GA4GHFeatureJson.create,
     idiogramJson: IdiogramJson.create,
+    cytoBand: CytoBandDataSource.create,
     vcf: VcfDataSource.create,
     twoBit: TwoBitDataSource.create,
     bigBed: BigBedDataSource.create,

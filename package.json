@@ -64,8 +64,7 @@
     "underscore": "^1.7.0",
     "memory-cache": "0.1.6",
     "html-to-image": "0.1.1",
-    "file-saver": "2.0.2",
-    "idiogrammatik.js": "1.1.2"
+    "file-saver": "2.0.2"
   },
   "devDependencies": {
     "arraybuffer-slice": "^0.1.2",

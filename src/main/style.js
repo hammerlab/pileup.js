@@ -42,6 +42,7 @@ module.exports = {
   },
 
 
+
   // Gene track
   GENE_ARROW_SIZE: 4,
   GENE_COLOR: 'blue',  // color of the gene line, exons, text, etc.
@@ -61,7 +62,19 @@ module.exports = {
 
   // Idiogram track
   IDIOGRAM_LINEWIDTH: 1,
-
+  IDIOGRAM_COLORS: {
+    "gpos100": "#000000",
+    "gpos": "#000000",
+    "gpos75": "#828282",
+    "gpos66": "#a0a0a0",
+    "gpos50": "#c8c8c8",
+    "gpos33": "#d2d2d2",
+    "gpos25": "#c8c8c8",
+    "gvar": "#dcdcdc",
+    "gneg": "#ffffff",
+    "acen": "#d92f27",
+    "stalk": "#647fa4",
+  },
 
   // Coverage track
   COVERAGE_FONT_STYLE: `bold 9px 'Helvetica Neue', Helvetica, Arial, sans-serif`,

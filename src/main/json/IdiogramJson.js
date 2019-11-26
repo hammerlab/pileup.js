@@ -33,7 +33,7 @@ function create(json: string): DataSource<Chromosome> {
     return;
   }
 
-  function getFeaturesInRange(range: ContigInterval<string>): Chromosome {
+  function getFeaturesInRange(range: ContigInterval<string>): Chromosome[] {
     return _.filter(chromosomes, chr => range.chrOnContig(chr.name));
   }
 

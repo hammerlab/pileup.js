@@ -9,10 +9,8 @@ import type {VizProps} from '../VisualizationWrapper';
 import type {State} from '../types';
 import type {DataSource} from '../sources/DataSource';
 import React from 'react';
-import EmptySource from '../sources/EmptySource';
 import ContigInterval from '../ContigInterval';
 import Chromosome from '../data/chromosome';
-import type Band from '../data/chromosome';
 import canvasUtils from './canvas-utils';
 import dataCanvas from 'data-canvas';
 import style from '../style';
@@ -21,27 +19,17 @@ import ReactDOM from 'react-dom';
 import shallowEquals from 'shallow-equals';
 import d3utils from './d3utils';
 import _ from 'underscore';
-import scale from '../scale';
-import Interval from '../Interval';
 
 import GenericFeature from '../data/genericFeature';
 import {GenericFeatureCache} from './GenericFeatureCache';
 
-function gstainFiller(d) {
-    var stain = d.value;
-    if (stain == "gneg") {
-      return '#dfdfdf';
-    } else if (stain == "gpos") {
-      return '#525252';
-    } else if (stain == "acen") {
-      return null;
-    } else if (stain == "gvar") {
-      return '#cfcfcf';
-    } else if (stain == "stalk") {
-      return '#cfcfcf';
-    } else {
-      return 'white';
-    }
+function gstainFiller(d): string {
+  var stain = style.IDIOGRAM_COLORS[d.value];
+  if (stain === undefined) {
+    return 'white';
+  } else {
+    return stain;
+  }
 }
 
 class IdiogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, State> {
@@ -95,15 +83,20 @@ class IdiogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, St
 
     var range = new ContigInterval(this.props.range.contig, this.props.range.start, this.props.range.stop);
 
-    if (!prevProps || !range.chrOnContig(prevProps.range.contig)) {
-      this.updateChromosome(canvas, height, width,range);
-    }
+    // Hold off until height & width are known.
+    if (width === 0 || typeof canvas == 'undefined' || canvas == null) return;
+
+    this.updateChromosome(canvas, height, width,range);
     this.updateChromosomeLocation(canvas, height, width, range);
   }
 
-  updateChromosomeLocation(canvas, height, width,range) {
+  updateChromosomeLocation(canvas: Object, height: number, width: number ,range: ContigInterval<string>) {
     var chrs = _.flatten(_.map(this.cache.getGroupsOverlapping(range),
       g => g.items));
+
+
+    // Hold off until height & width are known.
+    if (width === 0 || typeof canvas == 'undefined' || canvas == null) return;
 
     if (!chrs || chrs.length == 0) {
       return;
@@ -115,20 +108,20 @@ class IdiogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, St
       'stop': chr.position.stop()};
     var sc = d3utils.getTrackScale(iv, this.props.width);
 
-    var width = Math.ceil(sc(range.stop()) - sc(range.start()) );
+    var viewWidth = Math.ceil(sc(range.stop()) - sc(range.start()) );
     ctx.strokeStyle='red';
     ctx.strokeRect(sc(range.start()),
-                 0,
-                 width,
+                 style.IDIOGRAM_LINEWIDTH*2,
+                 viewWidth,
                  style.READ_HEIGHT);
 
     ctx.popObject();
   }
 
-  updateChromosome(canvas, height, width, range) {
+  updateChromosome(canvas: Object, height: number, width: number, range: ContigInterval<string>) {
 
     // Hold off until height & width are known.
-    if (width === 0 || typeof canvas == 'undefined') return;
+    if (width === 0 || typeof canvas == 'undefined' || canvas == null) return;
 
     d3utils.sizeCanvas(canvas, width, height);
     var ctx = dataCanvas.getDataContext(canvasUtils.getContext(canvas));
@@ -144,50 +137,49 @@ class IdiogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, St
     chrs.forEach(chr => {
       var iv = {'start':chr.position.start(),
         'stop': chr.position.stop()};
-      var sc = d3utils.getTrackScale(iv, this.props.width),
-        clampedScale = scale.linear()
-            .domain([sc.invert(0), sc.invert(width)])
-            .range([0, width])
-            .clamp(true);
-
       // add bands
       var band_sc = d3utils.getTrackScale(iv, this.props.width);
       chr.gFeature.bands.forEach(band => {
+        ctx.pushObject(band);
         var filler = gstainFiller(band);
 
         var width = Math.ceil(band_sc(band.end) - band_sc(band.start));
         var start = band_sc(band.start)+style.IDIOGRAM_LINEWIDTH;
 
-        if (!filler) {
+
+        if (band.value == "acen") {
           ctx.fillStyle='red';
           ctx.beginPath();
           if (band.name.startsWith("p")) {
-            ctx.moveTo(start, style.IDIOGRAM_LINEWIDTH);
+            ctx.moveTo(start+style.IDIOGRAM_LINEWIDTH, style.IDIOGRAM_LINEWIDTH*2 );
             ctx.lineTo(start+width,style.READ_HEIGHT/2);
-            ctx.lineTo(start, style.READ_HEIGHT);
+            ctx.lineTo(start+style.IDIOGRAM_LINEWIDTH, style.READ_HEIGHT+style.IDIOGRAM_LINEWIDTH);
             ctx.fill();
           } else {
-            ctx.moveTo(start, style.READ_HEIGHT/2);
-            ctx.lineTo(start+width,style.IDIOGRAM_LINEWIDTH);
-            ctx.lineTo(start+width, style.READ_HEIGHT);
+            ctx.moveTo(start+style.IDIOGRAM_LINEWIDTH, style.READ_HEIGHT/2);
+            ctx.lineTo(start+width,style.IDIOGRAM_LINEWIDTH*2);
+            ctx.lineTo(start+width, style.READ_HEIGHT+style.IDIOGRAM_LINEWIDTH);
             ctx.fill();
           }
         } else {
           ctx.fillStyle = filler;
+          ctx.strokeStyle = 'black';
           ctx.fillRect(start,
-                       style.IDIOGRAM_LINEWIDTH,
+                       style.IDIOGRAM_LINEWIDTH*2,
                        width,
                        style.READ_HEIGHT);
+          ctx.strokeRect(start,
+                      style.IDIOGRAM_LINEWIDTH*2,
+                      width,
+                      style.READ_HEIGHT);
         }
+        ctx.popObject();
       });
-
-    })
-    ctx.popObject();
+    });
   }
 
 }
 
 IdiogramTrack.displayName = 'idiogram';
-IdiogramTrack.defaultSource = EmptySource.create();
 
 module.exports = IdiogramTrack;
