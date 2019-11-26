@@ -16,6 +16,11 @@ var sources = [
     name: 'Reference'
   },
   {
+    viz: pileup.viz.idiogram(),
+    data: pileup.formats.cytoBand('/test-data/cytoBand.txt.gz'),
+    name: 'Idiogram'
+  },
+  {
     viz: pileup.viz.scale(),
     name: 'Scale'
   },

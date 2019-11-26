@@ -193,7 +193,7 @@ class GeneTrack extends React.Component<VizProps<DataSource<Gene>>, State> {
 
         ctx.popObject();
       });
-    } // end typecheck for canvasß
+    } // end typecheck for canvas
   }
 }
 

@@ -60,12 +60,19 @@
   overflow-x: hidden;
   position: relative;
 }
-.features > .track-content, .pileup > .track-content, .genes > .track-content,
-.variants > .track-content, .coverage > .track-content {
+.track-content {
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
     border-color: #bcbbbb;
     border-left: 7px solid #bcbbbb;
+}
+
+.reference > .track-content, .controls > .track-content,
+    .scale > .track-content, .location > .track-content {
+        border-top-left-radius: 0px;
+        border-bottom-left-radius: 0px;
+        border-color: None;
+        border-left: None;
 }
 
 .track-content > div {
