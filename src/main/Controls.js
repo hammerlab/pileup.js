@@ -133,7 +133,8 @@ class Controls extends React.Component<Props, State> {
   // To be used if the range changes through a control besides the slider
   // Slider value is changed to roughly reflect the new range
   updateSlider(newInterval: Interval) {
-    this.refs.slider.valueAsNumber = -1 * newInterval.stop;
+    var newSpan = (newInterval.stop - newInterval.start);
+    this.refs.slider.valueAsNumber = Math.ceil(-Math.log2(newSpan) + 1);
   }
 
   render(): any {
@@ -170,7 +171,7 @@ class Controls extends React.Component<Props, State> {
           var newInterval = _.find(this.props.contigList, ref => utils.isChrMatch(range.contig, ref.contig));
 
           if (newInterval != undefined) {
-            this.refs.slider.min = -1 * newInterval.stop();
+            this.refs.slider.min = Math.ceil(-Math.log2(newInterval.stop()) + 1);
             this.updateSlider(new Interval(range.start, range.stop));
           }
         }
