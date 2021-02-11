@@ -15,16 +15,31 @@ import pileup from '../../main/pileup';
 import dataCanvas from 'data-canvas';
 import {waitFor} from '../async';
 import RemoteFile from '../../main/RemoteFile';
+import TwoBit from '../../main/data/TwoBit';
+import TwoBitDataSource from '../../main/sources/TwoBitDataSource';
+import MappedRemoteFile from '../MappedRemoteFile';
+import {FakeTwoBit} from '../FakeTwoBit';
 
 describe('GenotypeTrack', function() {
   var server: any = null, response;
+  var reference: string = '';
+  var fakeTwoBit, referenceSource;
 
   var testDiv = document.getElementById('testdiv');
   if (!testDiv) throw new Error("Failed to match: testdiv");
 
-  before(function(): any {
+  // Test data files
+  var twoBitFile = new MappedRemoteFile(
+          '/test-data/hg19.2bit.mapped',
+          [[0, 16383], [691179834, 691183928], [694008946, 694011447]]);
 
-    return new RemoteFile('/test-data/variants.ga4gh.chr1.10000-11000.json').getAllString().then(data => {
+
+  before(function(): any {
+    var twoBit = new TwoBit(twoBitFile);
+    return twoBit.getFeaturesInRange('17', 7500000, 7510000).then(seq => {
+      reference = seq;
+      return new RemoteFile('/test-data/variants.ga4gh.chr1.10000-11000.json').getAllString();
+    }).then(data => {
       response = data;
 
       server = sinon.createFakeServer();
@@ -39,6 +54,13 @@ describe('GenotypeTrack', function() {
       sinon.fakeServer.xhr.addFilter(function (method, url) {
           return url === '/test-data/test.vcf';
       });
+
+      fakeTwoBit = new FakeTwoBit(twoBitFile),
+          referenceSource = TwoBitDataSource.createFromTwoBitFile(fakeTwoBit);
+
+      // Release the reference first.
+      fakeTwoBit.release(reference);
+
     });
 
   });
@@ -72,9 +94,7 @@ describe('GenotypeTrack', function() {
       tracks: [
         {
           viz: pileup.viz.genome(),
-          data: pileup.formats.twoBit({
-            url: '/test-data/test.2bit'
-          }),
+          data: referenceSource,
           isReference: true
         },
         {
@@ -121,9 +141,7 @@ describe('GenotypeTrack', function() {
       tracks: [
         {
           viz: pileup.viz.genome(),
-          data: pileup.formats.twoBit({
-            url: '/test-data/test.2bit'
-          }),
+          data: referenceSource,
           isReference: true
         },
         {
@@ -171,9 +189,7 @@ describe('GenotypeTrack', function() {
       tracks: [
         {
           viz: pileup.viz.genome(),
-          data: pileup.formats.twoBit({
-            url: '/test-data/test.2bit'
-          }),
+          data: referenceSource,
           isReference: true
         },
         {
@@ -214,9 +230,7 @@ describe('GenotypeTrack', function() {
       tracks: [
         {
           viz: pileup.viz.genome(),
-          data: pileup.formats.twoBit({
-            url: '/test-data/test.2bit'
-          }),
+          data: referenceSource,
           isReference: true
         },
         {

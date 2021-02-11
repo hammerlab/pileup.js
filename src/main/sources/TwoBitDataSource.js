@@ -42,7 +42,7 @@ export type TwoBitSource = {
   rangeChanged: (newRange: GenomeRange) => void;
   getRange: (range: GenomeRange) => {[key:string]: ?string};
   getRangeAsString: (range: GenomeRange) => string;
-  contigList: () => ContigInterval[];
+  contigList: () => ContigInterval<string>[];
   normalizeRange: (range: GenomeRange) => Q.Promise<GenomeRange>;
   on: (event: string, handler: Function) => void;
   once: (event: string, handler: Function) => void;
@@ -95,14 +95,15 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
   // This either adds or removes a 'chr' as needed.
   function normalizeRangeSync(range: GenomeRange): GenomeRange {
 
-    var contigIdx = _.findIndex(contigList, ref => utils.isChrMatch(range.contig, ref.contig));
+    // check for direct match
+    var contigIdx = _.findIndex(contigList, ref => range.contig == ref.contig);
 
     if (contigIdx >= 0) {
       return range;
     }
     var altContig = utils.altContigName(range.contig);
 
-    var contigIdx = _.findIndex(contigList, ref => utils.isChrMatch(altContig, ref.contig));
+    contigIdx = _.findIndex(contigList, ref => altContig == ref.contig);
 
     if (contigIdx >= 0) {
       return {

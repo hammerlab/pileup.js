@@ -15,7 +15,7 @@ import Interval from './Interval';
 
 type Props = {
   range: ?GenomeRange;
-  contigList: ContigInterval[];
+  contigList: ContigInterval<string>[];
   onChange: (newRange: GenomeRange)=>void;
 };
 
@@ -55,8 +55,8 @@ class Controls extends React.Component<Props, State> {
       // There are major performance issues with having a 'chr' mismatch in the
       // global location object.
       const contig = range.contig;
-      var altContig = _.find(this.props.contigList, ref => utils.isChrMatch(contig, ref.contig)).contig;
-      if (altContig) range.contig = altContig;
+      var altContig = _.find(this.props.contigList, ref => utils.isChrMatch(contig, ref.contig));
+      if (altContig) range.contig = altContig.contig;
     }
 
     return (_.extend(_.clone(this.props.range), range) : any);
@@ -165,9 +165,15 @@ class Controls extends React.Component<Props, State> {
     // Update slider if we have collected new information about a contig.
     if (!_.isEqual(prevProps.contigList, this.props.contigList)) {
       if (this.props.range != undefined) {
-        var newInterval = _.find(this.props.contigList, ref => utils.isChrMatch(this.props.range.contig, ref.contig));
-        this.refs.slider.min = -1 * newInterval.stop();
-        this.updateSlider(this.props.range);
+        var range = this.props.range; // flow
+        if (range.contig != undefined) {
+          var newInterval = _.find(this.props.contigList, ref => utils.isChrMatch(range.contig, ref.contig));
+
+          if (newInterval != undefined) {
+            this.refs.slider.min = -1 * newInterval.stop();
+            this.updateSlider(new Interval(range.start, range.stop));
+          }
+        }
       }
     }
   }

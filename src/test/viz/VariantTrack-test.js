@@ -8,12 +8,29 @@ import {expect} from 'chai';
 import pileup from '../../main/pileup';
 import dataCanvas from 'data-canvas';
 import {waitFor} from '../async';
+import TwoBit from '../../main/data/TwoBit';
+import TwoBitDataSource from '../../main/sources/TwoBitDataSource';
+import MappedRemoteFile from '../MappedRemoteFile';
+import {FakeTwoBit} from '../FakeTwoBit';
 
 import ReactTestUtils from 'react-dom/test-utils';
 
 describe('VariantTrack', function() {
   var testDiv = document.getElementById('testdiv');
   if (!testDiv) throw new Error("Failed to match: testdiv");
+  var reference: string = '';
+  
+  // Test data files
+  var twoBitFile = new MappedRemoteFile(
+          '/test-data/hg19.2bit.mapped',
+          [[0, 16383], [691179834, 691183928], [694008946, 694011447]]);
+
+  before(function(): any {
+    var twoBit = new TwoBit(twoBitFile);
+    return twoBit.getFeaturesInRange('17', 7500000, 7510000).then(seq => {
+      reference = seq;
+    });
+  });
 
   beforeEach(() => {
     testDiv.style.width = '700px';
@@ -33,6 +50,13 @@ describe('VariantTrack', function() {
   }
 
   it('should render variants', function(): any {
+
+    var fakeTwoBit = new FakeTwoBit(twoBitFile),
+        referenceSource = TwoBitDataSource.createFromTwoBitFile(fakeTwoBit);
+
+    // Release the reference first.
+    fakeTwoBit.release(reference);
+
     var variantClickedData = null;
     var variantClicked = function(data) {
       variantClickedData = data;
@@ -42,9 +66,7 @@ describe('VariantTrack', function() {
       tracks: [
         {
           viz: pileup.viz.genome(),
-          data: pileup.formats.twoBit({
-            url: '/test-data/test.2bit'
-          }),
+          data: referenceSource,
           isReference: true
         },
         {

@@ -28,7 +28,6 @@ import utils from '../utils';
 import dataCanvas from 'data-canvas';
 import style from '../style';
 
-
 // Draw an arrow in the middle of the visible portion of range.
 function drawArrow(ctx: CanvasRenderingContext2D,
                    clampedScale: (x: number)=>number,

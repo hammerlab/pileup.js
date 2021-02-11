@@ -10,6 +10,10 @@ import {expect} from 'chai';
 
 import _ from 'underscore';
 import RemoteFile from '../../main/RemoteFile';
+import TwoBit from '../../main/data/TwoBit';
+import TwoBitDataSource from '../../main/sources/TwoBitDataSource';
+import MappedRemoteFile from '../MappedRemoteFile';
+import {FakeTwoBit} from '../FakeTwoBit';
 import pileup from '../../main/pileup';
 import dataCanvas from 'data-canvas';
 import {waitFor} from '../async';
@@ -18,26 +22,6 @@ import {yForRow} from '../../main/viz/pileuputils';
 
 import ReactTestUtils from 'react-dom/test-utils';
 
-// We need a fake TwoBit file to query regions that extend the bounds in test.2bit
-class FakeTwoBit extends TwoBit {
-  deferred: Object;
-
-  constructor(remoteFile: RemoteFile) {
-    super(remoteFile);
-    this.deferred = Q.defer();
-  }
-
-  getFeaturesInRange(contig: string, start: number, stop: number): Q.Promise<string> {
-    expect(contig).to.equal('chr17');
-    expect(start).to.equal(7500000);
-    expect(stop).to.equal(7510000);
-    return this.deferred.promise;
-  }
-
-  release(sequence: string) {
-    this.deferred.resolve(sequence);
-  }
-}
 
 describe('FeatureTrack', function() {
   var testDiv= document.getElementById('testdiv');
@@ -51,8 +35,12 @@ describe('FeatureTrack', function() {
           drawnObjects(testDiv, '.features').length > 0;
   }
 
+  // Test data files
+  var twoBitFile = new MappedRemoteFile(
+          '/test-data/hg19.2bit.mapped',
+          [[0, 16383], [691179834, 691183928], [694008946, 694011447]]);
+
   describe('jsonFeatures', function() {
-    var json;
 
     beforeEach(() => {
       testDiv.style.width = '800px';
@@ -65,8 +53,16 @@ describe('FeatureTrack', function() {
       testDiv.innerHTML = '';
     });
 
+    var reference: string = '';
+    var json;
+
     before(function(): any {
-      return new RemoteFile('/test-data/features.ga4gh.chr1.120000-125000.chr17.7500000-7515100.json').getAllString().then(data => {
+      var twoBit = new TwoBit(twoBitFile);
+      return twoBit.getFeaturesInRange('chr17', 7500000, 7510000).then(seq => {
+        reference = seq;
+        return new RemoteFile('/test-data/features.ga4gh.chr1.120000-125000.chr17.7500000-7515100.json').getAllString();
+      }).then(data => {
+        expect(data).to.have.length.above(0);
         json = data;
       });
     });
@@ -80,6 +76,8 @@ describe('FeatureTrack', function() {
       var fakeTwoBit = new FakeTwoBit(twoBitFile),
           referenceSource = TwoBitDataSource.createFromTwoBitFile(fakeTwoBit);
 
+      // Release the reference first.
+      fakeTwoBit.release(reference);
 
       var p = pileup.create(testDiv, {
         range: {contig: 'chr1', start: 130000, stop: 135000},
@@ -142,9 +140,21 @@ describe('FeatureTrack', function() {
       testDiv.innerHTML = '';
     });
 
+    var reference: string = '';
+
+    before(function(): any {
+      var twoBit = new TwoBit(twoBitFile);
+      return twoBit.getFeaturesInRange('chr17', 7500000, 7510000).then(seq => {
+        reference = seq;
+      });
+    });
+
     it('should render features with bigBed file', function(): any {
       var fakeTwoBit = new FakeTwoBit(twoBitFile),
           referenceSource = TwoBitDataSource.createFromTwoBitFile(fakeTwoBit);
+
+      // Release the reference first.
+      fakeTwoBit.release(reference);
 
       var p = pileup.create(testDiv, {
         range: {contig: 'chr17', start: 10000, stop: 16500},

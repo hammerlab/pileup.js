@@ -76,7 +76,7 @@ var fakeSource = {
   rangeChanged: dieFn,
   getRange: function(): any { return {}; },
   getRangeAsString: function(): string { return ''; },
-  contigList: function(): string[] { return []; },
+  contigList: function(): ContigInterval<string>[] { return []; },
   normalizeRange: function(range: GenomeRange): Q.Promise<GenomeRange> { return Q.when(range); },
   on: dieFn,
   off: dieFn,

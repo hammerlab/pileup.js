@@ -23,7 +23,7 @@ type Props = {
 };
 
 type State = {
-  contigList: ContigInterval[];
+  contigList: ContigInterval<string>[];
   range: ?GenomeRange;
   settingsMenuKey: ?string;
   updateSize: boolean;
@@ -222,7 +222,7 @@ class Root extends React.Component<Props, State> {
     // a contig. This function truncates queries past the ends of a contig
     // and updates the required states.
 
-    var current_contig = this.props.initialRange;
+    var current_contig = this.props.initialRange.contig;
     if (this.state.range) {
       current_contig = this.state.range.contig;
     }
@@ -238,7 +238,7 @@ class Root extends React.Component<Props, State> {
     // only update if the current contig has new information regarding
     // the end of the chromosome AND the current range is out of bounds
     // with respect to chromosome length
-    if (newContig == undefined) {
+    if (this.state.contigList.length == 0) {
       this.setState({
         contigList: contigList
       });
@@ -250,8 +250,11 @@ class Root extends React.Component<Props, State> {
         this.setState({
           contigList: contigList
         });
-        if (this.state.range.stop > newContig.stop()) {
-          this.handleRangeChange(this.state.range);
+        if (this.state.range !== null && this.state.range !== undefined) {
+          if (this.state.range.stop > newContig.stop()) {
+            // $FlowIgnore: TODO remove flow suppression
+            this.handleRangeChange(this.state.range);
+          }
         }
       }
     }

@@ -256,7 +256,7 @@ class TwoBit {
   }
 
   // Returns a list of contig names.
-  getContigList(): Q.Promise<ContigInterval[]> {
+  getContigList(): Q.Promise<ContigInterval<string>[]> {
     return this.header.then(header => {
       return header.sequences.map(seq => {
         // fill in end if collected
