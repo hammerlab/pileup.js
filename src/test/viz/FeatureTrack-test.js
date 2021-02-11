@@ -18,6 +18,27 @@ import {yForRow} from '../../main/viz/pileuputils';
 
 import ReactTestUtils from 'react-dom/test-utils';
 
+// We need a fake TwoBit file to query regions that extend the bounds in test.2bit
+class FakeTwoBit extends TwoBit {
+  deferred: Object;
+
+  constructor(remoteFile: RemoteFile) {
+    super(remoteFile);
+    this.deferred = Q.defer();
+  }
+
+  getFeaturesInRange(contig: string, start: number, stop: number): Q.Promise<string> {
+    expect(contig).to.equal('chr17');
+    expect(start).to.equal(7500000);
+    expect(stop).to.equal(7510000);
+    return this.deferred.promise;
+  }
+
+  release(sequence: string) {
+    this.deferred.resolve(sequence);
+  }
+}
+
 describe('FeatureTrack', function() {
   var testDiv= document.getElementById('testdiv');
   if (!testDiv) throw new Error("Failed to match: testdiv");
@@ -56,14 +77,16 @@ describe('FeatureTrack', function() {
         featureClickedData = data;
       };
 
+      var fakeTwoBit = new FakeTwoBit(twoBitFile),
+          referenceSource = TwoBitDataSource.createFromTwoBitFile(fakeTwoBit);
+
+
       var p = pileup.create(testDiv, {
         range: {contig: 'chr1', start: 130000, stop: 135000},
         tracks: [
           {
             viz: pileup.viz.genome(),
-            data: pileup.formats.twoBit({
-              url: '/test-data/test.2bit'
-            }),
+            data: referenceSource,
             isReference: true
           },
           {
@@ -120,15 +143,15 @@ describe('FeatureTrack', function() {
     });
 
     it('should render features with bigBed file', function(): any {
+      var fakeTwoBit = new FakeTwoBit(twoBitFile),
+          referenceSource = TwoBitDataSource.createFromTwoBitFile(fakeTwoBit);
 
       var p = pileup.create(testDiv, {
         range: {contig: 'chr17', start: 10000, stop: 16500},
         tracks: [
           {
             viz: pileup.viz.genome(),
-            data: pileup.formats.twoBit({
-              url: '/test-data/test.2bit'
-            }),
+            data: referenceSource,
             isReference: true
           },
           {

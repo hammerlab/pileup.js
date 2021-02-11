@@ -95,7 +95,7 @@ describe('pileup', function() {
     hasCanvasAndObjects(testDiv, '.pileup')
   );
 
-  var rangeChanged = ((): boolean =>
+  var rangeChanged = ((range): boolean =>
     // $FlowIgnore: TODO remove flow suppression
     initialRange != p.getRange()
   );
@@ -178,6 +178,41 @@ describe('pileup', function() {
               .filter(x => x.span.intersects(cRange));
         expect(visibleReads).to.have.length(4);
         done();
+      });
+  });
+
+  it('should restrict viewing region outside of chromosome', function(done): any {
+    this.timeout(5000);
+
+    makePileup();
+
+    waitFor(ready, 5000)
+      .then(() => {
+
+        expect(p.getRange()).to.deep.equal({
+          contig: 'chr17',
+          start: 100,
+          stop: 150
+        });
+
+        // out of bounds for chromosome
+        var range = {
+          contig: 'chr17',
+          start: 100000000,
+          stop:  100000200
+        };
+
+        p.setRange(range);
+
+        waitFor(rangeChanged, 5000)
+          .then(() => {
+            expect(p.getRange()).to.deep.equal({
+              contig: 'chr17',
+              start: 0,
+              stop: 19198
+            });
+            done();
+          });
       });
   });
 

@@ -110,6 +110,12 @@
   border: 1px solid #bcbbbb;
   vertical-align: middle;
 }
+.controls button:active {
+  background-color: #bcbbbb;       /* make button interactive */
+}
+.controls button:focus {
+  outline: none !important;         /* remove blue line from buttons */
+}
 .zoom-slider {
   margin-left: 10px;                /* leave space between slider and zoom buttons */
   display: inline-block !important; /* imporant overrides input[type="range"] from forms.less */

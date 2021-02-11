@@ -15,7 +15,8 @@ describe('TwoBit', function() {
   it('should have the right contigs', function(): any {
     var twoBit = getTestTwoBit();
     return twoBit.getContigList()
-      .then(contigs => {
+      .then(contigList => {
+        var contigs = contigList.map(c => c.contig);
         expect(contigs).to.deep.equal(['chr1', 'chr17', 'chr22']);
       });
   });

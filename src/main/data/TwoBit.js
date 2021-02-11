@@ -6,6 +6,7 @@
 'use strict';
 
 import type RemoteFile from '../RemoteFile';
+import ContigInterval from '../ContigInterval';
 
 import Q from 'q';
 import _ from 'underscore';
@@ -206,9 +207,14 @@ function retryRemoteGet(remoteFile: RemoteFile, start: number, size: number, unt
 class TwoBit {
   remoteFile: RemoteFile;
   header: Q.Promise<TwoBitHeader>;
+  // Stores sequence records already seen.
+  // Used to keep track of lengths of each contig.
+  traversedSequenceRecords: {[key:string]: SequenceRecord};
+
 
   constructor(remoteFile: RemoteFile) {
     this.remoteFile = remoteFile;
+    this.traversedSequenceRecords = {};
     var deferredHeader = Q.defer();
     this.header = deferredHeader.promise;
     retryRemoteGet(
@@ -250,8 +256,17 @@ class TwoBit {
   }
 
   // Returns a list of contig names.
-  getContigList(): Q.Promise<string[]> {
-    return this.header.then(header => header.sequences.map(seq => seq.name));
+  getContigList(): Q.Promise<ContigInterval[]> {
+    return this.header.then(header => {
+      return header.sequences.map(seq => {
+        // fill in end if collected
+        var numBases = Number.MAX_VALUE;
+        if (this.traversedSequenceRecords[seq.name]) {
+          numBases = this.traversedSequenceRecords[seq.name].numBases;
+        }
+        return new ContigInterval(seq.name, 0, numBases);
+      });
+    });
   }
 
   _getSequenceHeader(contig: string): Q.Promise<SequenceRecord> {
@@ -263,17 +278,26 @@ class TwoBit {
       }
       var seq = maybeSeq;  // for flow, see facebook/flow#266
 
-      return retryRemoteGet(
-        this.remoteFile,
-        seq.offset,
-        FIRST_SEQUENCE_CHUNKSIZE,
-        MAX_CHUNKSIZE,
-        buffer => {
-          return parseWithException(() => {
-            return parseSequenceRecord(buffer, seq.offset);
-          });
-        }
-      );
+      if (contig in this.traversedSequenceRecords) {
+        return Q.when(this.traversedSequenceRecords[contig]);
+      } else {
+        return retryRemoteGet(
+          this.remoteFile,
+          seq.offset,
+          FIRST_SEQUENCE_CHUNKSIZE,
+          MAX_CHUNKSIZE,
+          buffer => {
+            return parseWithException(() => {
+
+              if (!this.traversedSequenceRecords[seq.name]) {
+                this.traversedSequenceRecords[contig] =
+                  parseSequenceRecord(buffer, seq.offset);
+              }
+              return this.traversedSequenceRecords[contig];
+            });
+          }
+        );
+      }
     }).then(p => {
       return p;
     });

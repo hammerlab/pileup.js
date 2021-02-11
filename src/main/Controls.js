@@ -5,6 +5,7 @@
 'use strict';
 
 import type {GenomeRange, PartialGenomeRange} from './types';
+import type ContigInterval from './ContigInterval';
 
 import React from 'react';
 import _ from 'underscore';
@@ -14,7 +15,7 @@ import Interval from './Interval';
 
 type Props = {
   range: ?GenomeRange;
-  contigList: string[];
+  contigList: ContigInterval[];
   onChange: (newRange: GenomeRange)=>void;
 };
 
@@ -54,7 +55,7 @@ class Controls extends React.Component<Props, State> {
       // There are major performance issues with having a 'chr' mismatch in the
       // global location object.
       const contig = range.contig;
-      var altContig = _.find(this.props.contigList, ref => utils.isChrMatch(contig, ref));
+      var altContig = _.find(this.props.contigList, ref => utils.isChrMatch(contig, ref.contig)).contig;
       if (altContig) range.contig = altContig;
     }
 
@@ -86,7 +87,8 @@ class Controls extends React.Component<Props, State> {
     this.refs.position.value = utils.formatInterval(new Interval(r.start, r.stop));
 
     if (this.props.contigList) {
-      var contigIdx = this.props.contigList.indexOf(r.contig);
+      var contigIdx = _.findIndex(this.props.contigList, ref => utils.isChrMatch(r.contig, ref.contig));
+
       this.refs.contig.selectedIndex = contigIdx;
     }
   }
@@ -131,13 +133,12 @@ class Controls extends React.Component<Props, State> {
   // To be used if the range changes through a control besides the slider
   // Slider value is changed to roughly reflect the new range
   updateSlider(newInterval: Interval) {
-    var newSpan = (newInterval.stop - newInterval.start);
-    this.refs.slider.valueAsNumber = Math.ceil(-Math.log2(newSpan) + 1);
+    this.refs.slider.valueAsNumber = -1 * newInterval.stop;
   }
 
   render(): any {
     var contigOptions = this.props.contigList
-        ? this.props.contigList.map((contig, i) => <option key={i}>{contig}</option>)
+        ? this.props.contigList.map((contig, i) => <option key={i}>{contig.contig}</option>)
         : null;
 
     // Note: input values are set in componentDidUpdate.
@@ -160,6 +161,14 @@ class Controls extends React.Component<Props, State> {
   componentDidUpdate(prevProps: Object) {
     if (!_.isEqual(prevProps.range, this.props.range)) {
       this.updateRangeUI();
+    }
+    // Update slider if we have collected new information about a contig.
+    if (!_.isEqual(prevProps.contigList, this.props.contigList)) {
+      if (this.props.range != undefined) {
+        var newInterval = _.find(this.props.contigList, ref => utils.isChrMatch(this.props.range.contig, ref.contig));
+        this.refs.slider.min = -1 * newInterval.stop();
+        this.updateSlider(this.props.range);
+      }
     }
   }
 
