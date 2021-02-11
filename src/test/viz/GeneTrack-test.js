@@ -10,13 +10,11 @@
 import sinon from 'sinon';
 import {expect} from 'chai';
 
-import Q from 'q';
 import pileup from '../../main/pileup';
 import dataCanvas from 'data-canvas';
 import {waitFor} from '../async';
 
 import RemoteFile from '../../main/RemoteFile';
-import TwoBit from '../../main/data/TwoBit';
 import TwoBitDataSource from '../../main/sources/TwoBitDataSource';
 import MappedRemoteFile from '../MappedRemoteFile';
 import {FakeTwoBit} from '../FakeTwoBit';
