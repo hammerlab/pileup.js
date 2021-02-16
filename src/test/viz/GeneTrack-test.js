@@ -43,7 +43,7 @@ describe('GeneTrack', function() {
 
       server.autoRespond = true;
 
-      // // Sinon should ignore 2bit request. RemoteFile handles this request.
+      // Sinon should ignore 2bit request. RemoteFile handles this request.
       sinon.fakeServer.xhr.useFilters = true;
       sinon.fakeServer.xhr.addFilter(function (method, url) {
           return url === '/test-data/hg19.2bit.mapped';

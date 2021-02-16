@@ -259,7 +259,7 @@ class TwoBit {
   getContigList(): Q.Promise<ContigInterval<string>[]> {
     return this.header.then(header => {
       return header.sequences.map(seq => {
-        // fill in end if collected
+        // fill in numBases if collected
         var numBases = Number.MAX_VALUE;
         if (this.traversedSequenceRecords[seq.name]) {
           numBases = this.traversedSequenceRecords[seq.name].numBases;
