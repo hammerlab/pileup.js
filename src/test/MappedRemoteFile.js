@@ -61,7 +61,7 @@ class MappedRemoteFile extends RemoteFile {
         return buf;
       });
     } else {
-      return Q.reject(`Request for ${originalRequest} is not mapped in ${this.url}`);
+      return Q.reject(`Request for ${originalRequest.toString()} is not mapped in ${this.url}`);
     }
   }
 

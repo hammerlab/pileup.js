@@ -14,6 +14,7 @@
 .*node_modules/jshint.*
 .*node_modules/jstransformify.*
 .*node_modules/uglify.*
+.*node_modules/module-deps.*
 .*node_modules/data-canvas.*
 .*node_modules/babel.*
 .*node_modules/d3.*
@@ -31,3 +32,6 @@
 [libs]
 lib
 node_modules/data-canvas/flowtype
+
+[options]
+suppress_comment= \\(.\\|\n\\)*\\$FlowIgnore

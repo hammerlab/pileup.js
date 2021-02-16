@@ -9,7 +9,6 @@ import type {DataSource} from '../sources/DataSource';
 import Feature from '../data/feature';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {BinSummary} from './CoverageCache';
-import type {Scale} from './d3utils';
 import type {State} from '../types';
 import type {VizProps} from '../VisualizationWrapper';
 
@@ -199,7 +198,7 @@ class CoverageTrack extends React.Component<VizProps<DataSource<Alignment | Feat
     return <canvas ref='canvas' onClick={this.handleClick.bind(this)} />;
   }
 
-  getScale(): Scale {
+  getScale(): any {
     return d3utils.getTrackScale(this.props.range, this.props.width);
   }
 
@@ -248,7 +247,7 @@ class CoverageTrack extends React.Component<VizProps<DataSource<Alignment | Feat
   }
 
   // Draw three ticks on the left to set the scale for the user
-  renderTicks(ctx: DataCanvasRenderingContext2D, yScale: (num: number)=>number) {
+  renderTicks(ctx: DataCanvasRenderingContext2D, yScale: any) {
     var axisMax = yScale.domain()[0];
     [0, Math.round(axisMax / 2), axisMax].forEach(tick => {
       // Draw a line indicating the tick

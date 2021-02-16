@@ -87,7 +87,7 @@
     "eslint-plugin-promise": "^4.0.0",
     "eslint-plugin-react": "7.22.0",
     "exorcist": "^0.4.0",
-    "flow-bin": "^0.144.0",
+    "flow-bin": "^0.120.1",
     "http-server": "^0.12.3",
     "install": "^0.13.0",
     "istanbul": "^0.4.5",

@@ -8,7 +8,6 @@ import type {VcfDataSource} from '../sources/VcfDataSource';
 import type {VariantContext} from '../data/variant';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {VizProps} from '../VisualizationWrapper';
-import type {Scale} from './d3utils';
 
 import React from 'react';
 import _ from 'underscore';
@@ -184,7 +183,7 @@ class GenotypeTrack extends React.Component<VizProps<VcfDataSource>, State> {
         this.updateVisualization();
   }
 
-  getScale(): Scale {
+  getScale(): any {
     return d3utils.getTrackScale(this.props.range, this.props.width - LABEL_WIDTH);
   }
 

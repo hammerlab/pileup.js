@@ -83,8 +83,8 @@ describe('pileup', function() {
   };
 
   // TODO: consider moving this into the data-canvas library
-  function hasCanvasAndObjects(div, selector) {
-    return div.querySelector(selector + ' canvas') && drawnObjects(div, selector).length > 0;
+  function hasCanvasAndObjects(div, selector): boolean {
+    return div.querySelector(selector + ' canvas') !== null && drawnObjects(div, selector).length > 0;
   }
 
   var ready = ((): boolean =>

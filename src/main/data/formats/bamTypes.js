@@ -56,6 +56,7 @@ var ThickAlignment = _.extend(_.clone(ThinAlignment), {
   auxiliary: ['array', {
     tag: ['string', 2],
     val_type: 'char',
+    // $FlowIgnore: TODO remove flow suppression
     value: ['if', ctx => ctx.val_type == 'B', {
              val_type: 'char',
              num_values: 'int32',

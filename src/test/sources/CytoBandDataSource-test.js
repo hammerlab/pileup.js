@@ -30,7 +30,7 @@ describe('CytoBandDataSource', function() {
       expect(chr.bands[0].value).to.equal('gvar');
       done();
     });
-    source.rangeChanged(range);
+    source.rangeChanged({contig: range.contig, start: range.start(), stop: range.stop()});
   });
 
   it('should allow a mix of chr and non-chr', function(done) {

@@ -11,7 +11,6 @@ import type {VisualAlignment, InsertStats} from './PileupCache';
 import type {VisualGroup} from './AbstractCache';
 import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {VizProps} from '../VisualizationWrapper';
-import type {Scale} from './d3utils';
 import type {State, NetworkStatus} from '../types';
 
 import React from 'react';
@@ -310,7 +309,7 @@ class PileupTrack extends React.Component<VizProps<DataSource<Alignment>>, State
     this.updateVisualization();
   }
 
-  getScale(): Scale {
+  getScale(): any {
     return d3utils.getTrackScale(this.props.range, this.props.width);
   }
 
