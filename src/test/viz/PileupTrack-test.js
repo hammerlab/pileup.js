@@ -208,13 +208,17 @@ describe('PileupTrack', function() {
   });
 
   it('should hide alignments', function(): any {
+
+    // The fake sources allow precise control over when they give up their data.
+    var fakeTwoBit = new FakeTwoBit(twoBitFile),
+        referenceSource = TwoBitDataSource.createFromTwoBitFile(fakeTwoBit);
+
+
     var p = pileup.create(testDiv, {
       range: {contig: 'chr17', start: 7500734, stop: 7500796},
       tracks: [
         {
-          data: pileup.formats.twoBit({
-            url: '/test-data/test.2bit'
-          }),
+          data: referenceSource,
           viz: pileup.viz.genome(),
           isReference: true
         },
@@ -238,13 +242,17 @@ describe('PileupTrack', function() {
   });
 
   it('should sort reads', function(): any {
+
+    // The fake sources allow precise control over when they give up their data.
+    var fakeTwoBit = new FakeTwoBit(twoBitFile),
+        referenceSource = TwoBitDataSource.createFromTwoBitFile(fakeTwoBit);
+
+
     var p = pileup.create(testDiv, {
       range: {contig: 'chr17', start: 7500734, stop: 7500796},
       tracks: [
         {
-          data: pileup.formats.twoBit({
-            url: '/test-data/test.2bit'
-          }),
+          data: referenceSource,
           viz: pileup.viz.genome(),
           isReference: true
         },

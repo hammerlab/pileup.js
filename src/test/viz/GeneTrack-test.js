@@ -15,13 +15,25 @@ import dataCanvas from 'data-canvas';
 import {waitFor} from '../async';
 
 import RemoteFile from '../../main/RemoteFile';
-
+import TwoBitDataSource from '../../main/sources/TwoBitDataSource';
+import MappedRemoteFile from '../MappedRemoteFile';
+import {FakeTwoBit} from '../FakeTwoBit';
 
 describe('GeneTrack', function() {
   var testDiv = document.getElementById('testdiv');
   if (!testDiv) throw new Error("Failed to match: testdiv");
 
   var server: any = null, response;
+
+  // Test data files
+  var twoBitFile = new MappedRemoteFile(
+          '/test-data/hg19.2bit.mapped',
+          [[0, 16383], [691179834, 691183928], [694008946, 694011447]]);
+
+
+  var fakeTwoBit = new FakeTwoBit(twoBitFile),
+      referenceSource = TwoBitDataSource.createFromTwoBitFile(fakeTwoBit);
+
 
   before((): any => {
     // server for genes
@@ -33,9 +45,6 @@ describe('GeneTrack', function() {
 
       // Sinon should ignore 2bit request. RemoteFile handles this request.
       sinon.fakeServer.xhr.useFilters = true;
-      sinon.fakeServer.xhr.addFilter(function (method, url) {
-          return url === '/test-data/test.2bit';
-      });
       sinon.fakeServer.xhr.addFilter(function (method, url) {
           return url === '/test-data/hg19.2bit.mapped';
       });
@@ -72,9 +81,7 @@ describe('GeneTrack', function() {
       tracks: [
         {
           viz: pileup.viz.genome(),
-          data: pileup.formats.twoBit({
-            url: '/test-data/test.2bit'
-          }),
+          data: referenceSource,
           isReference: true
         },
         {
@@ -110,9 +117,7 @@ describe('GeneTrack', function() {
       tracks: [
         {
           viz: pileup.viz.genome(),
-          data: pileup.formats.twoBit({
-            url: '/test-data/test.2bit'
-          }),
+          data: referenceSource,
           isReference: true
         },
         {
@@ -142,9 +147,7 @@ describe('GeneTrack', function() {
       tracks: [
         {
           viz: pileup.viz.genome(),
-          data: pileup.formats.twoBit({
-            url: '/test-data/test.2bit'
-          }),
+          data: referenceSource,
           isReference: true
         },
         {

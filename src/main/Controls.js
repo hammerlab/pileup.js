@@ -5,6 +5,7 @@
 'use strict';
 
 import type {GenomeRange, PartialGenomeRange} from './types';
+import type ContigInterval from './ContigInterval';
 
 import React from 'react';
 import _ from 'underscore';
@@ -14,7 +15,7 @@ import Interval from './Interval';
 
 type Props = {
   range: ?GenomeRange;
-  contigList: string[];
+  contigList: ContigInterval<string>[];
   onChange: (newRange: GenomeRange)=>void;
 };
 
@@ -54,8 +55,8 @@ class Controls extends React.Component<Props, State> {
       // There are major performance issues with having a 'chr' mismatch in the
       // global location object.
       const contig = range.contig;
-      var altContig = _.find(this.props.contigList, ref => utils.isChrMatch(contig, ref));
-      if (altContig) range.contig = altContig;
+      var altContig = _.find(this.props.contigList, ref => utils.isChrMatch(contig, ref.contig));
+      if (altContig) range.contig = altContig.contig;
     }
 
     return (_.extend(_.clone(this.props.range), range) : any);
@@ -86,7 +87,8 @@ class Controls extends React.Component<Props, State> {
     this.refs.position.value = utils.formatInterval(new Interval(r.start, r.stop));
 
     if (this.props.contigList) {
-      var contigIdx = this.props.contigList.indexOf(r.contig);
+      var contigIdx = _.findIndex(this.props.contigList, ref => utils.isChrMatch(r.contig, ref.contig));
+
       this.refs.contig.selectedIndex = contigIdx;
     }
   }
@@ -137,7 +139,7 @@ class Controls extends React.Component<Props, State> {
 
   render(): any {
     var contigOptions = this.props.contigList
-        ? this.props.contigList.map((contig, i) => <option key={i}>{contig}</option>)
+        ? this.props.contigList.map((contig, i) => <option key={i}>{contig.contig}</option>)
         : null;
 
     // Note: input values are set in componentDidUpdate.
@@ -160,6 +162,20 @@ class Controls extends React.Component<Props, State> {
   componentDidUpdate(prevProps: Object) {
     if (!_.isEqual(prevProps.range, this.props.range)) {
       this.updateRangeUI();
+    }
+    // Update slider if we have collected new information about a contig.
+    if (!_.isEqual(prevProps.contigList, this.props.contigList)) {
+      if (this.props.range != undefined) {
+        var range = this.props.range; // flow
+        if (range.contig != undefined) {
+          var newInterval = _.find(this.props.contigList, ref => utils.isChrMatch(range.contig, ref.contig));
+
+          if (newInterval != undefined) {
+            this.refs.slider.min = Math.ceil(-Math.log2(newInterval.stop()) + 1);
+            this.updateSlider(new Interval(range.start, range.stop));
+          }
+        }
+      }
     }
   }
 

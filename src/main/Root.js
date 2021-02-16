@@ -7,7 +7,8 @@
 import type {GenomeRange} from './types';
 import type {TwoBitSource} from './sources/TwoBitDataSource';
 import type {VisualizedTrack, VizWithOptions} from './types';
-
+import type ContigInterval from './ContigInterval';
+import utils from './utils';
 import _ from 'underscore';
 
 import React from 'react';
@@ -22,7 +23,7 @@ type Props = {
 };
 
 type State = {
-  contigList: string[];
+  contigList: ContigInterval<string>[];
   range: ?GenomeRange;
   settingsMenuKey: ?string;
   updateSize: boolean;
@@ -50,9 +51,7 @@ class Root extends React.Component<Props, State> {
 
   componentDidMount() {
     this.props.referenceSource.on('contigs', () => {
-      this.setState({
-        contigList: this.props.referenceSource.contigList(),
-      });
+      this.updateOutOfBoundsChromosome();
     });
 
     if (!this.state.range) {
@@ -63,13 +62,33 @@ class Root extends React.Component<Props, State> {
   }
 
   handleRangeChange(newRange: GenomeRange) {
-    // Do not propagate negative ranges
-    if (newRange.start < 0) {
-      newRange.start = 0;
-    }
-    this.props.referenceSource.normalizeRange(newRange).then(range => {
-      this.setState({range: range});
 
+    // copy over range so you don't modify
+    // this.state.range, which is bound to handleRangeChange
+    var modifiedRange =  {
+      contig: newRange.contig,
+      start: newRange.start,
+      stop: newRange.stop,
+    };
+
+    // Do not propagate negative ranges
+    if (modifiedRange.start < 0) {
+      modifiedRange.start = 0;
+    }
+    // Do not propogate ranges exceeding contig limit
+    var contigInfo = _.find(this.state.contigList, ref => utils.isChrMatch(modifiedRange.contig, ref.contig));
+
+    if (contigInfo != undefined) {
+      if (modifiedRange.stop > contigInfo.stop()) {
+        modifiedRange.stop = contigInfo.stop();
+        if (modifiedRange.start > modifiedRange.stop) {
+          modifiedRange.start = 0;
+        }
+      }
+    }
+
+    this.props.referenceSource.normalizeRange(modifiedRange).then(range => {
+      this.setState({range: range});
       // Inform all the sources of the range change (including referenceSource).
       this.props.tracks.forEach(track => {
         track.source.rangeChanged(range);
@@ -160,7 +179,7 @@ class Root extends React.Component<Props, State> {
         </div>
       );
     }
-    
+
     var className = ['track', track.visualization.component.displayName || '', track.track.cssClass || ''].join(' ');
 
     return (
@@ -198,6 +217,49 @@ class Root extends React.Component<Props, State> {
     );
   }
 
+  updateOutOfBoundsChromosome(): any {
+    // We don't want to allow users to go to regions that extend past the end of
+    // a contig. This function truncates queries past the ends of a contig
+    // and updates the required states.
+
+    var current_contig = this.props.initialRange.contig;
+    if (this.state.range) {
+      current_contig = this.state.range.contig;
+    }
+
+    var oldContig = _.find(this.state.contigList, ref =>
+        utils.isChrMatch(current_contig,
+        ref.contig));
+
+    var contigList = this.props.referenceSource.contigList();
+
+    var newContig = _.find(contigList, ref => utils.isChrMatch(current_contig, ref.contig));
+
+    // only update if the current contig has new information regarding
+    // the end of the chromosome AND the current range is out of bounds
+    // with respect to chromosome length
+    if (this.state.contigList.length == 0) {
+      this.setState({
+        contigList: contigList
+      });
+    }
+
+    if (newContig && oldContig) {
+      if (!_.isEqual(oldContig, newContig)) {
+        // only trigger state if current contig changed
+        this.setState({
+          contigList: contigList
+        });
+        if (this.state.range !== null && this.state.range !== undefined) {
+          if (this.state.range.stop > newContig.stop()) {
+            // $FlowIgnore: TODO remove flow suppression
+            this.handleRangeChange(this.state.range);
+          }
+        }
+      }
+    }
+  }
+
   componentDidUpdate(prevProps: Props, prevState: Object) {
     if (this.state.updateSize) {
       for (var i=0;i<this.props.tracks.length;i++) {
@@ -205,6 +267,10 @@ class Root extends React.Component<Props, State> {
       }
       this.state.updateSize=false;
     }
+
+    this.props.referenceSource.on('contigs', () => {
+      this.updateOutOfBoundsChromosome();
+    });
   }
 
 }

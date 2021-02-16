@@ -42,7 +42,7 @@ export type TwoBitSource = {
   rangeChanged: (newRange: GenomeRange) => void;
   getRange: (range: GenomeRange) => {[key:string]: ?string};
   getRangeAsString: (range: GenomeRange) => string;
-  contigList: () => string[];
+  contigList: () => ContigInterval<string>[];
   normalizeRange: (range: GenomeRange) => Q.Promise<GenomeRange>;
   on: (event: string, handler: Function) => void;
   once: (event: string, handler: Function) => void;
@@ -62,9 +62,13 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
   function fetch(range: ContigInterval<string>) {
     var span = range.length();
     if (span > MAX_BASE_PAIRS_TO_FETCH) {
-      //inform that we won't fetch the data
-      o.trigger('newdatarefused', range);
-      return Q.when();  // empty promise
+      // trigger header collection to get information about this chromosome,
+      // but don't fetch the actual data.
+      return remoteSource._getSequenceHeader(range.contig).then(header => remoteSource.getContigList()).then(c => {
+        contigList = c;
+        o.trigger('contigs', contigList);
+        o.trigger('newdatarefused', range);
+      }).done();
     }
     //now we can add region to covered regions
     //doing it earlier would provide inconsistency
@@ -81,18 +85,27 @@ var createFromTwoBitFile = function(remoteSource: TwoBit): TwoBitSource {
                                      range.start() + letters.length - 1);
         }
         store.setRange(range, letters);
-      }).then(() => {
+      }).then(() => remoteSource.getContigList()).then(c => {
+        contigList = c;
+        o.trigger('contigs', contigList);
         o.trigger('newdata', range);
       }).done();
   }
 
   // This either adds or removes a 'chr' as needed.
   function normalizeRangeSync(range: GenomeRange): GenomeRange {
-    if (contigList.indexOf(range.contig) >= 0) {
+
+    // check for direct match
+    var contigIdx = _.findIndex(contigList, ref => range.contig == ref.contig);
+
+    if (contigIdx >= 0) {
       return range;
     }
     var altContig = utils.altContigName(range.contig);
-    if (contigList.indexOf(altContig) >= 0) {
+
+    contigIdx = _.findIndex(contigList, ref => altContig == ref.contig);
+
+    if (contigIdx >= 0) {
       return {
         contig: altContig,
         start: range.start,

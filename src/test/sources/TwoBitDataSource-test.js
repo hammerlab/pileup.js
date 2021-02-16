@@ -25,7 +25,8 @@ describe('TwoBitDataSource', function() {
 
   it('should fetch contigs', function(done) {
     var source = getTestSource();
-    source.on('contigs', contigs => {
+    source.on('contigs', contigList => {
+      var contigs = contigList.map(c => c.contig);
       expect(contigs).to.deep.equal(['chr1', 'chr17', 'chr22']);
       done();
     });
