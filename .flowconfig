@@ -31,6 +31,3 @@
 [libs]
 lib
 node_modules/data-canvas/flowtype
-
-[options]
-suppress_comment= \\(.\\|\n\\)*\\$FlowIgnore
