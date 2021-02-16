@@ -85,7 +85,7 @@ class VisualizationWrapper extends React.Component<Props, State> {
     window.removeEventListener('resize', this.onResizeListener);
   }
 
-  getScale(): (num: number)=>number {
+  getScale(): any {
     if (!this.props.range) return x => x;
     return d3utils.getTrackScale(this.props.range, this.state.width);
   }

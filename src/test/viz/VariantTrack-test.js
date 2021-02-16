@@ -9,7 +9,7 @@ import pileup from '../../main/pileup';
 import dataCanvas from 'data-canvas';
 import {waitFor} from '../async';
 
-import ReactTestUtils from 'react-addons-test-utils';
+import ReactTestUtils from 'react-dom/test-utils';
 
 describe('VariantTrack', function() {
   var testDiv = document.getElementById('testdiv');

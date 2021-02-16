@@ -16,7 +16,7 @@ import {waitFor} from '../async';
 
 import {yForRow} from '../../main/viz/pileuputils';
 
-import ReactTestUtils from 'react-addons-test-utils';
+import ReactTestUtils from 'react-dom/test-utils';
 
 describe('FeatureTrack', function() {
   var testDiv= document.getElementById('testdiv');

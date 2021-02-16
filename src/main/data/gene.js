@@ -75,7 +75,7 @@ class Gene {
       codingRegion = new Interval(parseInt(thickStart.values[0].stringValue),
           parseInt(thickEnd.values[0].stringValue));
     } else {
-      codingRegion = new Interval(position.start(), position.end());
+      codingRegion = new Interval(position.start(), position.stop());
     }
 
     return new Gene({

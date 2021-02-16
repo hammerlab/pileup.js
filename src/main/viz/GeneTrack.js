@@ -8,7 +8,6 @@ import type {Strand} from '../Alignment';
 import Gene from '../data/gene';
 import type {DataSource} from '../sources/DataSource';
 import type {VizProps} from '../VisualizationWrapper';
-import type {Scale} from './d3utils';
 import type {State} from '../types';
 
 import GenericFeature from '../data/genericFeature';
@@ -113,7 +112,7 @@ class GeneTrack extends React.Component<VizProps<DataSource<Gene>>, State> {
     this.updateVisualization();
   }
 
-  getScale(): Scale {
+  getScale(): any {
     return d3utils.getTrackScale(this.props.range, this.props.width);
   }
 

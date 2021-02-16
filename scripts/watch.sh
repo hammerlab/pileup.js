@@ -8,9 +8,11 @@ trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
 
 mkdir -p dist  # in case it doesn't exist; watchify needs it
 
+babelify --ignore [src/lib]
+
 # Start watchers
-watchify -v -t [ babelify --ignore src/lib ] src/test/{*.js,**/*.js} --debug -o dist/tests.js &
-watchify -v -t [ babelify --ignore src/lib ] src/main/pileup.js      --debug -o dist/pileup.js --standalone pileup &
+watchify -v -t [ babelify --ignore [src/lib] ] src/test/{*.js,**/*.js} --debug -o dist/tests.js &
+watchify -v -t [babelify --ignore [src/lib] ] src/main/pileup.js      --debug -o dist/pileup.js --standalone pileup &
 
 # Wait until background processes end
 wait

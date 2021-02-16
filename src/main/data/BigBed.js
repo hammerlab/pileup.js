@@ -162,7 +162,7 @@ class ImmediateBigBed {
   contigMap: {[key:string]: number};
   chrIdToContig: string[];
 
-  constructor(remoteFile, header, cirTree, contigMap: {[key:string]: number}) {
+  constructor(remoteFile: RemoteFile, header: Object, cirTree: Object, contigMap: {[key:string]: number}) {
     this.remoteFile = remoteFile;
     this.header = header;
     this.cirTree = cirTree;

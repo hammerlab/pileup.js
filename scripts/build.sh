@@ -13,7 +13,7 @@ cp -r src/lib dist/
 # Create dist/tests
 browserify \
   -v \
-  -t [ babelify --ignore src/lib ] \
+  -t [ babelify --ignore [src/lib] ] \
   --debug \
   -o dist/tests.js \
   $(find src/test -name '*.js')
@@ -21,7 +21,7 @@ browserify \
 # Create dist/pileup.js
 browserify \
   -v \
-  -t [ babelify --ignore src/lib ] \
+  -t [ babelify --ignore [src/lib] ] \
   -g [ envify --NODE_ENV production ] \
   -g uglifyify \
   src/main/pileup.js \
@@ -34,12 +34,11 @@ cat dist/pileup.js | exorcist --base . dist/pileup.js.map > /dev/null
 
 version=$(grep '"version": ' package.json | sed 's/.*: "//; s/".*//')
 header="/*! pileup v$version | (c) 2015 HammerLab | Apache-2.0 licensed */"
+sourcemap="content='dist/pileup.js.map',filename='dist/pileup.min.js.map',includeSources=true"
 
 # Create dist/pileup.js.min{,.map}
 uglifyjs --compress --mangle \
-  --preamble "$header" \
-  --in-source-map dist/pileup.js.map \
-  --source-map-include-sources \
-  --source-map dist/pileup.min.js.map \
+  --beautify "beautify=false,preamble='$header'" \
+  --source-map $sourcemap \
   -o dist/pileup.min.js \
   dist/pileup.js

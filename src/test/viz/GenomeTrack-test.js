@@ -9,7 +9,7 @@
 
 import {expect} from 'chai';
 
-import ReactTestUtils from 'react-addons-test-utils';
+import ReactTestUtils from 'react-dom/test-utils';
 
 import pileup from '../../main/pileup';
 import TwoBit from '../../main/data/TwoBit';

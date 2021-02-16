@@ -14,6 +14,7 @@
 .*node_modules/jshint.*
 .*node_modules/jstransformify.*
 .*node_modules/uglify.*
+.*node_modules/module-deps.*
 .*node_modules/data-canvas.*
 .*node_modules/babel.*
 .*node_modules/d3.*
