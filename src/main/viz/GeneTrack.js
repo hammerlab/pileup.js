@@ -14,7 +14,6 @@ import GenericFeature from '../data/genericFeature';
 import {GenericFeatureCache} from './GenericFeatureCache';
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import _ from 'underscore';
 import shallowEquals from 'shallow-equals';
 
@@ -78,16 +77,18 @@ class GeneTrack extends React.Component<VizProps<DataSource<Gene>>, State> {
   props: VizProps<DataSource<Gene>>;
   state: State;
   cache: GenericFeatureCache;
+  ref: Object;
 
   constructor(props: VizProps<DataSource<Gene>>) {
     super(props);
+    this.ref = React.createRef();
     this.state = {
       networkStatus: null
     };
   }
 
   render(): any {
-    return <canvas />;
+    return <canvas ref={this.ref} />;
   }
 
   componentDidMount() {
@@ -124,8 +125,8 @@ class GeneTrack extends React.Component<VizProps<DataSource<Gene>>, State> {
   }
 
   updateVisualization() {
-    var canvas = ReactDOM.findDOMNode(this),
-        {width, height} = this.props,
+    const canvas = this.ref.current;
+    var {width, height} = this.props,
         genomeRange = this.props.range;
 
     var range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop);

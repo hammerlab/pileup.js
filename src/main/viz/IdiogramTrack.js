@@ -15,7 +15,6 @@ import canvasUtils from './canvas-utils';
 import dataCanvas from 'data-canvas';
 import style from '../style';
 
-import ReactDOM from 'react-dom';
 import shallowEquals from 'shallow-equals';
 import d3utils from './d3utils';
 import _ from 'underscore';
@@ -36,16 +35,18 @@ class IdiogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, St
   props: VizProps<DataSource<Chromosome>>;
   state: State;
   cache: GenericFeatureCache;
+  ref: Object
 
   constructor(props: VizProps<DataSource<Chromosome>>) {
     super(props);
+    this.ref = React.createRef();
     this.state = {
       networkStatus: null
     };
   }
 
   render(): any {
-    return <canvas />;
+    return <canvas ref = {this.ref} />;
   }
 
   componentDidMount() {
@@ -78,8 +79,8 @@ class IdiogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, St
   }
 
   updateVisualization(prevProps: any) {
-    var canvas = ReactDOM.findDOMNode(this),
-      {width, height} = this.props;
+    const canvas = this.ref.current;
+    var  {width, height} = this.props;
 
     var range = new ContigInterval(this.props.range.contig, this.props.range.start, this.props.range.stop);
 

@@ -12,7 +12,6 @@ import type {VizProps} from '../VisualizationWrapper';
 import type {Scale} from './d3utils';
 import type {State} from '../types';
 import React from 'react';
-import ReactDOM from 'react-dom';
 
 import d3utils from './d3utils';
 import shallowEquals from 'shallow-equals';
@@ -23,15 +22,16 @@ import style from '../style';
 
 class VariantTrack extends React.Component<VizProps<VcfDataSource>, State> {
   props: VizProps<VcfDataSource>;
-
+  ref: Object;
   state: State;
 
   constructor(props: VizProps<VcfDataSource>) {
     super(props);
+    this.ref = React.createRef();
   }
 
   render(): any {
-    return <canvas onClick={this.handleClick.bind(this)} />;
+    return <canvas ref={this.ref} onClick={this.handleClick.bind(this)} />;
   }
 
   componentDidMount() {
@@ -54,8 +54,8 @@ class VariantTrack extends React.Component<VizProps<VcfDataSource>, State> {
   }
 
   updateVisualization() {
-    var canvas = ReactDOM.findDOMNode(this),
-        {width, height} = this.props;
+    const canvas = this.ref.current;
+    var {width, height} = this.props;
 
     // Hold off until height & width are known.
     if (width === 0) return;
@@ -120,8 +120,8 @@ class VariantTrack extends React.Component<VizProps<VcfDataSource>, State> {
   handleClick(reactEvent: any) {
     var ev = reactEvent.nativeEvent,
         x = ev.offsetX,
-        y = ev.offsetY,
-        canvas: (null | Element | Text) = ReactDOM.findDOMNode(this);
+        y = ev.offsetY;
+    var canvas: (null | Element | Text) = this.ref.current;
 
     if (canvas == null ) return;
 

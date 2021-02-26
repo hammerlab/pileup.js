@@ -77,7 +77,10 @@ class VisualizationWrapper extends React.Component<Props, State> {
     if (this.props.range && !this.hasDragBeenInitialized) this.addDragInterface();
   }
 
-  componentDidUpdate(): any {
+  componentDidUpdate(prevProps: Props, prevState: Object): any {
+    if (prevState.updateSize) {
+      this.updateSize();
+    }
     if (this.props.range && !this.hasDragBeenInitialized) this.addDragInterface();
   }
 
@@ -134,12 +137,6 @@ class VisualizationWrapper extends React.Component<Props, State> {
   handleClick(): any {
     if (d3.event.defaultPrevented) {
       d3.event.stopPropagation();
-    }
-  }
-
-  componentWillUpdate(nextProps:Props, nextState: Object) {
-    if (nextState.updateSize) {
-      this.updateSize();
     }
   }
 

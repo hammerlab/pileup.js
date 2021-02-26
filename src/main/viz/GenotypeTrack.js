@@ -94,10 +94,14 @@ class GenotypeTrack extends React.Component<VizProps<VcfDataSource>, State> {
   props: VizProps<VcfDataSource>;
   state: State;
   tiles: GenotypeTiledCanvas;
+  canvasRef: Object;
+  labelRef: Object
   callSetNames: string[];
 
   constructor(props: Object) {
     super(props);
+    this.labelRef = React.createRef();
+    this.canvasRef = React.createRef();
     this.callSetNames = [];
     this.state = {
       networkStatus: null
@@ -133,7 +137,7 @@ class GenotypeTrack extends React.Component<VizProps<VcfDataSource>, State> {
         networkStatus = this.state.networkStatus;
     if (networkStatus) {
       statusEl = (
-        <div ref='status' className='network-status-small'>
+        <div className='network-status-small'>
           <div className='network-status-message-small'>
             Loading Genotypes…
           </div>
@@ -155,9 +159,9 @@ class GenotypeTrack extends React.Component<VizProps<VcfDataSource>, State> {
       return (
         <div>
           {statusEl}
-          <div ref='container' style={containerStyles}>
-            <div className="genotypeLabels" style={labelStyles}><canvas ref='labelCanvas' /></div>
-            <div className="genotypeRows" style={canvasStyles}><canvas ref='canvas' onClick={this.handleClick.bind(this)} /></div>
+          <div style={containerStyles}>
+            <div className="genotypeLabels" style={labelStyles}><canvas ref={this.labelRef} /></div>
+            <div className="genotypeRows" style={canvasStyles}><canvas ref={this.canvasRef} onClick={this.handleClick.bind(this)} /></div>
           </div>
         </div>
       );
@@ -216,8 +220,8 @@ class GenotypeTrack extends React.Component<VizProps<VcfDataSource>, State> {
   // draws sample names on side bar. This needs to be only rendered once.
   drawLabels() {
     // if already drawn, return
-    var labelCanvas = (this.refs.labelCanvas : HTMLCanvasElement),
-        width = this.props.width;
+    const labelCanvas = (this.labelRef.current : HTMLCanvasElement);
+    var width = this.props.width;
 
     // Hold off until height & width are known.
     if (width === 0 || typeof labelCanvas == 'undefined') return;
@@ -245,8 +249,8 @@ class GenotypeTrack extends React.Component<VizProps<VcfDataSource>, State> {
   }
 
   updateVisualization() {
-    var canvas = (this.refs.canvas : HTMLCanvasElement),
-        width = this.props.width;
+    const canvas = (this.canvasRef.current : HTMLCanvasElement);
+    var  width = this.props.width;
 
     // Hold off until height & width are known.
     if (width === 0 || typeof canvas == 'undefined') return;
