@@ -121,7 +121,7 @@ class GenomeTrack extends React.Component<VizProps<TwoBitSource>, State> {
   }
 
   render(): any {
-    return <canvas ref= {this.ref}/>;
+    return <canvas ref={this.ref}/>;
   }
 
   componentDidMount() {

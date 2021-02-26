@@ -46,7 +46,7 @@ class IdiogramTrack extends React.Component<VizProps<DataSource<Chromosome>>, St
   }
 
   render(): any {
-    return <canvas ref = {this.ref} />;
+    return <canvas ref={this.ref} />;
   }
 
   componentDidMount() {
