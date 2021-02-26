@@ -8,7 +8,6 @@ import type {VizProps} from '../VisualizationWrapper';
 import type {Scale} from './d3utils';
 import type {State} from '../types';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import EmptySource from '../sources/EmptySource';
 import canvasUtils from './canvas-utils';
 import dataCanvas from 'data-canvas';
@@ -18,10 +17,12 @@ import d3utils from './d3utils';
 class LocationTrack extends React.Component<VizProps<void>, State> {
   props: VizProps<void>;
   state: State;  // state not used, here to make flow happy
+  ref: Object;
   static defaultSource: Object;
 
   constructor(props: VizProps<void>) {
     super(props);
+    this.ref = React.createRef();
   }
 
   getScale(): Scale {
@@ -29,7 +30,7 @@ class LocationTrack extends React.Component<VizProps<void>, State> {
   }
 
   render(): any {
-    return <canvas />;
+    return <canvas ref={this.ref} />;
   }
 
   componentDidMount() {
@@ -41,8 +42,8 @@ class LocationTrack extends React.Component<VizProps<void>, State> {
   }
 
   updateVisualization() {
-    var canvas = ReactDOM.findDOMNode(this),
-        {range, width, height} = this.props,
+    const canvas = this.ref.current;
+    var  {range, width, height} = this.props,
         scale = this.getScale();
 
     if (canvas && canvas instanceof Element) { // check for getContext

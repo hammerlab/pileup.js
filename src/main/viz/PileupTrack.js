@@ -232,12 +232,14 @@ class PileupTrack extends React.Component<VizProps<DataSource<Alignment>>, State
   state: State;
   cache: PileupCache;
   tiles: PileupTiledCanvas;
+  ref: Object;
   static defaultOptions: { viewAsPairs: boolean };
   static getOptionsMenu: (options: Object) => any;
   static handleSelectOption: (item: Object, oldOptions: Object) => Object;
 
   constructor(props: VizProps<DataSource<Alignment>>) {
     super(props);
+    this.ref = React.createRef();
     this.state = {
       networkStatus: null
     };
@@ -257,7 +259,7 @@ class PileupTrack extends React.Component<VizProps<DataSource<Alignment>>, State
     if (networkStatus) {
       var message = this.formatStatus(networkStatus);
       statusEl = (
-        <div ref='status' className='network-status'>
+        <div className='network-status'>
           <div className='network-status-message'>
             Loading alignments… ({message})
           </div>
@@ -268,8 +270,8 @@ class PileupTrack extends React.Component<VizProps<DataSource<Alignment>>, State
     return (
       <div>
         {statusEl}
-        <div ref='container' style={containerStyles}>
-          <canvas ref='canvas' onClick={this.handleClick.bind(this)} />
+        <div style={containerStyles}>
+          <canvas ref={this.ref} onClick={this.handleClick.bind(this)} />
         </div>
       </div>
     );
@@ -364,8 +366,8 @@ class PileupTrack extends React.Component<VizProps<DataSource<Alignment>>, State
   // Update the visualization to reflect the cached reads &
   // currently-visible range.
   updateVisualization() {
-    var canvas = this.refs.canvas,
-        width = this.props.width;
+    const canvas = this.ref.current;
+    var  width = this.props.width;
 
     // Hold off until height & width are known.
     if (width === 0) return;
@@ -381,8 +383,8 @@ class PileupTrack extends React.Component<VizProps<DataSource<Alignment>>, State
     var genomeRange = this.props.range,
         range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop),
         scale = this.getScale(),
-        canvas = this.refs.canvas,
         width = this.props.width;
+    const canvas = this.ref.current;
 
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -412,7 +414,7 @@ class PileupTrack extends React.Component<VizProps<DataSource<Alignment>>, State
     this.renderCenterLine(ctx, range, scale);
 
     // This is a hack to mitigate #350
-    var el = d3utils.findParent(this.refs.canvas, 'track-content');
+    var el = d3utils.findParent(this.ref.current, 'track-content');
     if (el) el.scrollLeft = 0;
   }
 
@@ -452,7 +454,7 @@ class PileupTrack extends React.Component<VizProps<DataSource<Alignment>>, State
     var ev = reactEvent.nativeEvent,
         x = ev.offsetX,
         y = ev.offsetY;
-    var ctx = canvasUtils.getContext(this.refs.canvas);
+    var ctx = canvasUtils.getContext(this.ref.current);
     var trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
 
     var genomeRange = this.props.range,

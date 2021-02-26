@@ -101,12 +101,14 @@ class FeatureTrack extends React.Component<VizProps<DataSource<Feature>>, State>
   state: State;
   tiles: FeatureTiledCanvas;
   cache: GenericFeatureCache;
+  ref: Object;
   static defaultOptions: Object;
   static getOptionsMenu: (options: Object) => any;
   static handleSelectOption: (item: Object, oldOptions: Object) => Object;
 
   constructor(props: VizProps<DataSource<Feature>>) {
     super(props);
+    this.ref = React.createRef();
     this.state = {
       networkStatus: null
     };
@@ -125,7 +127,7 @@ class FeatureTrack extends React.Component<VizProps<DataSource<Feature>>, State>
         networkStatus = this.state.networkStatus;
     if (networkStatus) {
       statusEl = (
-        <div ref='status' className='network-status-small'>
+        <div className='network-status-small'>
           <div className='network-status-message-small'>
             Loading features…
           </div>
@@ -147,8 +149,8 @@ class FeatureTrack extends React.Component<VizProps<DataSource<Feature>>, State>
       return (
         <div>
           {statusEl}
-          <div ref='container' style={containerStyles}>
-            <canvas ref='canvas' onClick={this.handleClick.bind(this)} />
+          <div style={containerStyles}>
+            <canvas ref={this.ref} onClick={this.handleClick.bind(this)} />
           </div>
         </div>
       );
@@ -212,8 +214,8 @@ class FeatureTrack extends React.Component<VizProps<DataSource<Feature>>, State>
   }
 
   updateVisualization() {
-    var canvas = (this.refs.canvas : HTMLCanvasElement),
-        width = this.props.width,
+    const canvas = (this.ref.current : HTMLCanvasElement);
+    var width = this.props.width,
         genomeRange = this.props.range;
 
     var range = new ContigInterval(genomeRange.contig, genomeRange.start, genomeRange.stop);
@@ -253,7 +255,7 @@ class FeatureTrack extends React.Component<VizProps<DataSource<Feature>>, State>
         x = ev.offsetX, // resize offset to canvas size
         y = ev.offsetY/ratio;
 
-    var ctx = canvasUtils.getContext(this.refs.canvas);
+    var ctx = canvasUtils.getContext(this.ref.current);
     var trackingCtx = new dataCanvas.ClickTrackingContext(ctx, x, y);
 
     var genomeRange = this.props.range,
