@@ -28,13 +28,11 @@ class CoverageCache<T: (Alignment | Feature)> {
   items: {[key: string]: T};
   // ref --> position --> BinSummary
   refToCounts: {[key: string]: {[key: number]: BinSummary}};
-  refToMaxCoverage: {[key: string]: number};
   referenceSource: TwoBitSource;
 
   constructor(referenceSource: TwoBitSource) {
     this.items = {};
     this.refToCounts = {};
-    this.refToMaxCoverage = {};
     this.referenceSource = referenceSource;
   }
 
@@ -52,7 +50,6 @@ class CoverageCache<T: (Alignment | Feature)> {
   updateMismatches(range: ContigInterval<string>) {
     var ref = this._canonicalRef(range.contig);
     this.refToCounts[ref] = {};  // TODO: could be more efficient
-    this.refToMaxCoverage[ref] = 0;
 
     for (var k in this.items) {
       var item: (Feature | Alignment) = this.items[k];
@@ -69,10 +66,8 @@ class CoverageCache<T: (Alignment | Feature)> {
     var ref = this._canonicalRef(coverageCount.range.contig);
     if (!(ref in this.refToCounts)) {
       this.refToCounts[ref] = {};
-      this.refToMaxCoverage[ref] = 0;
     }
     var counts = this.refToCounts[ref],
-        max = this.refToMaxCoverage[ref],
         contig = coverageCount.range,
         start = contig.start(),
         stop = contig.stop();
@@ -82,7 +77,6 @@ class CoverageCache<T: (Alignment | Feature)> {
         counts[pos] = c = {count: 0};
       }
       c.count += 1;
-      if (c.count > max) max = c.count;
     }
 
     if (coverageCount.opInfo) {
@@ -100,14 +94,23 @@ class CoverageCache<T: (Alignment | Feature)> {
         mismatches[mm.basePair] = 1 + c;
       }
     }
-    this.refToMaxCoverage[ref] = max;
 
   }
 
-  maxCoverageForRef(ref: string): number {
-    return this.refToMaxCoverage[ref] ||
-        this.refToMaxCoverage[utils.altContigName(ref)] ||
-        0;
+  maxCoverageForRange(range: ContigInterval<string>): number {
+    var bins = this.refToCounts[range.contig] ||
+        this.refToCounts[utils.altContigName(range.contig)] ||
+        {};
+
+    var max = 10; // minimum coverage
+    for (var i = range.start(); i < range.stop(); i++) {
+      if (bins[i] != undefined) {
+        if (bins[i].count > max) {
+          max = bins[i].count;
+        }
+      }
+		}
+    return max;
   }
 
   binsForRef(ref: string): {[key: number]: BinSummary} {
