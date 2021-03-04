@@ -14,7 +14,7 @@ import type {VizProps} from '../VisualizationWrapper';
 import type {Scale} from './d3utils';
 import type {State} from '../types';
 import React from 'react';
-import ReactDOM from 'react-dom';
+
 import EmptySource from '../sources/EmptySource';
 import canvasUtils from './canvas-utils';
 import dataCanvas from 'data-canvas';
@@ -24,10 +24,12 @@ import d3utils from './d3utils';
 class ScaleTrack extends React.Component<VizProps<void>, State> {
   props: VizProps<void>;
   state: State;  // no state, used to make flow happy
+  ref: Object;
   static defaultSource: Object;
 
   constructor(props: VizProps<void>) {
     super(props);
+    this.ref = React.createRef();
   }
 
   getScale(): Scale {
@@ -35,7 +37,7 @@ class ScaleTrack extends React.Component<VizProps<void>, State> {
   }
 
   render(): any {
-    return <canvas ref='canvas' />;
+    return <canvas ref={this.ref} />;
   }
 
   componentDidMount() {
@@ -46,13 +48,9 @@ class ScaleTrack extends React.Component<VizProps<void>, State> {
     this.updateVisualization();
   }
 
-  getDOMNode(): any {
-    return ReactDOM.findDOMNode(this);
-  }
-
   updateVisualization() {
-    var canvas = this.getDOMNode(),
-        {range, width, height} = this.props;
+    const canvas = this.ref.current;
+    var  {range, width, height} = this.props;
 
     d3utils.sizeCanvas(canvas, width, height);
 

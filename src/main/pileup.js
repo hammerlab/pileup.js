@@ -80,7 +80,10 @@ function findReference(tracks: VisualizedTrack[]): ?VisualizedTrack {
   return _.find(tracks, t => !!t.track.isReference);
 }
 
+
 function create(elOrId: string|Element, params: PileupParams): Pileup {
+  const ref = React.createRef();
+
   var el = typeof(elOrId) == 'string' ? document.getElementById(elOrId) : elOrId;
   if (!el) {
     throw new Error(`Attempted to create pileup with non-existent element ${elOrId.toString()}`);
@@ -104,10 +107,10 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
     throw new Error('You must include at least one track with type=reference');
   }
 
-  var reactElement =
-      ReactDOM.render(<Root referenceSource={referenceTrack.source}
+  ReactDOM.render(<Root referenceSource={referenceTrack.source}
                             tracks={vizTracks}
-                            initialRange={params.range} />, el);
+                            initialRange={params.range}
+                            ref={ref} />, el);
 
   //if the element doesn't belong to document DOM observe DOM to detect
   //when it's attached
@@ -129,8 +132,8 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
             }
           }
           if (added) {
-            if (reactElement) {
-              reactElement.setState({updateSize:true});
+            if (ref.current) {
+              ref.current.setState({updateSize:true});
             } else {
               throw 'ReactElement was not initialized properly';
             }
@@ -147,23 +150,23 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
 
   return {
     setRange(range: GenomeRange) {
-      if (reactElement === null) {
+      if (ref.current === null) {
         throw 'Cannot call setRange on a destroyed pileup';
       }
-      reactElement.handleRangeChange(range);
+      ref.current.handleRangeChange(range);
     },
     getRange(): GenomeRange {
-      if (reactElement === null) {
+      if (ref.current === null) {
         throw 'Cannot call getRange on a destroyed pileup';
       }
-      if (reactElement.state.range != null) {
-        return _.clone(reactElement.state.range);
+      if (ref.current.state.range != null) {
+        return _.clone(ref.current.state.range);
       } else {
         throw 'Cannot call getRange on non-existent range';
       }
     },
     zoomIn(): GenomeRange {
-        if (reactElement === null) {
+        if (ref.current === null) {
           throw 'Cannot call zoomIn on a destroyed pileup';
         }
         var r = this.getRange();
@@ -177,7 +180,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
         return newRange;
     },
     zoomOut(): GenomeRange {
-        if (reactElement === null) {
+        if (ref.current === null) {
           throw 'Cannot call zoomOut on a destroyed pileup';
         }
         var r = this.getRange();
@@ -191,7 +194,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
         return newRange;
     },
     toSVG(filepath: ?string): Promise<string> {
-        if (reactElement === null) {
+        if (ref.current === null) {
           throw 'Cannot call toSVG on a destroyed pileup';
         }
 
@@ -211,7 +214,7 @@ function create(elOrId: string|Element, params: PileupParams): Pileup {
         source.off();
       });
       ReactDOM.unmountComponentAtNode(el);
-      reactElement = null;
+      ref.current = null;
       referenceTrack = null;
       vizTracks = null;
 

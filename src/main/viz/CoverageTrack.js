@@ -193,16 +193,18 @@ class CoverageTrack extends React.Component<VizProps<DataSource<Alignment | Feat
   state: State; // no state, used to make flow happy
   cache: CoverageCache< Alignment | Feature >;
   tiles: CoverageTiledCanvas;
+  ref: Object;
   static defaultOptions: Object;
   static getOptionsMenu: (options: Object) => any;
   static handleSelectOption: (item: Object, oldOptions: Object) => Object;
 
   constructor(props: VizProps<DataSource<Alignment | Feature>>) {
     super(props);
+    this.ref = React.createRef();
   }
 
   render(): any {
-    return <canvas ref='canvas' onClick={this.handleClick.bind(this)} />;
+    return <canvas ref={this.ref} onClick={this.handleClick.bind(this)} />;
   }
 
   getScale(): any {
@@ -248,7 +250,7 @@ class CoverageTrack extends React.Component<VizProps<DataSource<Alignment | Feat
   }
 
   getContext(): CanvasRenderingContext2D {
-    var canvas = (this.refs.canvas : HTMLCanvasElement);
+    const canvas = (this.ref.current : HTMLCanvasElement);
     // The typecast through `any` is because getContext could return a WebGL context.
     var ctx = ((canvas.getContext('2d') : any) : CanvasRenderingContext2D);
     return ctx;
@@ -283,8 +285,8 @@ class CoverageTrack extends React.Component<VizProps<DataSource<Alignment | Feat
   }
 
   visualizeCoverage() {
-    var canvas = (this.refs.canvas : HTMLCanvasElement),
-        width = this.props.width,
+    const canvas = (this.ref.current : HTMLCanvasElement);
+    var width = this.props.width,
         height = this.props.height,
         range = ContigInterval.fromGenomeRange(this.props.range);
 

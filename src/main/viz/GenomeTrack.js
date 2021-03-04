@@ -10,7 +10,6 @@ import type {DataCanvasRenderingContext2D} from 'data-canvas';
 import type {Scale} from './d3utils';
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import shallowEquals from 'shallow-equals';
 import type {State} from '../types';
 
@@ -114,9 +113,15 @@ class GenomeTrack extends React.Component<VizProps<TwoBitSource>, State> {
   props: VizProps<TwoBitSource>;
   state: State;  // no state, used to make flow happy
   tiles: GenomeTiledCanvas;
+  ref: Object
+
+  constructor(props: VizProps<TwoBitSource>) {
+    super(props);
+    this.ref = React.createRef();
+  }
 
   render(): any {
-    return <canvas />;
+    return <canvas ref={this.ref}/>;
   }
 
   componentDidMount() {
@@ -147,8 +152,8 @@ class GenomeTrack extends React.Component<VizProps<TwoBitSource>, State> {
   }
 
   updateVisualization() {
-    var canvas = ReactDOM.findDOMNode(this),
-        {width, height, range} = this.props;
+    const canvas = this.ref.current;
+    var  {width, height, range} = this.props;
 
     // Hold off until height & width are known.
     if (width === 0) return;
