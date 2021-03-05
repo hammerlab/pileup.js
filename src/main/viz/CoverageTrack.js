@@ -59,7 +59,7 @@ class CoverageTiledCanvas extends TiledCanvas {
 
   yScaleForRef(bottomPadding: number, topPadding:number): (y: number) => number {
     return scale.linear()
-      .domain([this.maxCoverage, 0])
+      .domain([Math.max(10, this.maxCoverage), 0]) // minimum coverage = 10
       .range([bottomPadding, this.height - topPadding])
       .nice();
   }

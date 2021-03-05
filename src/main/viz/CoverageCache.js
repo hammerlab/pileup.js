@@ -102,7 +102,7 @@ class CoverageCache<T: (Alignment | Feature)> {
         this.refToCounts[utils.altContigName(range.contig)] ||
         {};
 
-    var max = 10; // minimum coverage
+    var max = 0; // minimum coverage
     for (var i = range.start(); i < range.stop(); i++) {
       if (bins[i] != undefined) {
         if (bins[i].count > max) {
