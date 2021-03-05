@@ -36,6 +36,7 @@ class CoverageTiledCanvas extends TiledCanvas {
   height: number;
   options: Object;
   cache: CoverageCache< Alignment | Feature> ;
+  maxCoverage: number;
 
   constructor(cache: CoverageCache<(Alignment | Feature)>, height: number, options: Object) {
     super();
@@ -43,6 +44,7 @@ class CoverageTiledCanvas extends TiledCanvas {
     this.cache = cache;
     this.height = Math.max(1, height);
     this.options = options;
+    this.maxCoverage = 0;
   }
 
   heightForRef(ref: string): number {
@@ -55,10 +57,9 @@ class CoverageTiledCanvas extends TiledCanvas {
     this.options = options;
   }
 
-  yScaleForRef(ref: string, bottomPadding: number, topPadding:number): (y: number) => number {
-    var maxCoverage = this.cache.maxCoverageForRef(ref);
+  yScaleForRef(bottomPadding: number, topPadding:number): (y: number) => number {
     return scale.linear()
-      .domain([maxCoverage, 0])
+      .domain([Math.max(10, this.maxCoverage), 0]) // minimum coverage = 10
       .range([bottomPadding, this.height - topPadding])
       .nice();
   }
@@ -67,7 +68,7 @@ class CoverageTiledCanvas extends TiledCanvas {
          xScale: (x: number)=>number,
          range: ContigInterval<string>) {
     var bins = this.cache.binsForRef(range.contig);
-    var yScale = this.yScaleForRef(range.contig, 10, 10);
+    var yScale = this.yScaleForRef(10, 10);
     var relaxedRange = new ContigInterval(
         range.contig, range.start() - 1, range.stop() + 1);
     renderBars(ctx, xScale, yScale, relaxedRange, bins, this.options);
@@ -108,8 +109,8 @@ function renderBars(ctx: DataCanvasRenderingContext2D,
     var bin = bins[pos];
     if (!bin) continue;
 
-
-    if (!lastPos) {
+    // Restart path if first position or no bins before
+    if (!lastPos || !bins[pos-1]) {
       let {barX1} = binPos(pos, bin.count);
       ctx.fillStyle = `rgba(${options.color.rgb.r}, ${options.color.rgb.g}, ${options.color.rgb.b}, ${options.color.rgb.a})`;
       ctx.beginPath();
@@ -123,6 +124,12 @@ function renderBars(ctx: DataCanvasRenderingContext2D,
     if (showPadding) {
       ctx.lineTo(barX2, vBasePosY);
       ctx.lineTo(barX2 + 1, vBasePosY);
+    }
+    // close current path if next bin is going to be undefined
+    if (!bins[pos+1]) {
+      ctx.lineTo(barX2, vBasePosY);  // right edge of the right bar.
+      ctx.closePath();
+      ctx.fill();
     }
 
     if (SHOW_MISMATCHES && !_.isEmpty(bin.mismatches)) {
@@ -209,12 +216,12 @@ class CoverageTrack extends React.Component<VizProps<DataSource<Alignment | Feat
     this.tiles = new CoverageTiledCanvas(this.cache, this.props.height, this.props.options);
 
     this.props.source.on('newdata', range => {
-      var oldMax = this.cache.maxCoverageForRef(range.contig);
+      var oldMax = this.tiles.maxCoverage;
       this.props.source.getFeaturesInRange(range)
                        .forEach(read => this.cache.addItem(read));
-      var newMax = this.cache.maxCoverageForRef(range.contig);
+      this.tiles.maxCoverage = this.cache.maxCoverageForRange(range);
 
-      if (oldMax != newMax) {
+      if (oldMax != this.tiles.maxCoverage) {
         this.tiles.invalidateAll();
       } else {
         this.tiles.invalidateRange(range);
@@ -234,6 +241,7 @@ class CoverageTrack extends React.Component<VizProps<DataSource<Alignment | Feat
         !shallowEquals(this.state, prevState)) {
       if (this.props.height != prevProps.height ||
           this.props.options != prevProps.options) {
+        this.tiles.maxCoverage = this.cache.maxCoverageForRange(ContigInterval.fromGenomeRange(this.props.range));
         this.tiles.update(this.props.height, this.props.options);
         this.tiles.invalidateAll();
       }
@@ -291,7 +299,7 @@ class CoverageTrack extends React.Component<VizProps<DataSource<Alignment | Feat
     ctx.reset();
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    var yScale = this.tiles.yScaleForRef(range.contig, 10, 10);
+    var yScale = this.tiles.yScaleForRef(10, 10);
 
     this.tiles.renderToScreen(ctx, range, this.getScale());
     this.renderTicks(ctx, yScale);

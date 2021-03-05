@@ -195,11 +195,11 @@ describe('CoverageTrack', function() {
       // These are the objects being used to draw labels
       var labelTexts = findCoverageLabels();
       expect(labelTexts[0].label).to.equal('0X');
-      expect(labelTexts[labelTexts.length-1].label).to.equal('1X');
+      expect(labelTexts[labelTexts.length-1].label).to.equal('10X');
 
       // Now let's test if they are actually being put on the screen
       var texts = callsOf(testDiv, '.coverage', 'fillText');
-      expect(texts.map(t => t[1])).to.deep.equal(['0X', '1X', '1X']);
+      expect(texts.map(t => t[1])).to.deep.equal(['0X', '5X', '10X']);
     });
 
   });
