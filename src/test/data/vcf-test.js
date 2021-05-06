@@ -3,7 +3,7 @@
 
 import {expect} from 'chai';
 
-import {VcfFile} from '../../main/data/vcf';
+import {VcfFile, VcfWithTabixFile} from '../../main/data/vcf';
 import ContigInterval from '../../main/ContigInterval';
 import RemoteFile from '../../main/RemoteFile';
 import LocalStringFile from '../../main/LocalStringFile';
@@ -104,6 +104,30 @@ describe('VCF', function() {
 
   it('should get genotypes', function(): any {
     var vcf = new VcfFile(new RemoteFile('/test-data/snv.vcf'));
+    var range = new ContigInterval('chr20', 63799, 69094);
+    return vcf.getFeaturesInRange(range).then(features => {
+      expect(features[0].calls).to.have.length(2);
+      expect(features[0].calls[0].genotype).to.deep.equal([0,1]);
+      expect(features[0].calls[0].callSetName).to.equal("NORMAL");
+
+      expect(features[0].calls[1].genotype).to.deep.equal([0,1]);
+      expect(features[0].calls[1].callSetName).to.equal("TUMOR");
+    });
+  });
+
+});
+
+describe('VCF with tabix index', function() {
+  it('should get sample names', function(): any {
+    var vcf = new VcfWithTabixFile('/test-data/snv.vcf.gz','/test-data/snv.vcf.gz.tbi');
+
+    return vcf.getCallNames().then(samples => {
+      expect(samples).to.have.length(2);
+    });
+  });
+
+  it('should get genotypes', function(): any {
+    var vcf = new VcfWithTabixFile('/test-data/snv.vcf.gz','/test-data/snv.vcf.gz.tbi');
     var range = new ContigInterval('chr20', 63799, 69094);
     return vcf.getFeaturesInRange(range).then(features => {
       expect(features[0].calls).to.have.length(2);
