@@ -246,6 +246,7 @@ var pileup = {
     idiogramJson: IdiogramJson.create,
     cytoBand: CytoBandDataSource.create,
     vcf: VcfDataSource.create,
+    vcfWithTabix: VcfDataSource.createWithTabix,
     twoBit: TwoBitDataSource.create,
     bigBed: BigBedDataSource.create,
     GAReadAlignment: GA4GHAlignmentSource.create,

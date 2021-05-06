@@ -16,7 +16,7 @@ import LocalStringFile from '../LocalStringFile';
 // requirement for jshint to pass
 /* exported Variant */
 import {Variant, VariantContext} from '../data/variant';
-import {VcfFile} from '../data/vcf';
+import {VcfFile, VcfWithTabixFile} from '../data/vcf';
 
 
 export type VcfDataSource = {
@@ -115,7 +115,16 @@ function create(data: {url?: string, content?: string}): VcfDataSource {
   throw new Error(`Missing URL or content from track: ${JSON.stringify(data)}`);
 }
 
+function createWithTabix(data: {vcfUrl: string, tabixUrl: string}): VcfDataSource {
+  console.log("!!!!");
+  var {vcfUrl, tabixUrl} = data;
+  console.log(data);
+  console.log("!!!!");
+  return createFromVcfFile(new VcfWithTabixFile(vcfUrl, tabixUrl));
+}
+
 module.exports = {
   create,
+  createWithTabix,
   createFromVcfFile
 };
