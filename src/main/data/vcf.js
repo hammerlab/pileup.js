@@ -251,16 +251,16 @@ class VcfWithTabixFile {
   }
 
   getCallNames(): Q.Promise<string[]> {
-    return this.remoteTbiIndexed.getHeader().then(function (header) {
+    return Q.when(this.remoteTbiIndexed.getHeader().then(function (header) {
       return extractSamples(header.split("\n"));
-    });
+    }));
   }
 
   getFeaturesInRange(range: ContigInterval<string>): Q.Promise<VariantContext[]> {
     var remoteTbiIndexed = this.remoteTbiIndexed;
     var samples;
     const variants = [];
-    return this.getCallNames().then(function (result) {
+    return Q.when(this.getCallNames().then(function (result) {
       samples = result;
       var promises = [remoteTbiIndexed.getLines(range.contig, range.start(), range.stop(),
         function (line) {
@@ -275,7 +275,7 @@ class VcfWithTabixFile {
       return Q.all(promises);
     }).then(function () {
       return variants;
-    });
+    }));
   }
 }
 
