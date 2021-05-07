@@ -153,7 +153,7 @@ class ImmediateVcfFile {
     var contigMap = {};
     contigs.forEach(contig => {
       if (contig.slice(0, 3) == 'chr') {
-        contigMap[contig.slice(4)] = contig;
+        contigMap[contig.slice(3)] = contig;
       } else {
         contigMap['chr' + contig] = contig;
       }
