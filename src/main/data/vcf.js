@@ -36,7 +36,7 @@ function extractSamples(header: string[]): string[] {
 
 function extractLocusLine(vcfLine: string): LocusLine {
   var tab1 = vcfLine.indexOf('\t'),
-    tab2 = vcfLine.indexOf('\t', tab1 + 1);
+      tab2 = vcfLine.indexOf('\t', tab1 + 1);
 
   return {
     contig: vcfLine.slice(0, tab1),
@@ -52,15 +52,15 @@ function extractVariantContext(samples: string[], vcfLine: string): VariantConte
   var minFrequency = null;
   var calls = [];
 
-  if (parts.length >= 7) {
+  if (parts.length>=7){
     var params = parts[7].split(';'); // process INFO field
-    for (var i = 0; i < params.length; i++) {
+    for (var i=0;i<params.length;i++) {
       var param = params[i];
       if (param.startsWith("AF=")) {
         maxFrequency = 0.0;
         minFrequency = 1.0;
         var frequenciesStrings = param.substr(3).split(",");
-        for (var j = 0; j < frequenciesStrings.length; j++) {
+        for (var j=0;j<frequenciesStrings.length;j++) {
           var currentFrequency = parseFloat(frequenciesStrings[j]);
           maxFrequency = Math.max(maxFrequency, currentFrequency);
           minFrequency = Math.min(minFrequency, currentFrequency);
@@ -78,7 +78,7 @@ function extractVariantContext(samples: string[], vcfLine: string): VariantConte
           if (parseInt(genotype[0]) == 1 || parseInt(genotype[1]) == 1) {
             // TODO do you have to overwrite with concat?
             var call = new Call(samples[sample_i], genotype,
-              samples[sample_i], "True"); // currently not doing anything with phasing
+                samples[sample_i], "True"); // currently not doing anything with phasing
             calls = calls.concat(call);
           }
         }
@@ -117,10 +117,10 @@ function compareLocusLine(a: LocusLine, b: LocusLine): number {
 // (based on underscore source)
 function lowestIndex<T>(haystack: T[], needle: T, compare: (a: T, b: T)=>number): number {
   var low = 0,
-    high = haystack.length;
+      high = haystack.length;
   while (low < high) {
     var mid = Math.floor((low + high) / 2),
-      c = compare(haystack[mid], needle);
+        c = compare(haystack[mid], needle);
     if (c < 0) {
       low = mid + 1;
     } else {
@@ -133,7 +133,7 @@ function lowestIndex<T>(haystack: T[], needle: T, compare: (a: T, b: T)=>number)
 
 class ImmediateVcfFile {
   lines: LocusLine[];
-  contigMap: { [key: string]: string };  // canonical map
+  contigMap: {[key:string]:string};  // canonical map
   samples: string[];
 
   constructor(samples: string[], lines: LocusLine[]) {
@@ -142,9 +142,9 @@ class ImmediateVcfFile {
     this.contigMap = this.extractContigs();
   }
 
-  extractContigs(): { [key: string]: string } {
+  extractContigs(): {[key:string]:string} {
     var contigs = [],
-      lastContig = '';
+        lastContig = '';
     for (var i = 0; i < this.lines.length; i++) {
       var line = this.lines[i];
       if (line.contig != lastContig) {
@@ -207,9 +207,9 @@ class VcfFile {
     this.immediate = this.remoteFile.getAllString().then(txt => {
       // Running this on a 12MB string takes ~80ms on my 2014 Macbook Pro
       var txtLines = txt.split('\n');
-      var lines = txtLines
-        .filter(line => (line.length && line[0] != '#'))
-        .map(extractLocusLine);
+      var lines =  txtLines
+                     .filter(line => (line.length && line[0] != '#'))
+                     .map(extractLocusLine);
 
       var header = txtLines.filter(line => (line.length && line[0] == '#'));
 

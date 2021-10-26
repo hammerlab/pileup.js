@@ -116,10 +116,7 @@ function create(data: {url?: string, content?: string}): VcfDataSource {
 }
 
 function createWithTabix(data: {vcfUrl: string, tabixUrl: string}): VcfDataSource {
-  console.log("!!!!");
   var {vcfUrl, tabixUrl} = data;
-  console.log(data);
-  console.log("!!!!");
   return createFromVcfFile(new VcfWithTabixFile(vcfUrl, tabixUrl));
 }
 
