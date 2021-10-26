@@ -8,11 +8,13 @@
 'use strict';
 
 import type AbstractFile from '../AbstractFile';
-import type Q from 'q';
+import Q from 'q';
 import _ from 'underscore';
 import ContigInterval from '../ContigInterval';
 import {Call, Variant, VariantContext} from "./variant";
 
+import {TabixIndexedFile} from '@gmod/tabix';
+import {RemoteFile as TabixLibRemoteFile} from 'generic-filehandle';
 
 // This is a minimally-parsed line for facilitating binary search.
 type LocusLine = {
@@ -237,6 +239,47 @@ class VcfFile {
   }
 }
 
+class VcfWithTabixFile {
+  remoteTbiIndexed: TabixIndexedFile;
+
+
+  constructor(vcfUrl: string, vcfTabixUrl: string) {
+    this.remoteTbiIndexed = new TabixIndexedFile({
+      filehandle: new TabixLibRemoteFile(vcfUrl),
+      tbiFilehandle: new TabixLibRemoteFile(vcfTabixUrl)
+    });
+  }
+
+  getCallNames(): Q.Promise<string[]> {
+    return Q.when(this.remoteTbiIndexed.getHeader().then(function (header) {
+      return extractSamples(header.split("\n"));
+    }));
+  }
+
+  getFeaturesInRange(range: ContigInterval<string>): Q.Promise<VariantContext[]> {
+    var remoteTbiIndexed = this.remoteTbiIndexed;
+    var samples;
+    const variants = [];
+    return Q.when(this.getCallNames().then(function (result) {
+      samples = result;
+      var promises = [remoteTbiIndexed.getLines(range.contig, range.start(), range.stop(),
+        function (line) {
+          variants.push(extractVariantContext(samples, line));
+        })];
+      if (range.contig.slice(0, 3) === 'chr') {
+        promises.push(remoteTbiIndexed.getLines(range.contig.slice(3), range.start(), range.stop(),
+          function (line) {
+            variants.push(extractVariantContext(samples, line));
+          }));
+      }
+      return Q.all(promises);
+    }).then(function () {
+      return variants;
+    }));
+  }
+}
+
 module.exports = {
-  VcfFile
+  VcfFile,
+  VcfWithTabixFile
 };
